@@ -5,7 +5,21 @@
 
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -28,14 +42,24 @@ import { ContinuousToolbox, ContinuousFlyout, ContinuousMetrics } from '@blockly
 import "./css/index.css";
 import "./css/µcBlockly.css";
 
+// Cache DOM elements
+const elements = {
+  workspaceContentArea: document.getElementById("div_workspace_content_area")!,
+  workspaceContentBlockly: document.getElementById("div_workspace_content_blockly")!,
+  contentCode: document.getElementById('div_content_code')!,
+  contentMonacoEditor: document.getElementById('div_content_monacoEditor')!,
+  languageMenu: document.getElementById('languageMenu') as HTMLSelectElement,
+  themeMenu: document.getElementById('themeMenu') as HTMLSelectElement,
+  rendererMenu: document.getElementById('rendererMenu') as HTMLSelectElement,
+  pluginMinimap: document.getElementById('pluginMinimap') as HTMLInputElement,
+  pluginKeyboardNav: document.getElementById('pluginKeyboardNav') as HTMLInputElement,
+  pluginHighlight: document.getElementById('pluginHighlight') as HTMLInputElement,
+  pluginContinuousToolbox: document.getElementById('pluginContinuousToolbox') as HTMLInputElement,
+  codeEditorSwitch: document.getElementById('codeEditorSwitch') as HTMLInputElement
+};
 
-// Set up UI elements
-const div_workspace_content_area: HTMLElement = document.getElementById("div_workspace_content_area")!;
-const div_workspace_content_blockly: HTMLElement = document.getElementById("div_workspace_content_blockly")!;
-const div_content_code: HTMLElement = document.getElementById('div_content_code')!;
-const div_content_monacoEditor: HTMLElement = document.getElementById('div_content_monacoEditor')!;
-
-export const µcB_codeEditor = monaco.editor.create(div_content_monacoEditor, {
+// Initialize Monaco Editor
+export const µcB_codeEditor = monaco.editor.create(elements.contentMonacoEditor, {
   automaticLayout: true,
   formatOnPaste: true,
   formatOnType: true,
@@ -44,8 +68,9 @@ export const µcB_codeEditor = monaco.editor.create(div_content_monacoEditor, {
   readOnly: false,
   scrollBeyondLastLine: false,
 });
-div_content_monacoEditor.style.display = 'none';
+elements.contentMonacoEditor.style.display = 'none';
 
+// Initialize Blockly Application
 const µcB: BlocklyApplication = new BlocklyApplication(
   basic_toolbox,
   {
@@ -96,7 +121,7 @@ const µcB: BlocklyApplication = new BlocklyApplication(
       menu: true,
     },
   },
-  div_workspace_content_blockly
+  elements.workspaceContentBlockly
 );
 
 /**
@@ -124,15 +149,15 @@ const µcB: BlocklyApplication = new BlocklyApplication(
  * It then triggers a resize event on the Blockly workspace.
  */
 export const µcB_workspaceOnResize = (): void => {
-  let { offsetLeft: x, offsetTop: y } = div_workspace_content_area;
-  let element: HTMLElement = div_workspace_content_area;
+  let { offsetLeft: x, offsetTop: y } = elements.workspaceContentArea;
+  let element: HTMLElement = elements.workspaceContentArea;
   while (element.offsetParent) {
     element = element.offsetParent as HTMLElement;
     x += element.offsetLeft;
     y += element.offsetTop;
   }
-  const { offsetWidth: width, offsetHeight: height } = div_workspace_content_area;
-  Object.assign(div_workspace_content_blockly.style, {
+  const { offsetWidth: width, offsetHeight: height } = elements.workspaceContentArea;
+  Object.assign(elements.workspaceContentBlockly.style, {
     width: `${width}px`,
     height: `${height}px`,
     left: `${x}px`,
@@ -247,96 +272,78 @@ export const µcB_addFlexResizerEvents = (): void => {
 };
 
 /**
- * The function `HTML_onChange` sets up event listeners for the `onchange` event of two HTML select
+ * The function `HTML_onChange` sets up event listeners for the `onchange` event of HTML select
  * elements and calls corresponding functions based on the selected values.
  */
 const HTML_onChange = (): void => {
-  const langMenu = <HTMLSelectElement>document.getElementById("languageMenu");
-  langMenu.onchange = () => {
+  elements.languageMenu.onchange = () => {
     const rtl: boolean = µcB.changeLanguage(true);
     µcB.WORKSPACE_OPTIONS["rtl"] = rtl;
     µcB.workspaceReboot();
   };
-  const themeMenu = <HTMLSelectElement>document.getElementById("themeMenu");
-  themeMenu.onchange = () => {
-    const theme = µcB.changeTheme(themeMenu.value);
-    return theme;
+
+  elements.themeMenu.onchange = () => {
+    µcB.changeTheme(elements.themeMenu.value);
   };
-  const rendererMenu = <HTMLSelectElement>document.getElementById("rendererMenu");
-  rendererMenu.onchange = () => {
-    const renderer = µcB.changeRenderer(rendererMenu.value);
-    return renderer;
+
+  elements.rendererMenu.onchange = () => {
+    µcB.changeRenderer(elements.rendererMenu.value);
   };
-  const pluginMinimapCheck = <HTMLInputElement>document.getElementById("pluginMinimap");
-  pluginMinimapCheck.onchange = () => {
-    const isThereMinimap: HTMLElement = document.getElementsByClassName(
-      "blockly-minimap",
-    )[0] as HTMLElement;
-    isThereMinimap.style.visibility = pluginMinimapCheck.checked
-      ? "visible"
-      : "hidden";
+
+  elements.pluginMinimap.onchange = () => {
+    const minimap = document.getElementsByClassName("blockly-minimap")[0] as HTMLElement;
+    minimap.style.visibility = elements.pluginMinimap.checked ? "visible" : "hidden";
     setPluginsInURL('pluginMinimap', 'minimap');
-    return pluginMinimapCheck.checked;
   };
-  const pluginKeyboardNavCheck = <HTMLInputElement>document.getElementById("pluginKeyboardNav");
-  pluginKeyboardNavCheck.onchange = () => {
-    /* pluginKeyboardNavCheck.checked
-      ? µcB.plugin_KeyboardNav.enable(µcB.workspace)
-      : µcB.plugin_KeyboardNav.disable(µcB.workspace); */
+
+  elements.pluginKeyboardNav.onchange = () => {
     setPluginsInURL('pluginKeyboardNav', 'keybnav');
-    return pluginKeyboardNavCheck.checked;
   };
-  const pluginHighlightCheck = <HTMLInputElement>document.getElementById("pluginHighlight");
-  pluginHighlightCheck.onchange = () => {
-    if (pluginHighlightCheck.checked) {
+
+  elements.pluginHighlight.onchange = () => {
+    if (elements.pluginHighlight.checked) {
       µcB.plugin_contentHighlight = new ContentHighlight(µcB.workspace);
       µcB.plugin_contentHighlight.init();
-    }
-    else
+    } else {
       µcB.plugin_contentHighlight.dispose();
+    }
     setPluginsInURL('pluginHighlight', 'highlight');
-    return pluginHighlightCheck.checked;
   };
-  const pluginContinuousToolbox = <HTMLInputElement>document.getElementById("pluginContinuousToolbox");
-  pluginContinuousToolbox.onchange = () => {
-    if (pluginContinuousToolbox.checked) {
+
+  elements.pluginContinuousToolbox.onchange = () => {
+    if (elements.pluginContinuousToolbox.checked) {
       µcB.WORKSPACE_OPTIONS['plugins'] = {
         'toolbox': ContinuousToolbox,
         'flyoutsVerticalToolbox': ContinuousFlyout,
         'metricsManager': ContinuousMetrics,
       };
-      //modify categories alignment in toolbox
       (document.getElementsByClassName("blocklyToolboxContents")[0] as HTMLElement).style.alignItems = "center";
     } else {
       delete µcB.WORKSPACE_OPTIONS["plugins"];
-      const tempCategories = Array.from(
+      const categories = Array.from(
         document.getElementsByClassName('blocklyTreeRowContentContainer') as HTMLCollectionOf<HTMLElement>
       );
-      tempCategories.forEach(tempCategory => {
-        tempCategory.style.flexDirection = "row";
+      categories.forEach(category => {
+        category.style.flexDirection = "row";
       });
       (document.getElementsByClassName("blocklyToolboxContents")[0] as HTMLElement).style.alignItems = "start";
     }
     setPluginsInURL('pluginContinuousToolbox', 'ctoolbox');
     µcB.workspaceReboot();
-    return pluginContinuousToolbox.checked;
   };
-  const codeEditorSwitch = <HTMLInputElement>document.getElementById("codeEditorSwitch");
-  codeEditorSwitch.onchange = () => {
-    if (codeEditorSwitch.checked) {
-      div_content_code.style.display = 'none';
-      div_content_monacoEditor.style.display = 'block';
-      //needed AFTER monaco create editor, not to use in css file
-      div_content_monacoEditor.style.height = "100%";
-      div_content_monacoEditor.style.width = "100%";
-    }
-    else {
-      div_content_code.style.display = 'block';
-      div_content_monacoEditor.style.display = 'none';
-      div_content_monacoEditor.remove();
+
+  elements.codeEditorSwitch.onchange = () => {
+    if (elements.codeEditorSwitch.checked) {
+      elements.contentCode.style.display = 'none';
+      elements.contentMonacoEditor.style.display = 'block';
+      elements.contentMonacoEditor.style.height = "100%";
+      elements.contentMonacoEditor.style.width = "100%";
+    } else {
+      elements.contentCode.style.display = 'block';
+      elements.contentMonacoEditor.style.display = 'none';
+      elements.contentMonacoEditor.remove();
     }
     setPluginsInURL('codeEditorSwitch', 'codeEditor');
-    return codeEditorSwitch.checked;
   };
 };
 
@@ -370,60 +377,41 @@ DomIsLoaded((): void => {
 resources such as images and scripts. */
 window.onload = (): void => {
   HTML_onChange();
-  µcB_codeEditor.setValue(arduinoGenerator.workspaceToCode(µcB.workspace));
-  div_content_code.textContent = arduinoGenerator.workspaceToCode(µcB.workspace);
-  let tempComponent: HTMLElement = document.getElementById("flex_container_up") as HTMLElement;
-  /* The above code is retrieving values from the sessionStorage and applying them as styles to
-  different elements on the page. */
-  if (window.sessionStorage.getItem("flex_container_up"))
-    tempComponent.style.flex =
-      window.sessionStorage.getItem("flex_container_up")!;
-  tempComponent = document.getElementById("flex_container_up_left")!;
-  if (window.sessionStorage.getItem("flex_container_up_left"))
-    tempComponent.style.flex = window.sessionStorage.getItem(
-      "flex_container_up_left",
-    )!;
-  tempComponent = document.getElementById("flex_container_up_right")!;
-  if (window.sessionStorage.getItem("flex_container_up_right"))
-    tempComponent.style.flexGrow = window.sessionStorage.getItem(
-      "flex_container_up_right",
-    )!;
-  tempComponent = document.getElementById("flex_container_bottom")!;
-  if (window.sessionStorage.getItem("flex_container_bottom"))
-    tempComponent.style.flexGrow = window.sessionStorage.getItem(
-      "flex_container_bottom",
-    )!;
+  const code = arduinoGenerator.workspaceToCode(µcB.workspace);
+  µcB_codeEditor.setValue(code);
+  elements.contentCode.textContent = code;
+
+  // Restore saved layout
+  const layoutElements = {
+    flexContainerUp: document.getElementById("flex_container_up") as HTMLElement,
+    flexContainerUpLeft: document.getElementById("flex_container_up_left") as HTMLElement,
+    flexContainerUpRight: document.getElementById("flex_container_up_right") as HTMLElement,
+    flexContainerBottom: document.getElementById("flex_container_bottom") as HTMLElement
+  };
+
+  Object.entries(layoutElements).forEach(([key, element]) => {
+    const savedValue = window.sessionStorage.getItem(key);
+    if (savedValue) {
+      element.style.flex = savedValue;
+    }
+  });
+
   µcB.workspaceSetupPlugins(false);
-  // initialize specific plugins
-  const minimapDiv = document.getElementsByClassName("blockly-minimap")[0] as HTMLElement;
-  minimapDiv.style.visibility = "hidden";
-  const pluginMinimap = document.getElementById("pluginMinimap") as HTMLInputElement;
-  pluginMinimap.checked = false;
-  let tempCategories = Array.from(
+  
+  // Initialize minimap
+  const minimap = document.getElementsByClassName("blockly-minimap")[0] as HTMLElement;
+  minimap.style.visibility = "hidden";
+  elements.pluginMinimap.checked = false;
+
+  // Initialize toolbox categories
+  const categories = Array.from(
     document.getElementsByClassName('blocklyTreeRowContentContainer') as HTMLCollectionOf<HTMLElement>
   );
-  tempCategories.forEach(tempCategory => {
-    tempCategory.style.flexDirection = "row";
+  categories.forEach(category => {
+    category.style.flexDirection = "row";
   });
   (document.getElementsByClassName("blocklyToolboxContents")[0] as HTMLElement).style.alignItems = "start";
-  tempCategories = Array.from(
-    document.getElementsByClassName('blocklyToolboxCategory') as HTMLCollectionOf<HTMLElement>
-  );
-  tempCategories.forEach(tempCategory => {
-    tempCategory.style.width = "100%";
-  });
-  tempCategories = Array.from(
-    document.getElementsByClassName('categoryBubble') as HTMLCollectionOf<HTMLElement>
-  );
-  tempCategories.forEach(tempCategory => {
-    tempCategory.style.margin = "0";
-  });
-  tempCategories = Array.from(
-    document.getElementsByClassName('blocklyTreeLabel ') as HTMLCollectionOf<HTMLElement>
-  );
-  tempCategories.forEach(tempCategory => {
-    tempCategory.style.margin = "0";
-  });
+
   µcB_workspaceOnResize();
   µcB.setParamsBlockly();
   µcB.workspaceLoadBlocks("mainWorkspace_blocks");
@@ -434,22 +422,17 @@ window.onload = (): void => {
 /* The above code is a TypeScript code snippet that sets the `onbeforeunload` event handler for the
 window object. This event is triggered when the user is about to leave the current page, and save windows position in UI. */
 window.onbeforeunload = (): void => {
-  window.sessionStorage?.setItem(
-    "flex_container_up",
-    document.getElementById("flex_container_up")!.style.flex,
-  );
-  window.sessionStorage?.setItem(
-    "flex_container_up_left",
-    document.getElementById(`flex_container_up_left`)!.style.flex,
-  );
-  window.sessionStorage?.setItem(
-    "flex_container_up_right",
-    document.getElementById(`flex_container_up_right`)!.style.flexGrow,
-  );
-  window.sessionStorage?.setItem(
-    "flex_container_bottom",
-    document.getElementById(`flex_container_bottom`)!.style.flexGrow,
-  );
+  const layoutElements = {
+    flexContainerUp: document.getElementById("flex_container_up") as HTMLElement,
+    flexContainerUpLeft: document.getElementById("flex_container_up_left") as HTMLElement,
+    flexContainerUpRight: document.getElementById("flex_container_up_right") as HTMLElement,
+    flexContainerBottom: document.getElementById("flex_container_bottom") as HTMLElement
+  };
+
+  Object.entries(layoutElements).forEach(([key, element]) => {
+    window.sessionStorage?.setItem(key, element.style.flex);
+  });
+
   µcB.workspaceSaveBlocks("mainWorkspace_blocks");
   µcB.workspaceSetupPlugins(true);
 };

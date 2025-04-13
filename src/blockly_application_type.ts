@@ -5,7 +5,21 @@
 
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * 
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -97,7 +111,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * @param workspace - The parameter "workspace" is of type Blockly.WorkspaceSvg. It represents the
    * Blockly workspace where the blocks are being used.
    */
-  private workspaceListeners = (): void => {
+  private readonly workspaceListeners = (): void => {
     // Every time the workspace changes state, save the changes to storage.
     this.workspace.addChangeListener((e: Blockly.Events.Abstract): void => {
       // UI events are things like scrolling, zooming, etc.
@@ -244,7 +258,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
           const blocklyWorkspace = document.getElementsByClassName("blocklyFlyout");
           for (const element of blocklyWorkspace) {
             element.addEventListener('dblclick', function () {
-              continuousFlyout!.setVisible(false);
+              continuousFlyout.setVisible(false);
               Blockly.hideChaff();
             });
           }
@@ -422,7 +436,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * Blockly functionality.
    * @returns a boolean value.
    */
-  private isLangRtl = (): boolean => {
+  private readonly isLangRtl = (): boolean => {
     return this.LANGUAGE_RTL.indexOf(getLangParamFromUrl()) !== -1;
   };
 
@@ -432,7 +446,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * @param newLang - The `newLang` parameter is a string that represents the new language to
    * which the toolbox should be changed.
    */
-  private changeLanguageToolbox = (newLang: string): void => {
+  private readonly changeLanguageToolbox = (newLang: string): void => {
     const basic_toolboxCopy = JSON.parse(JSON.stringify(this.toolbox.contents));
     const langMap: LanguageItem = languagesMap[newLang];
     interface Category {
