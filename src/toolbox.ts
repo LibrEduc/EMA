@@ -1,6 +1,10 @@
 /**
- * @packageDocumentation Basic toolbox for algorithm.
+ * @packageDocumentation
+ * @module Toolbox
+ * @description Toolbox configuration and block definitions for µcBlockly
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

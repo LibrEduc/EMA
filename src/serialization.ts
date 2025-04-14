@@ -1,6 +1,10 @@
 /**
- * @packageDocumentation Script file to save and load blocks on workspace
+ * @packageDocumentation
+ * @module Serialization
+ * @description Block serialization and deserialization utilities for µcBlockly
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

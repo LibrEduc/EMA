@@ -1,7 +1,10 @@
 /**
- * @fileoverview µcBlockly specific CSS for index file.
- * @author Blockly Team (https://github.com/google/blockly-samples/tree/master/examples/sample-app-ts)
+ * @file µcBlockl.css
+ * @description µcBlockly specific CSS for index file.
  * @author scanet@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
+ * @license GPL-3.0-or-later
  */
 
 #flex_container_up_right {

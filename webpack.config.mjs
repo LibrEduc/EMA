@@ -1,14 +1,18 @@
 /**
  * @packageDocumentation Webpack configuration file.
  * @author Blockly Team (https://github.com/google/blockly-samples/tree/master/examples/sample-app-ts)
- * @author scanet@libreduc.cc (Sébastien Canet)
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  */
 
-const path = require("path");
-const webpack = require("webpack");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
+import path from "path";
+import { fileURLToPath } from 'url';
+import webpack from "webpack";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
+import CopyPlugin from "copy-webpack-plugin";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Base config that applies to either development or production mode.
 let config = {
@@ -61,7 +65,7 @@ let config = {
   ],
 };
 
-module.exports = (_env, argv) => {
+export default (_env, argv) => {
   if (argv.mode === "development") {
     config.output.path = path.resolve(__dirname, "build");
     config.devtool = "eval-cheap-module-source-map";
@@ -69,7 +73,7 @@ module.exports = (_env, argv) => {
     // Include the source maps for Blockly for easier debugging Blockly code.
     config.module.rules.push({
       test: /(blockly\/.*\.js)$/,
-      use: [require.resolve("source-map-loader")],
+      use: [import.meta.resolve("source-map-loader")],
       enforce: "pre",
     });
 

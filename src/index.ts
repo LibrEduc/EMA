@@ -1,6 +1,10 @@
 /**
- * @packageDocumentation General script file for index
+ * @packageDocumentation
+ * @module µcBlockly
+ * @description Main entry point for µcBlockly application
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

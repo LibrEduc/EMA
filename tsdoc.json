@@ -21,6 +21,26 @@
     {
       "tagName": "@type",
       "syntaxKind": "inline"
+    },
+    {
+      "tagName": "@module",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@package",
+      "syntaxKind": "modifier"
+    },
+    {
+      "tagName": "@version",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@description",
+      "syntaxKind": "block"
+    },
+    {
+      "tagName": "@since",
+      "syntaxKind": "block"
     }
   ],
   "supportForTags": {
@@ -28,6 +48,11 @@
     "@license": true,
     "@fileoverview": true,
     "@return": true,
-    "@type": true
+    "@type": true,
+    "@module": true,
+    "@package": true,
+    "@version": true,
+    "@description": true,
+    "@since": true
   }
 }

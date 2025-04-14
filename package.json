@@ -4,6 +4,7 @@
   "description": "Program microcontrollers thanks to Blockly",
   "main": "index.js",
   "private": true,
+  "type": "module",
   "scripts": {
     "audit": "npm audit fix",
     "build": "webpack --mode production",

@@ -1,4 +1,13 @@
 /**
+ * @packageDocumentation
+ * @module Types
+ * @description TypeScript type definitions and declarations for µcBlockly
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
  * 

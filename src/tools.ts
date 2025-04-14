@@ -1,7 +1,10 @@
 /**
- * @packageDocumentation General script file for various function useful for application
- * @author Blockly Team (https://github.com/google/blockly/blob/develop/demos/code/code.js) 
+ * @packageDocumentation
+ * @module Tools
+ * @description Utility functions and tools for µcBlockly
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
