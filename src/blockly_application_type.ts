@@ -22,7 +22,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see {@link https://www.gnu.org/licenses/}.
  * 
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -85,6 +85,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.LANGUAGE_RTL = [];
     this.PLUGINS = [];
     this.WORKSPACE_OPTIONS = WORKSPACE_OPTIONS;
+
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
   }
@@ -198,81 +199,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       div_workspace_content_blockly,
       this.WORKSPACE_OPTIONS,
     );
-    //const multiselectPlugin = new Multiselect(this.workspace);
-    //multiselectPlugin.init(this.WORKSPACE_OPTIONS);
-    //LexicalVariablesPlugin.init(this.workspace);
-    //specific to continuous toolbox plugin
-    const pluginContinuousToolbox = <HTMLInputElement>(
-      document.getElementById("pluginContinuousToolbox")
-    );
-    if (!pluginContinuousToolbox.checked) {
-      document.getElementById("pluginContinuousToolboxFlyout")!.style.visibility = "hidden";
-      let tempCategories = Array.from(
-        document.getElementsByClassName('blocklyTreeRowContentContainer') as HTMLCollectionOf<HTMLElement>
-      );
-      tempCategories.forEach(tempCategory => {
-        tempCategory.style.flexDirection = "row";
-      });
-      (document.getElementsByClassName("blocklyToolboxContents")[0] as HTMLElement).style.alignItems = "start";
-      tempCategories = Array.from(
-        document.getElementsByClassName('blocklyToolboxCategory') as HTMLCollectionOf<HTMLElement>
-      );
-      tempCategories.forEach(tempCategory => {
-        tempCategory.style.width = "100%";
-      });
-      tempCategories = Array.from(
-        document.getElementsByClassName('categoryBubble') as HTMLCollectionOf<HTMLElement>
-      );
-      tempCategories.forEach(tempCategory => {
-        tempCategory.style.margin = "0";
-      });
-      tempCategories = Array.from(
-        document.getElementsByClassName('blocklyTreeLabel ') as HTMLCollectionOf<HTMLElement>
-      );
-      tempCategories.forEach(tempCategory => {
-        tempCategory.style.margin = "0";
-      });
-    } else {
-      (document.getElementsByClassName("blocklyToolboxContents")[0] as HTMLElement).style.alignItems = "center";
-      document.getElementById("pluginContinuousToolboxFlyout")!.style.visibility = "visible";
-      const pluginContinuousToolboxFlyout = <HTMLInputElement>(
-        document.getElementById("pluginContinuousToolboxFlyout")
-      );
-      const continuousFlyout: Blockly.IFlyout | null
-        = (this.workspace as Blockly.WorkspaceSvg).getToolbox()!.getFlyout();
-
-      const onWorkspaceChanged = (event: Blockly.Events.Abstract): void => {
-        if (!continuousFlyout) return; // Add this null check
-        if ((event.type == Blockly.Events.BLOCK_CHANGE || event.type == "click") && continuousFlyout.isVisible()) {
-          continuousFlyout.setVisible(false);
-        } else if (event.type == "toolbox_item_select" && !continuousFlyout.isVisible()) {
-          continuousFlyout.setVisible(true);
-        } else if (event.type == "toolbox_item_select") {
-          const toolboxChangeEvent = event as Blockly.Events.ToolboxItemSelect;
-          if (!toolboxChangeEvent.newItem && continuousFlyout.isVisible()) {
-            (this.workspace as Blockly.WorkspaceSvg).getToolbox()!.clearSelection();
-            setTimeout(function () {
-              if (continuousFlyout.isVisible())
-                continuousFlyout.setVisible(false);
-            }, 20);
-          }
-        }
-        if (!pluginContinuousToolboxFlyout.checked) {
-          continuousFlyout.setVisible(false);
-          const blocklyWorkspace = document.getElementsByClassName("blocklyFlyout");
-          for (const element of blocklyWorkspace) {
-            element.addEventListener('dblclick', function () {
-              continuousFlyout.setVisible(false);
-              Blockly.hideChaff();
-            });
-          }
-        }
-        else {
-          continuousFlyout.setVisible(true);
-        }
-      }
-      this.workspace.addChangeListener(onWorkspaceChanged);
-    }
     this.workspaceSetupPlugins(false);
     //getPluginsBlockly(app);
     //specific to this plugin
@@ -325,7 +251,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       this.plugin_modal.init();
       this.plugin_workspaceSearch.init();
       this.plugin_zoomToFit.init();
-      //SuggestedBlocks.init(this.workspace as Blockly.WorkspaceSvg);
     }
     /* it seems there's conflict with nav keyboard copy function
     const options = {

@@ -22,7 +22,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see {@link https://www.gnu.org/licenses/}.
  * 
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -45,6 +45,5 @@ declare module "@blockly/theme-modern";
 declare module "@blockly/theme-highcontrast";
 declare module "@blockly/theme-deuteranopia";
 declare module "@blockly/theme-tritanopia";
-declare module "@aneilmac/blockly-theme-seshat";
 declare module "@mit-app-inventor/blockly-block-lexical-variables";
 declare module "@mit-app-inventor/blockly-plugin-workspace-multiselect";

@@ -48,29 +48,34 @@ export enum Order {
   COMMA = 18, // ,
   NONE = 99, // (...)
 }
+
 /**
- * JavaScript code generator class.
+ * Arduino code generator class.
+ * Extends Blockly.CodeGenerator to provide Arduino-specific code generation.
  */
 export class ArduinoGenerator extends Blockly.CodeGenerator {
-  // macros define
-  private macros_ = Object.create(null);
-  // libraries
-  private libraries_ = Object.create(null);
-  // variables definition
+  // Create a dictionary of definitions to be printed at the top of the sketch
+  private includes_ = Object.create(null);
+  // Create a dictionary of global definitions to be printed after variables
+  private defines_ = Object.create(null);
+  // Create a dictionary of variables
   private variables_ = Object.create(null);
-  // objetcs definition
-  private objects_ = Object.create(null);
-  // functions definition
-  private functions_ = Object.create(null);
-  // setup
+  // Create a dictionary of functions from the code generator
+  private codeFunctions_ = Object.create(null);
+  // Create a dictionary of functions created by the user
+  private userFunctions_ = Object.create(null);
+  // Create a dictionary mapping desired function names in definitions_
+  // to actual function names (to avoid collisions with user functions)
+  protected functionNames_ = Object.create(null);
+  // Create a dictionary of setups to be printed in the setup() function
   private setups_ = Object.create(null);
-  // user defined setup
-  private userSetups_ = Object.create(null);
-  // loop
-  private loops_ = Object.create(null);
+  // Create a dictionary of setups to be printed in the loop() function
+  private loop_ = Object.create(null);
+  // Create a dictionary of pins to check if their use conflicts
+  private pins_ = Object.create(null);
+  
   /**
    * List of outer-inner pairings that do NOT require parentheses.
-   * {@type !Array<!Array<number\>\>}
    */
   ORDER_OVERRIDES: [Order, Order][] = [
     // (foo()).bar -> foo().bar
@@ -98,9 +103,10 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     // a || (b || c) -> a || b || c
     [Order.LOGICAL_OR, Order.LOGICAL_OR],
   ];
+
   constructor(name = "Arduino") {
     super(name);
-    this.isInitialized = false;
+    
     for (const key in Order) {
       // Must assign Order[key] to a temporary to get the type guard to work;
       // see https://github.com/microsoft/TypeScript/issues/10530.
@@ -136,14 +142,15 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   init(workspace: Blockly.Workspace) {
     super.init(workspace);
 
-    this.macros_ = Object.create(null);
-    this.libraries_ = Object.create(null);
+    this.includes_ = Object.create(null);
+    this.defines_ = Object.create(null);
     this.variables_ = Object.create(null);
-    this.objects_ = Object.create(null);
-    this.functions_ = Object.create(null);
+    this.codeFunctions_ = Object.create(null);
+    this.userFunctions_ = Object.create(null);
+    this.functionNames_ = Object.create(null);
     this.setups_ = Object.create(null);
-    this.userSetups_ = Object.create(null);
-    this.loops_ = Object.create(null);
+    this.loop_ = Object.create(null);
+    this.pins_ = Object.create(null);
 
     if (!this.nameDB_) {
       this.nameDB_ = new Blockly.Names(this.RESERVED_WORDS_);
@@ -151,9 +158,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       this.nameDB_.reset();
     }
 
-    this.nameDB_!.setVariableMap(workspace.getVariableMap());
-    this.nameDB_!.populateVariables(workspace);
-    this.nameDB_!.populateProcedures(workspace);
+    this.nameDB_.setVariableMap(workspace.getVariableMap());
+    this.nameDB_.populateVariables(workspace);
+    this.nameDB_.populateProcedures(workspace);
 
     const defvars = [];
     // Add developer variables (not created or named by the user).
@@ -182,7 +189,6 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     if (defvars.length) {
       this.definitions_["variables"] = "int " + defvars.join(", ") + ";";
     }
-    this.isInitialized = true;
   }
 
   /**
@@ -192,51 +198,41 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * @returns Completed code.
    */
   finish(code: string): string {
-    // Convert the definitions dictionary into a list.
-    const definitions = Object.values(this.definitions_);
-    // macros definition
-    const macros = Object.values(this.macros_);
-    // libraries
-    const libraries = Object.values(this.libraries_);
-    // variables definition
+    const includes = Object.values(this.includes_);
+    const defines = Object.values(this.defines_);
     const variables = Object.values(this.variables_);
-    // objetcs definition
-    const objects = Object.values(this.objects_);
-    // functions definition
-    const functions = Object.values(this.functions_);
-    // setup
+    const codeFunctions = Object.values(this.codeFunctions_);
+    const userFunctions = Object.values(this.userFunctions_);
+    const functionNames = Object.values(this.functionNames_);
     const setups = Object.values(this.setups_);
-    // user defined setup
-    const userSetups = Object.values(this.userSetups_);
-    // loop
-    const loops = Object.values(this.loops_);
-
+    const loop = Object.values(this.loop_);
+    const pins = Object.values(this.pins_);
     // Call Blockly.CodeGenerator's finish.
     super.finish(code);
-    this.isInitialized = false;
 
     this.nameDB_!.reset();
 
     const newcode =
-      (macros.length > 0 ? `${macros.join("\n")}\n\n` : "") +
-      (libraries.length > 0 ? `${libraries.join("\n")}\n\n` : "") +
+      (includes.length > 0 ? `${includes.join("\n")}\n\n` : "") +
+      (defines.length > 0 ? `${defines.join("\n")}\n\n` : "") +
       (variables.length > 0 ? `${variables.join("\n")}\n\n` : "") +
-      (objects.length > 0 ? `${objects.join("\n")}\n\n` : "") +
-      (functions.length > 0 ? `${functions.join("\n")}\n\n` : "") +
-      `void setup() {\n${setups.join("\n")}\n${userSetups.join("\n")}\n}\n\n` +
-      `void loop() {\n${loops.join("\n") + code}\n}`;
+      (codeFunctions.length > 0 ? `${codeFunctions.join("\n")}\n\n` : "") +
+      (userFunctions.length > 0 ? `${userFunctions.join("\n")}\n\n` : "") +
+      (functionNames.length > 0 ? `${functionNames.join("\n")}\n\n` : "") +
+      `void setup() {\n${setups.join("\n")}\n${setups.join("\n")}\n}\n\n` +
+      `void loop() {\n${loop.join("\n") + code}\n}`;
     return newcode;
   }
 
-  addMacro(tag: string, code: string): void {
-    if (this.macros_[tag] === undefined) {
-      this.macros_[tag] = code;
+  addInclude(tag: string, code: string): void {
+    if (this.includes_[tag] === undefined) {
+      this.includes_[tag] = code;
     }
   }
 
-  addLibrary(tag: string, code: string): void {
-    if (this.libraries_[tag] === undefined) {
-      this.libraries_[tag] = code;
+  addDefinition(tag: string, code: string): void {
+    if (this.defines_[tag] === undefined) {
+      this.defines_[tag] = code;
     }
   }
 
@@ -246,15 +242,21 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     }
   }
 
-  addObject(tag: string, code: string): void {
-    if (this.objects_[tag] === undefined) {
-      this.objects_[tag] = code;
+  addCodeFunction(tag: string, code: string): void {
+    if (this.codeFunctions_[tag] === undefined) {
+      this.codeFunctions_[tag] = code;
     }
   }
 
-  addFunction(tag: string, code: string): void {
-    if (this.functions_[tag] === undefined) {
-      this.functions_[tag] = code;
+  addUserFunction(tag: string, code: string): void {
+    if (this.userFunctions_[tag] === undefined) {
+      this.userFunctions_[tag] = code;
+    }
+  }
+
+  addFunctionNames(tag: string, code: string): void {
+    if (this.functionNames_[tag] === undefined) {
+      this.functionNames_[tag] = code;
     }
   }
 
@@ -264,15 +266,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     }
   }
 
-  addUserSetup(tag: string, code: string): void {
-    if (this.userSetups_[tag] === undefined) {
-      this.userSetups_[tag] = code;
-    }
-  }
-
   addLoop(tag: string, code: string): void {
-    if (this.loops_[tag] === undefined) {
-      this.loops_[tag] = code;
+    if (this.loop_[tag] === undefined) {
+      this.loop_[tag] = code;
     }
   }
 
@@ -334,7 +330,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   scrub_(block: Blockly.Block, code: string, thisOnly = false): string {
     let commentCode = "";
     // Only collect comments for blocks that aren't inline.
-    if (!block.outputConnection || !block.outputConnection.targetConnection) {
+    if (!block.outputConnection?.targetConnection) {
       // Collect comment for this block.
       let comment = block.getCommentText();
       if (comment) {

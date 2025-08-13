@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 2.0.2, 2025-08-13
+- update with Blockly v12.2
+- fix switch toolboxes, categories and continuous 'Scratch like'
+
 ## 2.0.1, 2023-06-25
 - updated with Blockly v11.1.1
 - change toolbox between categories and continuous 'Scratch like'

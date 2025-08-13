@@ -10,8 +10,8 @@ node_modules/
 tmp/
 
 # Generated files
-#dist/
 build/
+dist/
 .DS_Store
 
 # Optional npm cache directory
