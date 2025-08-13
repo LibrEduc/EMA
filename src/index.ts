@@ -550,7 +550,8 @@ window.onload = (): void => {
   Object.entries(layoutElements).forEach(([key, element]) => {
     const savedValue = window.sessionStorage.getItem(key);
     if (savedValue && element) {
-      element.style.flex = savedValue;
+      // Restaurer la valeur flexGrow pour maintenir la compatibilité avec le système de resizers
+      element.style.flexGrow = savedValue;
     }
   });
 
@@ -582,11 +583,18 @@ window.onload = (): void => {
     toolboxContents.style.alignItems = "start";
   }
 
-  µcB_workspaceOnResize();
-  µcB.setParamsBlockly();
-  µcB.workspaceLoadBlocks("mainWorkspace_blocks");
-  (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
-  µcB.pluginsSetupWorkspace();
+  // Attendre que le DOM soit complètement stabilisé avant d'appeler workspaceOnResize
+  // Utiliser requestAnimationFrame pour s'assurer que le layout est calculé
+  requestAnimationFrame(() => {
+    // Attendre encore un frame pour s'assurer que les styles flex sont appliqués
+    requestAnimationFrame(() => {
+      µcB_workspaceOnResize();
+      µcB.setParamsBlockly();
+      µcB.workspaceLoadBlocks("mainWorkspace_blocks");
+      (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
+      µcB.pluginsSetupWorkspace();
+    });
+  });
 };
 
 /* The above code is a TypeScript code snippet that sets the `onbeforeunload` event handler for the
@@ -609,7 +617,9 @@ window.onbeforeunload = (): void => {
 
   Object.entries(layoutElements).forEach(([key, element]) => {
     if (element && window.sessionStorage) {
-      window.sessionStorage.setItem(key, element.style.flex);
+      // Sauvegarder la valeur flexGrow pour maintenir la compatibilité avec le système de resizers
+      const flexGrowValue = element.style.flexGrow || "1";
+      window.sessionStorage.setItem(key, flexGrowValue);
     }
   });
 
