@@ -42,7 +42,6 @@ import { setPluginsInURL } from "./tools";
 import { basic_toolbox } from "./toolbox";
 import { BlocklyApplication } from "./blockly_application_type";
 //plugins
-import { ContentHighlight } from "@blockly/workspace-content-highlight";
 import {
   ContinuousCategory,
   ContinuousFlyout,
@@ -50,6 +49,9 @@ import {
   ContinuousToolbox,
   RecyclableBlockFlyoutInflater,
 } from "@blockly/continuous-toolbox";
+import { ContentHighlight } from "@blockly/workspace-content-highlight";
+//import { KeyboardNavigation } from '@blockly/keyboard-navigation';
+//KeyboardNavigation.registerKeyboardNavigationStyles();
 
 import "./css/index.css";
 import "./css/µcBlockly.css";
@@ -66,9 +68,6 @@ const elements = {
   themeMenu: document.getElementById("themeMenu") as HTMLSelectElement,
   rendererMenu: document.getElementById("rendererMenu") as HTMLSelectElement,
   pluginMinimap: document.getElementById("pluginMinimap") as HTMLInputElement,
-  pluginKeyboardNav: document.getElementById(
-    "pluginKeyboardNav",
-  ) as HTMLInputElement,
   pluginHighlight: document.getElementById(
     "pluginHighlight",
   ) as HTMLInputElement,
@@ -93,7 +92,6 @@ const requiredElements = [
   "themeMenu",
   "rendererMenu",
   "pluginMinimap",
-  "pluginKeyboardNav",
   "pluginHighlight",
   "pluginContinuousToolbox",
   "codeEditorSwitch",
@@ -395,7 +393,9 @@ export const unregisterContinuousToolboxComponents = (): void => {
       margin: 0 0.5rem 0 0;
       border-radius: 0%;
       width: 8px;
-      height: -webkit-fill-available;
+      height: 16px;
+      min-height: 16px;
+      flex-shrink: 0;
     }
     .blocklyTreeRowContentContainer {
       display: flex;
@@ -434,10 +434,6 @@ const HTML_onChange = (): void => {
         : "hidden";
     }
     setPluginsInURL("pluginMinimap", "minimap");
-  };
-
-  elements.pluginKeyboardNav.onchange = () => {
-    setPluginsInURL("pluginKeyboardNav", "keybnav");
   };
 
   elements.pluginHighlight.onchange = () => {

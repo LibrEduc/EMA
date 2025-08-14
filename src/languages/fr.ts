@@ -6,7 +6,6 @@ export const frLang: LanguageMap = {
     ABOUT: "A propos",
     CONTACT: "Contacter",
     PLUGIN_MINIMAP: "Miniature",
-    PLUGIN_KEYBOARDNAV: "Clavier",
     PLUGIN_HIGHLIGHT: "Surbrillance",
     PLUGIN_CONTINUOUSTOOLBOX: "Catégories",
     CAT_LOGIC: "Logique",

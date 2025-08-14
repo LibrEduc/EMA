@@ -57,7 +57,6 @@ export interface LanguageItem {
   ABOUT: string;
   CONTACT: string;
   PLUGIN_MINIMAP: string;
-  PLUGIN_KEYBOARDNAV: string;
   PLUGIN_HIGHLIGHT: string;
   PLUGIN_CONTINUOUSTOOLBOX: string;
   CAT_LOGIC: string;

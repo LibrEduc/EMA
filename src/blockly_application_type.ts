@@ -40,13 +40,13 @@ import { getLangParamFromDropdown, getLangParamFromUrl, HTML_changeLanguage } fr
 unregisterProcedureBlocks();
 Blockly.common.defineBlocks(blocks);*/
 import { Backpack } from "@blockly/workspace-backpack";
-import { PositionedMinimap } from "@blockly/workspace-minimap";
-import { ZoomToFitControl } from "@blockly/zoom-to-fit";
-import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ContentHighlight } from "@blockly/workspace-content-highlight";
+//import { KeyboardNavigation } from '@blockly/keyboard-navigation';
 import { Modal } from "@blockly/plugin-modal";
-//import { NavigationController } from "@blockly/keyboard-navigation";
+import { PositionedMinimap } from "@blockly/workspace-minimap";
 import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
+import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
+import { ZoomToFitControl } from "@blockly/zoom-to-fit";
 //import * as SuggestedBlocks from '@blockly/suggested-blocks';
 //import { Multiselect } from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
 //import { LexicalVariablesPlugin } from '@mit-app-inventor/blockly-block-lexical-variables';
@@ -69,7 +69,6 @@ export interface BlocklyApplicationType {
   PLUGINS: string[];
   WORKSPACE_OPTIONS: Record<string, unknown>;
 }
-
 export class BlocklyApplication implements BlocklyApplicationType {
   workspace: Blockly.Workspace;
   toolbox: ToolboxConfiguration;
@@ -89,12 +88,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
   }
-  //plugin_KeyboardNav = new NavigationController();
-  plugin_contentHighlight = new ContentHighlight();
-  plugin_minimap = new PositionedMinimap();
-  plugin_modal = new Modal();
-  plugin_workspaceSearch = new WorkspaceSearch();
-  plugin_zoomToFit = new ZoomToFitControl();
   backpackOptions = {
     allowEmptyBackpackOpen: true,
     useFilledBackpackImage: true,
@@ -109,7 +102,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
     },
   };
   plugin_backpack = new Backpack();
-
+  plugin_contentHighlight = new ContentHighlight();
+  //plugin_keyboardNav = new KeyboardNavigation();
+  plugin_minimap = new PositionedMinimap();
+  plugin_modal = new Modal();
+  plugin_workspaceSearch = new WorkspaceSearch();
+  plugin_zoomToFit = new ZoomToFitControl();
   /**
    * The function `workspaceListeners` adds event listeners to a Blockly workspace to save changes to
    * storage and run code whenever the workspace changes meaningfully.
@@ -200,7 +198,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       this.WORKSPACE_OPTIONS,
     );
     this.workspaceSetupPlugins(false);
-    //getPluginsBlockly(app);
     //specific to this plugin
     const isThereMinimap: HTMLElement = document.getElementsByClassName(
       "blockly-minimap",
@@ -229,17 +226,16 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const pluginHighlightCheck: HTMLInputElement = document.getElementById("pluginHighlight") as HTMLInputElement;
     if (disposePlugin) {
       this.workspace.addChangeListener(shadowBlockConversionChangeListener);
-      //this.plugin_KeyboardNav.dispose();
       this.plugin_backpack.dispose();
       this.plugin_contentHighlight.dispose();
       this.plugin_minimap.dispose();
       this.plugin_modal.dispose();
       this.plugin_workspaceSearch.dispose();
       this.plugin_zoomToFit.dispose();
+      //this.plugin_keyboardNav.navigationController.removeWorkspace(this.workspace);
+      //this.plugin_keyboardNav.navigationController.disable(this.workspace);
     } else {
       this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
-      //this.plugin_KeyboardNav.init();
-      //this.plugin_KeyboardNav.addWorkspace(this.workspace);
       this.plugin_backpack.init();
       if (pluginHighlightCheck.checked) {
         this.plugin_contentHighlight = new ContentHighlight(this.workspace as Blockly.WorkspaceSvg);
@@ -251,6 +247,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
       this.plugin_modal.init();
       this.plugin_workspaceSearch.init();
       this.plugin_zoomToFit.init();
+      //this.plugin_keyboardNav.navigationController.addWorkspace(this.workspace);
+      //this.plugin_keyboardNav.navigationController.enable(this.workspace);
     }
     /* it seems there's conflict with nav keyboard copy function
     const options = {
@@ -313,11 +311,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       const pluginMinimapCheck: HTMLInputElement = document.getElementById("pluginMinimap") as HTMLInputElement;
       pluginMinimapCheck.checked = true;
       pluginMinimapCheck.dispatchEvent(new Event('change'));
-    }
-    if ((window.sessionStorage.getItem('pluginKeyboardNav') == "true") || (paramsURL.includes('keybnav'))) {
-      const pluginKeyboardNavCheck: HTMLInputElement = document.getElementById("pluginKeyboardNav") as HTMLInputElement;
-      pluginKeyboardNavCheck.checked = true;
-      pluginKeyboardNavCheck.dispatchEvent(new Event('change'));
     }
     if ((window.sessionStorage.getItem('pluginHighlight') == "true") || (paramsURL.includes('highlight'))) {
       const pluginHighlightCheck: HTMLInputElement = document.getElementById("pluginHighlight") as HTMLInputElement;
