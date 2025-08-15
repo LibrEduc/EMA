@@ -11,7 +11,7 @@
 <body>
   <flex id="container_page" class="wrapper_global">
     <div class="divTableCell">
-      <div class="lang" key="HOME">µcBlockly</div>
+      <div class="lang" key="HOME" id="title">µcBlockly</div>
       <a href="https://github.com/A-S-T-U-C-E/ucBlockly" target="_blank">
         <div class="lang" key="ABOUT">About</div>
       </a>
@@ -44,12 +44,13 @@
       <input type="checkbox" id="pluginHighlight" />
       <div class="lang" key="PLUGIN_CONTINUOUSTOOLBOX">toolbox</div>
       <input type="checkbox" id="pluginContinuousToolbox" />
-      <input type="checkbox" style="visibility: hidden" id="alwaysOpenedToolboxFlyout" />
+      <input type="checkbox" id="alwaysOpenedToolboxFlyout" />
       <div class="lang" key="codeEditorSwitch">editor</div>
       <input type="checkbox" id="codeEditorSwitch" />
     </div>
     <flex id="flex_container_up" class="wrapper_element" style="flex: 1;">
       <flex-item id="flex_container_up_left" style="flex: 1;">
+        <div id="shortcuts"></div>
         <div id="div_workspace_content_area"></div>
         <div id="div_workspace_content_blockly" style="position: absolute"></div>
       </flex-item>

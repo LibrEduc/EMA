@@ -495,6 +495,39 @@ const HTML_onChange = (): void => {
 };
 
 /**
+ * Fonction de réinitialisation simplifiée qui efface toutes les données
+ * enregistrées et recharge la page sur la racine
+ */
+const resetAllParameters = (): void => {
+  µcB.workspaceSetupPlugins(true);
+  µcB.workspace.dispose();
+
+  // Effacer toutes les données du sessionStorage
+  if (window.sessionStorage) {
+    window.sessionStorage.clear();
+  }
+  // Effacer toutes les données du localStorage (si utilisé)
+  if (window.localStorage) {
+    window.localStorage.clear();
+  }
+
+  // Réinitialiser les tailles des divs aux valeurs par défaut
+  document.getElementById("flex_container_up_right")!.style.flexGrow = "0";
+  document.getElementById("flex_container_bottom")!.style.flexGrow = "0";
+  document.getElementById("flex_container_up")!.style.flexGrow = "1";
+  document.getElementById("flex_container_up_left")!.style.flexGrow = "1";
+
+  µcB.workspace = Blockly.inject(
+    document.getElementById("div_workspace_content_blockly")!,
+    µcB.WORKSPACE_OPTIONS,
+  );
+  µcB.workspaceSetupPlugins(false);
+
+  // Recharger la page sur la racine
+  window.location.href = "/";
+};
+
+/**
  * Collection of functions ordered by priority: 1.DOM - 2.inside DOM - 3.inside window
  */
 
@@ -591,6 +624,15 @@ window.onload = (): void => {
       µcB.pluginsSetupWorkspace();
     });
   });
+
+  // Attacher l'événement de clic sur le titre pour réinitialiser tous les paramètres
+  const titleElement = document.getElementById("title");
+  if (titleElement) {
+    titleElement.addEventListener("click", resetAllParameters);
+    // Ajouter un style pour indiquer que c'est cliquable
+    titleElement.style.cursor = "pointer";
+    titleElement.title = "Cliquez pour réinitialiser tous les paramètres";
+  }
 };
 
 /* The above code is a TypeScript code snippet that sets the `onbeforeunload` event handler for the
