@@ -8,6 +8,7 @@ export const arLang: LanguageMap = {
     PLUGIN_MINIMAP: "minimap",
     PLUGIN_HIGHLIGHT: "highlight",
     PLUGIN_CONTINUOUSTOOLBOX: "toolbox",
+    PLUGIN_TYPEDVARIABLES: "typed variable",
     CAT_LOGIC: "منطق",
     CAT_LOOPS: "الحلقات",
     CAT_MATHS: "رياضيات",
@@ -15,6 +16,7 @@ export const arLang: LanguageMap = {
     CAT_LISTS: "قوائم",
     CAT_COLOR: "لون",
     CAT_VARIABLES: "متغيرات",
+    CAT_TYPEDVARIABLES: "إجراءات",
     CAT_FUNCTIONS: "إجراءات",
     THEME_CLASSIC: "classic",
     THEME_MODERN: "modern",
@@ -29,5 +31,12 @@ export const arLang: LanguageMap = {
     RENDERER_ZELOS: "zelos",
     RENDERER_MINI: "minimalist",
     EMPTY_BACKPACK: "empty backpack",
+    RESET_TITLE: "انقر لإعادة تعيين جميع المعاملات",
+    TYPED_VAR_MODAL_CONFIRM_BUTTON: "موافق",
+    TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: "اسم المتغير: ",
+    TYPED_VAR_MODAL_TYPES_LABEL: "أنواع المتغيرات",
+    TYPED_VAR_MODAL_CANCEL_BUTTON: "إلغاء",
+    TYPED_VAR_MODAL_TITLE: "إنشاء متغير مُحدد النوع",
+    TYPED_VAR_MODAL_INVALID_NAME: "الاسم غير صالح. يرجى اختيار اسم مختلف.",
   }
 };

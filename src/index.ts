@@ -32,12 +32,97 @@ import * as monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 
+// Exposer Blockly globalement IMMÉDIATEMENT après l'import
+if (typeof window !== 'undefined') {
+  // Exposer Blockly et toutes ses propriétés
+  (window as any).Blockly = Blockly;
+  
+  // Exposer également les propriétés principales individuellement
+  (window as any).Blockly = {
+    ...Blockly,
+    Blocks: Blockly.Blocks,
+    VERSION: Blockly.VERSION,
+    inject: Blockly.inject,
+    Workspace: Blockly.Workspace,
+    WorkspaceSvg: Blockly.WorkspaceSvg,
+    svgResize: Blockly.svgResize,
+    registry: Blockly.registry,
+    ToolboxCategory: Blockly.ToolboxCategory,
+    Names: Blockly.Names,
+    Variables: Blockly.Variables,
+    utils: Blockly.utils
+  };
+  
+  console.log('✅ Blockly et toutes ses propriétés exposés globalement immédiatement');
+  console.log('Propriétés disponibles:', Object.keys((window as any).Blockly));
+}
+
+// Fonction pour définir les blocs de variables typées
+function defineTypedVariableBlocks() {
+  if (typeof Blockly !== 'undefined') {
+    // Bloc pour obtenir la valeur d'une variable typée
+    Blockly.Blocks['variables_get_dynamic'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField(new Blockly.FieldVariable('item'), 'VAR');
+        this.setOutput(true, null);
+        this.setColour(330);
+        this.setTooltip('Gets the value of a typed variable');
+        this.setHelpUrl('');
+      }
+    };
+
+    // Bloc pour définir la valeur d'une variable typée
+    Blockly.Blocks['variables_set_dynamic'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField('set')
+            .appendField(new Blockly.FieldVariable('item'), 'VAR')
+            .appendField('to');
+        this.appendValueInput('VALUE')
+            .setCheck(null);
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(330);
+        this.setTooltip('Sets the value of a typed variable');
+        this.setHelpUrl('');
+      }
+    };
+    
+    console.log('Blocs de variables typées définis avec succès');
+    return true;
+  }
+  return false;
+}
+
 import { arduinoGenerator } from "./generators/arduino";
 import {
   HTML_populateLanguages,
   changeLanguageToolbox,
   getLangParamFromUrl,
+  HTML_changeLanguage,
 } from "./language";
+
+// Exposer arduinoGenerator globalement IMMÉDIATEMENT après l'import
+if (typeof window !== 'undefined') {
+  // Exposer arduinoGenerator et ses propriétés principales
+  (window as any).arduinoGenerator = {
+    ...arduinoGenerator,
+    forBlock: arduinoGenerator.forBlock,
+    workspaceToCode: arduinoGenerator.workspaceToCode,
+    init: arduinoGenerator.init,
+    finish: arduinoGenerator.finish,
+    scrub_: arduinoGenerator.scrub_,
+    scrubArduino_: arduinoGenerator.scrubArduino_,
+    addVariable: arduinoGenerator.addVariable,
+    setVariableType: arduinoGenerator.setVariableType,
+    getVariableType: arduinoGenerator.getVariableType,
+    debugGeneratorState: arduinoGenerator.debugGeneratorState
+  };
+  
+  console.log('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
+  console.log('Propriétés arduinoGenerator disponibles:', Object.keys((window as any).arduinoGenerator));
+}
 import { setPluginsInURL } from "./tools";
 import { basic_toolbox } from "./toolbox";
 import { BlocklyApplication } from "./blockly_application_type";
@@ -52,7 +137,6 @@ import {
 import { ContentHighlight } from "@blockly/workspace-content-highlight";
 //import { KeyboardNavigation } from '@blockly/keyboard-navigation';
 //KeyboardNavigation.registerKeyboardNavigationStyles();
-
 import "./css/index.css";
 import "./css/µcBlockly.css";
 
@@ -80,6 +164,9 @@ const elements = {
   codeEditorSwitch: document.getElementById(
     "codeEditorSwitch",
   ) as HTMLInputElement,
+  typedVariableSwitch: document.getElementById(
+    "typedVariableSwitch",
+  ) as HTMLInputElement,
 };
 
 // Verify all required elements exist
@@ -95,6 +182,7 @@ const requiredElements = [
   "pluginHighlight",
   "pluginContinuousToolbox",
   "codeEditorSwitch",
+  "typedVariableSwitch",
 ];
 
 requiredElements.forEach((id) => {
@@ -492,6 +580,12 @@ const HTML_onChange = (): void => {
     }
     setPluginsInURL("codeEditorSwitch", "codeEditor");
   };
+
+  elements.typedVariableSwitch.onchange = () => {
+    setPluginsInURL("typedVariableSwitch", "typedVariable");
+    µcB.typedVariableSwitch();
+    µcB.workspaceReboot();
+  };
 };
 
 /**
@@ -545,6 +639,21 @@ const DomIsLoaded = (callback: () => void): void => {
 };
 // The `DomIsLoaded` function prepares everything needed by structure of DOM.
 DomIsLoaded((): void => {
+  // Définir les blocs de variables typées après que Blockly soit chargé
+  if (defineTypedVariableBlocks()) {
+    console.log('✅ Blocs de variables typées définis au bon moment');
+  } else {
+    console.log('⚠️ Blockly pas encore disponible, retry dans 100ms...');
+    // Retry après un délai
+    setTimeout(() => {
+      if (defineTypedVariableBlocks()) {
+        console.log('✅ Blocs de variables typées définis après retry');
+      } else {
+        console.error('❌ Impossible de définir les blocs de variables typées');
+      }
+    }, 100);
+  }
+  
   HTML_populateLanguages(µcB);
   µcB.changeLanguage(false);
   µcB.workspaceInit();
@@ -553,6 +662,15 @@ DomIsLoaded((): void => {
 /* The `window.onload` event is triggered when the entire page has finished loading, including all
 resources such as images and scripts. */
 window.onload = (): void => {
+  // Blockly et arduinoGenerator sont déjà exposés globalement
+  console.log('🔄 window.onload - Vérification des composants...');
+  
+  // S'assurer que les blocs de variables typées sont définis
+  if (!Blockly.Blocks['variables_get_dynamic'] || !Blockly.Blocks['variables_set_dynamic']) {
+    console.log('🔄 Redéfinition des blocs de variables typées dans window.onload...');
+    defineTypedVariableBlocks();
+  }
+  
   HTML_onChange();
   const code = arduinoGenerator.workspaceToCode(µcB.workspace);
   µcB_codeEditor.setValue(code);
@@ -615,14 +733,17 @@ window.onload = (): void => {
   // Attendre que le DOM soit complètement stabilisé avant d'appeler workspaceOnResize
   // Utiliser requestAnimationFrame pour s'assurer que le layout est calculé
   requestAnimationFrame(() => {
-    // Attendre encore un frame pour s'assurer que les styles flex sont appliqués
-    requestAnimationFrame(() => {
-      µcB_workspaceOnResize();
-      µcB.setParamsBlockly();
-      µcB.workspaceLoadBlocks("mainWorkspace_blocks");
-      (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
-      µcB.pluginsSetupWorkspace();
-    });
+    µcB_workspaceOnResize();
+    µcB.setParamsBlockly();
+    µcB.workspaceLoadBlocks("mainWorkspace_blocks");
+    (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
+    µcB.pluginsSetupWorkspace();
+    // Si des plugins ont été activés depuis l'URL, forcer un reboot du workspace
+    // pour que les changements de toolbox soient pris en compte
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get("options")?.includes("typedVariable")) {
+      µcB.workspaceReboot();
+    }
   });
 
   // Attacher l'événement de clic sur le titre pour réinitialiser tous les paramètres
@@ -631,7 +752,19 @@ window.onload = (): void => {
     titleElement.addEventListener("click", resetAllParameters);
     // Ajouter un style pour indiquer que c'est cliquable
     titleElement.style.cursor = "pointer";
-    titleElement.title = "Cliquez pour réinitialiser tous les paramètres";
+
+    // Créer un span avec la classe lang pour la traduction automatique
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "lang";
+    titleSpan.setAttribute("key", "RESET_TITLE");
+    titleSpan.textContent = "Click to reset all parameters";
+
+    // Appliquer la traduction selon la langue actuelle
+    const currentLang = getLangParamFromUrl();
+    HTML_changeLanguage(currentLang);
+
+    // Définir le tooltip avec le texte traduit
+    titleElement.title = titleSpan.textContent;
   }
 };
 

@@ -59,6 +59,7 @@ export interface LanguageItem {
   PLUGIN_MINIMAP: string;
   PLUGIN_HIGHLIGHT: string;
   PLUGIN_CONTINUOUSTOOLBOX: string;
+  PLUGIN_TYPEDVARIABLES: string;
   CAT_LOGIC: string;
   CAT_LOOPS: string;
   CAT_MATHS: string;
@@ -66,6 +67,7 @@ export interface LanguageItem {
   CAT_LISTS: string;
   CAT_COLOR: string;
   CAT_VARIABLES: string;
+  CAT_TYPEDVARIABLES: string;
   CAT_FUNCTIONS: string;
   THEME_CLASSIC: string;
   THEME_MODERN: string;
@@ -79,6 +81,12 @@ export interface LanguageItem {
   RENDERER_THRASOS: string;
   RENDERER_ZELOS: string;
   RENDERER_MINI: string;
-  // plugins Blockly
   EMPTY_BACKPACK : string;
+  RESET_TITLE: string;
+  TYPED_VAR_MODAL_CONFIRM_BUTTON: string;
+  TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: string;
+  TYPED_VAR_MODAL_TYPES_LABEL: string;
+  TYPED_VAR_MODAL_CANCEL_BUTTON: string;
+  TYPED_VAR_MODAL_TITLE: string;
+  TYPED_VAR_MODAL_INVALID_NAME: string;
 }

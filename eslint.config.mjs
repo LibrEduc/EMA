@@ -33,4 +33,12 @@ export default [...compat.extends("plugin:@typescript-eslint/recommended"), {
     rules: {
         "tsdoc/syntax": "warn",
     },
+
+    ignores: [
+        "src/out/scripts/prettify/prettify.js",
+        "**/*.min.js",
+        "dist/**",
+        "build/**",
+        "node_modules/**"
+    ],
 }];
