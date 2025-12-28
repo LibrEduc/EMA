@@ -28,6 +28,7 @@
  */
 
 import * as Blockly from "blockly";
+
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
 import { themeMappings } from "./options";
@@ -45,6 +46,8 @@ import { ContentHighlight } from "@blockly/workspace-content-highlight";
 import { Modal } from "@blockly/plugin-modal";
 import { PositionedMinimap } from "@blockly/workspace-minimap";
 import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
+import { TypedVariableModal } from "@blockly/plugin-typed-variable-modal";
+
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ZoomToFitControl } from "@blockly/zoom-to-fit";
 //import * as SuggestedBlocks from '@blockly/suggested-blocks';
@@ -139,6 +142,78 @@ export class BlocklyApplication implements BlocklyApplicationType {
       div_content_code.textContent = arduinoGenerator.workspaceToCode(this.workspace);
     });
   };
+
+  public readonly typedVariableSwitch = (): void => {
+    const typedVariableSwitch = document.getElementById("typedVariableSwitch") as HTMLInputElement;
+    if (typedVariableSwitch.checked) {
+      const categoryExists = this.toolbox["contents"].some(
+        (item: Record<string, unknown>) => item.custom === "TYPED_VARIABLES",
+      );
+      if (!categoryExists) {
+        this.toolbox["contents"].push({
+          kind: "category",
+          name: "CAT_TYPEDVARIABLES",
+          categorystyle: "variable_category",
+          custom: "TYPED_VARIABLES",
+        });
+      }
+    } else {
+      const categoryExists = this.toolbox["contents"].some(
+        (item: Record<string, unknown>) => item.custom === "TYPED_VARIABLES",
+      );
+      if (categoryExists) {
+        this.toolbox["contents"] = this.toolbox["contents"].filter(
+          (item: Record<string, unknown>) => item.custom !== "TYPED_VARIABLES",
+        );
+      }
+    }
+    
+    // Mettre à jour WORKSPACE_OPTIONS.toolbox pour que les changements soient pris en compte
+    const temp_toolboxCopy: ToolboxConfiguration = JSON.parse(JSON.stringify(this.toolbox));
+    this.WORKSPACE_OPTIONS.toolbox = JSON.parse(JSON.stringify(temp_toolboxCopy));
+    
+    const createFlyout = () => {
+      const xmlList: Element[] = [];
+      // Add your button and give it a callback name.
+      const button = document.createElement('button');
+      button.setAttribute('text', 'Create Typed Variable');
+      button.setAttribute('callbackKey', 'callbackName');    
+      xmlList.push(button);
+    
+      // This gets all the variables that the user creates and adds them to the
+      // flyout.
+      // Dans Blockly 12.x, nous devons créer manuellement les blocs de variables
+      const variables = this.workspace.getVariableMap().getAllVariables();
+      variables.forEach((variable) => {
+        // Créer un bloc variables_get_dynamic
+        const getBlock = document.createElement('block');
+        getBlock.setAttribute('type', 'variables_get_dynamic');
+        getBlock.setAttribute('id', 'var_get_' + variable.getId());
+        
+        // Créer un bloc variables_set_dynamic
+        const setBlock = document.createElement('block');
+        setBlock.setAttribute('type', 'variables_set_dynamic');
+        setBlock.setAttribute('id', 'var_set_' + variable.getId());
+        
+        xmlList.push(getBlock);
+        xmlList.push(setBlock);
+      });
+      return xmlList;
+    };
+    (this.workspace as Blockly.WorkspaceSvg).registerToolboxCategoryCallback(
+      'TYPED_VARIABLES',
+      createFlyout,
+    );
+    const typedVarModal = new TypedVariableModal(this.workspace, 'callbackName', [
+      ['integer', 'int'],
+      ['float', 'float'],
+      ['string', 'string'],
+      ['boolean', 'bool'],
+      ['char', 'char'],
+      ['array', 'array'],
+    ]);
+    typedVarModal.init();
+  }
   /**
    * Initializes the workspace by setting up flexible views that can be adjusted in size and attaching necessary event listeners.
    * Initially, an event listener is attached to the window to manage resizing events, using the µcB_workspaceOnResize function. 
@@ -193,10 +268,15 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.workspaceSaveBlocks("mainWorkspace_blocks");
     this.workspaceSetupPlugins(true);
     this.workspace.dispose();
+    // S'assurer que la langue actuelle est appliquée à la toolbox ET à Blockly
+    const currentLang = getLangParamFromUrl();
+    this.changeLanguageToolbox(currentLang);
+    Blockly.setLocale(languagesMapBlockly[currentLang]);
     this.workspace = Blockly.inject(
       div_workspace_content_blockly,
       this.WORKSPACE_OPTIONS,
     );
+    this.typedVariableSwitch();
     this.workspaceSetupPlugins(false);
     //specific to this plugin
     const isThereMinimap: HTMLElement = document.getElementsByClassName(
@@ -326,6 +406,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
       const codeEditorSwitchCheck: HTMLInputElement = document.getElementById("codeEditorSwitch") as HTMLInputElement;
       codeEditorSwitchCheck.checked = true;
       codeEditorSwitchCheck.dispatchEvent(new Event('change'));
+    }
+    if ((window.sessionStorage.getItem('typedVariableSwitch') == "true") || (paramsURL.includes('typedVariable'))) {
+      const typedVariableSwitchCheck: HTMLInputElement = document.getElementById("typedVariableSwitch") as HTMLInputElement;
+      typedVariableSwitchCheck.checked = true;
+      typedVariableSwitchCheck.dispatchEvent(new Event('change'));
     }
   };
   /**

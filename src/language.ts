@@ -22,7 +22,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see \<https://www.gnu.org/licenses/\>.
  * 
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -116,9 +116,8 @@ export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): v
   const languageMenu: HTMLSelectElement = document.getElementById('languageMenu') as HTMLSelectElement;
   languageMenu.options.length = 0;
   for (const element of languages) {
-    const tuple = element;
-    const lang = tuple[tuple.length - 1];
-    const option = new Option(tuple[0], lang);
+    const lang = element[element.length - 1];
+    const option = new Option(element[0], lang);
     if (lang === getLangParamFromUrl()) {
       option.selected = true;
     }

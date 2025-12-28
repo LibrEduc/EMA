@@ -62,6 +62,10 @@ let config = {
         },
       ],
     }),
+    // Exposer Blockly globalement
+    new webpack.ProvidePlugin({
+      Blockly: 'blockly',
+    }),
   ],
 };
 

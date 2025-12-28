@@ -8,6 +8,7 @@ export const enLang: LanguageMap = {
     PLUGIN_MINIMAP: "minimap",
     PLUGIN_HIGHLIGHT: "highlight",
     PLUGIN_CONTINUOUSTOOLBOX: "toolbox",
+    PLUGIN_TYPEDVARIABLES: "typed variable",
     CAT_LOGIC: "Logic",
     CAT_LOOPS: "Loops",
     CAT_MATHS: "Math",
@@ -15,6 +16,7 @@ export const enLang: LanguageMap = {
     CAT_LISTS: "Lists",
     CAT_COLOR: "Colour",
     CAT_VARIABLES: "Variables",
+    CAT_TYPEDVARIABLES: "Typed Variables",
     CAT_FUNCTIONS: "Functions",
     THEME_CLASSIC: "classic",
     THEME_MODERN: "modern",
@@ -29,5 +31,12 @@ export const enLang: LanguageMap = {
     RENDERER_ZELOS: "zelos",
     RENDERER_MINI: "minimalist",
     EMPTY_BACKPACK: "empty backpack",
+    RESET_TITLE: "Click to reset all parameters",
+    TYPED_VAR_MODAL_CONFIRM_BUTTON: "Ok",
+    TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: "Variable Name: ",
+    TYPED_VAR_MODAL_TYPES_LABEL: "Variable Types",
+    TYPED_VAR_MODAL_CANCEL_BUTTON: "Cancel",
+    TYPED_VAR_MODAL_TITLE: "Create Typed Variable",
+    TYPED_VAR_MODAL_INVALID_NAME: "Name is not valid. Please choose a different name.",
   }
 };
