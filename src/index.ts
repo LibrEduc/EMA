@@ -32,6 +32,26 @@ import * as monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 
+// Configuration de Monaco Editor pour utilisation locale (chemins relatifs)
+// Force la définition de MonacoEnvironment pour s'assurer que les chemins sont corrects
+(window as any).MonacoEnvironment = {
+  getWorkerUrl: function (_moduleId: string, label: string) {
+    if (label === 'json') {
+      return './json.worker.js';
+    }
+    if (label === 'css' || label === 'scss' || label === 'less') {
+      return './css.worker.js';
+    }
+    if (label === 'html' || label === 'handlebars' || label === 'razor') {
+      return './html.worker.js';
+    }
+    if (label === 'typescript' || label === 'javascript') {
+      return './ts.worker.js';
+    }
+    return './editor.worker.js';
+  }
+};
+
 // Exposer Blockly globalement IMMÉDIATEMENT après l'import
 if (typeof window !== 'undefined') {
   // Exposer Blockly et toutes ses propriétés

@@ -1,1 +1,8668 @@
-(()=>{"use strict";var e,t,n={82184(e,t,n){var r,i=n(24508);function o(e,t=!1){const n=e.length;let r=0,i="",o=0,l=16,u=0,f=0,d=0,h=0,m=0;function p(t,n){let i=0,o=0;for(;i<t;){let t=e.charCodeAt(r);if(t>=48&&t<=57)o=16*o+t-48;else if(t>=65&&t<=70)o=16*o+t-65+10;else{if(!(t>=97&&t<=102))break;o=16*o+t-97+10}r++,i++}return i<t&&(o=-1),o}function g(){if(i="",m=0,o=r,f=u,h=d,r>=n)return o=n,l=17;let t=e.charCodeAt(r);if(s(t)){do{r++,i+=String.fromCharCode(t),t=e.charCodeAt(r)}while(s(t));return l=15}if(a(t))return r++,i+=String.fromCharCode(t),13===t&&10===e.charCodeAt(r)&&(r++,i+="\n"),u++,d=r,l=14;switch(t){case 123:return r++,l=1;case 125:return r++,l=2;case 91:return r++,l=3;case 93:return r++,l=4;case 58:return r++,l=6;case 44:return r++,l=5;case 34:return r++,i=function(){let t="",i=r;for(;;){if(r>=n){t+=e.substring(i,r),m=2;break}const o=e.charCodeAt(r);if(34===o){t+=e.substring(i,r),r++;break}if(92!==o){if(o>=0&&o<=31){if(a(o)){t+=e.substring(i,r),m=2;break}m=6}r++}else{if(t+=e.substring(i,r),r++,r>=n){m=2;break}switch(e.charCodeAt(r++)){case 34:t+='"';break;case 92:t+="\\";break;case 47:t+="/";break;case 98:t+="\b";break;case 102:t+="\f";break;case 110:t+="\n";break;case 114:t+="\r";break;case 116:t+="\t";break;case 117:const e=p(4);e>=0?t+=String.fromCharCode(e):m=4;break;default:m=5}i=r}}return t}(),l=10;case 47:const s=r-1;if(47===e.charCodeAt(r+1)){for(r+=2;r<n&&!a(e.charCodeAt(r));)r++;return i=e.substring(s,r),l=12}if(42===e.charCodeAt(r+1)){r+=2;const t=n-1;let o=!1;for(;r<t;){const t=e.charCodeAt(r);if(42===t&&47===e.charCodeAt(r+1)){r+=2,o=!0;break}r++,a(t)&&(13===t&&10===e.charCodeAt(r)&&r++,u++,d=r)}return o||(r++,m=1),i=e.substring(s,r),l=13}return i+=String.fromCharCode(t),r++,l=16;case 45:if(i+=String.fromCharCode(t),r++,r===n||!c(e.charCodeAt(r)))return l=16;case 48:case 49:case 50:case 51:case 52:case 53:case 54:case 55:case 56:case 57:return i+=function(){let t=r;if(48===e.charCodeAt(r))r++;else for(r++;r<e.length&&c(e.charCodeAt(r));)r++;if(r<e.length&&46===e.charCodeAt(r)){if(r++,!(r<e.length&&c(e.charCodeAt(r))))return m=3,e.substring(t,r);for(r++;r<e.length&&c(e.charCodeAt(r));)r++}let n=r;if(r<e.length&&(69===e.charCodeAt(r)||101===e.charCodeAt(r)))if(r++,(r<e.length&&43===e.charCodeAt(r)||45===e.charCodeAt(r))&&r++,r<e.length&&c(e.charCodeAt(r))){for(r++;r<e.length&&c(e.charCodeAt(r));)r++;n=r}else m=3;return e.substring(t,n)}(),l=11;default:for(;r<n&&y(t);)r++,t=e.charCodeAt(r);if(o!==r){switch(i=e.substring(o,r),i){case"true":return l=8;case"false":return l=9;case"null":return l=7}return l=16}return i+=String.fromCharCode(t),r++,l=16}}function y(e){if(s(e)||a(e))return!1;switch(e){case 125:case 93:case 123:case 91:case 34:case 58:case 44:case 47:return!1}return!0}return{setPosition:function(e){r=e,i="",o=0,l=16,m=0},getPosition:()=>r,scan:t?function(){let e;do{e=g()}while(e>=12&&e<=15);return e}:g,getToken:()=>l,getTokenValue:()=>i,getTokenOffset:()=>o,getTokenLength:()=>r-o,getTokenStartLine:()=>f,getTokenStartCharacter:()=>o-h,getTokenError:()=>m}}function s(e){return 32===e||9===e}function a(e){return 10===e||13===e}function c(e){return e>=48&&e<=57}!function(e){e[e.lineFeed=10]="lineFeed",e[e.carriageReturn=13]="carriageReturn",e[e.space=32]="space",e[e._0=48]="_0",e[e._1=49]="_1",e[e._2=50]="_2",e[e._3=51]="_3",e[e._4=52]="_4",e[e._5=53]="_5",e[e._6=54]="_6",e[e._7=55]="_7",e[e._8=56]="_8",e[e._9=57]="_9",e[e.a=97]="a",e[e.b=98]="b",e[e.c=99]="c",e[e.d=100]="d",e[e.e=101]="e",e[e.f=102]="f",e[e.g=103]="g",e[e.h=104]="h",e[e.i=105]="i",e[e.j=106]="j",e[e.k=107]="k",e[e.l=108]="l",e[e.m=109]="m",e[e.n=110]="n",e[e.o=111]="o",e[e.p=112]="p",e[e.q=113]="q",e[e.r=114]="r",e[e.s=115]="s",e[e.t=116]="t",e[e.u=117]="u",e[e.v=118]="v",e[e.w=119]="w",e[e.x=120]="x",e[e.y=121]="y",e[e.z=122]="z",e[e.A=65]="A",e[e.B=66]="B",e[e.C=67]="C",e[e.D=68]="D",e[e.E=69]="E",e[e.F=70]="F",e[e.G=71]="G",e[e.H=72]="H",e[e.I=73]="I",e[e.J=74]="J",e[e.K=75]="K",e[e.L=76]="L",e[e.M=77]="M",e[e.N=78]="N",e[e.O=79]="O",e[e.P=80]="P",e[e.Q=81]="Q",e[e.R=82]="R",e[e.S=83]="S",e[e.T=84]="T",e[e.U=85]="U",e[e.V=86]="V",e[e.W=87]="W",e[e.X=88]="X",e[e.Y=89]="Y",e[e.Z=90]="Z",e[e.asterisk=42]="asterisk",e[e.backslash=92]="backslash",e[e.closeBrace=125]="closeBrace",e[e.closeBracket=93]="closeBracket",e[e.colon=58]="colon",e[e.comma=44]="comma",e[e.dot=46]="dot",e[e.doubleQuote=34]="doubleQuote",e[e.minus=45]="minus",e[e.openBrace=123]="openBrace",e[e.openBracket=91]="openBracket",e[e.plus=43]="plus",e[e.slash=47]="slash",e[e.formFeed=12]="formFeed",e[e.tab=9]="tab"}(r||(r={}));const l=new Array(20).fill(0).map(((e,t)=>" ".repeat(t))),u=200,f={" ":{"\n":new Array(u).fill(0).map(((e,t)=>"\n"+" ".repeat(t))),"\r":new Array(u).fill(0).map(((e,t)=>"\r"+" ".repeat(t))),"\r\n":new Array(u).fill(0).map(((e,t)=>"\r\n"+" ".repeat(t)))},"\t":{"\n":new Array(u).fill(0).map(((e,t)=>"\n"+"\t".repeat(t))),"\r":new Array(u).fill(0).map(((e,t)=>"\r"+"\t".repeat(t))),"\r\n":new Array(u).fill(0).map(((e,t)=>"\r\n"+"\t".repeat(t)))}},d=["\n","\r","\r\n"];function h(e,t){let n="";for(let r=0;r<t;r++)n+=e;return n}function m(e,t){return-1!=="\r\n".indexOf(e.charAt(t))}var p;!function(e){e.DEFAULT={allowTrailingComma:!1}}(p||(p={}));const g=o;var y,b;!function(e){e[e.None=0]="None",e[e.UnexpectedEndOfComment=1]="UnexpectedEndOfComment",e[e.UnexpectedEndOfString=2]="UnexpectedEndOfString",e[e.UnexpectedEndOfNumber=3]="UnexpectedEndOfNumber",e[e.InvalidUnicode=4]="InvalidUnicode",e[e.InvalidEscapeCharacter=5]="InvalidEscapeCharacter",e[e.InvalidCharacter=6]="InvalidCharacter"}(y||(y={})),function(e){e[e.OpenBraceToken=1]="OpenBraceToken",e[e.CloseBraceToken=2]="CloseBraceToken",e[e.OpenBracketToken=3]="OpenBracketToken",e[e.CloseBracketToken=4]="CloseBracketToken",e[e.CommaToken=5]="CommaToken",e[e.ColonToken=6]="ColonToken",e[e.NullKeyword=7]="NullKeyword",e[e.TrueKeyword=8]="TrueKeyword",e[e.FalseKeyword=9]="FalseKeyword",e[e.StringLiteral=10]="StringLiteral",e[e.NumericLiteral=11]="NumericLiteral",e[e.LineCommentTrivia=12]="LineCommentTrivia",e[e.BlockCommentTrivia=13]="BlockCommentTrivia",e[e.LineBreakTrivia=14]="LineBreakTrivia",e[e.Trivia=15]="Trivia",e[e.Unknown=16]="Unknown",e[e.EOF=17]="EOF"}(b||(b={}));const v=function(e,t=[],n=p.DEFAULT){let r=null,i=[];const s=[];function a(e){Array.isArray(i)?i.push(e):null!==r&&(i[r]=e)}return function(e,t,n=p.DEFAULT){const r=o(e,!1),i=[];function s(e){return e?()=>e(r.getTokenOffset(),r.getTokenLength(),r.getTokenStartLine(),r.getTokenStartCharacter()):()=>!0}function a(e){return e?()=>e(r.getTokenOffset(),r.getTokenLength(),r.getTokenStartLine(),r.getTokenStartCharacter(),(()=>i.slice())):()=>!0}function c(e){return e?t=>e(t,r.getTokenOffset(),r.getTokenLength(),r.getTokenStartLine(),r.getTokenStartCharacter()):()=>!0}function l(e){return e?t=>e(t,r.getTokenOffset(),r.getTokenLength(),r.getTokenStartLine(),r.getTokenStartCharacter(),(()=>i.slice())):()=>!0}const u=a(t.onObjectBegin),f=l(t.onObjectProperty),d=s(t.onObjectEnd),h=a(t.onArrayBegin),m=s(t.onArrayEnd),g=l(t.onLiteralValue),y=c(t.onSeparator),b=s(t.onComment),v=c(t.onError),k=n&&n.disallowComments,S=n&&n.allowTrailingComma;function x(){for(;;){const e=r.scan();switch(r.getTokenError()){case 4:T(14);break;case 5:T(15);break;case 3:T(13);break;case 1:k||T(11);break;case 2:T(12);break;case 6:T(16)}switch(e){case 12:case 13:k?T(10):b();break;case 16:T(1);break;case 15:case 14:break;default:return e}}}function T(e,t=[],n=[]){if(v(e),t.length+n.length>0){let e=r.getToken();for(;17!==e;){if(-1!==t.indexOf(e)){x();break}if(-1!==n.indexOf(e))break;e=x()}}}function A(e){const t=r.getTokenValue();return e?g(t):(f(t),i.push(t)),x(),!0}function C(){switch(r.getToken()){case 3:return function(){h(),x();let e=!0,t=!1;for(;4!==r.getToken()&&17!==r.getToken();){if(5===r.getToken()){if(t||T(4,[],[]),y(","),x(),4===r.getToken()&&S)break}else t&&T(6,[],[]);e?(i.push(0),e=!1):i[i.length-1]++,C()||T(4,[],[4,5]),t=!0}return m(),e||i.pop(),4!==r.getToken()?T(8,[4],[]):x(),!0}();case 1:return function(){u(),x();let e=!1;for(;2!==r.getToken()&&17!==r.getToken();){if(5===r.getToken()){if(e||T(4,[],[]),y(","),x(),2===r.getToken()&&S)break}else e&&T(6,[],[]);(10!==r.getToken()?(T(3,[],[2,5]),!1):(A(!1),6===r.getToken()?(y(":"),x(),C()||T(4,[],[2,5])):T(5,[],[2,5]),i.pop(),!0))||T(4,[],[2,5]),e=!0}return d(),2!==r.getToken()?T(7,[2],[]):x(),!0}();case 10:return A(!0);default:return function(){switch(r.getToken()){case 11:const e=r.getTokenValue();let t=Number(e);isNaN(t)&&(T(2),t=0),g(t);break;case 7:g(null);break;case 8:g(!0);break;case 9:g(!1);break;default:return!1}return x(),!0}()}}x(),17===r.getToken()?!!n.allowEmptyContent||T(4,[],[]):C()?17!==r.getToken()&&T(9,[],[]):T(4,[],[])}(e,{onObjectBegin:()=>{const e={};a(e),s.push(i),i=e,r=null},onObjectProperty:e=>{r=e},onObjectEnd:()=>{i=s.pop()},onArrayBegin:()=>{const e=[];a(e),s.push(i),i=e,r=null},onArrayEnd:()=>{i=s.pop()},onLiteralValue:a,onError:(e,n,r)=>{t.push({error:e,offset:n,length:r})}},n),i[0]},k=function e(t,n,r=!1){if(function(e,t,n=!1){return t>=e.offset&&t<e.offset+e.length||n&&t===e.offset+e.length}(t,n,r)){const i=t.children;if(Array.isArray(i))for(let t=0;t<i.length&&i[t].offset<=n;t++){const o=e(i[t],n,r);if(o)return o}return t}},S=function e(t){if(!t.parent||!t.parent.children)return[];const n=e(t.parent);if("property"===t.parent.type){const e=t.parent.children[0].value;n.push(e)}else if("array"===t.parent.type){const e=t.parent.children.indexOf(t);-1!==e&&n.push(e)}return n},x=function e(t){switch(t.type){case"array":return t.children.map(e);case"object":const n=Object.create(null);for(let r of t.children){const t=r.children[1];t&&(n[r.children[0].value]=e(t))}return n;case"null":case"string":case"number":case"boolean":return t.value;default:return}};var T,A,C,O,w,N,I,E,L,P,V,M,j,F,$,R,D,_,U,B,K,q,J,W,z,H,G,X,Z,Q,Y,ee,te,ne,re,ie,oe,se,ae,ce,le,ue,fe,de,he,me,pe,ge,ye,be,ve,ke,Se,xe,Te,Ae,Ce,Oe,we,Ne,Ie,Ee,Le,Pe,Ve,Me,je,Fe,$e,Re,De,_e,Ue,Be,Ke,qe,Je,We,ze,He,Ge;function Xe(e,t){if(e===t)return!0;if(null==e||null==t)return!1;if(typeof e!=typeof t)return!1;if("object"!=typeof e)return!1;if(Array.isArray(e)!==Array.isArray(t))return!1;let n,r;if(Array.isArray(e)){if(e.length!==t.length)return!1;for(n=0;n<e.length;n++)if(!Xe(e[n],t[n]))return!1}else{const i=[];for(r in e)i.push(r);i.sort();const o=[];for(r in t)o.push(r);if(o.sort(),!Xe(i,o))return!1;for(n=0;n<i.length;n++)if(!Xe(e[i[n]],t[i[n]]))return!1}return!0}function Ze(e){return"number"==typeof e}function Qe(e){return void 0!==e}function Ye(e){return"boolean"==typeof e}function et(e){return"string"==typeof e}function tt(e){return"object"==typeof e&&null!==e&&!Array.isArray(e)}function nt(e,t){const n=e.length-t.length;return n>0?e.lastIndexOf(t)===n:0===n&&e===t}function rt(e){let t="";(function(e,t){if(e.length<4)return!1;for(let n=0;n<4;n++)if(e[n]!==t[n])return!1;return!0})(e,"(?i)")&&(e=e.substring(4),t="i");try{return new RegExp(e,t+"u")}catch(n){try{return new RegExp(e,t)}catch(e){return}}}function it(e){let t=0;for(let n=0;n<e.length;n++){t++;const r=e.charCodeAt(n);55296<=r&&r<=56319&&n++}return t}!function(e){e[e.InvalidSymbol=1]="InvalidSymbol",e[e.InvalidNumberFormat=2]="InvalidNumberFormat",e[e.PropertyNameExpected=3]="PropertyNameExpected",e[e.ValueExpected=4]="ValueExpected",e[e.ColonExpected=5]="ColonExpected",e[e.CommaExpected=6]="CommaExpected",e[e.CloseBraceExpected=7]="CloseBraceExpected",e[e.CloseBracketExpected=8]="CloseBracketExpected",e[e.EndOfFileExpected=9]="EndOfFileExpected",e[e.InvalidCommentToken=10]="InvalidCommentToken",e[e.UnexpectedEndOfComment=11]="UnexpectedEndOfComment",e[e.UnexpectedEndOfString=12]="UnexpectedEndOfString",e[e.UnexpectedEndOfNumber=13]="UnexpectedEndOfNumber",e[e.InvalidUnicode=14]="InvalidUnicode",e[e.InvalidEscapeCharacter=15]="InvalidEscapeCharacter",e[e.InvalidCharacter=16]="InvalidCharacter"}(T||(T={})),function(e){e.is=function(e){return"string"==typeof e}}(A||(A={})),function(e){e.is=function(e){return"string"==typeof e}}(C||(C={})),function(e){e.MIN_VALUE=-2147483648,e.MAX_VALUE=2147483647,e.is=function(t){return"number"==typeof t&&e.MIN_VALUE<=t&&t<=e.MAX_VALUE}}(O||(O={})),function(e){e.MIN_VALUE=0,e.MAX_VALUE=2147483647,e.is=function(t){return"number"==typeof t&&e.MIN_VALUE<=t&&t<=e.MAX_VALUE}}(w||(w={})),function(e){e.create=function(e,t){return e===Number.MAX_VALUE&&(e=w.MAX_VALUE),t===Number.MAX_VALUE&&(t=w.MAX_VALUE),{line:e,character:t}},e.is=function(e){let t=e;return Ge.objectLiteral(t)&&Ge.uinteger(t.line)&&Ge.uinteger(t.character)}}(N||(N={})),function(e){e.create=function(e,t,n,r){if(Ge.uinteger(e)&&Ge.uinteger(t)&&Ge.uinteger(n)&&Ge.uinteger(r))return{start:N.create(e,t),end:N.create(n,r)};if(N.is(e)&&N.is(t))return{start:e,end:t};throw new Error(`Range#create called with invalid arguments[${e}, ${t}, ${n}, ${r}]`)},e.is=function(e){let t=e;return Ge.objectLiteral(t)&&N.is(t.start)&&N.is(t.end)}}(I||(I={})),function(e){e.create=function(e,t){return{uri:e,range:t}},e.is=function(e){let t=e;return Ge.objectLiteral(t)&&I.is(t.range)&&(Ge.string(t.uri)||Ge.undefined(t.uri))}}(E||(E={})),function(e){e.create=function(e,t,n,r){return{targetUri:e,targetRange:t,targetSelectionRange:n,originSelectionRange:r}},e.is=function(e){let t=e;return Ge.objectLiteral(t)&&I.is(t.targetRange)&&Ge.string(t.targetUri)&&I.is(t.targetSelectionRange)&&(I.is(t.originSelectionRange)||Ge.undefined(t.originSelectionRange))}}(L||(L={})),function(e){e.create=function(e,t,n,r){return{red:e,green:t,blue:n,alpha:r}},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&Ge.numberRange(t.red,0,1)&&Ge.numberRange(t.green,0,1)&&Ge.numberRange(t.blue,0,1)&&Ge.numberRange(t.alpha,0,1)}}(P||(P={})),function(e){e.create=function(e,t){return{range:e,color:t}},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&I.is(t.range)&&P.is(t.color)}}(V||(V={})),function(e){e.create=function(e,t,n){return{label:e,textEdit:t,additionalTextEdits:n}},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&Ge.string(t.label)&&(Ge.undefined(t.textEdit)||K.is(t))&&(Ge.undefined(t.additionalTextEdits)||Ge.typedArray(t.additionalTextEdits,K.is))}}(M||(M={})),function(e){e.Comment="comment",e.Imports="imports",e.Region="region"}(j||(j={})),function(e){e.create=function(e,t,n,r,i,o){const s={startLine:e,endLine:t};return Ge.defined(n)&&(s.startCharacter=n),Ge.defined(r)&&(s.endCharacter=r),Ge.defined(i)&&(s.kind=i),Ge.defined(o)&&(s.collapsedText=o),s},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&Ge.uinteger(t.startLine)&&Ge.uinteger(t.startLine)&&(Ge.undefined(t.startCharacter)||Ge.uinteger(t.startCharacter))&&(Ge.undefined(t.endCharacter)||Ge.uinteger(t.endCharacter))&&(Ge.undefined(t.kind)||Ge.string(t.kind))}}(F||(F={})),function(e){e.create=function(e,t){return{location:e,message:t}},e.is=function(e){let t=e;return Ge.defined(t)&&E.is(t.location)&&Ge.string(t.message)}}($||($={})),function(e){e.Error=1,e.Warning=2,e.Information=3,e.Hint=4}(R||(R={})),function(e){e.Unnecessary=1,e.Deprecated=2}(D||(D={})),function(e){e.is=function(e){const t=e;return Ge.objectLiteral(t)&&Ge.string(t.href)}}(_||(_={})),function(e){e.create=function(e,t,n,r,i,o){let s={range:e,message:t};return Ge.defined(n)&&(s.severity=n),Ge.defined(r)&&(s.code=r),Ge.defined(i)&&(s.source=i),Ge.defined(o)&&(s.relatedInformation=o),s},e.is=function(e){var t;let n=e;return Ge.defined(n)&&I.is(n.range)&&Ge.string(n.message)&&(Ge.number(n.severity)||Ge.undefined(n.severity))&&(Ge.integer(n.code)||Ge.string(n.code)||Ge.undefined(n.code))&&(Ge.undefined(n.codeDescription)||Ge.string(null===(t=n.codeDescription)||void 0===t?void 0:t.href))&&(Ge.string(n.source)||Ge.undefined(n.source))&&(Ge.undefined(n.relatedInformation)||Ge.typedArray(n.relatedInformation,$.is))}}(U||(U={})),function(e){e.create=function(e,t,...n){let r={title:e,command:t};return Ge.defined(n)&&n.length>0&&(r.arguments=n),r},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.string(t.title)&&Ge.string(t.command)}}(B||(B={})),function(e){e.replace=function(e,t){return{range:e,newText:t}},e.insert=function(e,t){return{range:{start:e,end:e},newText:t}},e.del=function(e){return{range:e,newText:""}},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&Ge.string(t.newText)&&I.is(t.range)}}(K||(K={})),function(e){e.create=function(e,t,n){const r={label:e};return void 0!==t&&(r.needsConfirmation=t),void 0!==n&&(r.description=n),r},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&Ge.string(t.label)&&(Ge.boolean(t.needsConfirmation)||void 0===t.needsConfirmation)&&(Ge.string(t.description)||void 0===t.description)}}(q||(q={})),function(e){e.is=function(e){const t=e;return Ge.string(t)}}(J||(J={})),function(e){e.replace=function(e,t,n){return{range:e,newText:t,annotationId:n}},e.insert=function(e,t,n){return{range:{start:e,end:e},newText:t,annotationId:n}},e.del=function(e,t){return{range:e,newText:"",annotationId:t}},e.is=function(e){const t=e;return K.is(t)&&(q.is(t.annotationId)||J.is(t.annotationId))}}(W||(W={})),function(e){e.create=function(e,t){return{textDocument:e,edits:t}},e.is=function(e){let t=e;return Ge.defined(t)&&ee.is(t.textDocument)&&Array.isArray(t.edits)}}(z||(z={})),function(e){e.create=function(e,t,n){let r={kind:"create",uri:e};return void 0===t||void 0===t.overwrite&&void 0===t.ignoreIfExists||(r.options=t),void 0!==n&&(r.annotationId=n),r},e.is=function(e){let t=e;return t&&"create"===t.kind&&Ge.string(t.uri)&&(void 0===t.options||(void 0===t.options.overwrite||Ge.boolean(t.options.overwrite))&&(void 0===t.options.ignoreIfExists||Ge.boolean(t.options.ignoreIfExists)))&&(void 0===t.annotationId||J.is(t.annotationId))}}(H||(H={})),function(e){e.create=function(e,t,n,r){let i={kind:"rename",oldUri:e,newUri:t};return void 0===n||void 0===n.overwrite&&void 0===n.ignoreIfExists||(i.options=n),void 0!==r&&(i.annotationId=r),i},e.is=function(e){let t=e;return t&&"rename"===t.kind&&Ge.string(t.oldUri)&&Ge.string(t.newUri)&&(void 0===t.options||(void 0===t.options.overwrite||Ge.boolean(t.options.overwrite))&&(void 0===t.options.ignoreIfExists||Ge.boolean(t.options.ignoreIfExists)))&&(void 0===t.annotationId||J.is(t.annotationId))}}(G||(G={})),function(e){e.create=function(e,t,n){let r={kind:"delete",uri:e};return void 0===t||void 0===t.recursive&&void 0===t.ignoreIfNotExists||(r.options=t),void 0!==n&&(r.annotationId=n),r},e.is=function(e){let t=e;return t&&"delete"===t.kind&&Ge.string(t.uri)&&(void 0===t.options||(void 0===t.options.recursive||Ge.boolean(t.options.recursive))&&(void 0===t.options.ignoreIfNotExists||Ge.boolean(t.options.ignoreIfNotExists)))&&(void 0===t.annotationId||J.is(t.annotationId))}}(X||(X={})),function(e){e.is=function(e){let t=e;return t&&(void 0!==t.changes||void 0!==t.documentChanges)&&(void 0===t.documentChanges||t.documentChanges.every((e=>Ge.string(e.kind)?H.is(e)||G.is(e)||X.is(e):z.is(e))))}}(Z||(Z={})),function(e){e.create=function(e){return{uri:e}},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.string(t.uri)}}(Q||(Q={})),function(e){e.create=function(e,t){return{uri:e,version:t}},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.string(t.uri)&&Ge.integer(t.version)}}(Y||(Y={})),function(e){e.create=function(e,t){return{uri:e,version:t}},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.string(t.uri)&&(null===t.version||Ge.integer(t.version))}}(ee||(ee={})),function(e){e.create=function(e,t,n,r){return{uri:e,languageId:t,version:n,text:r}},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.string(t.uri)&&Ge.string(t.languageId)&&Ge.integer(t.version)&&Ge.string(t.text)}}(te||(te={})),function(e){e.PlainText="plaintext",e.Markdown="markdown",e.is=function(t){const n=t;return n===e.PlainText||n===e.Markdown}}(ne||(ne={})),function(e){e.is=function(e){const t=e;return Ge.objectLiteral(e)&&ne.is(t.kind)&&Ge.string(t.value)}}(re||(re={})),function(e){e.Text=1,e.Method=2,e.Function=3,e.Constructor=4,e.Field=5,e.Variable=6,e.Class=7,e.Interface=8,e.Module=9,e.Property=10,e.Unit=11,e.Value=12,e.Enum=13,e.Keyword=14,e.Snippet=15,e.Color=16,e.File=17,e.Reference=18,e.Folder=19,e.EnumMember=20,e.Constant=21,e.Struct=22,e.Event=23,e.Operator=24,e.TypeParameter=25}(ie||(ie={})),function(e){e.PlainText=1,e.Snippet=2}(oe||(oe={})),function(e){e.Deprecated=1}(se||(se={})),function(e){e.create=function(e,t,n){return{newText:e,insert:t,replace:n}},e.is=function(e){const t=e;return t&&Ge.string(t.newText)&&I.is(t.insert)&&I.is(t.replace)}}(ae||(ae={})),function(e){e.asIs=1,e.adjustIndentation=2}(ce||(ce={})),function(e){e.is=function(e){const t=e;return t&&(Ge.string(t.detail)||void 0===t.detail)&&(Ge.string(t.description)||void 0===t.description)}}(le||(le={})),function(e){e.create=function(e){return{label:e}}}(ue||(ue={})),function(e){e.create=function(e,t){return{items:e||[],isIncomplete:!!t}}}(fe||(fe={})),function(e){e.fromPlainText=function(e){return e.replace(/[\\`*_{}[\]()#+\-.!]/g,"\\$&")},e.is=function(e){const t=e;return Ge.string(t)||Ge.objectLiteral(t)&&Ge.string(t.language)&&Ge.string(t.value)}}(de||(de={})),function(e){e.is=function(e){let t=e;return!!t&&Ge.objectLiteral(t)&&(re.is(t.contents)||de.is(t.contents)||Ge.typedArray(t.contents,de.is))&&(void 0===e.range||I.is(e.range))}}(he||(he={})),function(e){e.create=function(e,t){return t?{label:e,documentation:t}:{label:e}}}(me||(me={})),function(e){e.create=function(e,t,...n){let r={label:e};return Ge.defined(t)&&(r.documentation=t),Ge.defined(n)?r.parameters=n:r.parameters=[],r}}(pe||(pe={})),function(e){e.Text=1,e.Read=2,e.Write=3}(ge||(ge={})),function(e){e.create=function(e,t){let n={range:e};return Ge.number(t)&&(n.kind=t),n}}(ye||(ye={})),function(e){e.File=1,e.Module=2,e.Namespace=3,e.Package=4,e.Class=5,e.Method=6,e.Property=7,e.Field=8,e.Constructor=9,e.Enum=10,e.Interface=11,e.Function=12,e.Variable=13,e.Constant=14,e.String=15,e.Number=16,e.Boolean=17,e.Array=18,e.Object=19,e.Key=20,e.Null=21,e.EnumMember=22,e.Struct=23,e.Event=24,e.Operator=25,e.TypeParameter=26}(be||(be={})),function(e){e.Deprecated=1}(ve||(ve={})),function(e){e.create=function(e,t,n,r,i){let o={name:e,kind:t,location:{uri:r,range:n}};return i&&(o.containerName=i),o}}(ke||(ke={})),function(e){e.create=function(e,t,n,r){return void 0!==r?{name:e,kind:t,location:{uri:n,range:r}}:{name:e,kind:t,location:{uri:n}}}}(Se||(Se={})),function(e){e.create=function(e,t,n,r,i,o){let s={name:e,detail:t,kind:n,range:r,selectionRange:i};return void 0!==o&&(s.children=o),s},e.is=function(e){let t=e;return t&&Ge.string(t.name)&&Ge.number(t.kind)&&I.is(t.range)&&I.is(t.selectionRange)&&(void 0===t.detail||Ge.string(t.detail))&&(void 0===t.deprecated||Ge.boolean(t.deprecated))&&(void 0===t.children||Array.isArray(t.children))&&(void 0===t.tags||Array.isArray(t.tags))}}(xe||(xe={})),function(e){e.Empty="",e.QuickFix="quickfix",e.Refactor="refactor",e.RefactorExtract="refactor.extract",e.RefactorInline="refactor.inline",e.RefactorRewrite="refactor.rewrite",e.Source="source",e.SourceOrganizeImports="source.organizeImports",e.SourceFixAll="source.fixAll"}(Te||(Te={})),function(e){e.Invoked=1,e.Automatic=2}(Ae||(Ae={})),function(e){e.create=function(e,t,n){let r={diagnostics:e};return null!=t&&(r.only=t),null!=n&&(r.triggerKind=n),r},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.typedArray(t.diagnostics,U.is)&&(void 0===t.only||Ge.typedArray(t.only,Ge.string))&&(void 0===t.triggerKind||t.triggerKind===Ae.Invoked||t.triggerKind===Ae.Automatic)}}(Ce||(Ce={})),function(e){e.create=function(e,t,n){let r={title:e},i=!0;return"string"==typeof t?(i=!1,r.kind=t):B.is(t)?r.command=t:r.edit=t,i&&void 0!==n&&(r.kind=n),r},e.is=function(e){let t=e;return t&&Ge.string(t.title)&&(void 0===t.diagnostics||Ge.typedArray(t.diagnostics,U.is))&&(void 0===t.kind||Ge.string(t.kind))&&(void 0!==t.edit||void 0!==t.command)&&(void 0===t.command||B.is(t.command))&&(void 0===t.isPreferred||Ge.boolean(t.isPreferred))&&(void 0===t.edit||Z.is(t.edit))}}(Oe||(Oe={})),function(e){e.create=function(e,t){let n={range:e};return Ge.defined(t)&&(n.data=t),n},e.is=function(e){let t=e;return Ge.defined(t)&&I.is(t.range)&&(Ge.undefined(t.command)||B.is(t.command))}}(we||(we={})),function(e){e.create=function(e,t){return{tabSize:e,insertSpaces:t}},e.is=function(e){let t=e;return Ge.defined(t)&&Ge.uinteger(t.tabSize)&&Ge.boolean(t.insertSpaces)}}(Ne||(Ne={})),function(e){e.create=function(e,t,n){return{range:e,target:t,data:n}},e.is=function(e){let t=e;return Ge.defined(t)&&I.is(t.range)&&(Ge.undefined(t.target)||Ge.string(t.target))}}(Ie||(Ie={})),function(e){e.create=function(e,t){return{range:e,parent:t}},e.is=function(t){let n=t;return Ge.objectLiteral(n)&&I.is(n.range)&&(void 0===n.parent||e.is(n.parent))}}(Ee||(Ee={})),function(e){e.namespace="namespace",e.type="type",e.class="class",e.enum="enum",e.interface="interface",e.struct="struct",e.typeParameter="typeParameter",e.parameter="parameter",e.variable="variable",e.property="property",e.enumMember="enumMember",e.event="event",e.function="function",e.method="method",e.macro="macro",e.keyword="keyword",e.modifier="modifier",e.comment="comment",e.string="string",e.number="number",e.regexp="regexp",e.operator="operator",e.decorator="decorator"}(Le||(Le={})),function(e){e.declaration="declaration",e.definition="definition",e.readonly="readonly",e.static="static",e.deprecated="deprecated",e.abstract="abstract",e.async="async",e.modification="modification",e.documentation="documentation",e.defaultLibrary="defaultLibrary"}(Pe||(Pe={})),function(e){e.is=function(e){const t=e;return Ge.objectLiteral(t)&&(void 0===t.resultId||"string"==typeof t.resultId)&&Array.isArray(t.data)&&(0===t.data.length||"number"==typeof t.data[0])}}(Ve||(Ve={})),function(e){e.create=function(e,t){return{range:e,text:t}},e.is=function(e){const t=e;return null!=t&&I.is(t.range)&&Ge.string(t.text)}}(Me||(Me={})),function(e){e.create=function(e,t,n){return{range:e,variableName:t,caseSensitiveLookup:n}},e.is=function(e){const t=e;return null!=t&&I.is(t.range)&&Ge.boolean(t.caseSensitiveLookup)&&(Ge.string(t.variableName)||void 0===t.variableName)}}(je||(je={})),function(e){e.create=function(e,t){return{range:e,expression:t}},e.is=function(e){const t=e;return null!=t&&I.is(t.range)&&(Ge.string(t.expression)||void 0===t.expression)}}(Fe||(Fe={})),function(e){e.create=function(e,t){return{frameId:e,stoppedLocation:t}},e.is=function(e){const t=e;return Ge.defined(t)&&I.is(e.stoppedLocation)}}($e||($e={})),function(e){e.Type=1,e.Parameter=2,e.is=function(e){return 1===e||2===e}}(Re||(Re={})),function(e){e.create=function(e){return{value:e}},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&(void 0===t.tooltip||Ge.string(t.tooltip)||re.is(t.tooltip))&&(void 0===t.location||E.is(t.location))&&(void 0===t.command||B.is(t.command))}}(De||(De={})),function(e){e.create=function(e,t,n){const r={position:e,label:t};return void 0!==n&&(r.kind=n),r},e.is=function(e){const t=e;return Ge.objectLiteral(t)&&N.is(t.position)&&(Ge.string(t.label)||Ge.typedArray(t.label,De.is))&&(void 0===t.kind||Re.is(t.kind))&&void 0===t.textEdits||Ge.typedArray(t.textEdits,K.is)&&(void 0===t.tooltip||Ge.string(t.tooltip)||re.is(t.tooltip))&&(void 0===t.paddingLeft||Ge.boolean(t.paddingLeft))&&(void 0===t.paddingRight||Ge.boolean(t.paddingRight))}}(_e||(_e={})),function(e){e.createSnippet=function(e){return{kind:"snippet",value:e}}}(Ue||(Ue={})),function(e){e.create=function(e,t,n,r){return{insertText:e,filterText:t,range:n,command:r}}}(Be||(Be={})),function(e){e.create=function(e){return{items:e}}}(Ke||(Ke={})),function(e){e.Invoked=0,e.Automatic=1}(qe||(qe={})),function(e){e.create=function(e,t){return{range:e,text:t}}}(Je||(Je={})),function(e){e.create=function(e,t){return{triggerKind:e,selectedCompletionInfo:t}}}(We||(We={})),function(e){e.is=function(e){const t=e;return Ge.objectLiteral(t)&&C.is(t.uri)&&Ge.string(t.name)}}(ze||(ze={})),function(e){function t(e,n){if(e.length<=1)return e;const r=e.length/2|0,i=e.slice(0,r),o=e.slice(r);t(i,n),t(o,n);let s=0,a=0,c=0;for(;s<i.length&&a<o.length;){let t=n(i[s],o[a]);e[c++]=t<=0?i[s++]:o[a++]}for(;s<i.length;)e[c++]=i[s++];for(;a<o.length;)e[c++]=o[a++];return e}e.create=function(e,t,n,r){return new ot(e,t,n,r)},e.is=function(e){let t=e;return!!(Ge.defined(t)&&Ge.string(t.uri)&&(Ge.undefined(t.languageId)||Ge.string(t.languageId))&&Ge.uinteger(t.lineCount)&&Ge.func(t.getText)&&Ge.func(t.positionAt)&&Ge.func(t.offsetAt))},e.applyEdits=function(e,n){let r=e.getText(),i=t(n,((e,t)=>{let n=e.range.start.line-t.range.start.line;return 0===n?e.range.start.character-t.range.start.character:n})),o=r.length;for(let t=i.length-1;t>=0;t--){let n=i[t],s=e.offsetAt(n.range.start),a=e.offsetAt(n.range.end);if(!(a<=o))throw new Error("Overlapping edit");r=r.substring(0,s)+n.newText+r.substring(a,r.length),o=s}return r}}(He||(He={}));class ot{constructor(e,t,n,r){this._uri=e,this._languageId=t,this._version=n,this._content=r,this._lineOffsets=void 0}get uri(){return this._uri}get languageId(){return this._languageId}get version(){return this._version}getText(e){if(e){let t=this.offsetAt(e.start),n=this.offsetAt(e.end);return this._content.substring(t,n)}return this._content}update(e,t){this._content=e.text,this._version=t,this._lineOffsets=void 0}getLineOffsets(){if(void 0===this._lineOffsets){let e=[],t=this._content,n=!0;for(let r=0;r<t.length;r++){n&&(e.push(r),n=!1);let i=t.charAt(r);n="\r"===i||"\n"===i,"\r"===i&&r+1<t.length&&"\n"===t.charAt(r+1)&&r++}n&&t.length>0&&e.push(t.length),this._lineOffsets=e}return this._lineOffsets}positionAt(e){e=Math.max(Math.min(e,this._content.length),0);let t=this.getLineOffsets(),n=0,r=t.length;if(0===r)return N.create(0,e);for(;n<r;){let i=Math.floor((n+r)/2);t[i]>e?r=i:n=i+1}let i=n-1;return N.create(i,e-t[i])}offsetAt(e){let t=this.getLineOffsets();if(e.line>=t.length)return this._content.length;if(e.line<0)return 0;let n=t[e.line],r=e.line+1<t.length?t[e.line+1]:this._content.length;return Math.max(Math.min(n+e.character,r),n)}get lineCount(){return this.getLineOffsets().length}}!function(e){const t=Object.prototype.toString;e.defined=function(e){return void 0!==e},e.undefined=function(e){return void 0===e},e.boolean=function(e){return!0===e||!1===e},e.string=function(e){return"[object String]"===t.call(e)},e.number=function(e){return"[object Number]"===t.call(e)},e.numberRange=function(e,n,r){return"[object Number]"===t.call(e)&&n<=e&&e<=r},e.integer=function(e){return"[object Number]"===t.call(e)&&-2147483648<=e&&e<=2147483647},e.uinteger=function(e){return"[object Number]"===t.call(e)&&0<=e&&e<=2147483647},e.func=function(e){return"[object Function]"===t.call(e)},e.objectLiteral=function(e){return null!==e&&"object"==typeof e},e.typedArray=function(e,t){return Array.isArray(e)&&e.every(t)}}(Ge||(Ge={}));var st,at,ct,lt=n(51341);!function(e){e[e.Undefined=0]="Undefined",e[e.EnumValueMismatch=1]="EnumValueMismatch",e[e.Deprecated=2]="Deprecated",e[e.UnexpectedEndOfComment=257]="UnexpectedEndOfComment",e[e.UnexpectedEndOfString=258]="UnexpectedEndOfString",e[e.UnexpectedEndOfNumber=259]="UnexpectedEndOfNumber",e[e.InvalidUnicode=260]="InvalidUnicode",e[e.InvalidEscapeCharacter=261]="InvalidEscapeCharacter",e[e.InvalidCharacter=262]="InvalidCharacter",e[e.PropertyExpected=513]="PropertyExpected",e[e.CommaExpected=514]="CommaExpected",e[e.ColonExpected=515]="ColonExpected",e[e.ValueExpected=516]="ValueExpected",e[e.CommaOrCloseBacketExpected=517]="CommaOrCloseBacketExpected",e[e.CommaOrCloseBraceExpected=518]="CommaOrCloseBraceExpected",e[e.TrailingComma=519]="TrailingComma",e[e.DuplicateKey=520]="DuplicateKey",e[e.CommentNotPermitted=521]="CommentNotPermitted",e[e.PropertyKeysMustBeDoublequoted=528]="PropertyKeysMustBeDoublequoted",e[e.SchemaResolveError=768]="SchemaResolveError",e[e.SchemaUnsupportedFeature=769]="SchemaUnsupportedFeature"}(st||(st={})),function(e){e[e.v3=3]="v3",e[e.v4=4]="v4",e[e.v6=6]="v6",e[e.v7=7]="v7",e[e.v2019_09=19]="v2019_09",e[e.v2020_12=20]="v2020_12"}(at||(at={})),function(e){e.LATEST={textDocument:{completion:{completionItem:{documentationFormat:[ne.Markdown,ne.PlainText],commitCharactersSupport:!0,labelDetailsSupport:!0}}}}}(ct||(ct={}));var ut=n(92146);const ft={"color-hex":{errorMessage:(0,ut.t)("Invalid color format. Use #RGB, #RGBA, #RRGGBB or #RRGGBBAA."),pattern:/^#([0-9A-Fa-f]{3,4}|([0-9A-Fa-f]{2}){3,4})$/},"date-time":{errorMessage:(0,ut.t)("String is not a RFC3339 date-time."),pattern:/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)([01][0-9]|2[0-3]):([0-5][0-9]))$/i},date:{errorMessage:(0,ut.t)("String is not a RFC3339 date."),pattern:/^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/i},time:{errorMessage:(0,ut.t)("String is not a RFC3339 time."),pattern:/^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)([01][0-9]|2[0-3]):([0-5][0-9]))$/i},email:{errorMessage:(0,ut.t)("String is not an e-mail address."),pattern:/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/},hostname:{errorMessage:(0,ut.t)("String is not a hostname."),pattern:/^(?=.{1,253}\.?$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[-0-9a-z]{0,61}[0-9a-z])?)*\.?$/i},ipv4:{errorMessage:(0,ut.t)("String is not an IPv4 address."),pattern:/^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/},ipv6:{errorMessage:(0,ut.t)("String is not an IPv6 address."),pattern:/^((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))$/i}};class dt{constructor(e,t,n=0){this.offset=t,this.length=n,this.parent=e}get children(){return[]}toString(){return"type: "+this.type+" ("+this.offset+"/"+this.length+")"+(this.parent?" parent: {"+this.parent.toString()+"}":"")}}class ht extends dt{constructor(e,t){super(e,t),this.type="null",this.value=null}}class mt extends dt{constructor(e,t,n){super(e,n),this.type="boolean",this.value=t}}class pt extends dt{constructor(e,t){super(e,t),this.type="array",this.items=[]}get children(){return this.items}}class gt extends dt{constructor(e,t){super(e,t),this.type="number",this.isInteger=!0,this.value=Number.NaN}}class yt extends dt{constructor(e,t,n){super(e,t,n),this.type="string",this.value=""}}class bt extends dt{constructor(e,t,n){super(e,t),this.type="property",this.colonOffset=-1,this.keyNode=n}get children(){return this.valueNode?[this.keyNode,this.valueNode]:[this.keyNode]}}class vt extends dt{constructor(e,t){super(e,t),this.type="object",this.properties=[]}get children(){return this.properties}}function kt(e){return Ye(e)?e?{}:{not:{}}:e}var St;!function(e){e[e.Key=0]="Key",e[e.Enum=1]="Enum"}(St||(St={}));const xt={"http://json-schema.org/draft-03/schema#":at.v3,"http://json-schema.org/draft-04/schema#":at.v4,"http://json-schema.org/draft-06/schema#":at.v6,"http://json-schema.org/draft-07/schema#":at.v7,"https://json-schema.org/draft/2019-09/schema":at.v2019_09,"https://json-schema.org/draft/2020-12/schema":at.v2020_12};class Tt{constructor(e){this.schemaDraft=e}}class At{constructor(e=-1,t){this.focusOffset=e,this.exclude=t,this.schemas=[]}add(e){this.schemas.push(e)}merge(e){Array.prototype.push.apply(this.schemas,e.schemas)}include(e){return(-1===this.focusOffset||It(e,this.focusOffset))&&e!==this.exclude}newSub(){return new At(-1,this.exclude)}}class Ct{constructor(){}get schemas(){return[]}add(e){}merge(e){}include(e){return!0}newSub(){return this}}Ct.instance=new Ct;class Ot{constructor(){this.problems=[],this.propertiesMatches=0,this.processedProperties=new Set,this.propertiesValueMatches=0,this.primaryValueMatches=0,this.enumValueMatch=!1,this.enumValues=void 0}hasProblems(){return!!this.problems.length}merge(e){this.problems=this.problems.concat(e.problems),this.propertiesMatches+=e.propertiesMatches,this.propertiesValueMatches+=e.propertiesValueMatches,this.mergeProcessedProperties(e)}mergeEnumValues(e){if(!this.enumValueMatch&&!e.enumValueMatch&&this.enumValues&&e.enumValues){this.enumValues=this.enumValues.concat(e.enumValues);for(const e of this.problems)e.code===st.EnumValueMismatch&&(e.message=(0,ut.t)("Value is not accepted. Valid values: {0}.",this.enumValues.map((e=>JSON.stringify(e))).join(", ")))}}mergePropertyMatch(e){this.problems=this.problems.concat(e.problems),this.propertiesMatches++,(e.enumValueMatch||!e.hasProblems()&&e.propertiesMatches)&&this.propertiesValueMatches++,e.enumValueMatch&&e.enumValues&&1===e.enumValues.length&&this.primaryValueMatches++}mergeProcessedProperties(e){e.processedProperties.forEach((e=>this.processedProperties.add(e)))}compare(e){const t=this.hasProblems();return t!==e.hasProblems()?t?-1:1:this.enumValueMatch!==e.enumValueMatch?e.enumValueMatch?-1:1:this.primaryValueMatches!==e.primaryValueMatches?this.primaryValueMatches-e.primaryValueMatches:this.propertiesValueMatches!==e.propertiesValueMatches?this.propertiesValueMatches-e.propertiesValueMatches:this.propertiesMatches-e.propertiesMatches}}function wt(e){return x(e)}function Nt(e){return S(e)}function It(e,t,n=!1){return t>=e.offset&&t<e.offset+e.length||n&&t===e.offset+e.length}class Et{constructor(e,t=[],n=[]){this.root=e,this.syntaxErrors=t,this.comments=n}getNodeFromOffset(e,t=!1){if(this.root)return k(this.root,e,t)}visit(e){if(this.root){const t=n=>{let r=e(n);const i=n.children;if(Array.isArray(i))for(let e=0;e<i.length&&r;e++)r=t(i[e]);return r};t(this.root)}}validate(e,t,n=R.Warning,r){if(this.root&&t){const i=new Ot;return Pt(this.root,t,i,Ct.instance,new Tt(r??Lt(t))),i.problems.map((t=>{const r=I.create(e.positionAt(t.location.offset),e.positionAt(t.location.offset+t.location.length));return U.create(r,t.message,t.severity??n,t.code)}))}}getMatchingSchemas(e,t=-1,n){if(this.root&&e){const r=new At(t,n),i=Lt(e),o=new Tt(i);return Pt(this.root,e,new Ot,r,o),r.schemas}return[]}}function Lt(e,t=at.v2020_12){let n=e.$schema;return n?xt[n]??t:t}function Pt(e,t,n,r,i){if(!e||!r.include(e))return;if("property"===e.type)return Pt(e.valueNode,t,n,r,i);const o=e;switch(function(){function e(e){return o.type===e||"integer"===e&&"number"===o.type&&o.isInteger}if(Array.isArray(t.type)?t.type.some(e)||n.problems.push({location:{offset:o.offset,length:o.length},message:t.errorMessage||(0,ut.t)("Incorrect type. Expected one of {0}.",t.type.join(", "))}):t.type&&(e(t.type)||n.problems.push({location:{offset:o.offset,length:o.length},message:t.errorMessage||(0,ut.t)('Incorrect type. Expected "{0}".',t.type)})),Array.isArray(t.allOf))for(const e of t.allOf){const t=new Ot,s=r.newSub();Pt(o,kt(e),t,s,i),n.merge(t),r.merge(s)}const s=kt(t.not);if(s){const e=new Ot,a=r.newSub();Pt(o,s,e,a,i),e.hasProblems()||n.problems.push({location:{offset:o.offset,length:o.length},message:t.errorMessage||(0,ut.t)("Matches a schema that is not allowed.")});for(const e of a.schemas)e.inverted=!e.inverted,r.add(e)}const a=(e,t)=>{const s=[];let a;for(const n of e){const e=kt(n),c=new Ot,l=r.newSub();if(Pt(o,e,c,l,i),c.hasProblems()||s.push(e),a)if(t||c.hasProblems()||a.validationResult.hasProblems()){const t=c.compare(a.validationResult);t>0?a={schema:e,validationResult:c,matchingSchemas:l}:0===t&&(a.matchingSchemas.merge(l),a.validationResult.mergeEnumValues(c))}else a.matchingSchemas.merge(l),a.validationResult.propertiesMatches+=c.propertiesMatches,a.validationResult.propertiesValueMatches+=c.propertiesValueMatches,a.validationResult.mergeProcessedProperties(c);else a={schema:e,validationResult:c,matchingSchemas:l}}return s.length>1&&t&&n.problems.push({location:{offset:o.offset,length:1},message:(0,ut.t)("Matches multiple schemas when only one must validate.")}),a&&(n.merge(a.validationResult),r.merge(a.matchingSchemas)),s.length};Array.isArray(t.anyOf)&&a(t.anyOf,!1),Array.isArray(t.oneOf)&&a(t.oneOf,!0);const c=e=>{const t=new Ot,s=r.newSub();Pt(o,kt(e),t,s,i),n.merge(t),r.merge(s)},l=kt(t.if);if(l&&((e,t,s)=>{const a=kt(e),l=new Ot,u=r.newSub();Pt(o,a,l,u,i),r.merge(u),n.mergeProcessedProperties(l),l.hasProblems()?s&&c(s):t&&c(t)})(l,kt(t.then),kt(t.else)),Array.isArray(t.enum)){const e=wt(o);let r=!1;for(const n of t.enum)if(Xe(e,n)){r=!0;break}n.enumValues=t.enum,n.enumValueMatch=r,r||n.problems.push({location:{offset:o.offset,length:o.length},code:st.EnumValueMismatch,message:t.errorMessage||(0,ut.t)("Value is not accepted. Valid values: {0}.",t.enum.map((e=>JSON.stringify(e))).join(", "))})}Qe(t.const)&&(Xe(wt(o),t.const)?n.enumValueMatch=!0:(n.problems.push({location:{offset:o.offset,length:o.length},code:st.EnumValueMismatch,message:t.errorMessage||(0,ut.t)("Value must be {0}.",JSON.stringify(t.const))}),n.enumValueMatch=!1),n.enumValues=[t.const]);let u=t.deprecationMessage;if(u||t.deprecated){u=u||(0,ut.t)("Value is deprecated");let e="property"===o.parent?.type?o.parent:o;n.problems.push({location:{offset:e.offset,length:e.length},severity:R.Warning,message:u,code:st.Deprecated})}}(),o.type){case"object":!function(e){const o=Object.create(null),s=new Set;for(const t of e.properties){const e=t.keyNode.value;o[e]=t.valueNode,s.add(e)}if(Array.isArray(t.required))for(const r of t.required)if(!o[r]){const t=e.parent&&"property"===e.parent.type&&e.parent.keyNode,i=t?{offset:t.offset,length:t.length}:{offset:e.offset,length:1};n.problems.push({location:i,message:(0,ut.t)('Missing property "{0}".',r)})}const a=e=>{s.delete(e),n.processedProperties.add(e)};if(t.properties)for(const e of Object.keys(t.properties)){a(e);const s=t.properties[e],c=o[e];if(c)if(Ye(s))if(s)n.propertiesMatches++,n.propertiesValueMatches++;else{const r=c.parent;n.problems.push({location:{offset:r.keyNode.offset,length:r.keyNode.length},message:t.errorMessage||(0,ut.t)("Property {0} is not allowed.",e)})}else{const e=new Ot;Pt(c,s,e,r,i),n.mergePropertyMatch(e)}}if(t.patternProperties)for(const e of Object.keys(t.patternProperties)){const c=rt(e);if(c){const l=[];for(const a of s)if(c.test(a)){l.push(a);const s=o[a];if(s){const o=t.patternProperties[e];if(Ye(o))if(o)n.propertiesMatches++,n.propertiesValueMatches++;else{const e=s.parent;n.problems.push({location:{offset:e.keyNode.offset,length:e.keyNode.length},message:t.errorMessage||(0,ut.t)("Property {0} is not allowed.",a)})}else{const e=new Ot;Pt(s,o,e,r,i),n.mergePropertyMatch(e)}}}l.forEach(a)}}const c=t.additionalProperties;if(void 0!==c)for(const e of s){a(e);const s=o[e];if(s)if(!1===c){const r=s.parent;n.problems.push({location:{offset:r.keyNode.offset,length:r.keyNode.length},message:t.errorMessage||(0,ut.t)("Property {0} is not allowed.",e)})}else if(!0!==c){const e=new Ot;Pt(s,c,e,r,i),n.mergePropertyMatch(e)}}const l=t.unevaluatedProperties;if(void 0!==l){const e=[];for(const a of s)if(!n.processedProperties.has(a)){e.push(a);const s=o[a];if(s)if(!1===l){const e=s.parent;n.problems.push({location:{offset:e.keyNode.offset,length:e.keyNode.length},message:t.errorMessage||(0,ut.t)("Property {0} is not allowed.",a)})}else if(!0!==l){const e=new Ot;Pt(s,l,e,r,i),n.mergePropertyMatch(e)}}e.forEach(a)}if(Ze(t.maxProperties)&&e.properties.length>t.maxProperties&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Object has more properties than limit of {0}.",t.maxProperties)}),Ze(t.minProperties)&&e.properties.length<t.minProperties&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Object has fewer properties than the required number of {0}",t.minProperties)}),t.dependentRequired)for(const e in t.dependentRequired){const n=o[e],r=t.dependentRequired[e];n&&Array.isArray(r)&&f(e,r)}if(t.dependentSchemas)for(const e in t.dependentSchemas){const n=o[e],r=t.dependentSchemas[e];n&&tt(r)&&f(e,r)}if(t.dependencies)for(const e in t.dependencies)o[e]&&f(e,t.dependencies[e]);const u=kt(t.propertyNames);if(u)for(const t of e.properties){const e=t.keyNode;e&&Pt(e,u,n,Ct.instance,i)}function f(t,s){if(Array.isArray(s))for(const r of s)o[r]?n.propertiesValueMatches++:n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Object is missing property {0} required by property {1}.",r,t)});else{const t=kt(s);if(t){const o=new Ot;Pt(e,t,o,r,i),n.mergePropertyMatch(o)}}}}(o);break;case"array":!function(e){let o,s;i.schemaDraft>=at.v2020_12?(o=t.prefixItems,s=Array.isArray(t.items)?void 0:t.items):(o=Array.isArray(t.items)?t.items:void 0,s=Array.isArray(t.items)?t.additionalItems:t.items);let a=0;if(void 0!==o){const u=Math.min(o.length,e.items.length);for(;a<u;a++){const f=kt(o[a]),d=new Ot,h=e.items[a];h&&(Pt(h,f,d,r,i),n.mergePropertyMatch(d)),n.processedProperties.add(String(a))}}if(void 0!==s&&a<e.items.length)if("boolean"==typeof s)for(!1===s&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Array has too many items according to schema. Expected {0} or fewer.",a)});a<e.items.length;a++)n.processedProperties.add(String(a)),n.propertiesValueMatches++;else for(;a<e.items.length;a++){const m=new Ot;Pt(e.items[a],s,m,r,i),n.mergePropertyMatch(m),n.processedProperties.add(String(a))}const c=kt(t.contains);if(c){let p=0;for(let g=0;g<e.items.length;g++){const y=e.items[g],b=new Ot;Pt(y,c,b,Ct.instance,i),b.hasProblems()||(p++,i.schemaDraft>=at.v2020_12&&n.processedProperties.add(String(g)))}0!==p||Ze(t.minContains)||n.problems.push({location:{offset:e.offset,length:e.length},message:t.errorMessage||(0,ut.t)("Array does not contain required item.")}),Ze(t.minContains)&&p<t.minContains&&n.problems.push({location:{offset:e.offset,length:e.length},message:t.errorMessage||(0,ut.t)("Array has too few items that match the contains contraint. Expected {0} or more.",t.minContains)}),Ze(t.maxContains)&&p>t.maxContains&&n.problems.push({location:{offset:e.offset,length:e.length},message:t.errorMessage||(0,ut.t)("Array has too many items that match the contains contraint. Expected {0} or less.",t.maxContains)})}const l=t.unevaluatedItems;if(void 0!==l)for(let v=0;v<e.items.length;v++){if(!n.processedProperties.has(String(v)))if(!1===l)n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Item does not match any validation rule from the array.")});else{const k=new Ot;Pt(e.items[v],t.unevaluatedItems,k,r,i),n.mergePropertyMatch(k)}n.processedProperties.add(String(v)),n.propertiesValueMatches++}if(Ze(t.minItems)&&e.items.length<t.minItems&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Array has too few items. Expected {0} or more.",t.minItems)}),Ze(t.maxItems)&&e.items.length>t.maxItems&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Array has too many items. Expected {0} or fewer.",t.maxItems)}),!0===t.uniqueItems){const S=wt(e);function x(){for(let e=0;e<S.length-1;e++){const t=S[e];for(let n=e+1;n<S.length;n++)if(Xe(t,S[n]))return!0}return!1}x()&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Array has duplicate items.")})}}(o);break;case"string":!function(e){if(Ze(t.minLength)&&it(e.value)<t.minLength&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("String is shorter than the minimum length of {0}.",t.minLength)}),Ze(t.maxLength)&&it(e.value)>t.maxLength&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("String is longer than the maximum length of {0}.",t.maxLength)}),et(t.pattern)){const r=rt(t.pattern);r?.test(e.value)||n.problems.push({location:{offset:e.offset,length:e.length},message:t.patternErrorMessage||t.errorMessage||(0,ut.t)('String does not match the pattern of "{0}".',t.pattern)})}if(t.format)switch(t.format){case"uri":case"uri-reference":{let r;if(e.value){const n=/^(([^:/?#]+?):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/.exec(e.value);n?n[2]||"uri"!==t.format||(r=(0,ut.t)("URI with a scheme is expected.")):r=(0,ut.t)("URI is expected.")}else r=(0,ut.t)("URI expected.");r&&n.problems.push({location:{offset:e.offset,length:e.length},message:t.patternErrorMessage||t.errorMessage||(0,ut.t)("String is not a URI: {0}",r)})}break;case"color-hex":case"date-time":case"date":case"time":case"email":case"hostname":case"ipv4":case"ipv6":const r=ft[t.format];e.value&&r.pattern.exec(e.value)||n.problems.push({location:{offset:e.offset,length:e.length},message:t.patternErrorMessage||t.errorMessage||r.errorMessage})}}(o);break;case"number":!function(e){const r=e.value;function i(e){const t=/^(-?\d+)(?:\.(\d+))?(?:e([-+]\d+))?$/.exec(e.toString());return t&&{value:Number(t[1]+(t[2]||"")),multiplier:(t[2]?.length||0)-(parseInt(t[3])||0)}}if(Ze(t.multipleOf)){let o=-1;if(Number.isInteger(t.multipleOf))o=r%t.multipleOf;else{let e=i(t.multipleOf),n=i(r);if(e&&n){const t=10**Math.abs(n.multiplier-e.multiplier);n.multiplier<e.multiplier?n.value*=t:e.value*=t,o=n.value%e.value}}0!==o&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Value is not divisible by {0}.",t.multipleOf)})}function o(e,t){return Ze(t)?t:Ye(t)&&t?e:void 0}function s(e,t){if(!Ye(t)||!t)return e}const a=o(t.minimum,t.exclusiveMinimum);Ze(a)&&r<=a&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Value is below the exclusive minimum of {0}.",a)});const c=o(t.maximum,t.exclusiveMaximum);Ze(c)&&r>=c&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Value is above the exclusive maximum of {0}.",c)});const l=s(t.minimum,t.exclusiveMinimum);Ze(l)&&r<l&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Value is below the minimum of {0}.",l)});const u=s(t.maximum,t.exclusiveMaximum);Ze(u)&&r>u&&n.problems.push({location:{offset:e.offset,length:e.length},message:(0,ut.t)("Value is above the maximum of {0}.",u)})}(o)}r.add({node:o,schema:t})}function Vt(e,t,n){if(null!==e&&"object"==typeof e){const r=t+"\t";if(Array.isArray(e)){if(0===e.length)return"[]";let i="[\n";for(let t=0;t<e.length;t++)i+=r+Vt(e[t],r,n),t<e.length-1&&(i+=","),i+="\n";return i+=t+"]",i}{const i=Object.keys(e);if(0===i.length)return"{}";let o="{\n";for(let t=0;t<i.length;t++){const s=i[t];o+=r+JSON.stringify(s)+": "+Vt(e[s],r,n),t<i.length-1&&(o+=","),o+="\n"}return o+=t+"}",o}}return n(e)}class Mt{constructor(e,t=[],n=Promise,r={}){this.schemaService=e,this.contributions=t,this.promiseConstructor=n,this.clientCapabilities=r}doResolve(e){for(let t=this.contributions.length-1;t>=0;t--){const n=this.contributions[t].resolveCompletion;if(n){const t=n(e);if(t)return t}}return this.promiseConstructor.resolve(e)}doComplete(e,t,n){const r={items:[],isIncomplete:!1},i=e.getText(),o=e.offsetAt(t);let s=n.getNodeFromOffset(o,!0);if(this.isInComment(e,s?s.offset:0,o))return Promise.resolve(r);if(s&&o===s.offset+s.length&&o>0){const e=i[o-1];("object"===s.type&&"}"===e||"array"===s.type&&"]"===e)&&(s=s.parent)}const a=this.getCurrentWord(e,o);let c;if(!s||"string"!==s.type&&"number"!==s.type&&"boolean"!==s.type&&"null"!==s.type){let n=o-a.length;n>0&&'"'===i[n-1]&&n--,c=I.create(e.positionAt(n),t)}else c=I.create(e.positionAt(s.offset),e.positionAt(s.offset+s.length));const l=new Map,u={add:e=>{let t=e.label;const n=l.get(t);if(n)n.documentation||(n.documentation=e.documentation),n.detail||(n.detail=e.detail),n.labelDetails||(n.labelDetails=e.labelDetails);else{if(t=t.replace(/[\n]/g,"↵"),t.length>60){const e=t.substr(0,57).trim()+"...";l.has(e)||(t=e)}e.textEdit=K.replace(c,e.insertText),e.label=t,l.set(t,e),r.items.push(e)}},setAsIncomplete:()=>{r.isIncomplete=!0},error:e=>{console.error(e)},getNumberOfProposals:()=>r.items.length};return this.schemaService.getSchemaForResource(e.uri,n).then((t=>{const f=[];let d,h=!0,m="";if(s&&"string"===s.type){const e=s.parent;e&&"property"===e.type&&e.keyNode===s&&(h=!e.valueNode,d=e,m=i.substr(s.offset+1,s.length-2),e&&(s=e.parent))}if(s&&"object"===s.type){if(s.offset===o)return r;s.properties.forEach((e=>{d&&d===e||l.set(e.keyNode.value,ue.create("__"))}));let p="";h&&(p=this.evaluateSeparatorAfter(e,e.offsetAt(c.end))),t?this.getPropertyCompletions(t,n,s,h,p,u):this.getSchemaLessPropertyCompletions(n,s,m,u);const g=Nt(s);this.contributions.forEach((t=>{const n=t.collectPropertyCompletions(e.uri,g,a,h,""===p,u);n&&f.push(n)})),!t&&a.length>0&&'"'!==i.charAt(o-a.length-1)&&(u.add({kind:ie.Property,label:this.getLabelForValue(a),insertText:this.getInsertTextForProperty(a,void 0,!1,p),insertTextFormat:oe.Snippet,documentation:""}),u.setAsIncomplete())}const p={};return t?this.getValueCompletions(t,n,s,o,e,u,p):this.getSchemaLessValueCompletions(n,s,o,e,u),this.contributions.length>0&&this.getContributedValueCompletions(n,s,o,e,u,f),this.promiseConstructor.all(f).then((()=>{if(0===u.getNumberOfProposals()){let t=o;!s||"string"!==s.type&&"number"!==s.type&&"boolean"!==s.type&&"null"!==s.type||(t=s.offset+s.length);const n=this.evaluateSeparatorAfter(e,t);this.addFillerValueCompletions(p,n,u)}return r}))}))}getPropertyCompletions(e,t,n,r,i,o){t.getMatchingSchemas(e.schema,n.offset).forEach((e=>{if(e.node===n&&!e.inverted){const t=e.schema.properties;t&&Object.keys(t).forEach((e=>{const n=t[e];if("object"==typeof n&&!n.deprecationMessage&&!n.doNotSuggest){const t={kind:ie.Property,label:e,insertText:this.getInsertTextForProperty(e,n,r,i),insertTextFormat:oe.Snippet,filterText:this.getFilterTextForValue(e),documentation:this.fromMarkup(n.markdownDescription)||n.description||""};void 0!==n.suggestSortText&&(t.sortText=n.suggestSortText),t.insertText&&nt(t.insertText,`$1${i}`)&&(t.command={title:"Suggest",command:"editor.action.triggerSuggest"}),o.add(t)}}));const n=e.schema.propertyNames;if("object"==typeof n&&!n.deprecationMessage&&!n.doNotSuggest){const e=(e,t=void 0)=>{const s={kind:ie.Property,label:e,insertText:this.getInsertTextForProperty(e,void 0,r,i),insertTextFormat:oe.Snippet,filterText:this.getFilterTextForValue(e),documentation:t||this.fromMarkup(n.markdownDescription)||n.description||""};void 0!==n.suggestSortText&&(s.sortText=n.suggestSortText),s.insertText&&nt(s.insertText,`$1${i}`)&&(s.command={title:"Suggest",command:"editor.action.triggerSuggest"}),o.add(s)};if(n.enum)for(let t=0;t<n.enum.length;t++){let r;n.markdownEnumDescriptions&&t<n.markdownEnumDescriptions.length?r=this.fromMarkup(n.markdownEnumDescriptions[t]):n.enumDescriptions&&t<n.enumDescriptions.length&&(r=n.enumDescriptions[t]),e(n.enum[t],r)}n.const&&e(n.const)}}}))}getSchemaLessPropertyCompletions(e,t,n,r){const i=e=>{e.properties.forEach((e=>{const t=e.keyNode.value;r.add({kind:ie.Property,label:t,insertText:this.getInsertTextForValue(t,""),insertTextFormat:oe.Snippet,filterText:this.getFilterTextForValue(t),documentation:""})}))};if(t.parent)if("property"===t.parent.type){const n=t.parent.keyNode.value;e.visit((e=>("property"===e.type&&e!==t.parent&&e.keyNode.value===n&&e.valueNode&&"object"===e.valueNode.type&&i(e.valueNode),!0)))}else"array"===t.parent.type&&t.parent.items.forEach((e=>{"object"===e.type&&e!==t&&i(e)}));else"object"===t.type&&r.add({kind:ie.Property,label:"$schema",insertText:this.getInsertTextForProperty("$schema",void 0,!0,""),insertTextFormat:oe.Snippet,documentation:"",filterText:this.getFilterTextForValue("$schema")})}getSchemaLessValueCompletions(e,t,n,r,i){let o=n;if(!t||"string"!==t.type&&"number"!==t.type&&"boolean"!==t.type&&"null"!==t.type||(o=t.offset+t.length,t=t.parent),!t)return i.add({kind:this.getSuggestionKind("object"),label:"Empty object",insertText:this.getInsertTextForValue({},""),insertTextFormat:oe.Snippet,documentation:""}),void i.add({kind:this.getSuggestionKind("array"),label:"Empty array",insertText:this.getInsertTextForValue([],""),insertTextFormat:oe.Snippet,documentation:""});const s=this.evaluateSeparatorAfter(r,o),a=e=>{e.parent&&!It(e.parent,n,!0)&&i.add({kind:this.getSuggestionKind(e.type),label:this.getLabelTextForMatchingNode(e,r),insertText:this.getInsertTextForMatchingNode(e,r,s),insertTextFormat:oe.Snippet,documentation:""}),"boolean"===e.type&&this.addBooleanValueCompletion(!e.value,s,i)};if("property"===t.type&&n>(t.colonOffset||0)){const r=t.valueNode;if(r&&(n>r.offset+r.length||"object"===r.type||"array"===r.type))return;const o=t.keyNode.value;e.visit((e=>("property"===e.type&&e.keyNode.value===o&&e.valueNode&&a(e.valueNode),!0))),"$schema"===o&&t.parent&&!t.parent.parent&&this.addDollarSchemaCompletions(s,i)}if("array"===t.type)if(t.parent&&"property"===t.parent.type){const n=t.parent.keyNode.value;e.visit((e=>("property"===e.type&&e.keyNode.value===n&&e.valueNode&&"array"===e.valueNode.type&&e.valueNode.items.forEach(a),!0)))}else t.items.forEach(a)}getValueCompletions(e,t,n,r,i,o,s){let a,c,l=r;if(!n||"string"!==n.type&&"number"!==n.type&&"boolean"!==n.type&&"null"!==n.type||(l=n.offset+n.length,c=n,n=n.parent),n){if("property"===n.type&&r>(n.colonOffset||0)){const e=n.valueNode;if(e&&r>e.offset+e.length)return;a=n.keyNode.value,n=n.parent}if(n&&(void 0!==a||"array"===n.type)){const u=this.evaluateSeparatorAfter(i,l),f=t.getMatchingSchemas(e.schema,n.offset,c);for(const e of f)if(e.node===n&&!e.inverted&&e.schema){if("array"===n.type&&e.schema.items){let t=o;if(e.schema.uniqueItems){const e=new Set;n.children.forEach((t=>{"array"!==t.type&&"object"!==t.type&&e.add(this.getLabelForValue(wt(t)))})),t={...o,add(t){e.has(t.label)||o.add(t)}}}if(Array.isArray(e.schema.items)){const o=this.findItemAtOffset(n,i,r);o<e.schema.items.length&&this.addSchemaValueCompletions(e.schema.items[o],u,t,s)}else this.addSchemaValueCompletions(e.schema.items,u,t,s)}if(void 0!==a){let t=!1;if(e.schema.properties){const n=e.schema.properties[a];n&&(t=!0,this.addSchemaValueCompletions(n,u,o,s))}if(e.schema.patternProperties&&!t)for(const n of Object.keys(e.schema.patternProperties)){const r=rt(n);if(r?.test(a)){t=!0;const r=e.schema.patternProperties[n];this.addSchemaValueCompletions(r,u,o,s)}}if(e.schema.additionalProperties&&!t){const t=e.schema.additionalProperties;this.addSchemaValueCompletions(t,u,o,s)}}}"$schema"!==a||n.parent||this.addDollarSchemaCompletions(u,o),s.boolean&&(this.addBooleanValueCompletion(!0,u,o),this.addBooleanValueCompletion(!1,u,o)),s.null&&this.addNullValueCompletion(u,o)}}else this.addSchemaValueCompletions(e.schema,"",o,s)}getContributedValueCompletions(e,t,n,r,i,o){if(t){if("string"!==t.type&&"number"!==t.type&&"boolean"!==t.type&&"null"!==t.type||(t=t.parent),t&&"property"===t.type&&n>(t.colonOffset||0)){const e=t.keyNode.value,s=t.valueNode;if((!s||n<=s.offset+s.length)&&t.parent){const n=Nt(t.parent);this.contributions.forEach((t=>{const s=t.collectValueCompletions(r.uri,n,e,i);s&&o.push(s)}))}}}else this.contributions.forEach((e=>{const t=e.collectDefaultCompletions(r.uri,i);t&&o.push(t)}))}addSchemaValueCompletions(e,t,n,r){"object"==typeof e&&(this.addEnumValueCompletions(e,t,n),this.addDefaultValueCompletions(e,t,n),this.collectTypes(e,r),Array.isArray(e.allOf)&&e.allOf.forEach((e=>this.addSchemaValueCompletions(e,t,n,r))),Array.isArray(e.anyOf)&&e.anyOf.forEach((e=>this.addSchemaValueCompletions(e,t,n,r))),Array.isArray(e.oneOf)&&e.oneOf.forEach((e=>this.addSchemaValueCompletions(e,t,n,r))))}addDefaultValueCompletions(e,t,n,r=0){let i=!1;if(Qe(e.default)){let o=e.type,s=e.default;for(let e=r;e>0;e--)s=[s],o="array";const a={kind:this.getSuggestionKind(o),label:this.getLabelForValue(s),insertText:this.getInsertTextForValue(s,t),insertTextFormat:oe.Snippet};this.doesSupportsLabelDetails()?a.labelDetails={description:(0,ut.t)("Default value")}:a.detail=(0,ut.t)("Default value"),n.add(a),i=!0}Array.isArray(e.examples)&&e.examples.forEach((o=>{let s=e.type,a=o;for(let e=r;e>0;e--)a=[a],s="array";n.add({kind:this.getSuggestionKind(s),label:this.getLabelForValue(a),insertText:this.getInsertTextForValue(a,t),insertTextFormat:oe.Snippet}),i=!0})),Array.isArray(e.defaultSnippets)&&e.defaultSnippets.forEach((o=>{let s,a,c=e.type,l=o.body,u=o.label;if(Qe(l)){e.type;for(let e=r;e>0;e--)l=[l];s=this.getInsertTextForSnippetValue(l,t),a=this.getFilterTextForSnippetValue(l),u=u||this.getLabelForSnippetValue(l)}else{if("string"!=typeof o.bodyText)return;{let e="",n="",i="";for(let t=r;t>0;t--)e=e+i+"[\n",n=n+"\n"+i+"]",i+="\t",c="array";s=e+i+o.bodyText.split("\n").join("\n"+i)+n+t,u=u||s,a=s.replace(/[\n]/g,"")}}n.add({kind:this.getSuggestionKind(c),label:u,documentation:this.fromMarkup(o.markdownDescription)||o.description,insertText:s,insertTextFormat:oe.Snippet,filterText:a}),i=!0})),!i&&"object"==typeof e.items&&!Array.isArray(e.items)&&r<5&&this.addDefaultValueCompletions(e.items,t,n,r+1)}addEnumValueCompletions(e,t,n){if(Qe(e.const)&&n.add({kind:this.getSuggestionKind(e.type),label:this.getLabelForValue(e.const),insertText:this.getInsertTextForValue(e.const,t),insertTextFormat:oe.Snippet,documentation:this.fromMarkup(e.markdownDescription)||e.description}),Array.isArray(e.enum))for(let r=0,i=e.enum.length;r<i;r++){const i=e.enum[r];let o=this.fromMarkup(e.markdownDescription)||e.description;e.markdownEnumDescriptions&&r<e.markdownEnumDescriptions.length&&this.doesSupportMarkdown()?o=this.fromMarkup(e.markdownEnumDescriptions[r]):e.enumDescriptions&&r<e.enumDescriptions.length&&(o=e.enumDescriptions[r]),n.add({kind:this.getSuggestionKind(e.type),label:this.getLabelForValue(i),insertText:this.getInsertTextForValue(i,t),insertTextFormat:oe.Snippet,documentation:o})}}collectTypes(e,t){if(Array.isArray(e.enum)||Qe(e.const))return;const n=e.type;Array.isArray(n)?n.forEach((e=>t[e]=!0)):n&&(t[n]=!0)}addFillerValueCompletions(e,t,n){e.object&&n.add({kind:this.getSuggestionKind("object"),label:"{}",insertText:this.getInsertTextForGuessedValue({},t),insertTextFormat:oe.Snippet,detail:(0,ut.t)("New object"),documentation:""}),e.array&&n.add({kind:this.getSuggestionKind("array"),label:"[]",insertText:this.getInsertTextForGuessedValue([],t),insertTextFormat:oe.Snippet,detail:(0,ut.t)("New array"),documentation:""})}addBooleanValueCompletion(e,t,n){n.add({kind:this.getSuggestionKind("boolean"),label:e?"true":"false",insertText:this.getInsertTextForValue(e,t),insertTextFormat:oe.Snippet,documentation:""})}addNullValueCompletion(e,t){t.add({kind:this.getSuggestionKind("null"),label:"null",insertText:"null"+e,insertTextFormat:oe.Snippet,documentation:""})}addDollarSchemaCompletions(e,t){this.schemaService.getRegisteredSchemaIds((e=>"http"===e||"https"===e)).forEach((n=>{n.startsWith("http://json-schema.org/draft-")&&(n+="#"),t.add({kind:ie.Module,label:this.getLabelForValue(n),filterText:this.getFilterTextForValue(n),insertText:this.getInsertTextForValue(n,e),insertTextFormat:oe.Snippet,documentation:""})}))}getLabelForValue(e){return JSON.stringify(e)}getValueFromLabel(e){return JSON.parse(e)}getFilterTextForValue(e){return JSON.stringify(e)}getFilterTextForSnippetValue(e){return JSON.stringify(e).replace(/\$\{\d+:([^}]+)\}|\$\d+/g,"$1")}getLabelForSnippetValue(e){return JSON.stringify(e).replace(/\$\{\d+:([^}]+)\}|\$\d+/g,"$1")}getInsertTextForPlainText(e){return e.replace(/[\\\$\}]/g,"\\$&")}getInsertTextForValue(e,t){const n=JSON.stringify(e,null,"\t");return"{}"===n?"{$1}"+t:"[]"===n?"[$1]"+t:this.getInsertTextForPlainText(n+t)}getInsertTextForSnippetValue(e,t){return Vt(e,"",(e=>"string"==typeof e&&"^"===e[0]?e.substr(1):JSON.stringify(e)))+t}getInsertTextForGuessedValue(e,t){switch(typeof e){case"object":return null===e?"${1:null}"+t:this.getInsertTextForValue(e,t);case"string":let n=JSON.stringify(e);return n=n.substr(1,n.length-2),n=this.getInsertTextForPlainText(n),'"${1:'+n+'}"'+t;case"number":case"boolean":return"${1:"+JSON.stringify(e)+"}"+t}return this.getInsertTextForValue(e,t)}getSuggestionKind(e){if(Array.isArray(e)){const t=e;e=t.length>0?t[0]:void 0}if(!e)return ie.Value;switch(e){case"string":default:return ie.Value;case"object":return ie.Module;case"property":return ie.Property}}getLabelTextForMatchingNode(e,t){switch(e.type){case"array":return"[]";case"object":return"{}";default:return t.getText().substr(e.offset,e.length)}}getInsertTextForMatchingNode(e,t,n){switch(e.type){case"array":return this.getInsertTextForValue([],n);case"object":return this.getInsertTextForValue({},n);default:const r=t.getText().substr(e.offset,e.length)+n;return this.getInsertTextForPlainText(r)}}getInsertTextForProperty(e,t,n,r){const i=this.getInsertTextForValue(e,"");if(!n)return i;const o=i+": ";let s,a=0;if(t){if(Array.isArray(t.defaultSnippets)){if(1===t.defaultSnippets.length){const e=t.defaultSnippets[0].body;Qe(e)&&(s=this.getInsertTextForSnippetValue(e,""))}a+=t.defaultSnippets.length}if(t.enum&&(s||1!==t.enum.length||(s=this.getInsertTextForGuessedValue(t.enum[0],"")),a+=t.enum.length),Qe(t.const)&&(s||(s=this.getInsertTextForGuessedValue(t.const,"")),a++),Qe(t.default)&&(s||(s=this.getInsertTextForGuessedValue(t.default,"")),a++),Array.isArray(t.examples)&&t.examples.length&&(s||(s=this.getInsertTextForGuessedValue(t.examples[0],"")),a+=t.examples.length),0===a){let e=Array.isArray(t.type)?t.type[0]:t.type;switch(e||(t.properties?e="object":t.items&&(e="array")),e){case"boolean":s="$1";break;case"string":s='"$1"';break;case"object":s="{$1}";break;case"array":s="[$1]";break;case"number":case"integer":s="${1:0}";break;case"null":s="${1:null}";break;default:return i}}}return(!s||a>1)&&(s="$1"),o+s+r}getCurrentWord(e,t){let n=t-1;const r=e.getText();for(;n>=0&&-1===' \t\n\r\v":{[,]}'.indexOf(r.charAt(n));)n--;return r.substring(n+1,t)}evaluateSeparatorAfter(e,t){const n=g(e.getText(),!0);switch(n.setPosition(t),n.scan()){case 5:case 2:case 4:case 17:return"";default:return","}}findItemAtOffset(e,t,n){const r=g(t.getText(),!0),i=e.items;for(let e=i.length-1;e>=0;e--){const t=i[e];if(n>t.offset+t.length)return r.setPosition(t.offset+t.length),5===r.scan()&&n>=r.getTokenOffset()+r.getTokenLength()?e+1:e;if(n>=t.offset)return e}return 0}isInComment(e,t,n){const r=g(e.getText(),!1);r.setPosition(t);let i=r.scan();for(;17!==i&&r.getTokenOffset()+r.getTokenLength()<n;)i=r.scan();return(12===i||13===i)&&r.getTokenOffset()<=n}fromMarkup(e){if(e&&this.doesSupportMarkdown())return{kind:ne.Markdown,value:e}}doesSupportMarkdown(){if(!Qe(this.supportsMarkdown)){const e=this.clientCapabilities.textDocument?.completion?.completionItem?.documentationFormat;this.supportsMarkdown=Array.isArray(e)&&-1!==e.indexOf(ne.Markdown)}return this.supportsMarkdown}doesSupportsCommitCharacters(){return Qe(this.supportsCommitCharacters)||(this.labelDetailsSupport=this.clientCapabilities.textDocument?.completion?.completionItem?.commitCharactersSupport),this.supportsCommitCharacters}doesSupportsLabelDetails(){return Qe(this.labelDetailsSupport)||(this.labelDetailsSupport=this.clientCapabilities.textDocument?.completion?.completionItem?.labelDetailsSupport),this.labelDetailsSupport}}class jt{constructor(e,t=[],n){this.schemaService=e,this.contributions=t,this.promise=n||Promise}doHover(e,t,n){const r=e.offsetAt(t);let i=n.getNodeFromOffset(r);if(!i||("object"===i.type||"array"===i.type)&&r>i.offset+1&&r<i.offset+i.length-1)return this.promise.resolve(null);const o=i;if("string"===i.type){const e=i.parent;if(e&&"property"===e.type&&e.keyNode===i&&(i=e.valueNode,!i))return this.promise.resolve(null)}const s=I.create(e.positionAt(o.offset),e.positionAt(o.offset+o.length)),a=e=>({contents:e,range:s}),c=Nt(i);for(let t=this.contributions.length-1;t>=0;t--){const n=this.contributions[t].getInfoContribution(e.uri,c);if(n)return n.then((e=>a(e)))}return this.schemaService.getSchemaForResource(e.uri,n).then((e=>{if(e&&i){let r,o,s,c;n.getMatchingSchemas(e.schema,i.offset).every((e=>{if(e.node===i&&!e.inverted&&e.schema&&(r=r||e.schema.title,o=o||e.schema.markdownDescription||Ft(e.schema.description),e.schema.enum)){const t=e.schema.enum.indexOf(wt(i));e.schema.markdownEnumDescriptions?s=e.schema.markdownEnumDescriptions[t]:e.schema.enumDescriptions&&(s=Ft(e.schema.enumDescriptions[t])),s&&(c=e.schema.enum[t],"string"!=typeof c&&(c=JSON.stringify(c)))}return!0}));let l="";return r&&(l=Ft(r)),o&&(l.length>0&&(l+="\n\n"),l+=o),s&&(l.length>0&&(l+="\n\n"),l+=`\`${t=c,-1!==t.indexOf("`")?"`` "+t+" ``":t}\`: ${s}`),a([l])}var t;return null}))}}function Ft(e){if(e)return e.replace(/([^\n\r])(\r?\n)([^\n\r])/gm,"$1\n\n$3").replace(/[\\`*_{}[\]()#+\-.!]/g,"\\$&")}class $t{constructor(e,t){this.jsonSchemaService=e,this.promise=t,this.validationEnabled=!0}configure(e){e&&(this.validationEnabled=!1!==e.validate,this.commentSeverity=e.allowComments?void 0:R.Error)}doValidation(e,t,n,r){if(!this.validationEnabled)return this.promise.resolve([]);const i=[],o={},s=e=>{const t=e.range.start.line+" "+e.range.start.character+" "+e.message;o[t]||(o[t]=!0,i.push(e))},a=r=>{let o=n?.trailingCommas?Ut(n.trailingCommas):R.Error,a=n?.comments?Ut(n.comments):this.commentSeverity,c=n?.schemaValidation?Ut(n.schemaValidation):R.Warning,l=n?.schemaRequest?Ut(n.schemaRequest):R.Warning;if(r){const i=(n,r)=>{if(t.root&&l){const i=t.root,o="object"===i.type?i.properties[0]:void 0;if(o&&"$schema"===o.keyNode.value){const t=o.valueNode||o,i=I.create(e.positionAt(t.offset),e.positionAt(t.offset+t.length));s(U.create(i,n,l,r))}else{const t=I.create(e.positionAt(i.offset),e.positionAt(i.offset+1));s(U.create(t,n,l,r))}}};if(r.errors.length)i(r.errors[0],st.SchemaResolveError);else if(c){for(const e of r.warnings)i(e,st.SchemaUnsupportedFeature);const o=t.validate(e,r.schema,c,n?.schemaDraft);o&&o.forEach(s)}Dt(r.schema)&&(a=void 0),_t(r.schema)&&(o=void 0)}for(const e of t.syntaxErrors){if(e.code===st.TrailingComma){if("number"!=typeof o)continue;e.severity=o}s(e)}if("number"==typeof a){const e=(0,ut.t)("Comments are not permitted in JSON.");t.comments.forEach((t=>{s(U.create(t,e,a,st.CommentNotPermitted))}))}return i};if(r){const e=r.id||"schemaservice://untitled/"+Rt++;return this.jsonSchemaService.registerExternalSchema({uri:e,schema:r}).getResolvedSchema().then((e=>a(e)))}return this.jsonSchemaService.getSchemaForResource(e.uri,t).then((e=>a(e)))}getLanguageStatus(e,t){return{schemas:this.jsonSchemaService.getSchemaURIsForResource(e.uri,t)}}}let Rt=0;function Dt(e){if(e&&"object"==typeof e){if(Ye(e.allowComments))return e.allowComments;if(e.allOf)for(const t of e.allOf){const e=Dt(t);if(Ye(e))return e}}}function _t(e){if(e&&"object"==typeof e){if(Ye(e.allowTrailingCommas))return e.allowTrailingCommas;const t=e;if(Ye(t.allowsTrailingCommas))return t.allowsTrailingCommas;if(e.allOf)for(const t of e.allOf){const e=_t(t);if(Ye(e))return e}}}function Ut(e){switch(e){case"error":return R.Error;case"warning":return R.Warning;case"ignore":return}}function Bt(e){return e<48?0:e<=57?e-48:(e<97&&(e+=32),e>=97&&e<=102?e-97+10:0)}function Kt(e){if("#"===e[0])switch(e.length){case 4:return{red:17*Bt(e.charCodeAt(1))/255,green:17*Bt(e.charCodeAt(2))/255,blue:17*Bt(e.charCodeAt(3))/255,alpha:1};case 5:return{red:17*Bt(e.charCodeAt(1))/255,green:17*Bt(e.charCodeAt(2))/255,blue:17*Bt(e.charCodeAt(3))/255,alpha:17*Bt(e.charCodeAt(4))/255};case 7:return{red:(16*Bt(e.charCodeAt(1))+Bt(e.charCodeAt(2)))/255,green:(16*Bt(e.charCodeAt(3))+Bt(e.charCodeAt(4)))/255,blue:(16*Bt(e.charCodeAt(5))+Bt(e.charCodeAt(6)))/255,alpha:1};case 9:return{red:(16*Bt(e.charCodeAt(1))+Bt(e.charCodeAt(2)))/255,green:(16*Bt(e.charCodeAt(3))+Bt(e.charCodeAt(4)))/255,blue:(16*Bt(e.charCodeAt(5))+Bt(e.charCodeAt(6)))/255,alpha:(16*Bt(e.charCodeAt(7))+Bt(e.charCodeAt(8)))/255}}}class qt{constructor(e){this.schemaService=e}findDocumentSymbols(e,t,n={resultLimit:Number.MAX_VALUE}){const r=t.root;if(!r)return[];let i=n.resultLimit||Number.MAX_VALUE;const o=e.uri;if(("vscode://defaultsettings/keybindings.json"===o||nt(o.toLowerCase(),"/user/keybindings.json"))&&"array"===r.type){const t=[];for(const s of r.items)if("object"===s.type)for(const r of s.properties)if("key"===r.keyNode.value&&r.valueNode){const a=E.create(e.uri,Jt(e,s));if(t.push({name:Wt(r.valueNode),kind:be.Function,location:a}),i--,i<=0)return n&&n.onResultLimitExceeded&&n.onResultLimitExceeded(o),t}return t}const s=[{node:r,containerName:""}];let a=0,c=!1;const l=[],u=(t,n)=>{"array"===t.type?t.items.forEach((e=>{e&&s.push({node:e,containerName:n})})):"object"===t.type&&t.properties.forEach((t=>{const r=t.valueNode;if(r)if(i>0){i--;const o=E.create(e.uri,Jt(e,t)),a=n?n+"."+t.keyNode.value:t.keyNode.value;l.push({name:this.getKeyLabel(t),kind:this.getSymbolKind(r.type),location:o,containerName:n}),s.push({node:r,containerName:a})}else c=!0}))};for(;a<s.length;){const e=s[a++];u(e.node,e.containerName)}return c&&n&&n.onResultLimitExceeded&&n.onResultLimitExceeded(o),l}findDocumentSymbols2(e,t,n={resultLimit:Number.MAX_VALUE}){const r=t.root;if(!r)return[];let i=n.resultLimit||Number.MAX_VALUE;const o=e.uri;if(("vscode://defaultsettings/keybindings.json"===o||nt(o.toLowerCase(),"/user/keybindings.json"))&&"array"===r.type){const t=[];for(const s of r.items)if("object"===s.type)for(const r of s.properties)if("key"===r.keyNode.value&&r.valueNode){const a=Jt(e,s),c=Jt(e,r.keyNode);if(t.push({name:Wt(r.valueNode),kind:be.Function,range:a,selectionRange:c}),i--,i<=0)return n&&n.onResultLimitExceeded&&n.onResultLimitExceeded(o),t}return t}const s=[],a=[{node:r,result:s}];let c=0,l=!1;const u=(t,n)=>{"array"===t.type?t.items.forEach(((t,r)=>{if(t)if(i>0){i--;const o=Jt(e,t),s=o,c={name:String(r),kind:this.getSymbolKind(t.type),range:o,selectionRange:s,children:[]};n.push(c),a.push({result:c.children,node:t})}else l=!0})):"object"===t.type&&t.properties.forEach((t=>{const r=t.valueNode;if(r)if(i>0){i--;const o=Jt(e,t),s=Jt(e,t.keyNode),c=[],l={name:this.getKeyLabel(t),kind:this.getSymbolKind(r.type),range:o,selectionRange:s,children:c,detail:this.getDetail(r)};n.push(l),a.push({result:c,node:r})}else l=!0}))};for(;c<a.length;){const e=a[c++];u(e.node,e.result)}return l&&n&&n.onResultLimitExceeded&&n.onResultLimitExceeded(o),s}getSymbolKind(e){switch(e){case"object":return be.Module;case"string":return be.String;case"number":return be.Number;case"array":return be.Array;case"boolean":return be.Boolean;default:return be.Variable}}getKeyLabel(e){let t=e.keyNode.value;return t&&(t=t.replace(/[\n]/g,"↵")),t&&t.trim()?t:`"${t}"`}getDetail(e){if(e)return"boolean"===e.type||"number"===e.type||"null"===e.type||"string"===e.type?String(e.value):"array"===e.type?e.children.length?void 0:"[]":"object"===e.type?e.children.length?void 0:"{}":void 0}findDocumentColors(e,t,n){return this.schemaService.getSchemaForResource(e.uri,t).then((r=>{const i=[];if(r){let o=n&&"number"==typeof n.resultLimit?n.resultLimit:Number.MAX_VALUE;const s=t.getMatchingSchemas(r.schema),a={};for(const t of s)if(!t.inverted&&t.schema&&("color"===t.schema.format||"color-hex"===t.schema.format)&&t.node&&"string"===t.node.type){const r=String(t.node.offset);if(!a[r]){const s=Kt(wt(t.node));if(s){const n=Jt(e,t.node);i.push({color:s,range:n})}if(a[r]=!0,o--,o<=0)return n&&n.onResultLimitExceeded&&n.onResultLimitExceeded(e.uri),i}}}return i}))}getColorPresentations(e,t,n,r){const i=[],o=Math.round(255*n.red),s=Math.round(255*n.green),a=Math.round(255*n.blue);function c(e){const t=e.toString(16);return 2!==t.length?"0"+t:t}let l;return l=1===n.alpha?`#${c(o)}${c(s)}${c(a)}`:`#${c(o)}${c(s)}${c(a)}${c(Math.round(255*n.alpha))}`,i.push({label:l,textEdit:K.replace(r,JSON.stringify(l))}),i}}function Jt(e,t){return I.create(e.positionAt(t.offset),e.positionAt(t.offset+t.length))}function Wt(e){return wt(e)||(0,ut.t)("<empty>")}const zt={schemaAssociations:[],schemas:{"http://json-schema.org/draft-04/schema#":{$schema:"http://json-schema.org/draft-04/schema#",definitions:{schemaArray:{type:"array",minItems:1,items:{$ref:"#"}},positiveInteger:{type:"integer",minimum:0},positiveIntegerDefault0:{allOf:[{$ref:"#/definitions/positiveInteger"},{default:0}]},simpleTypes:{type:"string",enum:["array","boolean","integer","null","number","object","string"]},stringArray:{type:"array",items:{type:"string"},minItems:1,uniqueItems:!0}},type:"object",properties:{id:{type:"string",format:"uri"},$schema:{type:"string",format:"uri"},title:{type:"string"},description:{type:"string"},default:{},multipleOf:{type:"number",minimum:0,exclusiveMinimum:!0},maximum:{type:"number"},exclusiveMaximum:{type:"boolean",default:!1},minimum:{type:"number"},exclusiveMinimum:{type:"boolean",default:!1},maxLength:{allOf:[{$ref:"#/definitions/positiveInteger"}]},minLength:{allOf:[{$ref:"#/definitions/positiveIntegerDefault0"}]},pattern:{type:"string",format:"regex"},additionalItems:{anyOf:[{type:"boolean"},{$ref:"#"}],default:{}},items:{anyOf:[{$ref:"#"},{$ref:"#/definitions/schemaArray"}],default:{}},maxItems:{allOf:[{$ref:"#/definitions/positiveInteger"}]},minItems:{allOf:[{$ref:"#/definitions/positiveIntegerDefault0"}]},uniqueItems:{type:"boolean",default:!1},maxProperties:{allOf:[{$ref:"#/definitions/positiveInteger"}]},minProperties:{allOf:[{$ref:"#/definitions/positiveIntegerDefault0"}]},required:{allOf:[{$ref:"#/definitions/stringArray"}]},additionalProperties:{anyOf:[{type:"boolean"},{$ref:"#"}],default:{}},definitions:{type:"object",additionalProperties:{$ref:"#"},default:{}},properties:{type:"object",additionalProperties:{$ref:"#"},default:{}},patternProperties:{type:"object",additionalProperties:{$ref:"#"},default:{}},dependencies:{type:"object",additionalProperties:{anyOf:[{$ref:"#"},{$ref:"#/definitions/stringArray"}]}},enum:{type:"array",minItems:1,uniqueItems:!0},type:{anyOf:[{$ref:"#/definitions/simpleTypes"},{type:"array",items:{$ref:"#/definitions/simpleTypes"},minItems:1,uniqueItems:!0}]},format:{anyOf:[{type:"string",enum:["date-time","uri","email","hostname","ipv4","ipv6","regex"]},{type:"string"}]},allOf:{allOf:[{$ref:"#/definitions/schemaArray"}]},anyOf:{allOf:[{$ref:"#/definitions/schemaArray"}]},oneOf:{allOf:[{$ref:"#/definitions/schemaArray"}]},not:{allOf:[{$ref:"#"}]}},dependencies:{exclusiveMaximum:["maximum"],exclusiveMinimum:["minimum"]},default:{}},"http://json-schema.org/draft-07/schema#":{definitions:{schemaArray:{type:"array",minItems:1,items:{$ref:"#"}},nonNegativeInteger:{type:"integer",minimum:0},nonNegativeIntegerDefault0:{allOf:[{$ref:"#/definitions/nonNegativeInteger"},{default:0}]},simpleTypes:{enum:["array","boolean","integer","null","number","object","string"]},stringArray:{type:"array",items:{type:"string"},uniqueItems:!0,default:[]}},type:["object","boolean"],properties:{$id:{type:"string",format:"uri-reference"},$schema:{type:"string",format:"uri"},$ref:{type:"string",format:"uri-reference"},$comment:{type:"string"},title:{type:"string"},description:{type:"string"},default:!0,readOnly:{type:"boolean",default:!1},examples:{type:"array",items:!0},multipleOf:{type:"number",exclusiveMinimum:0},maximum:{type:"number"},exclusiveMaximum:{type:"number"},minimum:{type:"number"},exclusiveMinimum:{type:"number"},maxLength:{$ref:"#/definitions/nonNegativeInteger"},minLength:{$ref:"#/definitions/nonNegativeIntegerDefault0"},pattern:{type:"string",format:"regex"},additionalItems:{$ref:"#"},items:{anyOf:[{$ref:"#"},{$ref:"#/definitions/schemaArray"}],default:!0},maxItems:{$ref:"#/definitions/nonNegativeInteger"},minItems:{$ref:"#/definitions/nonNegativeIntegerDefault0"},uniqueItems:{type:"boolean",default:!1},contains:{$ref:"#"},maxProperties:{$ref:"#/definitions/nonNegativeInteger"},minProperties:{$ref:"#/definitions/nonNegativeIntegerDefault0"},required:{$ref:"#/definitions/stringArray"},additionalProperties:{$ref:"#"},definitions:{type:"object",additionalProperties:{$ref:"#"},default:{}},properties:{type:"object",additionalProperties:{$ref:"#"},default:{}},patternProperties:{type:"object",additionalProperties:{$ref:"#"},propertyNames:{format:"regex"},default:{}},dependencies:{type:"object",additionalProperties:{anyOf:[{$ref:"#"},{$ref:"#/definitions/stringArray"}]}},propertyNames:{$ref:"#"},const:!0,enum:{type:"array",items:!0,minItems:1,uniqueItems:!0},type:{anyOf:[{$ref:"#/definitions/simpleTypes"},{type:"array",items:{$ref:"#/definitions/simpleTypes"},minItems:1,uniqueItems:!0}]},format:{type:"string"},contentMediaType:{type:"string"},contentEncoding:{type:"string"},if:{$ref:"#"},then:{$ref:"#"},else:{$ref:"#"},allOf:{$ref:"#/definitions/schemaArray"},anyOf:{$ref:"#/definitions/schemaArray"},oneOf:{$ref:"#/definitions/schemaArray"},not:{$ref:"#"}},default:!0}}},Ht={id:(0,ut.t)("A unique identifier for the schema."),$schema:(0,ut.t)("The schema to verify this document against."),title:(0,ut.t)("A descriptive title of the element."),description:(0,ut.t)("A long description of the element. Used in hover menus and suggestions."),default:(0,ut.t)("A default value. Used by suggestions."),multipleOf:(0,ut.t)("A number that should cleanly divide the current value (i.e. have no remainder)."),maximum:(0,ut.t)("The maximum numerical value, inclusive by default."),exclusiveMaximum:(0,ut.t)("Makes the maximum property exclusive."),minimum:(0,ut.t)("The minimum numerical value, inclusive by default."),exclusiveMinimum:(0,ut.t)("Makes the minimum property exclusive."),maxLength:(0,ut.t)("The maximum length of a string."),minLength:(0,ut.t)("The minimum length of a string."),pattern:(0,ut.t)("A regular expression to match the string against. It is not implicitly anchored."),additionalItems:(0,ut.t)("For arrays, only when items is set as an array. If it is a schema, then this schema validates items after the ones specified by the items array. If it is false, then additional items will cause validation to fail."),items:(0,ut.t)("For arrays. Can either be a schema to validate every element against or an array of schemas to validate each item against in order (the first schema will validate the first element, the second schema will validate the second element, and so on."),maxItems:(0,ut.t)("The maximum number of items that can be inside an array. Inclusive."),minItems:(0,ut.t)("The minimum number of items that can be inside an array. Inclusive."),uniqueItems:(0,ut.t)("If all of the items in the array must be unique. Defaults to false."),maxProperties:(0,ut.t)("The maximum number of properties an object can have. Inclusive."),minProperties:(0,ut.t)("The minimum number of properties an object can have. Inclusive."),required:(0,ut.t)("An array of strings that lists the names of all properties required on this object."),additionalProperties:(0,ut.t)("Either a schema or a boolean. If a schema, then used to validate all properties not matched by 'properties' or 'patternProperties'. If false, then any properties not matched by either will cause this schema to fail."),definitions:(0,ut.t)("Not used for validation. Place subschemas here that you wish to reference inline with $ref."),properties:(0,ut.t)("A map of property names to schemas for each property."),patternProperties:(0,ut.t)("A map of regular expressions on property names to schemas for matching properties."),dependencies:(0,ut.t)("A map of property names to either an array of property names or a schema. An array of property names means the property named in the key depends on the properties in the array being present in the object in order to be valid. If the value is a schema, then the schema is only applied to the object if the property in the key exists on the object."),enum:(0,ut.t)("The set of literal values that are valid."),type:(0,ut.t)("Either a string of one of the basic schema types (number, integer, null, array, object, boolean, string) or an array of strings specifying a subset of those types."),format:(0,ut.t)("Describes the format expected for the value."),allOf:(0,ut.t)("An array of schemas, all of which must match."),anyOf:(0,ut.t)("An array of schemas, where at least one must match."),oneOf:(0,ut.t)("An array of schemas, exactly one of which must match."),not:(0,ut.t)("A schema which must not match."),$id:(0,ut.t)("A unique identifier for the schema."),$ref:(0,ut.t)("Reference a definition hosted on any location."),$comment:(0,ut.t)("Comments from schema authors to readers or maintainers of the schema."),readOnly:(0,ut.t)("Indicates that the value of the instance is managed exclusively by the owning authority."),examples:(0,ut.t)("Sample JSON values associated with a particular schema, for the purpose of illustrating usage."),contains:(0,ut.t)('An array instance is valid against "contains" if at least one of its elements is valid against the given schema.'),propertyNames:(0,ut.t)("If the instance is an object, this keyword validates if every property name in the instance validates against the provided schema."),const:(0,ut.t)("An instance validates successfully against this keyword if its value is equal to the value of the keyword."),contentMediaType:(0,ut.t)("Describes the media type of a string property."),contentEncoding:(0,ut.t)("Describes the content encoding of a string property."),if:(0,ut.t)('The validation outcome of the "if" subschema controls which of the "then" or "else" keywords are evaluated.'),then:(0,ut.t)('The "if" subschema is used for validation when the "if" subschema succeeds.'),else:(0,ut.t)('The "else" subschema is used for validation when the "if" subschema fails.')};for(const e in zt.schemas){const t=zt.schemas[e];for(const e in t.properties){let n=t.properties[e];"boolean"==typeof n&&(n=t.properties[e]={});const r=Ht[e];r&&(n.description=r)}}var Gt=n(74562);function Xt(e,t){if("string"!=typeof e)throw new TypeError("Expected a string");const n=String(e);let r="";const i=!!t,o=!!t;let s=!1;const a=t&&"string"==typeof t.flags?t.flags:"";let c;for(let e=0,t=n.length;e<t;e++)switch(c=n[e],c){case"/":case"$":case"^":case"+":case".":case"(":case")":case"=":case"!":case"|":r+="\\"+c;break;case"?":if(i){r+=".";break}case"[":case"]":if(i){r+=c;break}case"{":if(i){s=!0,r+="(";break}case"}":if(i){s=!1,r+=")";break}case",":if(s){r+="|";break}r+="\\"+c;break;case"*":const t=n[e-1];let a=1;for(;"*"===n[e+1];)a++,e++;const l=n[e+1];o?!(a>1)||"/"!==t&&void 0!==t&&"{"!==t&&","!==t||"/"!==l&&void 0!==l&&","!==l&&"}"!==l?r+="([^/]*)":("/"===l?e++:"/"===t&&r.endsWith("\\/")&&(r=r.substr(0,r.length-2)),r+="((?:[^/]*(?:/|$))*)"):r+=".*";break;default:r+=c}return a&&~a.indexOf("g")||(r="^"+r+"$"),new RegExp(r,a)}class Zt{constructor(e,t,n){this.folderUri=t,this.uris=n,this.globWrappers=[];try{for(let t of e){const e="!"!==t[0];e||(t=t.substring(1)),t.length>0&&("/"===t[0]&&(t=t.substring(1)),this.globWrappers.push({regexp:Xt("**/"+t,{extended:!0,globstar:!0}),include:e}))}t&&((t=on(t)).endsWith("/")||(t+="/"),this.folderUri=t)}catch(e){this.globWrappers.length=0,this.uris=[]}}matchesPattern(e){if(this.folderUri&&!e.startsWith(this.folderUri))return!1;let t=!1;for(const{regexp:n,include:r}of this.globWrappers)n.test(e)&&(t=r);return t}getURIs(){return this.uris}}class Qt{constructor(e,t,n){this.service=e,this.uri=t,this.dependencies=new Set,this.anchors=void 0,n&&(this.unresolvedSchema=this.service.promise.resolve(new Yt(n)))}getUnresolvedSchema(){return this.unresolvedSchema||(this.unresolvedSchema=this.service.loadSchema(this.uri)),this.unresolvedSchema}getResolvedSchema(){return this.resolvedSchema||(this.resolvedSchema=this.getUnresolvedSchema().then((e=>this.service.resolveSchemaContent(e,this)))),this.resolvedSchema}clearSchema(){const e=!!this.unresolvedSchema;return this.resolvedSchema=void 0,this.unresolvedSchema=void 0,this.dependencies.clear(),this.anchors=void 0,e}}class Yt{constructor(e,t=[]){this.schema=e,this.errors=t}}class en{constructor(e,t=[],n=[],r){this.schema=e,this.errors=t,this.warnings=n,this.schemaDraft=r}getSection(e){const t=this.getSectionRecursive(e,this.schema);if(t)return kt(t)}getSectionRecursive(e,t){if(!t||"boolean"==typeof t||0===e.length)return t;const n=e.shift();if(t.properties&&(t.properties[n],1))return this.getSectionRecursive(e,t.properties[n]);if(t.patternProperties)for(const r of Object.keys(t.patternProperties)){const i=rt(r);if(i?.test(n))return this.getSectionRecursive(e,t.patternProperties[r])}else{if("object"==typeof t.additionalProperties)return this.getSectionRecursive(e,t.additionalProperties);if(n.match("[0-9]+"))if(Array.isArray(t.items)){const r=parseInt(n,10);if(!isNaN(r)&&t.items[r])return this.getSectionRecursive(e,t.items[r])}else if(t.items)return this.getSectionRecursive(e,t.items)}}}class tn{constructor(e,t,n){this.contextService=t,this.requestService=e,this.promiseConstructor=n||Promise,this.callOnDispose=[],this.contributionSchemas={},this.contributionAssociations=[],this.schemasById={},this.filePatternAssociations=[],this.registeredSchemasIds={}}getRegisteredSchemaIds(e){return Object.keys(this.registeredSchemasIds).filter((t=>{const n=Gt.r.parse(t).scheme;return"schemaservice"!==n&&(!e||e(n))}))}get promise(){return this.promiseConstructor}dispose(){for(;this.callOnDispose.length>0;)this.callOnDispose.pop()()}onResourceChange(e){this.cachedSchemaForResource=void 0;let t=!1;const n=[e=rn(e)],r=Object.keys(this.schemasById).map((e=>this.schemasById[e]));for(;n.length;){const e=n.pop();for(let i=0;i<r.length;i++){const o=r[i];o&&(o.uri===e||o.dependencies.has(e))&&(o.uri!==e&&n.push(o.uri),o.clearSchema()&&(t=!0),r[i]=void 0)}}return t}setSchemaContributions(e){if(e.schemas){const t=e.schemas;for(const e in t){const n=rn(e);this.contributionSchemas[n]=this.addSchemaHandle(n,t[e])}}if(Array.isArray(e.schemaAssociations)){const t=e.schemaAssociations;for(let e of t){const t=e.uris.map(rn),n=this.addFilePatternAssociation(e.pattern,e.folderUri,t);this.contributionAssociations.push(n)}}}addSchemaHandle(e,t){const n=new Qt(this,e,t);return this.schemasById[e]=n,n}getOrAddSchemaHandle(e,t){return this.schemasById[e]||this.addSchemaHandle(e,t)}addFilePatternAssociation(e,t,n){const r=new Zt(e,t,n);return this.filePatternAssociations.push(r),r}registerExternalSchema(e){const t=rn(e.uri);return this.registeredSchemasIds[t]=!0,this.cachedSchemaForResource=void 0,e.fileMatch&&e.fileMatch.length&&this.addFilePatternAssociation(e.fileMatch,e.folderUri,[t]),e.schema?this.addSchemaHandle(t,e.schema):this.getOrAddSchemaHandle(t)}clearExternalSchemas(){this.schemasById={},this.filePatternAssociations=[],this.registeredSchemasIds={},this.cachedSchemaForResource=void 0;for(const e in this.contributionSchemas)this.schemasById[e]=this.contributionSchemas[e],this.registeredSchemasIds[e]=!0;for(const e of this.contributionAssociations)this.filePatternAssociations.push(e)}getResolvedSchema(e){const t=rn(e),n=this.schemasById[t];return n?n.getResolvedSchema():this.promise.resolve(void 0)}loadSchema(e){if(!this.requestService){const t=(0,ut.t)("Unable to load schema from '{0}'. No schema request service available",sn(e));return this.promise.resolve(new Yt({},[t]))}return e.startsWith("http://json-schema.org/")&&(e="https"+e.substring(4)),this.requestService(e).then((t=>{if(!t){const t=(0,ut.t)("Unable to load schema from '{0}': No content.",sn(e));return new Yt({},[t])}const n=[];65279===t.charCodeAt(0)&&(n.push((0,ut.t)("Problem reading content from '{0}': UTF-8 with BOM detected, only UTF 8 is allowed.",sn(e))),t=t.trimStart());let r={};const i=[];return r=v(t,i),i.length&&n.push((0,ut.t)("Unable to parse content from '{0}': Parse error at offset {1}.",sn(e),i[0].offset)),new Yt(r,n)}),(t=>{let n=t.toString();const r=t.toString().split("Error: ");return r.length>1&&(n=r[1]),nt(n,".")&&(n=n.substr(0,n.length-1)),new Yt({},[(0,ut.t)("Unable to load schema from '{0}': {1}.",sn(e),n)])}))}resolveSchemaContent(e,t){const n=e.errors.slice(0),r=e.schema;let i=r.$schema?rn(r.$schema):void 0;if("http://json-schema.org/draft-03/schema"===i)return this.promise.resolve(new en({},[(0,ut.t)("Draft-03 schemas are not supported.")],[],i));let o=new Set;const s=this.contextService,a=(e,t,r,i)=>{let o;o=void 0===i||0===i.length?t:"/"===i.charAt(0)?((e,t)=>{t=decodeURIComponent(t);let n=e;return"/"===t[0]&&(t=t.substring(1)),t.split("/").some((e=>(e=e.replace(/~1/g,"/").replace(/~0/g,"~"),n=n[e],!n))),n})(t,i):((e,t,n)=>(t.anchors||(t.anchors=u(e)),t.anchors.get(n)))(t,r,i),o?((e,t)=>{for(const n in t)t.hasOwnProperty(n)&&"id"!==n&&"$id"!==n&&(e[n]=t[n])})(e,o):n.push((0,ut.t)("$ref '{0}' in '{1}' can not be resolved.",i||"",r.uri))},c=(e,t,r,i)=>{s&&!/^[A-Za-z][A-Za-z0-9+\-.+]*:\/\/.*/.test(t)&&(t=s.resolveRelativePath(t,i.uri)),t=rn(t);const o=this.getOrAddSchemaHandle(t);return o.getUnresolvedSchema().then((s=>{if(i.dependencies.add(t),s.errors.length){const e=r?t+"#"+r:t;n.push((0,ut.t)("Problems loading reference '{0}': {1}",e,s.errors[0]))}return a(e,s.schema,o,r),l(e,s.schema,o)}))},l=(e,t,n)=>{const r=[];return this.traverseNodes(e,(e=>{const i=new Set;for(;e.$ref;){const o=e.$ref,s=o.split("#",2);if(delete e.$ref,s[0].length>0)return void r.push(c(e,s[0],s[1],n));if(!i.has(o)){const r=s[1];a(e,t,n,r),i.add(o)}}e.$recursiveRef&&o.add("$recursiveRef"),e.$dynamicRef&&o.add("$dynamicRef")})),this.promise.all(r)},u=e=>{const t=new Map;return this.traverseNodes(e,(e=>{const r=e.$id||e.id,i=et(r)&&"#"===r.charAt(0)?r.substring(1):e.$anchor;i&&(t.has(i)?n.push((0,ut.t)("Duplicate anchor declaration: '{0}'",i)):t.set(i,e)),e.$recursiveAnchor&&o.add("$recursiveAnchor"),e.$dynamicAnchor&&o.add("$dynamicAnchor")})),t};return l(r,r,t).then((e=>{let t=[];return o.size&&t.push((0,ut.t)("The schema uses meta-schema features ({0}) that are not yet supported by the validator.",Array.from(o.keys()).join(", "))),new en(r,n,t,i)}))}traverseNodes(e,t){if(!e||"object"!=typeof e)return Promise.resolve(null);const n=new Set,r=(...e)=>{for(const t of e)tt(t)&&a.push(t)},i=(...e)=>{for(const t of e)if(tt(t))for(const e in t){const n=t[e];tt(n)&&a.push(n)}},o=(...e)=>{for(const t of e)if(Array.isArray(t))for(const e of t)tt(e)&&a.push(e)},s=e=>{if(Array.isArray(e))for(const t of e)tt(t)&&a.push(t);else tt(e)&&a.push(e)},a=[e];let c=a.pop();for(;c;)n.has(c)||(n.add(c),t(c),r(c.additionalItems,c.additionalProperties,c.not,c.contains,c.propertyNames,c.if,c.then,c.else,c.unevaluatedItems,c.unevaluatedProperties),i(c.definitions,c.$defs,c.properties,c.patternProperties,c.dependencies,c.dependentSchemas),o(c.anyOf,c.allOf,c.oneOf,c.prefixItems),s(c.items)),c=a.pop()}getSchemaFromProperty(e,t){if("object"===t.root?.type)for(const n of t.root.properties)if("$schema"===n.keyNode.value&&"string"===n.valueNode?.type){let t=n.valueNode.value;return this.contextService&&!/^\w[\w\d+.-]*:/.test(t)&&(t=this.contextService.resolveRelativePath(t,e)),t}}getAssociatedSchemas(e){const t=Object.create(null),n=[],r=on(e);for(const e of this.filePatternAssociations)if(e.matchesPattern(r))for(const r of e.getURIs())t[r]||(n.push(r),t[r]=!0);return n}getSchemaURIsForResource(e,t){let n=t&&this.getSchemaFromProperty(e,t);return n?[n]:this.getAssociatedSchemas(e)}getSchemaForResource(e,t){if(t){let n=this.getSchemaFromProperty(e,t);if(n){const e=rn(n);return this.getOrAddSchemaHandle(e).getResolvedSchema()}}if(this.cachedSchemaForResource&&this.cachedSchemaForResource.resource===e)return this.cachedSchemaForResource.resolvedSchema;const n=this.getAssociatedSchemas(e),r=n.length>0?this.createCombinedSchema(e,n).getResolvedSchema():this.promise.resolve(void 0);return this.cachedSchemaForResource={resource:e,resolvedSchema:r},r}createCombinedSchema(e,t){if(1===t.length)return this.getOrAddSchemaHandle(t[0]);{const n="schemaservice://combinedSchema/"+encodeURIComponent(e),r={allOf:t.map((e=>({$ref:e})))};return this.addSchemaHandle(n,r)}}getMatchingSchemas(e,t,n){if(n){const e=n.id||"schemaservice://untitled/matchingSchemas/"+nn++;return this.addSchemaHandle(e,n).getResolvedSchema().then((e=>t.getMatchingSchemas(e.schema).filter((e=>!e.inverted))))}return this.getSchemaForResource(e.uri,t).then((e=>e?t.getMatchingSchemas(e.schema).filter((e=>!e.inverted)):[]))}}let nn=0;function rn(e){try{return Gt.r.parse(e).toString(!0)}catch(t){return e}}function on(e){try{return Gt.r.parse(e).with({fragment:null,query:null}).toString(!0)}catch(t){return e}}function sn(e){try{const t=Gt.r.parse(e);if("file"===t.scheme)return t.fsPath}catch(e){}return e}function an(e,t){const n=[],r=[],i=[];let o=-1;const s=g(e.getText(),!1);let a=s.scan();function c(e){n.push(e),r.push(i.length)}for(;17!==a;){switch(a){case 1:case 3:{const t=e.positionAt(s.getTokenOffset()).line,n={startLine:t,endLine:t,kind:1===a?"object":"array"};i.push(n);break}case 2:case 4:{const t=2===a?"object":"array";if(i.length>0&&i[i.length-1].kind===t){const t=i.pop(),n=e.positionAt(s.getTokenOffset()).line;t&&n>t.startLine+1&&o!==t.startLine&&(t.endLine=n-1,c(t),o=t.startLine)}break}case 13:{const t=e.positionAt(s.getTokenOffset()).line,n=e.positionAt(s.getTokenOffset()+s.getTokenLength()).line;1===s.getTokenError()&&t+1<e.lineCount?s.setPosition(e.offsetAt(N.create(t+1,0))):t<n&&(c({startLine:t,endLine:n,kind:j.Comment}),o=t);break}case 12:{const t=e.getText().substr(s.getTokenOffset(),s.getTokenLength()).match(/^\/\/\s*#(region\b)|(endregion\b)/);if(t){const n=e.positionAt(s.getTokenOffset()).line;if(t[1]){const e={startLine:n,endLine:n,kind:j.Region};i.push(e)}else{let e=i.length-1;for(;e>=0&&i[e].kind!==j.Region;)e--;if(e>=0){const t=i[e];i.length=e,n>t.startLine&&o!==t.startLine&&(t.endLine=n,c(t),o=t.startLine)}}}break}}a=s.scan()}const l=t&&t.rangeLimit;if("number"!=typeof l||n.length<=l)return n;t&&t.onRangeLimitExceeded&&t.onRangeLimitExceeded(e.uri);const u=[];for(let e of r)e<30&&(u[e]=(u[e]||0)+1);let f=0,d=0;for(let e=0;e<u.length;e++){const t=u[e];if(t){if(t+f>l){d=e;break}f+=t}}const h=[];for(let e=0;e<n.length;e++){const t=r[e];"number"==typeof t&&(t<d||t===d&&f++<l)&&h.push(n[e])}return h}function cn(e,t,n){function r(t,n){return I.create(e.positionAt(t),e.positionAt(n))}const i=g(e.getText(),!0);function o(e,t){return i.setPosition(e),i.scan()===t?i.getTokenOffset()+i.getTokenLength():-1}return t.map((function(t){let i=e.offsetAt(t),s=n.getNodeFromOffset(i,!0);const a=[];for(;s;){switch(s.type){case"string":case"object":case"array":const e=s.offset+1,t=s.offset+s.length-1;e<t&&i>=e&&i<=t&&a.push(r(e,t)),a.push(r(s.offset,s.offset+s.length));break;case"number":case"boolean":case"null":case"property":a.push(r(s.offset,s.offset+s.length))}if("property"===s.type||s.parent&&"array"===s.parent.type){const e=o(s.offset+s.length,5);-1!==e&&a.push(r(s.offset,e))}s=s.parent}let c;for(let e=a.length-1;e>=0;e--)c=Ee.create(a[e],c);return c||(c=Ee.create(I.create(t,t))),c}))}function ln(e,t,n){let r;if(n){const t=e.offsetAt(n.start);r={offset:t,length:e.offsetAt(n.end)-t}}const i={tabSize:t?t.tabSize:4,insertSpaces:!0===t?.insertSpaces,insertFinalNewline:!0===t?.insertFinalNewline,eol:"\n",keepLines:!0===t?.keepLines};return function(e,t,n){return function(e,t,n){let r,i,s,a,c;if(t){for(a=t.offset,c=a+t.length,s=a;s>0&&!m(e,s-1);)s--;let o=c;for(;o<e.length&&!m(e,o);)o++;i=e.substring(s,o),r=function(e,t){let n=0,r=0;const i=t.tabSize||4;for(;n<e.length;){let t=e.charAt(n);if(t===l[1])r++;else{if("\t"!==t)break;r+=i}n++}return Math.floor(r/i)}(i,n)}else i=e,r=0,s=0,a=0,c=e.length;const u=function(e,t){for(let e=0;e<t.length;e++){const n=t.charAt(e);if("\r"===n)return e+1<t.length&&"\n"===t.charAt(e+1)?"\r\n":"\r";if("\n"===n)return"\n"}return e&&e.eol||"\n"}(n,e),p=d.includes(u);let g,y=0,b=0;g=n.insertSpaces?l[n.tabSize||4]??h(l[1],n.tabSize||4):"\t";const v="\t"===g?"\t":" ";let k=o(i,!1),S=!1;function x(){if(y>1)return h(u,y)+h(g,r+b);const e=g.length*(r+b);return!p||e>f[v][u].length?u+h(g,r+b):e<=0?u:f[v][u][e]}function T(){let e=k.scan();for(y=0;15===e||14===e;)14===e&&n.keepLines?y+=1:14===e&&(y=1),e=k.scan();return S=16===e||0!==k.getTokenError(),e}const A=[];function C(n,r,i){S||t&&!(r<c&&i>a)||e.substring(r,i)===n||A.push({offset:r,length:i-r,content:n})}let O=T();if(n.keepLines&&y>0&&C(h(u,y),0,0),17!==O){let e=k.getTokenOffset()+s;C(g.length*r<20&&n.insertSpaces?l[g.length*r]:h(g,r),s,e)}for(;17!==O;){let e=k.getTokenOffset()+k.getTokenLength()+s,t=T(),r="",i=!1;for(;0===y&&(12===t||13===t);){let n=k.getTokenOffset()+s;C(l[1],e,n),e=k.getTokenOffset()+k.getTokenLength()+s,i=12===t,r=i?x():"",t=T()}if(2===t)1!==O&&b--,n.keepLines&&y>0||!n.keepLines&&1!==O?r=x():n.keepLines&&(r=l[1]);else if(4===t)3!==O&&b--,n.keepLines&&y>0||!n.keepLines&&3!==O?r=x():n.keepLines&&(r=l[1]);else{switch(O){case 3:case 1:b++,r=n.keepLines&&y>0||!n.keepLines?x():l[1];break;case 5:r=n.keepLines&&y>0||!n.keepLines?x():l[1];break;case 12:r=x();break;case 13:y>0?r=x():i||(r=l[1]);break;case 6:n.keepLines&&y>0?r=x():i||(r=l[1]);break;case 10:n.keepLines&&y>0?r=x():6!==t||i||(r="");break;case 7:case 8:case 9:case 11:case 2:case 4:n.keepLines&&y>0?r=x():12!==t&&13!==t||i?5!==t&&17!==t&&(S=!0):r=l[1];break;case 16:S=!0}y>0&&(12===t||13===t)&&(r=x())}17===t&&(r=n.keepLines&&y>0?x():n.insertFinalNewline?u:""),C(r,e,k.getTokenOffset()+s),O=t}return A}(e,t,n)}(e.getText(),r,i).map((t=>K.replace(I.create(e.positionAt(t.offset),e.positionAt(t.offset+t.length)),t.content)))}var un;!function(e){e[e.Object=0]="Object",e[e.Array=1]="Array"}(un||(un={}));class fn{constructor(e,t){this.propertyName=e??"",this.beginningLineNumber=t,this.childrenProperties=[],this.lastProperty=!1,this.noKeyName=!1}addChildProperty(e){if(e.parent=this,this.childrenProperties.length>0){let t=0;t=e.noKeyName?this.childrenProperties.length:function(e,t,n){const r=t.propertyName.toLowerCase(),i=e[0].propertyName.toLowerCase(),o=e[e.length-1].propertyName.toLowerCase();if(r<i)return 0;if(r>o)return e.length;let s=0,a=e.length-1;for(;s<=a;){let r=a+s>>1,i=n(t,e[r]);if(i>0)s=r+1;else{if(!(i<0))return r;a=r-1}}return-s-1}(this.childrenProperties,e,dn),t<0&&(t=-1*t-1),this.childrenProperties.splice(t,0,e)}else this.childrenProperties.push(e);return e}}function dn(e,t){const n=e.propertyName.toLowerCase(),r=t.propertyName.toLowerCase();return n<r?-1:n>r?1:0}function hn(e,t,n){if(0!==t.childrenProperties.length)if(t.type===un.Object){let r=1/0;for(const e of t.childrenProperties)e.beginningLineNumber<r&&(r=e.beginningLineNumber);n+=r-t.beginningLineNumber,e.push(new pn(n,t.childrenProperties))}else t.type===un.Array&&mn(e,t,n)}function mn(e,t,n){for(const r of t.childrenProperties){if(r.type===un.Object){let i=1/0;for(const e of r.childrenProperties)e.beginningLineNumber<i&&(i=e.beginningLineNumber);const o=i-r.beginningLineNumber;e.push(new pn(n+r.beginningLineNumber-t.beginningLineNumber+o,r.childrenProperties))}r.type===un.Array&&mn(e,r,n+r.beginningLineNumber-t.beginningLineNumber)}}class pn{constructor(e,t){this.beginningLineNumber=e,this.propertyTreeArray=t}}function gn(e,t){const n=[];return t.visit((r=>{if("property"===r.type&&"$ref"===r.keyNode.value&&"string"===r.valueNode?.type){const i=r.valueNode.value,o=function(e,t){const n=function(e){return"#"===e?[]:"#"!==e[0]||"/"!==e[1]?null:e.substring(2).split(/\//).map(vn)}(t);return n?bn(n,e.root):null}(t,i);if(o){const t=e.positionAt(o.offset);n.push({target:`${e.uri}#${t.line+1},${t.character+1}`,range:yn(e,r.valueNode)})}}return!0})),Promise.resolve(n)}function yn(e,t){return I.create(e.positionAt(t.offset+1),e.positionAt(t.offset+t.length-1))}function bn(e,t){if(!t)return null;if(0===e.length)return t;const n=e.shift();if(t&&"object"===t.type){const r=t.properties.find((e=>e.keyNode.value===n));return r?bn(e,r.valueNode):null}if(t&&"array"===t.type&&n.match(/^(0|[1-9][0-9]*)$/)){const r=Number.parseInt(n),i=t.items[r];return i?bn(e,i):null}return null}function vn(e){return e.replace(/~1/g,"/").replace(/~0/g,"~")}function kn(e){const t=e.promiseConstructor||Promise,n=new tn(e.schemaRequestService,e.workspaceContext,t);n.setSchemaContributions(zt);const r=new Mt(n,e.contributions,t,e.clientCapabilities),i=new jt(n,e.contributions,t),o=new qt(n),s=new $t(n,t);return{configure:e=>{n.clearExternalSchemas(),e.schemas?.forEach(n.registerExternalSchema.bind(n)),s.configure(e)},resetSchema:e=>n.onResourceChange(e),doValidation:s.doValidation.bind(s),getLanguageStatus:s.getLanguageStatus.bind(s),parseJSONDocument:e=>function(e,t){const n=[];let r=-1;const i=e.getText(),o=g(i,!1),s=t&&t.collectComments?[]:void 0;function a(){for(;;){const t=o.scan();switch(u(),t){case 12:case 13:Array.isArray(s)&&s.push(I.create(e.positionAt(o.getTokenOffset()),e.positionAt(o.getTokenOffset()+o.getTokenLength())));break;case 15:case 14:break;default:return t}}}function c(t,i,o,s,a=R.Error){if(0===n.length||o!==r){const c=I.create(e.positionAt(o),e.positionAt(s));n.push(U.create(c,t,a,i,e.languageId)),r=o}}function l(e,t,n=void 0,r=[],s=[]){let l=o.getTokenOffset(),u=o.getTokenOffset()+o.getTokenLength();if(l===u&&l>0){for(l--;l>0&&/\s/.test(i.charAt(l));)l--;u=l+1}if(c(e,t,l,u),n&&f(n,!1),r.length+s.length>0){let e=o.getToken();for(;17!==e;){if(-1!==r.indexOf(e)){a();break}if(-1!==s.indexOf(e))break;e=a()}}return n}function u(){switch(o.getTokenError()){case 4:return l((0,ut.t)("Invalid unicode sequence in string."),st.InvalidUnicode),!0;case 5:return l((0,ut.t)("Invalid escape character in string."),st.InvalidEscapeCharacter),!0;case 3:return l((0,ut.t)("Unexpected end of number."),st.UnexpectedEndOfNumber),!0;case 1:return l((0,ut.t)("Unexpected end of comment."),st.UnexpectedEndOfComment),!0;case 2:return l((0,ut.t)("Unexpected end of string."),st.UnexpectedEndOfString),!0;case 6:return l((0,ut.t)("Invalid characters in string. Control characters must be escaped."),st.InvalidCharacter),!0}return!1}function f(e,t){return e.length=o.getTokenOffset()+o.getTokenLength()-e.offset,t&&a(),e}const d=new yt(void 0,0,0);function h(t,n){const r=new bt(t,o.getTokenOffset(),d);let i=m(r);if(!i){if(16!==o.getToken())return;{l((0,ut.t)("Property keys must be doublequoted"),st.PropertyKeysMustBeDoublequoted);const e=new yt(r,o.getTokenOffset(),o.getTokenLength());e.value=o.getTokenValue(),i=e,a()}}if(r.keyNode=i,"//"!==i.value){const e=n[i.value];e?(c((0,ut.t)("Duplicate object key"),st.DuplicateKey,r.keyNode.offset,r.keyNode.offset+r.keyNode.length,R.Warning),tt(e)&&c((0,ut.t)("Duplicate object key"),st.DuplicateKey,e.keyNode.offset,e.keyNode.offset+e.keyNode.length,R.Warning),n[i.value]=!0):n[i.value]=r}if(6===o.getToken())r.colonOffset=o.getTokenOffset(),a();else if(l((0,ut.t)("Colon expected"),st.ColonExpected),10===o.getToken()&&e.positionAt(i.offset+i.length).line<e.positionAt(o.getTokenOffset()).line)return r.length=i.length,r;const s=p(r);return s?(r.valueNode=s,r.length=s.offset+s.length-r.offset,r):l((0,ut.t)("Value expected"),st.ValueExpected,r,[],[2,5])}function m(e){if(10!==o.getToken())return;const t=new yt(e,o.getTokenOffset());return t.value=o.getTokenValue(),f(t,!0)}function p(e){return function(e){if(3!==o.getToken())return;const t=new pt(e,o.getTokenOffset());a();let n=!1;for(;4!==o.getToken()&&17!==o.getToken();){if(5===o.getToken()){n||l((0,ut.t)("Value expected"),st.ValueExpected);const e=o.getTokenOffset();if(a(),4===o.getToken()){n&&c((0,ut.t)("Trailing comma"),st.TrailingComma,e,e+1);continue}}else n&&l((0,ut.t)("Expected comma"),st.CommaExpected);const e=p(t);e?t.items.push(e):l((0,ut.t)("Value expected"),st.ValueExpected,void 0,[],[4,5]),n=!0}return 4!==o.getToken()?l((0,ut.t)("Expected comma or closing bracket"),st.CommaOrCloseBacketExpected,t):f(t,!0)}(e)||function(e){if(1!==o.getToken())return;const t=new vt(e,o.getTokenOffset()),n=Object.create(null);a();let r=!1;for(;2!==o.getToken()&&17!==o.getToken();){if(5===o.getToken()){r||l((0,ut.t)("Property expected"),st.PropertyExpected);const e=o.getTokenOffset();if(a(),2===o.getToken()){r&&c((0,ut.t)("Trailing comma"),st.TrailingComma,e,e+1);continue}}else r&&l((0,ut.t)("Expected comma"),st.CommaExpected);const e=h(t,n);e?t.properties.push(e):l((0,ut.t)("Property expected"),st.PropertyExpected,void 0,[],[2,5]),r=!0}return 2!==o.getToken()?l((0,ut.t)("Expected comma or closing brace"),st.CommaOrCloseBraceExpected,t):f(t,!0)}(e)||m(e)||function(e){if(11!==o.getToken())return;const t=new gt(e,o.getTokenOffset());if(0===o.getTokenError()){const e=o.getTokenValue();try{const n=JSON.parse(e);if(!Ze(n))return l((0,ut.t)("Invalid number format."),st.Undefined,t);t.value=n}catch(e){return l((0,ut.t)("Invalid number format."),st.Undefined,t)}t.isInteger=-1===e.indexOf(".")}return f(t,!0)}(e)||function(e){switch(o.getToken()){case 7:return f(new ht(e,o.getTokenOffset()),!0);case 8:return f(new mt(e,!0,o.getTokenOffset()),!0);case 9:return f(new mt(e,!1,o.getTokenOffset()),!0);default:return}}(e)}let y;return 17!==a()&&(y=p(y),y?17!==o.getToken()&&l((0,ut.t)("End of file expected."),st.Undefined):l((0,ut.t)("Expected a JSON object, array or literal."),st.Undefined)),new Et(y,n,s)}(e,{collectComments:!0}),newJSONDocument:(e,t)=>function(e,t=[]){return new Et(e,t,[])}(e,t),getMatchingSchemas:n.getMatchingSchemas.bind(n),doResolve:r.doResolve.bind(r),doComplete:r.doComplete.bind(r),findDocumentSymbols:o.findDocumentSymbols.bind(o),findDocumentSymbols2:o.findDocumentSymbols2.bind(o),findDocumentColors:o.findDocumentColors.bind(o),getColorPresentations:o.getColorPresentations.bind(o),doHover:i.doHover.bind(i),getFoldingRanges:an,getSelectionRanges:cn,findDefinition:()=>Promise.resolve([]),findLinks:gn,format:(e,t,n)=>ln(e,n,t),sort:(e,t)=>function(e,t){const n={...t,keepLines:!1},r=lt.V.applyEdits(e,ln(e,n,void 0)),i=lt.V.create("test://test.json","json",0,r),o=function(e,t){if(0===t.childrenProperties.length)return e;const n=lt.V.create("test://test.json","json",0,e.getText()),r=[];for(hn(r,t,t.beginningLineNumber);r.length>0;){const t=r.shift(),i=t.propertyTreeArray;let o=t.beginningLineNumber;for(let t=0;t<i.length;t++){const s=i[t],a=I.create(N.create(s.beginningLineNumber,0),N.create(s.endLineNumber+1,0)),c=e.getText(a),l=lt.V.create("test://test.json","json",0,c);if(!0===s.lastProperty&&t!==i.length-1){const e=s.lineWhereToAddComma-s.beginningLineNumber,t=s.indexWhereToAddComa,n={range:I.create(N.create(e,t),N.create(e,t)),text:","};lt.V.update(l,[n],1)}else if(!1===s.lastProperty&&t===i.length-1){const e=s.commaIndex,t=s.commaLine-s.beginningLineNumber,n={range:I.create(N.create(t,e),N.create(t,e+1)),text:""};lt.V.update(l,[n],1)}const u=s.endLineNumber-s.beginningLineNumber+1,f={range:I.create(N.create(o,0),N.create(o+u,0)),text:l.getText()};lt.V.update(n,[f],1),hn(r,s,o),o+=u}}return n}(i,function(e){const t=e.getText(),n=g(t,!1);let r,i,o,s=new fn,a=s,c=s,l=s,u=0,f=0,d=-1,h=-1,m=0,p=0,y=[],b=!1,v=!1;for(;17!==(r=n.scan());){if(!0===b&&14!==r&&15!==r&&12!==r&&13!==r&&void 0===c.endLineNumber){let e=n.getTokenStartLine();2===o||4===o?l.endLineNumber=e-1:c.endLineNumber=e-1,m=e,b=!1}if(!0===v&&14!==r&&15!==r&&12!==r&&13!==r&&(m=n.getTokenStartLine(),v=!1),n.getTokenStartLine()!==u){for(let t=u;t<n.getTokenStartLine();t++)f+=e.getText(I.create(N.create(t,0),N.create(t+1,0))).length;u=n.getTokenStartLine()}switch(r){case 10:if(void 0===i||1===i||5===i&&y[y.length-1]===un.Object){const e=new fn(n.getTokenValue(),m);l=c,c=a.addChildProperty(e)}break;case 3:if(void 0===s.beginningLineNumber&&(s.beginningLineNumber=n.getTokenStartLine()),y[y.length-1]===un.Object)a=c;else if(y[y.length-1]===un.Array){const e=new fn(n.getTokenValue(),m);e.noKeyName=!0,l=c,c=a.addChildProperty(e),a=c}y.push(un.Array),c.type=un.Array,m=n.getTokenStartLine(),m++;break;case 1:if(void 0===s.beginningLineNumber)s.beginningLineNumber=n.getTokenStartLine();else if(y[y.length-1]===un.Array){const e=new fn(n.getTokenValue(),m);e.noKeyName=!0,l=c,c=a.addChildProperty(e)}c.type=un.Object,y.push(un.Object),a=c,m=n.getTokenStartLine(),m++;break;case 4:p=n.getTokenStartLine(),y.pop(),void 0!==c.endLineNumber||2!==i&&4!==i||(c.endLineNumber=p-1,c.lastProperty=!0,c.lineWhereToAddComma=d,c.indexWhereToAddComa=h,l=c,c=c?c.parent:void 0,a=c),s.endLineNumber=p,m=p+1;break;case 2:p=n.getTokenStartLine(),y.pop(),1!==i&&(void 0===c.endLineNumber&&(c.endLineNumber=p-1,c.lastProperty=!0,c.lineWhereToAddComma=d,c.indexWhereToAddComa=h),l=c,c=c?c.parent:void 0,a=c),s.endLineNumber=n.getTokenStartLine(),m=p+1;break;case 5:p=n.getTokenStartLine(),void 0!==c.endLineNumber||y[y.length-1]!==un.Object&&(y[y.length-1]!==un.Array||2!==i&&4!==i)||(c.endLineNumber=p,c.commaIndex=n.getTokenOffset()-f,c.commaLine=p),2!==i&&4!==i||(l=c,c=c?c.parent:void 0,a=c),m=p+1;break;case 13:5!==i||d!==n.getTokenStartLine()||(y[y.length-1]!==un.Array||2!==o&&4!==o)&&y[y.length-1]!==un.Object||(y[y.length-1]!==un.Array||2!==o&&4!==o)&&y[y.length-1]!==un.Object||(c.endLineNumber=void 0,b=!0),1!==i&&3!==i||d!==n.getTokenStartLine()||(v=!0)}14!==r&&13!==r&&12!==r&&15!==r&&(o=i,i=r,d=n.getTokenStartLine(),h=n.getTokenOffset()+n.getTokenLength()-f)}return s}(i)),s=ln(o,n,void 0),a=lt.V.applyEdits(o,s);return[K.replace(I.create(N.create(0,0),e.positionAt(e.getText().length)),a)]}(e,t)}}let Sn;"undefined"!=typeof fetch&&(Sn=function(e){return fetch(e).then((e=>e.text()))});class xn{constructor(e,t){this._ctx=e,this._languageSettings=t.languageSettings,this._languageId=t.languageId,this._languageService=kn({workspaceContext:{resolveRelativePath:(e,t)=>function(e,t){if(function(e){return e.charCodeAt(0)===Tn}(t)){const n=Gt.r.parse(e),r=t.split("/");return n.with({path:Cn(r)}).toString()}return function(e,...t){const n=Gt.r.parse(e),r=n.path.split("/");for(let e of t)r.push(...e.split("/"));return n.with({path:Cn(r)}).toString()}(e,t)}(t.substr(0,t.lastIndexOf("/")+1),e)},schemaRequestService:t.enableSchemaRequest?Sn:void 0,clientCapabilities:ct.LATEST}),this._languageService.configure(this._languageSettings)}async doValidation(e){let t=this._getTextDocument(e);if(t){let e=this._languageService.parseJSONDocument(t);return this._languageService.doValidation(t,e,this._languageSettings)}return Promise.resolve([])}async doComplete(e,t){let n=this._getTextDocument(e);if(!n)return null;let r=this._languageService.parseJSONDocument(n);return this._languageService.doComplete(n,t,r)}async doResolve(e){return this._languageService.doResolve(e)}async doHover(e,t){let n=this._getTextDocument(e);if(!n)return null;let r=this._languageService.parseJSONDocument(n);return this._languageService.doHover(n,t,r)}async format(e,t,n){let r=this._getTextDocument(e);if(!r)return[];let i=this._languageService.format(r,t,n);return Promise.resolve(i)}async resetSchema(e){return Promise.resolve(this._languageService.resetSchema(e))}async findDocumentSymbols(e){let t=this._getTextDocument(e);if(!t)return[];let n=this._languageService.parseJSONDocument(t),r=this._languageService.findDocumentSymbols2(t,n);return Promise.resolve(r)}async findDocumentColors(e){let t=this._getTextDocument(e);if(!t)return[];let n=this._languageService.parseJSONDocument(t),r=this._languageService.findDocumentColors(t,n);return Promise.resolve(r)}async getColorPresentations(e,t,n){let r=this._getTextDocument(e);if(!r)return[];let i=this._languageService.parseJSONDocument(r),o=this._languageService.getColorPresentations(r,i,t,n);return Promise.resolve(o)}async getFoldingRanges(e,t){let n=this._getTextDocument(e);if(!n)return[];let r=this._languageService.getFoldingRanges(n,t);return Promise.resolve(r)}async getSelectionRanges(e,t){let n=this._getTextDocument(e);if(!n)return[];let r=this._languageService.parseJSONDocument(n),i=this._languageService.getSelectionRanges(n,t,r);return Promise.resolve(i)}async parseJSONDocument(e){let t=this._getTextDocument(e);if(!t)return null;let n=this._languageService.parseJSONDocument(t);return Promise.resolve(n)}async getMatchingSchemas(e){let t=this._getTextDocument(e);if(!t)return[];let n=this._languageService.parseJSONDocument(t);return Promise.resolve(this._languageService.getMatchingSchemas(t,n))}_getTextDocument(e){let t=this._ctx.getMirrorModels();for(let n of t)if(n.uri.toString()===e)return lt.V.create(e,this._languageId,n.version,n.getValue());return null}}const Tn="/".charCodeAt(0),An=".".charCodeAt(0);function Cn(e){const t=[];for(const n of e)0===n.length||1===n.length&&n.charCodeAt(0)===An||(2===n.length&&n.charCodeAt(0)===An&&n.charCodeAt(1)===An?t.pop():t.push(n));e.length>1&&0===e[e.length-1].length&&t.push("");let n=t.join("/");return 0===e[0].length&&(n="/"+n),n}self.onmessage=()=>{(0,i.n)(((e,t)=>new xn(e,t)))}}},r={};function i(e){var t=r[e];if(void 0!==t)return t.exports;var o=r[e]={exports:{}};return n[e](o,o.exports,i),o.exports}i.m=n,i.x=()=>{var e=i.O(void 0,[4508,5323],(()=>i(82184)));return i.O(e)},e=[],i.O=(t,n,r,o)=>{if(!n){var s=1/0;for(u=0;u<e.length;u++){for(var[n,r,o]=e[u],a=!0,c=0;c<n.length;c++)(!1&o||s>=o)&&Object.keys(i.O).every((e=>i.O[e](n[c])))?n.splice(c--,1):(a=!1,o<s&&(s=o));if(a){e.splice(u--,1);var l=r();void 0!==l&&(t=l)}}return t}o=o||0;for(var u=e.length;u>0&&e[u-1][2]>o;u--)e[u]=e[u-1];e[u]=[n,r,o]},i.d=(e,t)=>{for(var n in t)i.o(t,n)&&!i.o(e,n)&&Object.defineProperty(e,n,{enumerable:!0,get:t[n]})},i.f={},i.e=e=>Promise.all(Object.keys(i.f).reduce(((t,n)=>(i.f[n](e,t),t)),[])),i.u=e=>e+".bundle.js",i.g=function(){if("object"==typeof globalThis)return globalThis;try{return this||new Function("return this")()}catch(e){if("object"==typeof window)return window}}(),i.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),(()=>{var e;i.g.importScripts&&(e=i.g.location+"");var t=i.g.document;if(!e&&t&&(t.currentScript&&"SCRIPT"===t.currentScript.tagName.toUpperCase()&&(e=t.currentScript.src),!e)){var n=t.getElementsByTagName("script");if(n.length)for(var r=n.length-1;r>-1&&(!e||!/^http(s?):/.test(e));)e=n[r--].src}if(!e)throw new Error("Automatic publicPath is not supported in this browser");e=e.replace(/^blob:/,"").replace(/#.*$/,"").replace(/\?.*$/,"").replace(/\/[^\/]+$/,"/"),i.p=e})(),(()=>{var e={2184:1};i.f.i=(t,n)=>{e[t]||importScripts(i.p+i.u(t))};var t=self.webpackChunk_cBlockly=self.webpackChunk_cBlockly||[],n=t.push.bind(t);t.push=t=>{var[r,o,s]=t;for(var a in o)i.o(o,a)&&(i.m[a]=o[a]);for(s&&s(i);r.length;)e[r.pop()]=1;n(t)}})(),t=i.x,i.x=()=>Promise.all([i.e(4508),i.e(5323)]).then(t),i.x()})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ 82184
+(__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) {
+
+
+// EXTERNAL MODULE: ./node_modules/monaco-editor/esm/vs/common/initialize.js + 79 modules
+var initialize = __webpack_require__(24508);
+;// ./node_modules/monaco-editor/esm/external/jsonc-parser/lib/esm/impl/scanner.js
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+/**
+ * Creates a JSON scanner on the given text.
+ * If ignoreTrivia is set, whitespaces or comments are ignored.
+ */
+function createScanner(text, ignoreTrivia = false) {
+    const len = text.length;
+    let pos = 0, value = '', tokenOffset = 0, token = 16 /* SyntaxKind.Unknown */, lineNumber = 0, lineStartOffset = 0, tokenLineStartOffset = 0, prevTokenLineStartOffset = 0, scanError = 0 /* ScanError.None */;
+    function scanHexDigits(count, exact) {
+        let digits = 0;
+        let value = 0;
+        while (digits < count || false) {
+            let ch = text.charCodeAt(pos);
+            if (ch >= 48 /* CharacterCodes._0 */ && ch <= 57 /* CharacterCodes._9 */) {
+                value = value * 16 + ch - 48 /* CharacterCodes._0 */;
+            }
+            else if (ch >= 65 /* CharacterCodes.A */ && ch <= 70 /* CharacterCodes.F */) {
+                value = value * 16 + ch - 65 /* CharacterCodes.A */ + 10;
+            }
+            else if (ch >= 97 /* CharacterCodes.a */ && ch <= 102 /* CharacterCodes.f */) {
+                value = value * 16 + ch - 97 /* CharacterCodes.a */ + 10;
+            }
+            else {
+                break;
+            }
+            pos++;
+            digits++;
+        }
+        if (digits < count) {
+            value = -1;
+        }
+        return value;
+    }
+    function setPosition(newPosition) {
+        pos = newPosition;
+        value = '';
+        tokenOffset = 0;
+        token = 16 /* SyntaxKind.Unknown */;
+        scanError = 0 /* ScanError.None */;
+    }
+    function scanNumber() {
+        let start = pos;
+        if (text.charCodeAt(pos) === 48 /* CharacterCodes._0 */) {
+            pos++;
+        }
+        else {
+            pos++;
+            while (pos < text.length && isDigit(text.charCodeAt(pos))) {
+                pos++;
+            }
+        }
+        if (pos < text.length && text.charCodeAt(pos) === 46 /* CharacterCodes.dot */) {
+            pos++;
+            if (pos < text.length && isDigit(text.charCodeAt(pos))) {
+                pos++;
+                while (pos < text.length && isDigit(text.charCodeAt(pos))) {
+                    pos++;
+                }
+            }
+            else {
+                scanError = 3 /* ScanError.UnexpectedEndOfNumber */;
+                return text.substring(start, pos);
+            }
+        }
+        let end = pos;
+        if (pos < text.length && (text.charCodeAt(pos) === 69 /* CharacterCodes.E */ || text.charCodeAt(pos) === 101 /* CharacterCodes.e */)) {
+            pos++;
+            if (pos < text.length && text.charCodeAt(pos) === 43 /* CharacterCodes.plus */ || text.charCodeAt(pos) === 45 /* CharacterCodes.minus */) {
+                pos++;
+            }
+            if (pos < text.length && isDigit(text.charCodeAt(pos))) {
+                pos++;
+                while (pos < text.length && isDigit(text.charCodeAt(pos))) {
+                    pos++;
+                }
+                end = pos;
+            }
+            else {
+                scanError = 3 /* ScanError.UnexpectedEndOfNumber */;
+            }
+        }
+        return text.substring(start, end);
+    }
+    function scanString() {
+        let result = '', start = pos;
+        while (true) {
+            if (pos >= len) {
+                result += text.substring(start, pos);
+                scanError = 2 /* ScanError.UnexpectedEndOfString */;
+                break;
+            }
+            const ch = text.charCodeAt(pos);
+            if (ch === 34 /* CharacterCodes.doubleQuote */) {
+                result += text.substring(start, pos);
+                pos++;
+                break;
+            }
+            if (ch === 92 /* CharacterCodes.backslash */) {
+                result += text.substring(start, pos);
+                pos++;
+                if (pos >= len) {
+                    scanError = 2 /* ScanError.UnexpectedEndOfString */;
+                    break;
+                }
+                const ch2 = text.charCodeAt(pos++);
+                switch (ch2) {
+                    case 34 /* CharacterCodes.doubleQuote */:
+                        result += '\"';
+                        break;
+                    case 92 /* CharacterCodes.backslash */:
+                        result += '\\';
+                        break;
+                    case 47 /* CharacterCodes.slash */:
+                        result += '/';
+                        break;
+                    case 98 /* CharacterCodes.b */:
+                        result += '\b';
+                        break;
+                    case 102 /* CharacterCodes.f */:
+                        result += '\f';
+                        break;
+                    case 110 /* CharacterCodes.n */:
+                        result += '\n';
+                        break;
+                    case 114 /* CharacterCodes.r */:
+                        result += '\r';
+                        break;
+                    case 116 /* CharacterCodes.t */:
+                        result += '\t';
+                        break;
+                    case 117 /* CharacterCodes.u */:
+                        const ch3 = scanHexDigits(4);
+                        if (ch3 >= 0) {
+                            result += String.fromCharCode(ch3);
+                        }
+                        else {
+                            scanError = 4 /* ScanError.InvalidUnicode */;
+                        }
+                        break;
+                    default:
+                        scanError = 5 /* ScanError.InvalidEscapeCharacter */;
+                }
+                start = pos;
+                continue;
+            }
+            if (ch >= 0 && ch <= 0x1f) {
+                if (isLineBreak(ch)) {
+                    result += text.substring(start, pos);
+                    scanError = 2 /* ScanError.UnexpectedEndOfString */;
+                    break;
+                }
+                else {
+                    scanError = 6 /* ScanError.InvalidCharacter */;
+                    // mark as error but continue with string
+                }
+            }
+            pos++;
+        }
+        return result;
+    }
+    function scanNext() {
+        value = '';
+        scanError = 0 /* ScanError.None */;
+        tokenOffset = pos;
+        lineStartOffset = lineNumber;
+        prevTokenLineStartOffset = tokenLineStartOffset;
+        if (pos >= len) {
+            // at the end
+            tokenOffset = len;
+            return token = 17 /* SyntaxKind.EOF */;
+        }
+        let code = text.charCodeAt(pos);
+        // trivia: whitespace
+        if (isWhiteSpace(code)) {
+            do {
+                pos++;
+                value += String.fromCharCode(code);
+                code = text.charCodeAt(pos);
+            } while (isWhiteSpace(code));
+            return token = 15 /* SyntaxKind.Trivia */;
+        }
+        // trivia: newlines
+        if (isLineBreak(code)) {
+            pos++;
+            value += String.fromCharCode(code);
+            if (code === 13 /* CharacterCodes.carriageReturn */ && text.charCodeAt(pos) === 10 /* CharacterCodes.lineFeed */) {
+                pos++;
+                value += '\n';
+            }
+            lineNumber++;
+            tokenLineStartOffset = pos;
+            return token = 14 /* SyntaxKind.LineBreakTrivia */;
+        }
+        switch (code) {
+            // tokens: []{}:,
+            case 123 /* CharacterCodes.openBrace */:
+                pos++;
+                return token = 1 /* SyntaxKind.OpenBraceToken */;
+            case 125 /* CharacterCodes.closeBrace */:
+                pos++;
+                return token = 2 /* SyntaxKind.CloseBraceToken */;
+            case 91 /* CharacterCodes.openBracket */:
+                pos++;
+                return token = 3 /* SyntaxKind.OpenBracketToken */;
+            case 93 /* CharacterCodes.closeBracket */:
+                pos++;
+                return token = 4 /* SyntaxKind.CloseBracketToken */;
+            case 58 /* CharacterCodes.colon */:
+                pos++;
+                return token = 6 /* SyntaxKind.ColonToken */;
+            case 44 /* CharacterCodes.comma */:
+                pos++;
+                return token = 5 /* SyntaxKind.CommaToken */;
+            // strings
+            case 34 /* CharacterCodes.doubleQuote */:
+                pos++;
+                value = scanString();
+                return token = 10 /* SyntaxKind.StringLiteral */;
+            // comments
+            case 47 /* CharacterCodes.slash */:
+                const start = pos - 1;
+                // Single-line comment
+                if (text.charCodeAt(pos + 1) === 47 /* CharacterCodes.slash */) {
+                    pos += 2;
+                    while (pos < len) {
+                        if (isLineBreak(text.charCodeAt(pos))) {
+                            break;
+                        }
+                        pos++;
+                    }
+                    value = text.substring(start, pos);
+                    return token = 12 /* SyntaxKind.LineCommentTrivia */;
+                }
+                // Multi-line comment
+                if (text.charCodeAt(pos + 1) === 42 /* CharacterCodes.asterisk */) {
+                    pos += 2;
+                    const safeLength = len - 1; // For lookahead.
+                    let commentClosed = false;
+                    while (pos < safeLength) {
+                        const ch = text.charCodeAt(pos);
+                        if (ch === 42 /* CharacterCodes.asterisk */ && text.charCodeAt(pos + 1) === 47 /* CharacterCodes.slash */) {
+                            pos += 2;
+                            commentClosed = true;
+                            break;
+                        }
+                        pos++;
+                        if (isLineBreak(ch)) {
+                            if (ch === 13 /* CharacterCodes.carriageReturn */ && text.charCodeAt(pos) === 10 /* CharacterCodes.lineFeed */) {
+                                pos++;
+                            }
+                            lineNumber++;
+                            tokenLineStartOffset = pos;
+                        }
+                    }
+                    if (!commentClosed) {
+                        pos++;
+                        scanError = 1 /* ScanError.UnexpectedEndOfComment */;
+                    }
+                    value = text.substring(start, pos);
+                    return token = 13 /* SyntaxKind.BlockCommentTrivia */;
+                }
+                // just a single slash
+                value += String.fromCharCode(code);
+                pos++;
+                return token = 16 /* SyntaxKind.Unknown */;
+            // numbers
+            case 45 /* CharacterCodes.minus */:
+                value += String.fromCharCode(code);
+                pos++;
+                if (pos === len || !isDigit(text.charCodeAt(pos))) {
+                    return token = 16 /* SyntaxKind.Unknown */;
+                }
+            // found a minus, followed by a number so
+            // we fall through to proceed with scanning
+            // numbers
+            case 48 /* CharacterCodes._0 */:
+            case 49 /* CharacterCodes._1 */:
+            case 50 /* CharacterCodes._2 */:
+            case 51 /* CharacterCodes._3 */:
+            case 52 /* CharacterCodes._4 */:
+            case 53 /* CharacterCodes._5 */:
+            case 54 /* CharacterCodes._6 */:
+            case 55 /* CharacterCodes._7 */:
+            case 56 /* CharacterCodes._8 */:
+            case 57 /* CharacterCodes._9 */:
+                value += scanNumber();
+                return token = 11 /* SyntaxKind.NumericLiteral */;
+            // literals and unknown symbols
+            default:
+                // is a literal? Read the full word.
+                while (pos < len && isUnknownContentCharacter(code)) {
+                    pos++;
+                    code = text.charCodeAt(pos);
+                }
+                if (tokenOffset !== pos) {
+                    value = text.substring(tokenOffset, pos);
+                    // keywords: true, false, null
+                    switch (value) {
+                        case 'true': return token = 8 /* SyntaxKind.TrueKeyword */;
+                        case 'false': return token = 9 /* SyntaxKind.FalseKeyword */;
+                        case 'null': return token = 7 /* SyntaxKind.NullKeyword */;
+                    }
+                    return token = 16 /* SyntaxKind.Unknown */;
+                }
+                // some
+                value += String.fromCharCode(code);
+                pos++;
+                return token = 16 /* SyntaxKind.Unknown */;
+        }
+    }
+    function isUnknownContentCharacter(code) {
+        if (isWhiteSpace(code) || isLineBreak(code)) {
+            return false;
+        }
+        switch (code) {
+            case 125 /* CharacterCodes.closeBrace */:
+            case 93 /* CharacterCodes.closeBracket */:
+            case 123 /* CharacterCodes.openBrace */:
+            case 91 /* CharacterCodes.openBracket */:
+            case 34 /* CharacterCodes.doubleQuote */:
+            case 58 /* CharacterCodes.colon */:
+            case 44 /* CharacterCodes.comma */:
+            case 47 /* CharacterCodes.slash */:
+                return false;
+        }
+        return true;
+    }
+    function scanNextNonTrivia() {
+        let result;
+        do {
+            result = scanNext();
+        } while (result >= 12 /* SyntaxKind.LineCommentTrivia */ && result <= 15 /* SyntaxKind.Trivia */);
+        return result;
+    }
+    return {
+        setPosition: setPosition,
+        getPosition: () => pos,
+        scan: ignoreTrivia ? scanNextNonTrivia : scanNext,
+        getToken: () => token,
+        getTokenValue: () => value,
+        getTokenOffset: () => tokenOffset,
+        getTokenLength: () => pos - tokenOffset,
+        getTokenStartLine: () => lineStartOffset,
+        getTokenStartCharacter: () => tokenOffset - prevTokenLineStartOffset,
+        getTokenError: () => scanError,
+    };
+}
+function isWhiteSpace(ch) {
+    return ch === 32 /* CharacterCodes.space */ || ch === 9 /* CharacterCodes.tab */;
+}
+function isLineBreak(ch) {
+    return ch === 10 /* CharacterCodes.lineFeed */ || ch === 13 /* CharacterCodes.carriageReturn */;
+}
+function isDigit(ch) {
+    return ch >= 48 /* CharacterCodes._0 */ && ch <= 57 /* CharacterCodes._9 */;
+}
+var CharacterCodes;
+(function (CharacterCodes) {
+    CharacterCodes[CharacterCodes["lineFeed"] = 10] = "lineFeed";
+    CharacterCodes[CharacterCodes["carriageReturn"] = 13] = "carriageReturn";
+    CharacterCodes[CharacterCodes["space"] = 32] = "space";
+    CharacterCodes[CharacterCodes["_0"] = 48] = "_0";
+    CharacterCodes[CharacterCodes["_1"] = 49] = "_1";
+    CharacterCodes[CharacterCodes["_2"] = 50] = "_2";
+    CharacterCodes[CharacterCodes["_3"] = 51] = "_3";
+    CharacterCodes[CharacterCodes["_4"] = 52] = "_4";
+    CharacterCodes[CharacterCodes["_5"] = 53] = "_5";
+    CharacterCodes[CharacterCodes["_6"] = 54] = "_6";
+    CharacterCodes[CharacterCodes["_7"] = 55] = "_7";
+    CharacterCodes[CharacterCodes["_8"] = 56] = "_8";
+    CharacterCodes[CharacterCodes["_9"] = 57] = "_9";
+    CharacterCodes[CharacterCodes["a"] = 97] = "a";
+    CharacterCodes[CharacterCodes["b"] = 98] = "b";
+    CharacterCodes[CharacterCodes["c"] = 99] = "c";
+    CharacterCodes[CharacterCodes["d"] = 100] = "d";
+    CharacterCodes[CharacterCodes["e"] = 101] = "e";
+    CharacterCodes[CharacterCodes["f"] = 102] = "f";
+    CharacterCodes[CharacterCodes["g"] = 103] = "g";
+    CharacterCodes[CharacterCodes["h"] = 104] = "h";
+    CharacterCodes[CharacterCodes["i"] = 105] = "i";
+    CharacterCodes[CharacterCodes["j"] = 106] = "j";
+    CharacterCodes[CharacterCodes["k"] = 107] = "k";
+    CharacterCodes[CharacterCodes["l"] = 108] = "l";
+    CharacterCodes[CharacterCodes["m"] = 109] = "m";
+    CharacterCodes[CharacterCodes["n"] = 110] = "n";
+    CharacterCodes[CharacterCodes["o"] = 111] = "o";
+    CharacterCodes[CharacterCodes["p"] = 112] = "p";
+    CharacterCodes[CharacterCodes["q"] = 113] = "q";
+    CharacterCodes[CharacterCodes["r"] = 114] = "r";
+    CharacterCodes[CharacterCodes["s"] = 115] = "s";
+    CharacterCodes[CharacterCodes["t"] = 116] = "t";
+    CharacterCodes[CharacterCodes["u"] = 117] = "u";
+    CharacterCodes[CharacterCodes["v"] = 118] = "v";
+    CharacterCodes[CharacterCodes["w"] = 119] = "w";
+    CharacterCodes[CharacterCodes["x"] = 120] = "x";
+    CharacterCodes[CharacterCodes["y"] = 121] = "y";
+    CharacterCodes[CharacterCodes["z"] = 122] = "z";
+    CharacterCodes[CharacterCodes["A"] = 65] = "A";
+    CharacterCodes[CharacterCodes["B"] = 66] = "B";
+    CharacterCodes[CharacterCodes["C"] = 67] = "C";
+    CharacterCodes[CharacterCodes["D"] = 68] = "D";
+    CharacterCodes[CharacterCodes["E"] = 69] = "E";
+    CharacterCodes[CharacterCodes["F"] = 70] = "F";
+    CharacterCodes[CharacterCodes["G"] = 71] = "G";
+    CharacterCodes[CharacterCodes["H"] = 72] = "H";
+    CharacterCodes[CharacterCodes["I"] = 73] = "I";
+    CharacterCodes[CharacterCodes["J"] = 74] = "J";
+    CharacterCodes[CharacterCodes["K"] = 75] = "K";
+    CharacterCodes[CharacterCodes["L"] = 76] = "L";
+    CharacterCodes[CharacterCodes["M"] = 77] = "M";
+    CharacterCodes[CharacterCodes["N"] = 78] = "N";
+    CharacterCodes[CharacterCodes["O"] = 79] = "O";
+    CharacterCodes[CharacterCodes["P"] = 80] = "P";
+    CharacterCodes[CharacterCodes["Q"] = 81] = "Q";
+    CharacterCodes[CharacterCodes["R"] = 82] = "R";
+    CharacterCodes[CharacterCodes["S"] = 83] = "S";
+    CharacterCodes[CharacterCodes["T"] = 84] = "T";
+    CharacterCodes[CharacterCodes["U"] = 85] = "U";
+    CharacterCodes[CharacterCodes["V"] = 86] = "V";
+    CharacterCodes[CharacterCodes["W"] = 87] = "W";
+    CharacterCodes[CharacterCodes["X"] = 88] = "X";
+    CharacterCodes[CharacterCodes["Y"] = 89] = "Y";
+    CharacterCodes[CharacterCodes["Z"] = 90] = "Z";
+    CharacterCodes[CharacterCodes["asterisk"] = 42] = "asterisk";
+    CharacterCodes[CharacterCodes["backslash"] = 92] = "backslash";
+    CharacterCodes[CharacterCodes["closeBrace"] = 125] = "closeBrace";
+    CharacterCodes[CharacterCodes["closeBracket"] = 93] = "closeBracket";
+    CharacterCodes[CharacterCodes["colon"] = 58] = "colon";
+    CharacterCodes[CharacterCodes["comma"] = 44] = "comma";
+    CharacterCodes[CharacterCodes["dot"] = 46] = "dot";
+    CharacterCodes[CharacterCodes["doubleQuote"] = 34] = "doubleQuote";
+    CharacterCodes[CharacterCodes["minus"] = 45] = "minus";
+    CharacterCodes[CharacterCodes["openBrace"] = 123] = "openBrace";
+    CharacterCodes[CharacterCodes["openBracket"] = 91] = "openBracket";
+    CharacterCodes[CharacterCodes["plus"] = 43] = "plus";
+    CharacterCodes[CharacterCodes["slash"] = 47] = "slash";
+    CharacterCodes[CharacterCodes["formFeed"] = 12] = "formFeed";
+    CharacterCodes[CharacterCodes["tab"] = 9] = "tab";
+})(CharacterCodes || (CharacterCodes = {}));
+
+
+
+;// ./node_modules/monaco-editor/esm/external/jsonc-parser/lib/esm/impl/string-intern.js
+const cachedSpaces = new Array(20).fill(0).map((_, index) => {
+    return ' '.repeat(index);
+});
+const maxCachedValues = 200;
+const cachedBreakLinesWithSpaces = {
+    ' ': {
+        '\n': new Array(maxCachedValues).fill(0).map((_, index) => {
+            return '\n' + ' '.repeat(index);
+        }),
+        '\r': new Array(maxCachedValues).fill(0).map((_, index) => {
+            return '\r' + ' '.repeat(index);
+        }),
+        '\r\n': new Array(maxCachedValues).fill(0).map((_, index) => {
+            return '\r\n' + ' '.repeat(index);
+        }),
+    },
+    '\t': {
+        '\n': new Array(maxCachedValues).fill(0).map((_, index) => {
+            return '\n' + '\t'.repeat(index);
+        }),
+        '\r': new Array(maxCachedValues).fill(0).map((_, index) => {
+            return '\r' + '\t'.repeat(index);
+        }),
+        '\r\n': new Array(maxCachedValues).fill(0).map((_, index) => {
+            return '\r\n' + '\t'.repeat(index);
+        }),
+    }
+};
+const supportedEols = ['\n', '\r', '\r\n'];
+
+
+
+;// ./node_modules/monaco-editor/esm/external/jsonc-parser/lib/esm/impl/format.js
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+function format(documentText, range, options) {
+    let initialIndentLevel;
+    let formatText;
+    let formatTextStart;
+    let rangeStart;
+    let rangeEnd;
+    if (range) {
+        rangeStart = range.offset;
+        rangeEnd = rangeStart + range.length;
+        formatTextStart = rangeStart;
+        while (formatTextStart > 0 && !isEOL(documentText, formatTextStart - 1)) {
+            formatTextStart--;
+        }
+        let endOffset = rangeEnd;
+        while (endOffset < documentText.length && !isEOL(documentText, endOffset)) {
+            endOffset++;
+        }
+        formatText = documentText.substring(formatTextStart, endOffset);
+        initialIndentLevel = computeIndentLevel(formatText, options);
+    }
+    else {
+        formatText = documentText;
+        initialIndentLevel = 0;
+        formatTextStart = 0;
+        rangeStart = 0;
+        rangeEnd = documentText.length;
+    }
+    const eol = getEOL(options, documentText);
+    const eolFastPathSupported = supportedEols.includes(eol);
+    let numberLineBreaks = 0;
+    let indentLevel = 0;
+    let indentValue;
+    if (options.insertSpaces) {
+        indentValue = cachedSpaces[options.tabSize || 4] ?? repeat(cachedSpaces[1], options.tabSize || 4);
+    }
+    else {
+        indentValue = '\t';
+    }
+    const indentType = indentValue === '\t' ? '\t' : ' ';
+    let scanner = createScanner(formatText, false);
+    let hasError = false;
+    function newLinesAndIndent() {
+        if (numberLineBreaks > 1) {
+            return repeat(eol, numberLineBreaks) + repeat(indentValue, initialIndentLevel + indentLevel);
+        }
+        const amountOfSpaces = indentValue.length * (initialIndentLevel + indentLevel);
+        if (!eolFastPathSupported || amountOfSpaces > cachedBreakLinesWithSpaces[indentType][eol].length) {
+            return eol + repeat(indentValue, initialIndentLevel + indentLevel);
+        }
+        if (amountOfSpaces <= 0) {
+            return eol;
+        }
+        return cachedBreakLinesWithSpaces[indentType][eol][amountOfSpaces];
+    }
+    function scanNext() {
+        let token = scanner.scan();
+        numberLineBreaks = 0;
+        while (token === 15 /* SyntaxKind.Trivia */ || token === 14 /* SyntaxKind.LineBreakTrivia */) {
+            if (token === 14 /* SyntaxKind.LineBreakTrivia */ && options.keepLines) {
+                numberLineBreaks += 1;
+            }
+            else if (token === 14 /* SyntaxKind.LineBreakTrivia */) {
+                numberLineBreaks = 1;
+            }
+            token = scanner.scan();
+        }
+        hasError = token === 16 /* SyntaxKind.Unknown */ || scanner.getTokenError() !== 0 /* ScanError.None */;
+        return token;
+    }
+    const editOperations = [];
+    function addEdit(text, startOffset, endOffset) {
+        if (!hasError && (!range || (startOffset < rangeEnd && endOffset > rangeStart)) && documentText.substring(startOffset, endOffset) !== text) {
+            editOperations.push({ offset: startOffset, length: endOffset - startOffset, content: text });
+        }
+    }
+    let firstToken = scanNext();
+    if (options.keepLines && numberLineBreaks > 0) {
+        addEdit(repeat(eol, numberLineBreaks), 0, 0);
+    }
+    if (firstToken !== 17 /* SyntaxKind.EOF */) {
+        let firstTokenStart = scanner.getTokenOffset() + formatTextStart;
+        let initialIndent = (indentValue.length * initialIndentLevel < 20) && options.insertSpaces
+            ? cachedSpaces[indentValue.length * initialIndentLevel]
+            : repeat(indentValue, initialIndentLevel);
+        addEdit(initialIndent, formatTextStart, firstTokenStart);
+    }
+    while (firstToken !== 17 /* SyntaxKind.EOF */) {
+        let firstTokenEnd = scanner.getTokenOffset() + scanner.getTokenLength() + formatTextStart;
+        let secondToken = scanNext();
+        let replaceContent = '';
+        let needsLineBreak = false;
+        while (numberLineBreaks === 0 && (secondToken === 12 /* SyntaxKind.LineCommentTrivia */ || secondToken === 13 /* SyntaxKind.BlockCommentTrivia */)) {
+            let commentTokenStart = scanner.getTokenOffset() + formatTextStart;
+            addEdit(cachedSpaces[1], firstTokenEnd, commentTokenStart);
+            firstTokenEnd = scanner.getTokenOffset() + scanner.getTokenLength() + formatTextStart;
+            needsLineBreak = secondToken === 12 /* SyntaxKind.LineCommentTrivia */;
+            replaceContent = needsLineBreak ? newLinesAndIndent() : '';
+            secondToken = scanNext();
+        }
+        if (secondToken === 2 /* SyntaxKind.CloseBraceToken */) {
+            if (firstToken !== 1 /* SyntaxKind.OpenBraceToken */) {
+                indentLevel--;
+            }
+            if (options.keepLines && numberLineBreaks > 0 || !options.keepLines && firstToken !== 1 /* SyntaxKind.OpenBraceToken */) {
+                replaceContent = newLinesAndIndent();
+            }
+            else if (options.keepLines) {
+                replaceContent = cachedSpaces[1];
+            }
+        }
+        else if (secondToken === 4 /* SyntaxKind.CloseBracketToken */) {
+            if (firstToken !== 3 /* SyntaxKind.OpenBracketToken */) {
+                indentLevel--;
+            }
+            if (options.keepLines && numberLineBreaks > 0 || !options.keepLines && firstToken !== 3 /* SyntaxKind.OpenBracketToken */) {
+                replaceContent = newLinesAndIndent();
+            }
+            else if (options.keepLines) {
+                replaceContent = cachedSpaces[1];
+            }
+        }
+        else {
+            switch (firstToken) {
+                case 3 /* SyntaxKind.OpenBracketToken */:
+                case 1 /* SyntaxKind.OpenBraceToken */:
+                    indentLevel++;
+                    if (options.keepLines && numberLineBreaks > 0 || !options.keepLines) {
+                        replaceContent = newLinesAndIndent();
+                    }
+                    else {
+                        replaceContent = cachedSpaces[1];
+                    }
+                    break;
+                case 5 /* SyntaxKind.CommaToken */:
+                    if (options.keepLines && numberLineBreaks > 0 || !options.keepLines) {
+                        replaceContent = newLinesAndIndent();
+                    }
+                    else {
+                        replaceContent = cachedSpaces[1];
+                    }
+                    break;
+                case 12 /* SyntaxKind.LineCommentTrivia */:
+                    replaceContent = newLinesAndIndent();
+                    break;
+                case 13 /* SyntaxKind.BlockCommentTrivia */:
+                    if (numberLineBreaks > 0) {
+                        replaceContent = newLinesAndIndent();
+                    }
+                    else if (!needsLineBreak) {
+                        replaceContent = cachedSpaces[1];
+                    }
+                    break;
+                case 6 /* SyntaxKind.ColonToken */:
+                    if (options.keepLines && numberLineBreaks > 0) {
+                        replaceContent = newLinesAndIndent();
+                    }
+                    else if (!needsLineBreak) {
+                        replaceContent = cachedSpaces[1];
+                    }
+                    break;
+                case 10 /* SyntaxKind.StringLiteral */:
+                    if (options.keepLines && numberLineBreaks > 0) {
+                        replaceContent = newLinesAndIndent();
+                    }
+                    else if (secondToken === 6 /* SyntaxKind.ColonToken */ && !needsLineBreak) {
+                        replaceContent = '';
+                    }
+                    break;
+                case 7 /* SyntaxKind.NullKeyword */:
+                case 8 /* SyntaxKind.TrueKeyword */:
+                case 9 /* SyntaxKind.FalseKeyword */:
+                case 11 /* SyntaxKind.NumericLiteral */:
+                case 2 /* SyntaxKind.CloseBraceToken */:
+                case 4 /* SyntaxKind.CloseBracketToken */:
+                    if (options.keepLines && numberLineBreaks > 0) {
+                        replaceContent = newLinesAndIndent();
+                    }
+                    else {
+                        if ((secondToken === 12 /* SyntaxKind.LineCommentTrivia */ || secondToken === 13 /* SyntaxKind.BlockCommentTrivia */) && !needsLineBreak) {
+                            replaceContent = cachedSpaces[1];
+                        }
+                        else if (secondToken !== 5 /* SyntaxKind.CommaToken */ && secondToken !== 17 /* SyntaxKind.EOF */) {
+                            hasError = true;
+                        }
+                    }
+                    break;
+                case 16 /* SyntaxKind.Unknown */:
+                    hasError = true;
+                    break;
+            }
+            if (numberLineBreaks > 0 && (secondToken === 12 /* SyntaxKind.LineCommentTrivia */ || secondToken === 13 /* SyntaxKind.BlockCommentTrivia */)) {
+                replaceContent = newLinesAndIndent();
+            }
+        }
+        if (secondToken === 17 /* SyntaxKind.EOF */) {
+            if (options.keepLines && numberLineBreaks > 0) {
+                replaceContent = newLinesAndIndent();
+            }
+            else {
+                replaceContent = options.insertFinalNewline ? eol : '';
+            }
+        }
+        const secondTokenStart = scanner.getTokenOffset() + formatTextStart;
+        addEdit(replaceContent, firstTokenEnd, secondTokenStart);
+        firstToken = secondToken;
+    }
+    return editOperations;
+}
+function repeat(s, count) {
+    let result = '';
+    for (let i = 0; i < count; i++) {
+        result += s;
+    }
+    return result;
+}
+function computeIndentLevel(content, options) {
+    let i = 0;
+    let nChars = 0;
+    const tabSize = options.tabSize || 4;
+    while (i < content.length) {
+        let ch = content.charAt(i);
+        if (ch === cachedSpaces[1]) {
+            nChars++;
+        }
+        else if (ch === '\t') {
+            nChars += tabSize;
+        }
+        else {
+            break;
+        }
+        i++;
+    }
+    return Math.floor(nChars / tabSize);
+}
+function getEOL(options, text) {
+    for (let i = 0; i < text.length; i++) {
+        const ch = text.charAt(i);
+        if (ch === '\r') {
+            if (i + 1 < text.length && text.charAt(i + 1) === '\n') {
+                return '\r\n';
+            }
+            return '\r';
+        }
+        else if (ch === '\n') {
+            return '\n';
+        }
+    }
+    return (options && options.eol) || '\n';
+}
+function isEOL(text, offset) {
+    return '\r\n'.indexOf(text.charAt(offset)) !== -1;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/jsonc-parser/lib/esm/impl/parser.js
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+var ParseOptions;
+(function (ParseOptions) {
+    ParseOptions.DEFAULT = {
+        allowTrailingComma: false
+    };
+})(ParseOptions || (ParseOptions = {}));
+/**
+ * Parses the given text and returns the object the JSON content represents. On invalid input, the parser tries to be as fault tolerant as possible, but still return a result.
+ * Therefore always check the errors list to find out if the input was valid.
+ */
+function parse(text, errors = [], options = ParseOptions.DEFAULT) {
+    let currentProperty = null;
+    let currentParent = [];
+    const previousParents = [];
+    function onValue(value) {
+        if (Array.isArray(currentParent)) {
+            currentParent.push(value);
+        }
+        else if (currentProperty !== null) {
+            currentParent[currentProperty] = value;
+        }
+    }
+    const visitor = {
+        onObjectBegin: () => {
+            const object = {};
+            onValue(object);
+            previousParents.push(currentParent);
+            currentParent = object;
+            currentProperty = null;
+        },
+        onObjectProperty: (name) => {
+            currentProperty = name;
+        },
+        onObjectEnd: () => {
+            currentParent = previousParents.pop();
+        },
+        onArrayBegin: () => {
+            const array = [];
+            onValue(array);
+            previousParents.push(currentParent);
+            currentParent = array;
+            currentProperty = null;
+        },
+        onArrayEnd: () => {
+            currentParent = previousParents.pop();
+        },
+        onLiteralValue: onValue,
+        onError: (error, offset, length) => {
+            errors.push({ error, offset, length });
+        }
+    };
+    visit(text, visitor, options);
+    return currentParent[0];
+}
+/**
+ * Gets the JSON path of the given JSON DOM node
+ */
+function getNodePath(node) {
+    if (!node.parent || !node.parent.children) {
+        return [];
+    }
+    const path = getNodePath(node.parent);
+    if (node.parent.type === 'property') {
+        const key = node.parent.children[0].value;
+        path.push(key);
+    }
+    else if (node.parent.type === 'array') {
+        const index = node.parent.children.indexOf(node);
+        if (index !== -1) {
+            path.push(index);
+        }
+    }
+    return path;
+}
+/**
+ * Evaluates the JavaScript object of the given JSON DOM node
+ */
+function getNodeValue(node) {
+    switch (node.type) {
+        case 'array':
+            return node.children.map(getNodeValue);
+        case 'object':
+            const obj = Object.create(null);
+            for (let prop of node.children) {
+                const valueNode = prop.children[1];
+                if (valueNode) {
+                    obj[prop.children[0].value] = getNodeValue(valueNode);
+                }
+            }
+            return obj;
+        case 'null':
+        case 'string':
+        case 'number':
+        case 'boolean':
+            return node.value;
+        default:
+            return undefined;
+    }
+}
+function contains(node, offset, includeRightBound = false) {
+    return (offset >= node.offset && offset < (node.offset + node.length)) || includeRightBound && (offset === (node.offset + node.length));
+}
+/**
+ * Finds the most inner node at the given offset. If includeRightBound is set, also finds nodes that end at the given offset.
+ */
+function findNodeAtOffset(node, offset, includeRightBound = false) {
+    if (contains(node, offset, includeRightBound)) {
+        const children = node.children;
+        if (Array.isArray(children)) {
+            for (let i = 0; i < children.length && children[i].offset <= offset; i++) {
+                const item = findNodeAtOffset(children[i], offset, includeRightBound);
+                if (item) {
+                    return item;
+                }
+            }
+        }
+        return node;
+    }
+    return undefined;
+}
+/**
+ * Parses the given text and invokes the visitor functions for each object, array and literal reached.
+ */
+function visit(text, visitor, options = ParseOptions.DEFAULT) {
+    const _scanner = createScanner(text, false);
+    // Important: Only pass copies of this to visitor functions to prevent accidental modification, and
+    // to not affect visitor functions which stored a reference to a previous JSONPath
+    const _jsonPath = [];
+    function toNoArgVisit(visitFunction) {
+        return visitFunction ? () => visitFunction(_scanner.getTokenOffset(), _scanner.getTokenLength(), _scanner.getTokenStartLine(), _scanner.getTokenStartCharacter()) : () => true;
+    }
+    function toNoArgVisitWithPath(visitFunction) {
+        return visitFunction ? () => visitFunction(_scanner.getTokenOffset(), _scanner.getTokenLength(), _scanner.getTokenStartLine(), _scanner.getTokenStartCharacter(), () => _jsonPath.slice()) : () => true;
+    }
+    function toOneArgVisit(visitFunction) {
+        return visitFunction ? (arg) => visitFunction(arg, _scanner.getTokenOffset(), _scanner.getTokenLength(), _scanner.getTokenStartLine(), _scanner.getTokenStartCharacter()) : () => true;
+    }
+    function toOneArgVisitWithPath(visitFunction) {
+        return visitFunction ? (arg) => visitFunction(arg, _scanner.getTokenOffset(), _scanner.getTokenLength(), _scanner.getTokenStartLine(), _scanner.getTokenStartCharacter(), () => _jsonPath.slice()) : () => true;
+    }
+    const onObjectBegin = toNoArgVisitWithPath(visitor.onObjectBegin), onObjectProperty = toOneArgVisitWithPath(visitor.onObjectProperty), onObjectEnd = toNoArgVisit(visitor.onObjectEnd), onArrayBegin = toNoArgVisitWithPath(visitor.onArrayBegin), onArrayEnd = toNoArgVisit(visitor.onArrayEnd), onLiteralValue = toOneArgVisitWithPath(visitor.onLiteralValue), onSeparator = toOneArgVisit(visitor.onSeparator), onComment = toNoArgVisit(visitor.onComment), onError = toOneArgVisit(visitor.onError);
+    const disallowComments = options && options.disallowComments;
+    const allowTrailingComma = options && options.allowTrailingComma;
+    function scanNext() {
+        while (true) {
+            const token = _scanner.scan();
+            switch (_scanner.getTokenError()) {
+                case 4 /* ScanError.InvalidUnicode */:
+                    handleError(14 /* ParseErrorCode.InvalidUnicode */);
+                    break;
+                case 5 /* ScanError.InvalidEscapeCharacter */:
+                    handleError(15 /* ParseErrorCode.InvalidEscapeCharacter */);
+                    break;
+                case 3 /* ScanError.UnexpectedEndOfNumber */:
+                    handleError(13 /* ParseErrorCode.UnexpectedEndOfNumber */);
+                    break;
+                case 1 /* ScanError.UnexpectedEndOfComment */:
+                    if (!disallowComments) {
+                        handleError(11 /* ParseErrorCode.UnexpectedEndOfComment */);
+                    }
+                    break;
+                case 2 /* ScanError.UnexpectedEndOfString */:
+                    handleError(12 /* ParseErrorCode.UnexpectedEndOfString */);
+                    break;
+                case 6 /* ScanError.InvalidCharacter */:
+                    handleError(16 /* ParseErrorCode.InvalidCharacter */);
+                    break;
+            }
+            switch (token) {
+                case 12 /* SyntaxKind.LineCommentTrivia */:
+                case 13 /* SyntaxKind.BlockCommentTrivia */:
+                    if (disallowComments) {
+                        handleError(10 /* ParseErrorCode.InvalidCommentToken */);
+                    }
+                    else {
+                        onComment();
+                    }
+                    break;
+                case 16 /* SyntaxKind.Unknown */:
+                    handleError(1 /* ParseErrorCode.InvalidSymbol */);
+                    break;
+                case 15 /* SyntaxKind.Trivia */:
+                case 14 /* SyntaxKind.LineBreakTrivia */:
+                    break;
+                default:
+                    return token;
+            }
+        }
+    }
+    function handleError(error, skipUntilAfter = [], skipUntil = []) {
+        onError(error);
+        if (skipUntilAfter.length + skipUntil.length > 0) {
+            let token = _scanner.getToken();
+            while (token !== 17 /* SyntaxKind.EOF */) {
+                if (skipUntilAfter.indexOf(token) !== -1) {
+                    scanNext();
+                    break;
+                }
+                else if (skipUntil.indexOf(token) !== -1) {
+                    break;
+                }
+                token = scanNext();
+            }
+        }
+    }
+    function parseString(isValue) {
+        const value = _scanner.getTokenValue();
+        if (isValue) {
+            onLiteralValue(value);
+        }
+        else {
+            onObjectProperty(value);
+            // add property name afterwards
+            _jsonPath.push(value);
+        }
+        scanNext();
+        return true;
+    }
+    function parseLiteral() {
+        switch (_scanner.getToken()) {
+            case 11 /* SyntaxKind.NumericLiteral */:
+                const tokenValue = _scanner.getTokenValue();
+                let value = Number(tokenValue);
+                if (isNaN(value)) {
+                    handleError(2 /* ParseErrorCode.InvalidNumberFormat */);
+                    value = 0;
+                }
+                onLiteralValue(value);
+                break;
+            case 7 /* SyntaxKind.NullKeyword */:
+                onLiteralValue(null);
+                break;
+            case 8 /* SyntaxKind.TrueKeyword */:
+                onLiteralValue(true);
+                break;
+            case 9 /* SyntaxKind.FalseKeyword */:
+                onLiteralValue(false);
+                break;
+            default:
+                return false;
+        }
+        scanNext();
+        return true;
+    }
+    function parseProperty() {
+        if (_scanner.getToken() !== 10 /* SyntaxKind.StringLiteral */) {
+            handleError(3 /* ParseErrorCode.PropertyNameExpected */, [], [2 /* SyntaxKind.CloseBraceToken */, 5 /* SyntaxKind.CommaToken */]);
+            return false;
+        }
+        parseString(false);
+        if (_scanner.getToken() === 6 /* SyntaxKind.ColonToken */) {
+            onSeparator(':');
+            scanNext(); // consume colon
+            if (!parseValue()) {
+                handleError(4 /* ParseErrorCode.ValueExpected */, [], [2 /* SyntaxKind.CloseBraceToken */, 5 /* SyntaxKind.CommaToken */]);
+            }
+        }
+        else {
+            handleError(5 /* ParseErrorCode.ColonExpected */, [], [2 /* SyntaxKind.CloseBraceToken */, 5 /* SyntaxKind.CommaToken */]);
+        }
+        _jsonPath.pop(); // remove processed property name
+        return true;
+    }
+    function parseObject() {
+        onObjectBegin();
+        scanNext(); // consume open brace
+        let needsComma = false;
+        while (_scanner.getToken() !== 2 /* SyntaxKind.CloseBraceToken */ && _scanner.getToken() !== 17 /* SyntaxKind.EOF */) {
+            if (_scanner.getToken() === 5 /* SyntaxKind.CommaToken */) {
+                if (!needsComma) {
+                    handleError(4 /* ParseErrorCode.ValueExpected */, [], []);
+                }
+                onSeparator(',');
+                scanNext(); // consume comma
+                if (_scanner.getToken() === 2 /* SyntaxKind.CloseBraceToken */ && allowTrailingComma) {
+                    break;
+                }
+            }
+            else if (needsComma) {
+                handleError(6 /* ParseErrorCode.CommaExpected */, [], []);
+            }
+            if (!parseProperty()) {
+                handleError(4 /* ParseErrorCode.ValueExpected */, [], [2 /* SyntaxKind.CloseBraceToken */, 5 /* SyntaxKind.CommaToken */]);
+            }
+            needsComma = true;
+        }
+        onObjectEnd();
+        if (_scanner.getToken() !== 2 /* SyntaxKind.CloseBraceToken */) {
+            handleError(7 /* ParseErrorCode.CloseBraceExpected */, [2 /* SyntaxKind.CloseBraceToken */], []);
+        }
+        else {
+            scanNext(); // consume close brace
+        }
+        return true;
+    }
+    function parseArray() {
+        onArrayBegin();
+        scanNext(); // consume open bracket
+        let isFirstElement = true;
+        let needsComma = false;
+        while (_scanner.getToken() !== 4 /* SyntaxKind.CloseBracketToken */ && _scanner.getToken() !== 17 /* SyntaxKind.EOF */) {
+            if (_scanner.getToken() === 5 /* SyntaxKind.CommaToken */) {
+                if (!needsComma) {
+                    handleError(4 /* ParseErrorCode.ValueExpected */, [], []);
+                }
+                onSeparator(',');
+                scanNext(); // consume comma
+                if (_scanner.getToken() === 4 /* SyntaxKind.CloseBracketToken */ && allowTrailingComma) {
+                    break;
+                }
+            }
+            else if (needsComma) {
+                handleError(6 /* ParseErrorCode.CommaExpected */, [], []);
+            }
+            if (isFirstElement) {
+                _jsonPath.push(0);
+                isFirstElement = false;
+            }
+            else {
+                _jsonPath[_jsonPath.length - 1]++;
+            }
+            if (!parseValue()) {
+                handleError(4 /* ParseErrorCode.ValueExpected */, [], [4 /* SyntaxKind.CloseBracketToken */, 5 /* SyntaxKind.CommaToken */]);
+            }
+            needsComma = true;
+        }
+        onArrayEnd();
+        if (!isFirstElement) {
+            _jsonPath.pop(); // remove array index
+        }
+        if (_scanner.getToken() !== 4 /* SyntaxKind.CloseBracketToken */) {
+            handleError(8 /* ParseErrorCode.CloseBracketExpected */, [4 /* SyntaxKind.CloseBracketToken */], []);
+        }
+        else {
+            scanNext(); // consume close bracket
+        }
+        return true;
+    }
+    function parseValue() {
+        switch (_scanner.getToken()) {
+            case 3 /* SyntaxKind.OpenBracketToken */:
+                return parseArray();
+            case 1 /* SyntaxKind.OpenBraceToken */:
+                return parseObject();
+            case 10 /* SyntaxKind.StringLiteral */:
+                return parseString(true);
+            default:
+                return parseLiteral();
+        }
+    }
+    scanNext();
+    if (_scanner.getToken() === 17 /* SyntaxKind.EOF */) {
+        if (options.allowEmptyContent) {
+            return true;
+        }
+        handleError(4 /* ParseErrorCode.ValueExpected */, [], []);
+        return false;
+    }
+    if (!parseValue()) {
+        handleError(4 /* ParseErrorCode.ValueExpected */, [], []);
+        return false;
+    }
+    if (_scanner.getToken() !== 17 /* SyntaxKind.EOF */) {
+        handleError(9 /* ParseErrorCode.EndOfFileExpected */, [], []);
+    }
+    return true;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/jsonc-parser/lib/esm/main.js
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+/**
+ * Creates a JSON scanner on the given text.
+ * If ignoreTrivia is set, whitespaces or comments are ignored.
+ */
+const main_createScanner = createScanner;
+var ScanError;
+(function (ScanError) {
+    ScanError[ScanError["None"] = 0] = "None";
+    ScanError[ScanError["UnexpectedEndOfComment"] = 1] = "UnexpectedEndOfComment";
+    ScanError[ScanError["UnexpectedEndOfString"] = 2] = "UnexpectedEndOfString";
+    ScanError[ScanError["UnexpectedEndOfNumber"] = 3] = "UnexpectedEndOfNumber";
+    ScanError[ScanError["InvalidUnicode"] = 4] = "InvalidUnicode";
+    ScanError[ScanError["InvalidEscapeCharacter"] = 5] = "InvalidEscapeCharacter";
+    ScanError[ScanError["InvalidCharacter"] = 6] = "InvalidCharacter";
+})(ScanError || (ScanError = {}));
+var SyntaxKind;
+(function (SyntaxKind) {
+    SyntaxKind[SyntaxKind["OpenBraceToken"] = 1] = "OpenBraceToken";
+    SyntaxKind[SyntaxKind["CloseBraceToken"] = 2] = "CloseBraceToken";
+    SyntaxKind[SyntaxKind["OpenBracketToken"] = 3] = "OpenBracketToken";
+    SyntaxKind[SyntaxKind["CloseBracketToken"] = 4] = "CloseBracketToken";
+    SyntaxKind[SyntaxKind["CommaToken"] = 5] = "CommaToken";
+    SyntaxKind[SyntaxKind["ColonToken"] = 6] = "ColonToken";
+    SyntaxKind[SyntaxKind["NullKeyword"] = 7] = "NullKeyword";
+    SyntaxKind[SyntaxKind["TrueKeyword"] = 8] = "TrueKeyword";
+    SyntaxKind[SyntaxKind["FalseKeyword"] = 9] = "FalseKeyword";
+    SyntaxKind[SyntaxKind["StringLiteral"] = 10] = "StringLiteral";
+    SyntaxKind[SyntaxKind["NumericLiteral"] = 11] = "NumericLiteral";
+    SyntaxKind[SyntaxKind["LineCommentTrivia"] = 12] = "LineCommentTrivia";
+    SyntaxKind[SyntaxKind["BlockCommentTrivia"] = 13] = "BlockCommentTrivia";
+    SyntaxKind[SyntaxKind["LineBreakTrivia"] = 14] = "LineBreakTrivia";
+    SyntaxKind[SyntaxKind["Trivia"] = 15] = "Trivia";
+    SyntaxKind[SyntaxKind["Unknown"] = 16] = "Unknown";
+    SyntaxKind[SyntaxKind["EOF"] = 17] = "EOF";
+})(SyntaxKind || (SyntaxKind = {}));
+/**
+ * Parses the given text and returns the object the JSON content represents. On invalid input, the parser tries to be as fault tolerant as possible, but still return a result.
+ * Therefore, always check the errors list to find out if the input was valid.
+ */
+const main_parse = parse;
+/**
+ * Finds the innermost node at the given offset. If includeRightBound is set, also finds nodes that end at the given offset.
+ */
+const main_findNodeAtOffset = findNodeAtOffset;
+/**
+ * Gets the JSON path of the given JSON DOM node
+ */
+const main_getNodePath = getNodePath;
+/**
+ * Evaluates the JavaScript object of the given JSON DOM node
+ */
+const main_getNodeValue = getNodeValue;
+var ParseErrorCode;
+(function (ParseErrorCode) {
+    ParseErrorCode[ParseErrorCode["InvalidSymbol"] = 1] = "InvalidSymbol";
+    ParseErrorCode[ParseErrorCode["InvalidNumberFormat"] = 2] = "InvalidNumberFormat";
+    ParseErrorCode[ParseErrorCode["PropertyNameExpected"] = 3] = "PropertyNameExpected";
+    ParseErrorCode[ParseErrorCode["ValueExpected"] = 4] = "ValueExpected";
+    ParseErrorCode[ParseErrorCode["ColonExpected"] = 5] = "ColonExpected";
+    ParseErrorCode[ParseErrorCode["CommaExpected"] = 6] = "CommaExpected";
+    ParseErrorCode[ParseErrorCode["CloseBraceExpected"] = 7] = "CloseBraceExpected";
+    ParseErrorCode[ParseErrorCode["CloseBracketExpected"] = 8] = "CloseBracketExpected";
+    ParseErrorCode[ParseErrorCode["EndOfFileExpected"] = 9] = "EndOfFileExpected";
+    ParseErrorCode[ParseErrorCode["InvalidCommentToken"] = 10] = "InvalidCommentToken";
+    ParseErrorCode[ParseErrorCode["UnexpectedEndOfComment"] = 11] = "UnexpectedEndOfComment";
+    ParseErrorCode[ParseErrorCode["UnexpectedEndOfString"] = 12] = "UnexpectedEndOfString";
+    ParseErrorCode[ParseErrorCode["UnexpectedEndOfNumber"] = 13] = "UnexpectedEndOfNumber";
+    ParseErrorCode[ParseErrorCode["InvalidUnicode"] = 14] = "InvalidUnicode";
+    ParseErrorCode[ParseErrorCode["InvalidEscapeCharacter"] = 15] = "InvalidEscapeCharacter";
+    ParseErrorCode[ParseErrorCode["InvalidCharacter"] = 16] = "InvalidCharacter";
+})(ParseErrorCode || (ParseErrorCode = {}));
+/**
+ * Computes the edit operations needed to format a JSON document.
+ *
+ * @param documentText The input text
+ * @param range The range to format or `undefined` to format the full content
+ * @param options The formatting options
+ * @returns The edit operations describing the formatting changes to the original document following the format described in {@linkcode EditResult}.
+ * To apply the edit operations to the input, use {@linkcode applyEdits}.
+ */
+function main_format(documentText, range, options) {
+    return format(documentText, range, options);
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/objects.js
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) Microsoft Corporation. All rights reserved.
+*  Licensed under the MIT License. See License.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+function equals(one, other) {
+    if (one === other) {
+        return true;
+    }
+    if (one === null || one === undefined || other === null || other === undefined) {
+        return false;
+    }
+    if (typeof one !== typeof other) {
+        return false;
+    }
+    if (typeof one !== 'object') {
+        return false;
+    }
+    if ((Array.isArray(one)) !== (Array.isArray(other))) {
+        return false;
+    }
+    let i, key;
+    if (Array.isArray(one)) {
+        if (one.length !== other.length) {
+            return false;
+        }
+        for (i = 0; i < one.length; i++) {
+            if (!equals(one[i], other[i])) {
+                return false;
+            }
+        }
+    }
+    else {
+        const oneKeys = [];
+        for (key in one) {
+            oneKeys.push(key);
+        }
+        oneKeys.sort();
+        const otherKeys = [];
+        for (key in other) {
+            otherKeys.push(key);
+        }
+        otherKeys.sort();
+        if (!equals(oneKeys, otherKeys)) {
+            return false;
+        }
+        for (i = 0; i < oneKeys.length; i++) {
+            if (!equals(one[oneKeys[i]], other[oneKeys[i]])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+function isNumber(val) {
+    return typeof val === 'number';
+}
+function isDefined(val) {
+    return typeof val !== 'undefined';
+}
+function isBoolean(val) {
+    return typeof val === 'boolean';
+}
+function isString(val) {
+    return typeof val === 'string';
+}
+function isObject(val) {
+    return typeof val === 'object' && val !== null && !Array.isArray(val);
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/strings.js
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) Microsoft Corporation. All rights reserved.
+*  Licensed under the MIT License. See License.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+function startsWith(haystack, needle) {
+    if (haystack.length < needle.length) {
+        return false;
+    }
+    for (let i = 0; i < needle.length; i++) {
+        if (haystack[i] !== needle[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+/**
+ * Determines if haystack ends with needle.
+ */
+function endsWith(haystack, needle) {
+    const diff = haystack.length - needle.length;
+    if (diff > 0) {
+        return haystack.lastIndexOf(needle) === diff;
+    }
+    else if (diff === 0) {
+        return haystack === needle;
+    }
+    else {
+        return false;
+    }
+}
+function extendedRegExp(pattern) {
+    let flags = '';
+    if (startsWith(pattern, '(?i)')) {
+        pattern = pattern.substring(4);
+        flags = 'i';
+    }
+    try {
+        return new RegExp(pattern, flags + 'u');
+    }
+    catch (e) {
+        // could be an exception due to the 'u ' flag
+        try {
+            return new RegExp(pattern, flags);
+        }
+        catch (e) {
+            // invalid pattern
+            return undefined;
+        }
+    }
+}
+// from https://tanishiking.github.io/posts/count-unicode-codepoint/#work-hard-with-for-statements
+function stringLength(str) {
+    let count = 0;
+    for (let i = 0; i < str.length; i++) {
+        count++;
+        // obtain the i-th 16-bit
+        const code = str.charCodeAt(i);
+        if (0xD800 <= code && code <= 0xDBFF) {
+            // if the i-th 16bit is an upper surrogate
+            // skip the next 16 bits (lower surrogate)
+            i++;
+        }
+    }
+    return count;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-languageserver-types/lib/esm/main.js
+/* --------------------------------------------------------------------------------------------
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License.txt in the project root for license information.
+ * ------------------------------------------------------------------------------------------ */
+var DocumentUri;
+(function (DocumentUri) {
+    function is(value) {
+        return typeof value === 'string';
+    }
+    DocumentUri.is = is;
+})(DocumentUri || (DocumentUri = {}));
+var URI;
+(function (URI) {
+    function is(value) {
+        return typeof value === 'string';
+    }
+    URI.is = is;
+})(URI || (URI = {}));
+var integer;
+(function (integer) {
+    integer.MIN_VALUE = -2147483648;
+    integer.MAX_VALUE = 2147483647;
+    function is(value) {
+        return typeof value === 'number' && integer.MIN_VALUE <= value && value <= integer.MAX_VALUE;
+    }
+    integer.is = is;
+})(integer || (integer = {}));
+var uinteger;
+(function (uinteger) {
+    uinteger.MIN_VALUE = 0;
+    uinteger.MAX_VALUE = 2147483647;
+    function is(value) {
+        return typeof value === 'number' && uinteger.MIN_VALUE <= value && value <= uinteger.MAX_VALUE;
+    }
+    uinteger.is = is;
+})(uinteger || (uinteger = {}));
+/**
+ * The Position namespace provides helper functions to work with
+ * {@link Position} literals.
+ */
+var Position;
+(function (Position) {
+    /**
+     * Creates a new Position literal from the given line and character.
+     * @param line The position's line.
+     * @param character The position's character.
+     */
+    function create(line, character) {
+        if (line === Number.MAX_VALUE) {
+            line = uinteger.MAX_VALUE;
+        }
+        if (character === Number.MAX_VALUE) {
+            character = uinteger.MAX_VALUE;
+        }
+        return { line, character };
+    }
+    Position.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link Position} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.objectLiteral(candidate) && Is.uinteger(candidate.line) && Is.uinteger(candidate.character);
+    }
+    Position.is = is;
+})(Position || (Position = {}));
+/**
+ * The Range namespace provides helper functions to work with
+ * {@link Range} literals.
+ */
+var Range;
+(function (Range) {
+    function create(one, two, three, four) {
+        if (Is.uinteger(one) && Is.uinteger(two) && Is.uinteger(three) && Is.uinteger(four)) {
+            return { start: Position.create(one, two), end: Position.create(three, four) };
+        }
+        else if (Position.is(one) && Position.is(two)) {
+            return { start: one, end: two };
+        }
+        else {
+            throw new Error(`Range#create called with invalid arguments[${one}, ${two}, ${three}, ${four}]`);
+        }
+    }
+    Range.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link Range} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.objectLiteral(candidate) && Position.is(candidate.start) && Position.is(candidate.end);
+    }
+    Range.is = is;
+})(Range || (Range = {}));
+/**
+ * The Location namespace provides helper functions to work with
+ * {@link Location} literals.
+ */
+var Location;
+(function (Location) {
+    /**
+     * Creates a Location literal.
+     * @param uri The location's uri.
+     * @param range The location's range.
+     */
+    function create(uri, range) {
+        return { uri, range };
+    }
+    Location.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link Location} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.objectLiteral(candidate) && Range.is(candidate.range) && (Is.string(candidate.uri) || Is.undefined(candidate.uri));
+    }
+    Location.is = is;
+})(Location || (Location = {}));
+/**
+ * The LocationLink namespace provides helper functions to work with
+ * {@link LocationLink} literals.
+ */
+var LocationLink;
+(function (LocationLink) {
+    /**
+     * Creates a LocationLink literal.
+     * @param targetUri The definition's uri.
+     * @param targetRange The full range of the definition.
+     * @param targetSelectionRange The span of the symbol definition at the target.
+     * @param originSelectionRange The span of the symbol being defined in the originating source file.
+     */
+    function create(targetUri, targetRange, targetSelectionRange, originSelectionRange) {
+        return { targetUri, targetRange, targetSelectionRange, originSelectionRange };
+    }
+    LocationLink.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link LocationLink} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.objectLiteral(candidate) && Range.is(candidate.targetRange) && Is.string(candidate.targetUri)
+            && Range.is(candidate.targetSelectionRange)
+            && (Range.is(candidate.originSelectionRange) || Is.undefined(candidate.originSelectionRange));
+    }
+    LocationLink.is = is;
+})(LocationLink || (LocationLink = {}));
+/**
+ * The Color namespace provides helper functions to work with
+ * {@link Color} literals.
+ */
+var Color;
+(function (Color) {
+    /**
+     * Creates a new Color literal.
+     */
+    function create(red, green, blue, alpha) {
+        return {
+            red,
+            green,
+            blue,
+            alpha,
+        };
+    }
+    Color.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link Color} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Is.numberRange(candidate.red, 0, 1)
+            && Is.numberRange(candidate.green, 0, 1)
+            && Is.numberRange(candidate.blue, 0, 1)
+            && Is.numberRange(candidate.alpha, 0, 1);
+    }
+    Color.is = is;
+})(Color || (Color = {}));
+/**
+ * The ColorInformation namespace provides helper functions to work with
+ * {@link ColorInformation} literals.
+ */
+var ColorInformation;
+(function (ColorInformation) {
+    /**
+     * Creates a new ColorInformation literal.
+     */
+    function create(range, color) {
+        return {
+            range,
+            color,
+        };
+    }
+    ColorInformation.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link ColorInformation} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Range.is(candidate.range) && Color.is(candidate.color);
+    }
+    ColorInformation.is = is;
+})(ColorInformation || (ColorInformation = {}));
+/**
+ * The Color namespace provides helper functions to work with
+ * {@link ColorPresentation} literals.
+ */
+var ColorPresentation;
+(function (ColorPresentation) {
+    /**
+     * Creates a new ColorInformation literal.
+     */
+    function create(label, textEdit, additionalTextEdits) {
+        return {
+            label,
+            textEdit,
+            additionalTextEdits,
+        };
+    }
+    ColorPresentation.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link ColorInformation} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Is.string(candidate.label)
+            && (Is.undefined(candidate.textEdit) || TextEdit.is(candidate))
+            && (Is.undefined(candidate.additionalTextEdits) || Is.typedArray(candidate.additionalTextEdits, TextEdit.is));
+    }
+    ColorPresentation.is = is;
+})(ColorPresentation || (ColorPresentation = {}));
+/**
+ * A set of predefined range kinds.
+ */
+var FoldingRangeKind;
+(function (FoldingRangeKind) {
+    /**
+     * Folding range for a comment
+     */
+    FoldingRangeKind.Comment = 'comment';
+    /**
+     * Folding range for an import or include
+     */
+    FoldingRangeKind.Imports = 'imports';
+    /**
+     * Folding range for a region (e.g. `#region`)
+     */
+    FoldingRangeKind.Region = 'region';
+})(FoldingRangeKind || (FoldingRangeKind = {}));
+/**
+ * The folding range namespace provides helper functions to work with
+ * {@link FoldingRange} literals.
+ */
+var FoldingRange;
+(function (FoldingRange) {
+    /**
+     * Creates a new FoldingRange literal.
+     */
+    function create(startLine, endLine, startCharacter, endCharacter, kind, collapsedText) {
+        const result = {
+            startLine,
+            endLine
+        };
+        if (Is.defined(startCharacter)) {
+            result.startCharacter = startCharacter;
+        }
+        if (Is.defined(endCharacter)) {
+            result.endCharacter = endCharacter;
+        }
+        if (Is.defined(kind)) {
+            result.kind = kind;
+        }
+        if (Is.defined(collapsedText)) {
+            result.collapsedText = collapsedText;
+        }
+        return result;
+    }
+    FoldingRange.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link FoldingRange} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Is.uinteger(candidate.startLine) && Is.uinteger(candidate.startLine)
+            && (Is.undefined(candidate.startCharacter) || Is.uinteger(candidate.startCharacter))
+            && (Is.undefined(candidate.endCharacter) || Is.uinteger(candidate.endCharacter))
+            && (Is.undefined(candidate.kind) || Is.string(candidate.kind));
+    }
+    FoldingRange.is = is;
+})(FoldingRange || (FoldingRange = {}));
+/**
+ * The DiagnosticRelatedInformation namespace provides helper functions to work with
+ * {@link DiagnosticRelatedInformation} literals.
+ */
+var DiagnosticRelatedInformation;
+(function (DiagnosticRelatedInformation) {
+    /**
+     * Creates a new DiagnosticRelatedInformation literal.
+     */
+    function create(location, message) {
+        return {
+            location,
+            message
+        };
+    }
+    DiagnosticRelatedInformation.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link DiagnosticRelatedInformation} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Location.is(candidate.location) && Is.string(candidate.message);
+    }
+    DiagnosticRelatedInformation.is = is;
+})(DiagnosticRelatedInformation || (DiagnosticRelatedInformation = {}));
+/**
+ * The diagnostic's severity.
+ */
+var DiagnosticSeverity;
+(function (DiagnosticSeverity) {
+    /**
+     * Reports an error.
+     */
+    DiagnosticSeverity.Error = 1;
+    /**
+     * Reports a warning.
+     */
+    DiagnosticSeverity.Warning = 2;
+    /**
+     * Reports an information.
+     */
+    DiagnosticSeverity.Information = 3;
+    /**
+     * Reports a hint.
+     */
+    DiagnosticSeverity.Hint = 4;
+})(DiagnosticSeverity || (DiagnosticSeverity = {}));
+/**
+ * The diagnostic tags.
+ *
+ * @since 3.15.0
+ */
+var DiagnosticTag;
+(function (DiagnosticTag) {
+    /**
+     * Unused or unnecessary code.
+     *
+     * Clients are allowed to render diagnostics with this tag faded out instead of having
+     * an error squiggle.
+     */
+    DiagnosticTag.Unnecessary = 1;
+    /**
+     * Deprecated or obsolete code.
+     *
+     * Clients are allowed to rendered diagnostics with this tag strike through.
+     */
+    DiagnosticTag.Deprecated = 2;
+})(DiagnosticTag || (DiagnosticTag = {}));
+/**
+ * The CodeDescription namespace provides functions to deal with descriptions for diagnostic codes.
+ *
+ * @since 3.16.0
+ */
+var CodeDescription;
+(function (CodeDescription) {
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Is.string(candidate.href);
+    }
+    CodeDescription.is = is;
+})(CodeDescription || (CodeDescription = {}));
+/**
+ * The Diagnostic namespace provides helper functions to work with
+ * {@link Diagnostic} literals.
+ */
+var Diagnostic;
+(function (Diagnostic) {
+    /**
+     * Creates a new Diagnostic literal.
+     */
+    function create(range, message, severity, code, source, relatedInformation) {
+        let result = { range, message };
+        if (Is.defined(severity)) {
+            result.severity = severity;
+        }
+        if (Is.defined(code)) {
+            result.code = code;
+        }
+        if (Is.defined(source)) {
+            result.source = source;
+        }
+        if (Is.defined(relatedInformation)) {
+            result.relatedInformation = relatedInformation;
+        }
+        return result;
+    }
+    Diagnostic.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link Diagnostic} interface.
+     */
+    function is(value) {
+        var _a;
+        let candidate = value;
+        return Is.defined(candidate)
+            && Range.is(candidate.range)
+            && Is.string(candidate.message)
+            && (Is.number(candidate.severity) || Is.undefined(candidate.severity))
+            && (Is.integer(candidate.code) || Is.string(candidate.code) || Is.undefined(candidate.code))
+            && (Is.undefined(candidate.codeDescription) || (Is.string((_a = candidate.codeDescription) === null || _a === void 0 ? void 0 : _a.href)))
+            && (Is.string(candidate.source) || Is.undefined(candidate.source))
+            && (Is.undefined(candidate.relatedInformation) || Is.typedArray(candidate.relatedInformation, DiagnosticRelatedInformation.is));
+    }
+    Diagnostic.is = is;
+})(Diagnostic || (Diagnostic = {}));
+/**
+ * The Command namespace provides helper functions to work with
+ * {@link Command} literals.
+ */
+var Command;
+(function (Command) {
+    /**
+     * Creates a new Command literal.
+     */
+    function create(title, command, ...args) {
+        let result = { title, command };
+        if (Is.defined(args) && args.length > 0) {
+            result.arguments = args;
+        }
+        return result;
+    }
+    Command.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link Command} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.string(candidate.title) && Is.string(candidate.command);
+    }
+    Command.is = is;
+})(Command || (Command = {}));
+/**
+ * The TextEdit namespace provides helper function to create replace,
+ * insert and delete edits more easily.
+ */
+var TextEdit;
+(function (TextEdit) {
+    /**
+     * Creates a replace text edit.
+     * @param range The range of text to be replaced.
+     * @param newText The new text.
+     */
+    function replace(range, newText) {
+        return { range, newText };
+    }
+    TextEdit.replace = replace;
+    /**
+     * Creates an insert text edit.
+     * @param position The position to insert the text at.
+     * @param newText The text to be inserted.
+     */
+    function insert(position, newText) {
+        return { range: { start: position, end: position }, newText };
+    }
+    TextEdit.insert = insert;
+    /**
+     * Creates a delete text edit.
+     * @param range The range of text to be deleted.
+     */
+    function del(range) {
+        return { range, newText: '' };
+    }
+    TextEdit.del = del;
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate)
+            && Is.string(candidate.newText)
+            && Range.is(candidate.range);
+    }
+    TextEdit.is = is;
+})(TextEdit || (TextEdit = {}));
+var ChangeAnnotation;
+(function (ChangeAnnotation) {
+    function create(label, needsConfirmation, description) {
+        const result = { label };
+        if (needsConfirmation !== undefined) {
+            result.needsConfirmation = needsConfirmation;
+        }
+        if (description !== undefined) {
+            result.description = description;
+        }
+        return result;
+    }
+    ChangeAnnotation.create = create;
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Is.string(candidate.label) &&
+            (Is.boolean(candidate.needsConfirmation) || candidate.needsConfirmation === undefined) &&
+            (Is.string(candidate.description) || candidate.description === undefined);
+    }
+    ChangeAnnotation.is = is;
+})(ChangeAnnotation || (ChangeAnnotation = {}));
+var ChangeAnnotationIdentifier;
+(function (ChangeAnnotationIdentifier) {
+    function is(value) {
+        const candidate = value;
+        return Is.string(candidate);
+    }
+    ChangeAnnotationIdentifier.is = is;
+})(ChangeAnnotationIdentifier || (ChangeAnnotationIdentifier = {}));
+var AnnotatedTextEdit;
+(function (AnnotatedTextEdit) {
+    /**
+     * Creates an annotated replace text edit.
+     *
+     * @param range The range of text to be replaced.
+     * @param newText The new text.
+     * @param annotation The annotation.
+     */
+    function replace(range, newText, annotation) {
+        return { range, newText, annotationId: annotation };
+    }
+    AnnotatedTextEdit.replace = replace;
+    /**
+     * Creates an annotated insert text edit.
+     *
+     * @param position The position to insert the text at.
+     * @param newText The text to be inserted.
+     * @param annotation The annotation.
+     */
+    function insert(position, newText, annotation) {
+        return { range: { start: position, end: position }, newText, annotationId: annotation };
+    }
+    AnnotatedTextEdit.insert = insert;
+    /**
+     * Creates an annotated delete text edit.
+     *
+     * @param range The range of text to be deleted.
+     * @param annotation The annotation.
+     */
+    function del(range, annotation) {
+        return { range, newText: '', annotationId: annotation };
+    }
+    AnnotatedTextEdit.del = del;
+    function is(value) {
+        const candidate = value;
+        return TextEdit.is(candidate) && (ChangeAnnotation.is(candidate.annotationId) || ChangeAnnotationIdentifier.is(candidate.annotationId));
+    }
+    AnnotatedTextEdit.is = is;
+})(AnnotatedTextEdit || (AnnotatedTextEdit = {}));
+/**
+ * The TextDocumentEdit namespace provides helper function to create
+ * an edit that manipulates a text document.
+ */
+var TextDocumentEdit;
+(function (TextDocumentEdit) {
+    /**
+     * Creates a new `TextDocumentEdit`
+     */
+    function create(textDocument, edits) {
+        return { textDocument, edits };
+    }
+    TextDocumentEdit.create = create;
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate)
+            && OptionalVersionedTextDocumentIdentifier.is(candidate.textDocument)
+            && Array.isArray(candidate.edits);
+    }
+    TextDocumentEdit.is = is;
+})(TextDocumentEdit || (TextDocumentEdit = {}));
+var CreateFile;
+(function (CreateFile) {
+    function create(uri, options, annotation) {
+        let result = {
+            kind: 'create',
+            uri
+        };
+        if (options !== undefined && (options.overwrite !== undefined || options.ignoreIfExists !== undefined)) {
+            result.options = options;
+        }
+        if (annotation !== undefined) {
+            result.annotationId = annotation;
+        }
+        return result;
+    }
+    CreateFile.create = create;
+    function is(value) {
+        let candidate = value;
+        return candidate && candidate.kind === 'create' && Is.string(candidate.uri) && (candidate.options === undefined ||
+            ((candidate.options.overwrite === undefined || Is.boolean(candidate.options.overwrite)) && (candidate.options.ignoreIfExists === undefined || Is.boolean(candidate.options.ignoreIfExists)))) && (candidate.annotationId === undefined || ChangeAnnotationIdentifier.is(candidate.annotationId));
+    }
+    CreateFile.is = is;
+})(CreateFile || (CreateFile = {}));
+var RenameFile;
+(function (RenameFile) {
+    function create(oldUri, newUri, options, annotation) {
+        let result = {
+            kind: 'rename',
+            oldUri,
+            newUri
+        };
+        if (options !== undefined && (options.overwrite !== undefined || options.ignoreIfExists !== undefined)) {
+            result.options = options;
+        }
+        if (annotation !== undefined) {
+            result.annotationId = annotation;
+        }
+        return result;
+    }
+    RenameFile.create = create;
+    function is(value) {
+        let candidate = value;
+        return candidate && candidate.kind === 'rename' && Is.string(candidate.oldUri) && Is.string(candidate.newUri) && (candidate.options === undefined ||
+            ((candidate.options.overwrite === undefined || Is.boolean(candidate.options.overwrite)) && (candidate.options.ignoreIfExists === undefined || Is.boolean(candidate.options.ignoreIfExists)))) && (candidate.annotationId === undefined || ChangeAnnotationIdentifier.is(candidate.annotationId));
+    }
+    RenameFile.is = is;
+})(RenameFile || (RenameFile = {}));
+var DeleteFile;
+(function (DeleteFile) {
+    function create(uri, options, annotation) {
+        let result = {
+            kind: 'delete',
+            uri
+        };
+        if (options !== undefined && (options.recursive !== undefined || options.ignoreIfNotExists !== undefined)) {
+            result.options = options;
+        }
+        if (annotation !== undefined) {
+            result.annotationId = annotation;
+        }
+        return result;
+    }
+    DeleteFile.create = create;
+    function is(value) {
+        let candidate = value;
+        return candidate && candidate.kind === 'delete' && Is.string(candidate.uri) && (candidate.options === undefined ||
+            ((candidate.options.recursive === undefined || Is.boolean(candidate.options.recursive)) && (candidate.options.ignoreIfNotExists === undefined || Is.boolean(candidate.options.ignoreIfNotExists)))) && (candidate.annotationId === undefined || ChangeAnnotationIdentifier.is(candidate.annotationId));
+    }
+    DeleteFile.is = is;
+})(DeleteFile || (DeleteFile = {}));
+var WorkspaceEdit;
+(function (WorkspaceEdit) {
+    function is(value) {
+        let candidate = value;
+        return candidate &&
+            (candidate.changes !== undefined || candidate.documentChanges !== undefined) &&
+            (candidate.documentChanges === undefined || candidate.documentChanges.every((change) => {
+                if (Is.string(change.kind)) {
+                    return CreateFile.is(change) || RenameFile.is(change) || DeleteFile.is(change);
+                }
+                else {
+                    return TextDocumentEdit.is(change);
+                }
+            }));
+    }
+    WorkspaceEdit.is = is;
+})(WorkspaceEdit || (WorkspaceEdit = {}));
+/**
+ * The TextDocumentIdentifier namespace provides helper functions to work with
+ * {@link TextDocumentIdentifier} literals.
+ */
+var TextDocumentIdentifier;
+(function (TextDocumentIdentifier) {
+    /**
+     * Creates a new TextDocumentIdentifier literal.
+     * @param uri The document's uri.
+     */
+    function create(uri) {
+        return { uri };
+    }
+    TextDocumentIdentifier.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link TextDocumentIdentifier} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.string(candidate.uri);
+    }
+    TextDocumentIdentifier.is = is;
+})(TextDocumentIdentifier || (TextDocumentIdentifier = {}));
+/**
+ * The VersionedTextDocumentIdentifier namespace provides helper functions to work with
+ * {@link VersionedTextDocumentIdentifier} literals.
+ */
+var VersionedTextDocumentIdentifier;
+(function (VersionedTextDocumentIdentifier) {
+    /**
+     * Creates a new VersionedTextDocumentIdentifier literal.
+     * @param uri The document's uri.
+     * @param version The document's version.
+     */
+    function create(uri, version) {
+        return { uri, version };
+    }
+    VersionedTextDocumentIdentifier.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link VersionedTextDocumentIdentifier} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.string(candidate.uri) && Is.integer(candidate.version);
+    }
+    VersionedTextDocumentIdentifier.is = is;
+})(VersionedTextDocumentIdentifier || (VersionedTextDocumentIdentifier = {}));
+/**
+ * The OptionalVersionedTextDocumentIdentifier namespace provides helper functions to work with
+ * {@link OptionalVersionedTextDocumentIdentifier} literals.
+ */
+var OptionalVersionedTextDocumentIdentifier;
+(function (OptionalVersionedTextDocumentIdentifier) {
+    /**
+     * Creates a new OptionalVersionedTextDocumentIdentifier literal.
+     * @param uri The document's uri.
+     * @param version The document's version.
+     */
+    function create(uri, version) {
+        return { uri, version };
+    }
+    OptionalVersionedTextDocumentIdentifier.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link OptionalVersionedTextDocumentIdentifier} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.string(candidate.uri) && (candidate.version === null || Is.integer(candidate.version));
+    }
+    OptionalVersionedTextDocumentIdentifier.is = is;
+})(OptionalVersionedTextDocumentIdentifier || (OptionalVersionedTextDocumentIdentifier = {}));
+/**
+ * The TextDocumentItem namespace provides helper functions to work with
+ * {@link TextDocumentItem} literals.
+ */
+var TextDocumentItem;
+(function (TextDocumentItem) {
+    /**
+     * Creates a new TextDocumentItem literal.
+     * @param uri The document's uri.
+     * @param languageId The document's language identifier.
+     * @param version The document's version number.
+     * @param text The document's text.
+     */
+    function create(uri, languageId, version, text) {
+        return { uri, languageId, version, text };
+    }
+    TextDocumentItem.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link TextDocumentItem} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.string(candidate.uri) && Is.string(candidate.languageId) && Is.integer(candidate.version) && Is.string(candidate.text);
+    }
+    TextDocumentItem.is = is;
+})(TextDocumentItem || (TextDocumentItem = {}));
+/**
+ * Describes the content type that a client supports in various
+ * result literals like `Hover`, `ParameterInfo` or `CompletionItem`.
+ *
+ * Please note that `MarkupKinds` must not start with a `$`. This kinds
+ * are reserved for internal usage.
+ */
+var MarkupKind;
+(function (MarkupKind) {
+    /**
+     * Plain text is supported as a content format
+     */
+    MarkupKind.PlainText = 'plaintext';
+    /**
+     * Markdown is supported as a content format
+     */
+    MarkupKind.Markdown = 'markdown';
+    /**
+     * Checks whether the given value is a value of the {@link MarkupKind} type.
+     */
+    function is(value) {
+        const candidate = value;
+        return candidate === MarkupKind.PlainText || candidate === MarkupKind.Markdown;
+    }
+    MarkupKind.is = is;
+})(MarkupKind || (MarkupKind = {}));
+var MarkupContent;
+(function (MarkupContent) {
+    /**
+     * Checks whether the given value conforms to the {@link MarkupContent} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(value) && MarkupKind.is(candidate.kind) && Is.string(candidate.value);
+    }
+    MarkupContent.is = is;
+})(MarkupContent || (MarkupContent = {}));
+/**
+ * The kind of a completion entry.
+ */
+var CompletionItemKind;
+(function (CompletionItemKind) {
+    CompletionItemKind.Text = 1;
+    CompletionItemKind.Method = 2;
+    CompletionItemKind.Function = 3;
+    CompletionItemKind.Constructor = 4;
+    CompletionItemKind.Field = 5;
+    CompletionItemKind.Variable = 6;
+    CompletionItemKind.Class = 7;
+    CompletionItemKind.Interface = 8;
+    CompletionItemKind.Module = 9;
+    CompletionItemKind.Property = 10;
+    CompletionItemKind.Unit = 11;
+    CompletionItemKind.Value = 12;
+    CompletionItemKind.Enum = 13;
+    CompletionItemKind.Keyword = 14;
+    CompletionItemKind.Snippet = 15;
+    CompletionItemKind.Color = 16;
+    CompletionItemKind.File = 17;
+    CompletionItemKind.Reference = 18;
+    CompletionItemKind.Folder = 19;
+    CompletionItemKind.EnumMember = 20;
+    CompletionItemKind.Constant = 21;
+    CompletionItemKind.Struct = 22;
+    CompletionItemKind.Event = 23;
+    CompletionItemKind.Operator = 24;
+    CompletionItemKind.TypeParameter = 25;
+})(CompletionItemKind || (CompletionItemKind = {}));
+/**
+ * Defines whether the insert text in a completion item should be interpreted as
+ * plain text or a snippet.
+ */
+var InsertTextFormat;
+(function (InsertTextFormat) {
+    /**
+     * The primary text to be inserted is treated as a plain string.
+     */
+    InsertTextFormat.PlainText = 1;
+    /**
+     * The primary text to be inserted is treated as a snippet.
+     *
+     * A snippet can define tab stops and placeholders with `$1`, `$2`
+     * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+     * the end of the snippet. Placeholders with equal identifiers are linked,
+     * that is typing in one will update others too.
+     *
+     * See also: https://microsoft.github.io/language-server-protocol/specifications/specification-current/#snippet_syntax
+     */
+    InsertTextFormat.Snippet = 2;
+})(InsertTextFormat || (InsertTextFormat = {}));
+/**
+ * Completion item tags are extra annotations that tweak the rendering of a completion
+ * item.
+ *
+ * @since 3.15.0
+ */
+var CompletionItemTag;
+(function (CompletionItemTag) {
+    /**
+     * Render a completion as obsolete, usually using a strike-out.
+     */
+    CompletionItemTag.Deprecated = 1;
+})(CompletionItemTag || (CompletionItemTag = {}));
+/**
+ * The InsertReplaceEdit namespace provides functions to deal with insert / replace edits.
+ *
+ * @since 3.16.0
+ */
+var InsertReplaceEdit;
+(function (InsertReplaceEdit) {
+    /**
+     * Creates a new insert / replace edit
+     */
+    function create(newText, insert, replace) {
+        return { newText, insert, replace };
+    }
+    InsertReplaceEdit.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link InsertReplaceEdit} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return candidate && Is.string(candidate.newText) && Range.is(candidate.insert) && Range.is(candidate.replace);
+    }
+    InsertReplaceEdit.is = is;
+})(InsertReplaceEdit || (InsertReplaceEdit = {}));
+/**
+ * How whitespace and indentation is handled during completion
+ * item insertion.
+ *
+ * @since 3.16.0
+ */
+var InsertTextMode;
+(function (InsertTextMode) {
+    /**
+     * The insertion or replace strings is taken as it is. If the
+     * value is multi line the lines below the cursor will be
+     * inserted using the indentation defined in the string value.
+     * The client will not apply any kind of adjustments to the
+     * string.
+     */
+    InsertTextMode.asIs = 1;
+    /**
+     * The editor adjusts leading whitespace of new lines so that
+     * they match the indentation up to the cursor of the line for
+     * which the item is accepted.
+     *
+     * Consider a line like this: <2tabs><cursor><3tabs>foo. Accepting a
+     * multi line completion item is indented using 2 tabs and all
+     * following lines inserted will be indented using 2 tabs as well.
+     */
+    InsertTextMode.adjustIndentation = 2;
+})(InsertTextMode || (InsertTextMode = {}));
+var CompletionItemLabelDetails;
+(function (CompletionItemLabelDetails) {
+    function is(value) {
+        const candidate = value;
+        return candidate && (Is.string(candidate.detail) || candidate.detail === undefined) &&
+            (Is.string(candidate.description) || candidate.description === undefined);
+    }
+    CompletionItemLabelDetails.is = is;
+})(CompletionItemLabelDetails || (CompletionItemLabelDetails = {}));
+/**
+ * The CompletionItem namespace provides functions to deal with
+ * completion items.
+ */
+var CompletionItem;
+(function (CompletionItem) {
+    /**
+     * Create a completion item and seed it with a label.
+     * @param label The completion item's label
+     */
+    function create(label) {
+        return { label };
+    }
+    CompletionItem.create = create;
+})(CompletionItem || (CompletionItem = {}));
+/**
+ * The CompletionList namespace provides functions to deal with
+ * completion lists.
+ */
+var CompletionList;
+(function (CompletionList) {
+    /**
+     * Creates a new completion list.
+     *
+     * @param items The completion items.
+     * @param isIncomplete The list is not complete.
+     */
+    function create(items, isIncomplete) {
+        return { items: items ? items : [], isIncomplete: !!isIncomplete };
+    }
+    CompletionList.create = create;
+})(CompletionList || (CompletionList = {}));
+var MarkedString;
+(function (MarkedString) {
+    /**
+     * Creates a marked string from plain text.
+     *
+     * @param plainText The plain text.
+     */
+    function fromPlainText(plainText) {
+        return plainText.replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&'); // escape markdown syntax tokens: http://daringfireball.net/projects/markdown/syntax#backslash
+    }
+    MarkedString.fromPlainText = fromPlainText;
+    /**
+     * Checks whether the given value conforms to the {@link MarkedString} type.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.string(candidate) || (Is.objectLiteral(candidate) && Is.string(candidate.language) && Is.string(candidate.value));
+    }
+    MarkedString.is = is;
+})(MarkedString || (MarkedString = {}));
+var Hover;
+(function (Hover) {
+    /**
+     * Checks whether the given value conforms to the {@link Hover} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return !!candidate && Is.objectLiteral(candidate) && (MarkupContent.is(candidate.contents) ||
+            MarkedString.is(candidate.contents) ||
+            Is.typedArray(candidate.contents, MarkedString.is)) && (value.range === undefined || Range.is(value.range));
+    }
+    Hover.is = is;
+})(Hover || (Hover = {}));
+/**
+ * The ParameterInformation namespace provides helper functions to work with
+ * {@link ParameterInformation} literals.
+ */
+var ParameterInformation;
+(function (ParameterInformation) {
+    /**
+     * Creates a new parameter information literal.
+     *
+     * @param label A label string.
+     * @param documentation A doc string.
+     */
+    function create(label, documentation) {
+        return documentation ? { label, documentation } : { label };
+    }
+    ParameterInformation.create = create;
+})(ParameterInformation || (ParameterInformation = {}));
+/**
+ * The SignatureInformation namespace provides helper functions to work with
+ * {@link SignatureInformation} literals.
+ */
+var SignatureInformation;
+(function (SignatureInformation) {
+    function create(label, documentation, ...parameters) {
+        let result = { label };
+        if (Is.defined(documentation)) {
+            result.documentation = documentation;
+        }
+        if (Is.defined(parameters)) {
+            result.parameters = parameters;
+        }
+        else {
+            result.parameters = [];
+        }
+        return result;
+    }
+    SignatureInformation.create = create;
+})(SignatureInformation || (SignatureInformation = {}));
+/**
+ * A document highlight kind.
+ */
+var DocumentHighlightKind;
+(function (DocumentHighlightKind) {
+    /**
+     * A textual occurrence.
+     */
+    DocumentHighlightKind.Text = 1;
+    /**
+     * Read-access of a symbol, like reading a variable.
+     */
+    DocumentHighlightKind.Read = 2;
+    /**
+     * Write-access of a symbol, like writing to a variable.
+     */
+    DocumentHighlightKind.Write = 3;
+})(DocumentHighlightKind || (DocumentHighlightKind = {}));
+/**
+ * DocumentHighlight namespace to provide helper functions to work with
+ * {@link DocumentHighlight} literals.
+ */
+var DocumentHighlight;
+(function (DocumentHighlight) {
+    /**
+     * Create a DocumentHighlight object.
+     * @param range The range the highlight applies to.
+     * @param kind The highlight kind
+     */
+    function create(range, kind) {
+        let result = { range };
+        if (Is.number(kind)) {
+            result.kind = kind;
+        }
+        return result;
+    }
+    DocumentHighlight.create = create;
+})(DocumentHighlight || (DocumentHighlight = {}));
+/**
+ * A symbol kind.
+ */
+var SymbolKind;
+(function (SymbolKind) {
+    SymbolKind.File = 1;
+    SymbolKind.Module = 2;
+    SymbolKind.Namespace = 3;
+    SymbolKind.Package = 4;
+    SymbolKind.Class = 5;
+    SymbolKind.Method = 6;
+    SymbolKind.Property = 7;
+    SymbolKind.Field = 8;
+    SymbolKind.Constructor = 9;
+    SymbolKind.Enum = 10;
+    SymbolKind.Interface = 11;
+    SymbolKind.Function = 12;
+    SymbolKind.Variable = 13;
+    SymbolKind.Constant = 14;
+    SymbolKind.String = 15;
+    SymbolKind.Number = 16;
+    SymbolKind.Boolean = 17;
+    SymbolKind.Array = 18;
+    SymbolKind.Object = 19;
+    SymbolKind.Key = 20;
+    SymbolKind.Null = 21;
+    SymbolKind.EnumMember = 22;
+    SymbolKind.Struct = 23;
+    SymbolKind.Event = 24;
+    SymbolKind.Operator = 25;
+    SymbolKind.TypeParameter = 26;
+})(SymbolKind || (SymbolKind = {}));
+/**
+ * Symbol tags are extra annotations that tweak the rendering of a symbol.
+ *
+ * @since 3.16
+ */
+var SymbolTag;
+(function (SymbolTag) {
+    /**
+     * Render a symbol as obsolete, usually using a strike-out.
+     */
+    SymbolTag.Deprecated = 1;
+})(SymbolTag || (SymbolTag = {}));
+var SymbolInformation;
+(function (SymbolInformation) {
+    /**
+     * Creates a new symbol information literal.
+     *
+     * @param name The name of the symbol.
+     * @param kind The kind of the symbol.
+     * @param range The range of the location of the symbol.
+     * @param uri The resource of the location of symbol.
+     * @param containerName The name of the symbol containing the symbol.
+     */
+    function create(name, kind, range, uri, containerName) {
+        let result = {
+            name,
+            kind,
+            location: { uri, range }
+        };
+        if (containerName) {
+            result.containerName = containerName;
+        }
+        return result;
+    }
+    SymbolInformation.create = create;
+})(SymbolInformation || (SymbolInformation = {}));
+var WorkspaceSymbol;
+(function (WorkspaceSymbol) {
+    /**
+     * Create a new workspace symbol.
+     *
+     * @param name The name of the symbol.
+     * @param kind The kind of the symbol.
+     * @param uri The resource of the location of the symbol.
+     * @param range An options range of the location.
+     * @returns A WorkspaceSymbol.
+     */
+    function create(name, kind, uri, range) {
+        return range !== undefined
+            ? { name, kind, location: { uri, range } }
+            : { name, kind, location: { uri } };
+    }
+    WorkspaceSymbol.create = create;
+})(WorkspaceSymbol || (WorkspaceSymbol = {}));
+var DocumentSymbol;
+(function (DocumentSymbol) {
+    /**
+     * Creates a new symbol information literal.
+     *
+     * @param name The name of the symbol.
+     * @param detail The detail of the symbol.
+     * @param kind The kind of the symbol.
+     * @param range The range of the symbol.
+     * @param selectionRange The selectionRange of the symbol.
+     * @param children Children of the symbol.
+     */
+    function create(name, detail, kind, range, selectionRange, children) {
+        let result = {
+            name,
+            detail,
+            kind,
+            range,
+            selectionRange
+        };
+        if (children !== undefined) {
+            result.children = children;
+        }
+        return result;
+    }
+    DocumentSymbol.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link DocumentSymbol} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return candidate &&
+            Is.string(candidate.name) && Is.number(candidate.kind) &&
+            Range.is(candidate.range) && Range.is(candidate.selectionRange) &&
+            (candidate.detail === undefined || Is.string(candidate.detail)) &&
+            (candidate.deprecated === undefined || Is.boolean(candidate.deprecated)) &&
+            (candidate.children === undefined || Array.isArray(candidate.children)) &&
+            (candidate.tags === undefined || Array.isArray(candidate.tags));
+    }
+    DocumentSymbol.is = is;
+})(DocumentSymbol || (DocumentSymbol = {}));
+/**
+ * A set of predefined code action kinds
+ */
+var CodeActionKind;
+(function (CodeActionKind) {
+    /**
+     * Empty kind.
+     */
+    CodeActionKind.Empty = '';
+    /**
+     * Base kind for quickfix actions: 'quickfix'
+     */
+    CodeActionKind.QuickFix = 'quickfix';
+    /**
+     * Base kind for refactoring actions: 'refactor'
+     */
+    CodeActionKind.Refactor = 'refactor';
+    /**
+     * Base kind for refactoring extraction actions: 'refactor.extract'
+     *
+     * Example extract actions:
+     *
+     * - Extract method
+     * - Extract function
+     * - Extract variable
+     * - Extract interface from class
+     * - ...
+     */
+    CodeActionKind.RefactorExtract = 'refactor.extract';
+    /**
+     * Base kind for refactoring inline actions: 'refactor.inline'
+     *
+     * Example inline actions:
+     *
+     * - Inline function
+     * - Inline variable
+     * - Inline constant
+     * - ...
+     */
+    CodeActionKind.RefactorInline = 'refactor.inline';
+    /**
+     * Base kind for refactoring rewrite actions: 'refactor.rewrite'
+     *
+     * Example rewrite actions:
+     *
+     * - Convert JavaScript function to class
+     * - Add or remove parameter
+     * - Encapsulate field
+     * - Make method static
+     * - Move method to base class
+     * - ...
+     */
+    CodeActionKind.RefactorRewrite = 'refactor.rewrite';
+    /**
+     * Base kind for source actions: `source`
+     *
+     * Source code actions apply to the entire file.
+     */
+    CodeActionKind.Source = 'source';
+    /**
+     * Base kind for an organize imports source action: `source.organizeImports`
+     */
+    CodeActionKind.SourceOrganizeImports = 'source.organizeImports';
+    /**
+     * Base kind for auto-fix source actions: `source.fixAll`.
+     *
+     * Fix all actions automatically fix errors that have a clear fix that do not require user input.
+     * They should not suppress errors or perform unsafe fixes such as generating new types or classes.
+     *
+     * @since 3.15.0
+     */
+    CodeActionKind.SourceFixAll = 'source.fixAll';
+})(CodeActionKind || (CodeActionKind = {}));
+/**
+ * The reason why code actions were requested.
+ *
+ * @since 3.17.0
+ */
+var CodeActionTriggerKind;
+(function (CodeActionTriggerKind) {
+    /**
+     * Code actions were explicitly requested by the user or by an extension.
+     */
+    CodeActionTriggerKind.Invoked = 1;
+    /**
+     * Code actions were requested automatically.
+     *
+     * This typically happens when current selection in a file changes, but can
+     * also be triggered when file content changes.
+     */
+    CodeActionTriggerKind.Automatic = 2;
+})(CodeActionTriggerKind || (CodeActionTriggerKind = {}));
+/**
+ * The CodeActionContext namespace provides helper functions to work with
+ * {@link CodeActionContext} literals.
+ */
+var CodeActionContext;
+(function (CodeActionContext) {
+    /**
+     * Creates a new CodeActionContext literal.
+     */
+    function create(diagnostics, only, triggerKind) {
+        let result = { diagnostics };
+        if (only !== undefined && only !== null) {
+            result.only = only;
+        }
+        if (triggerKind !== undefined && triggerKind !== null) {
+            result.triggerKind = triggerKind;
+        }
+        return result;
+    }
+    CodeActionContext.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link CodeActionContext} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.typedArray(candidate.diagnostics, Diagnostic.is)
+            && (candidate.only === undefined || Is.typedArray(candidate.only, Is.string))
+            && (candidate.triggerKind === undefined || candidate.triggerKind === CodeActionTriggerKind.Invoked || candidate.triggerKind === CodeActionTriggerKind.Automatic);
+    }
+    CodeActionContext.is = is;
+})(CodeActionContext || (CodeActionContext = {}));
+var CodeAction;
+(function (CodeAction) {
+    function create(title, kindOrCommandOrEdit, kind) {
+        let result = { title };
+        let checkKind = true;
+        if (typeof kindOrCommandOrEdit === 'string') {
+            checkKind = false;
+            result.kind = kindOrCommandOrEdit;
+        }
+        else if (Command.is(kindOrCommandOrEdit)) {
+            result.command = kindOrCommandOrEdit;
+        }
+        else {
+            result.edit = kindOrCommandOrEdit;
+        }
+        if (checkKind && kind !== undefined) {
+            result.kind = kind;
+        }
+        return result;
+    }
+    CodeAction.create = create;
+    function is(value) {
+        let candidate = value;
+        return candidate && Is.string(candidate.title) &&
+            (candidate.diagnostics === undefined || Is.typedArray(candidate.diagnostics, Diagnostic.is)) &&
+            (candidate.kind === undefined || Is.string(candidate.kind)) &&
+            (candidate.edit !== undefined || candidate.command !== undefined) &&
+            (candidate.command === undefined || Command.is(candidate.command)) &&
+            (candidate.isPreferred === undefined || Is.boolean(candidate.isPreferred)) &&
+            (candidate.edit === undefined || WorkspaceEdit.is(candidate.edit));
+    }
+    CodeAction.is = is;
+})(CodeAction || (CodeAction = {}));
+/**
+ * The CodeLens namespace provides helper functions to work with
+ * {@link CodeLens} literals.
+ */
+var CodeLens;
+(function (CodeLens) {
+    /**
+     * Creates a new CodeLens literal.
+     */
+    function create(range, data) {
+        let result = { range };
+        if (Is.defined(data)) {
+            result.data = data;
+        }
+        return result;
+    }
+    CodeLens.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link CodeLens} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Range.is(candidate.range) && (Is.undefined(candidate.command) || Command.is(candidate.command));
+    }
+    CodeLens.is = is;
+})(CodeLens || (CodeLens = {}));
+/**
+ * The FormattingOptions namespace provides helper functions to work with
+ * {@link FormattingOptions} literals.
+ */
+var FormattingOptions;
+(function (FormattingOptions) {
+    /**
+     * Creates a new FormattingOptions literal.
+     */
+    function create(tabSize, insertSpaces) {
+        return { tabSize, insertSpaces };
+    }
+    FormattingOptions.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link FormattingOptions} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.uinteger(candidate.tabSize) && Is.boolean(candidate.insertSpaces);
+    }
+    FormattingOptions.is = is;
+})(FormattingOptions || (FormattingOptions = {}));
+/**
+ * The DocumentLink namespace provides helper functions to work with
+ * {@link DocumentLink} literals.
+ */
+var DocumentLink;
+(function (DocumentLink) {
+    /**
+     * Creates a new DocumentLink literal.
+     */
+    function create(range, target, data) {
+        return { range, target, data };
+    }
+    DocumentLink.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link DocumentLink} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Range.is(candidate.range) && (Is.undefined(candidate.target) || Is.string(candidate.target));
+    }
+    DocumentLink.is = is;
+})(DocumentLink || (DocumentLink = {}));
+/**
+ * The SelectionRange namespace provides helper function to work with
+ * SelectionRange literals.
+ */
+var SelectionRange;
+(function (SelectionRange) {
+    /**
+     * Creates a new SelectionRange
+     * @param range the range.
+     * @param parent an optional parent.
+     */
+    function create(range, parent) {
+        return { range, parent };
+    }
+    SelectionRange.create = create;
+    function is(value) {
+        let candidate = value;
+        return Is.objectLiteral(candidate) && Range.is(candidate.range) && (candidate.parent === undefined || SelectionRange.is(candidate.parent));
+    }
+    SelectionRange.is = is;
+})(SelectionRange || (SelectionRange = {}));
+/**
+ * A set of predefined token types. This set is not fixed
+ * an clients can specify additional token types via the
+ * corresponding client capabilities.
+ *
+ * @since 3.16.0
+ */
+var SemanticTokenTypes;
+(function (SemanticTokenTypes) {
+    SemanticTokenTypes["namespace"] = "namespace";
+    /**
+     * Represents a generic type. Acts as a fallback for types which can't be mapped to
+     * a specific type like class or enum.
+     */
+    SemanticTokenTypes["type"] = "type";
+    SemanticTokenTypes["class"] = "class";
+    SemanticTokenTypes["enum"] = "enum";
+    SemanticTokenTypes["interface"] = "interface";
+    SemanticTokenTypes["struct"] = "struct";
+    SemanticTokenTypes["typeParameter"] = "typeParameter";
+    SemanticTokenTypes["parameter"] = "parameter";
+    SemanticTokenTypes["variable"] = "variable";
+    SemanticTokenTypes["property"] = "property";
+    SemanticTokenTypes["enumMember"] = "enumMember";
+    SemanticTokenTypes["event"] = "event";
+    SemanticTokenTypes["function"] = "function";
+    SemanticTokenTypes["method"] = "method";
+    SemanticTokenTypes["macro"] = "macro";
+    SemanticTokenTypes["keyword"] = "keyword";
+    SemanticTokenTypes["modifier"] = "modifier";
+    SemanticTokenTypes["comment"] = "comment";
+    SemanticTokenTypes["string"] = "string";
+    SemanticTokenTypes["number"] = "number";
+    SemanticTokenTypes["regexp"] = "regexp";
+    SemanticTokenTypes["operator"] = "operator";
+    /**
+     * @since 3.17.0
+     */
+    SemanticTokenTypes["decorator"] = "decorator";
+})(SemanticTokenTypes || (SemanticTokenTypes = {}));
+/**
+ * A set of predefined token modifiers. This set is not fixed
+ * an clients can specify additional token types via the
+ * corresponding client capabilities.
+ *
+ * @since 3.16.0
+ */
+var SemanticTokenModifiers;
+(function (SemanticTokenModifiers) {
+    SemanticTokenModifiers["declaration"] = "declaration";
+    SemanticTokenModifiers["definition"] = "definition";
+    SemanticTokenModifiers["readonly"] = "readonly";
+    SemanticTokenModifiers["static"] = "static";
+    SemanticTokenModifiers["deprecated"] = "deprecated";
+    SemanticTokenModifiers["abstract"] = "abstract";
+    SemanticTokenModifiers["async"] = "async";
+    SemanticTokenModifiers["modification"] = "modification";
+    SemanticTokenModifiers["documentation"] = "documentation";
+    SemanticTokenModifiers["defaultLibrary"] = "defaultLibrary";
+})(SemanticTokenModifiers || (SemanticTokenModifiers = {}));
+/**
+ * @since 3.16.0
+ */
+var SemanticTokens;
+(function (SemanticTokens) {
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && (candidate.resultId === undefined || typeof candidate.resultId === 'string') &&
+            Array.isArray(candidate.data) && (candidate.data.length === 0 || typeof candidate.data[0] === 'number');
+    }
+    SemanticTokens.is = is;
+})(SemanticTokens || (SemanticTokens = {}));
+/**
+ * The InlineValueText namespace provides functions to deal with InlineValueTexts.
+ *
+ * @since 3.17.0
+ */
+var InlineValueText;
+(function (InlineValueText) {
+    /**
+     * Creates a new InlineValueText literal.
+     */
+    function create(range, text) {
+        return { range, text };
+    }
+    InlineValueText.create = create;
+    function is(value) {
+        const candidate = value;
+        return candidate !== undefined && candidate !== null && Range.is(candidate.range) && Is.string(candidate.text);
+    }
+    InlineValueText.is = is;
+})(InlineValueText || (InlineValueText = {}));
+/**
+ * The InlineValueVariableLookup namespace provides functions to deal with InlineValueVariableLookups.
+ *
+ * @since 3.17.0
+ */
+var InlineValueVariableLookup;
+(function (InlineValueVariableLookup) {
+    /**
+     * Creates a new InlineValueText literal.
+     */
+    function create(range, variableName, caseSensitiveLookup) {
+        return { range, variableName, caseSensitiveLookup };
+    }
+    InlineValueVariableLookup.create = create;
+    function is(value) {
+        const candidate = value;
+        return candidate !== undefined && candidate !== null && Range.is(candidate.range) && Is.boolean(candidate.caseSensitiveLookup)
+            && (Is.string(candidate.variableName) || candidate.variableName === undefined);
+    }
+    InlineValueVariableLookup.is = is;
+})(InlineValueVariableLookup || (InlineValueVariableLookup = {}));
+/**
+ * The InlineValueEvaluatableExpression namespace provides functions to deal with InlineValueEvaluatableExpression.
+ *
+ * @since 3.17.0
+ */
+var InlineValueEvaluatableExpression;
+(function (InlineValueEvaluatableExpression) {
+    /**
+     * Creates a new InlineValueEvaluatableExpression literal.
+     */
+    function create(range, expression) {
+        return { range, expression };
+    }
+    InlineValueEvaluatableExpression.create = create;
+    function is(value) {
+        const candidate = value;
+        return candidate !== undefined && candidate !== null && Range.is(candidate.range)
+            && (Is.string(candidate.expression) || candidate.expression === undefined);
+    }
+    InlineValueEvaluatableExpression.is = is;
+})(InlineValueEvaluatableExpression || (InlineValueEvaluatableExpression = {}));
+/**
+ * The InlineValueContext namespace provides helper functions to work with
+ * {@link InlineValueContext} literals.
+ *
+ * @since 3.17.0
+ */
+var InlineValueContext;
+(function (InlineValueContext) {
+    /**
+     * Creates a new InlineValueContext literal.
+     */
+    function create(frameId, stoppedLocation) {
+        return { frameId, stoppedLocation };
+    }
+    InlineValueContext.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link InlineValueContext} interface.
+     */
+    function is(value) {
+        const candidate = value;
+        return Is.defined(candidate) && Range.is(value.stoppedLocation);
+    }
+    InlineValueContext.is = is;
+})(InlineValueContext || (InlineValueContext = {}));
+/**
+ * Inlay hint kinds.
+ *
+ * @since 3.17.0
+ */
+var InlayHintKind;
+(function (InlayHintKind) {
+    /**
+     * An inlay hint that for a type annotation.
+     */
+    InlayHintKind.Type = 1;
+    /**
+     * An inlay hint that is for a parameter.
+     */
+    InlayHintKind.Parameter = 2;
+    function is(value) {
+        return value === 1 || value === 2;
+    }
+    InlayHintKind.is = is;
+})(InlayHintKind || (InlayHintKind = {}));
+var InlayHintLabelPart;
+(function (InlayHintLabelPart) {
+    function create(value) {
+        return { value };
+    }
+    InlayHintLabelPart.create = create;
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate)
+            && (candidate.tooltip === undefined || Is.string(candidate.tooltip) || MarkupContent.is(candidate.tooltip))
+            && (candidate.location === undefined || Location.is(candidate.location))
+            && (candidate.command === undefined || Command.is(candidate.command));
+    }
+    InlayHintLabelPart.is = is;
+})(InlayHintLabelPart || (InlayHintLabelPart = {}));
+var InlayHint;
+(function (InlayHint) {
+    function create(position, label, kind) {
+        const result = { position, label };
+        if (kind !== undefined) {
+            result.kind = kind;
+        }
+        return result;
+    }
+    InlayHint.create = create;
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && Position.is(candidate.position)
+            && (Is.string(candidate.label) || Is.typedArray(candidate.label, InlayHintLabelPart.is))
+            && (candidate.kind === undefined || InlayHintKind.is(candidate.kind))
+            && (candidate.textEdits === undefined) || Is.typedArray(candidate.textEdits, TextEdit.is)
+            && (candidate.tooltip === undefined || Is.string(candidate.tooltip) || MarkupContent.is(candidate.tooltip))
+            && (candidate.paddingLeft === undefined || Is.boolean(candidate.paddingLeft))
+            && (candidate.paddingRight === undefined || Is.boolean(candidate.paddingRight));
+    }
+    InlayHint.is = is;
+})(InlayHint || (InlayHint = {}));
+var StringValue;
+(function (StringValue) {
+    function createSnippet(value) {
+        return { kind: 'snippet', value };
+    }
+    StringValue.createSnippet = createSnippet;
+})(StringValue || (StringValue = {}));
+var InlineCompletionItem;
+(function (InlineCompletionItem) {
+    function create(insertText, filterText, range, command) {
+        return { insertText, filterText, range, command };
+    }
+    InlineCompletionItem.create = create;
+})(InlineCompletionItem || (InlineCompletionItem = {}));
+var InlineCompletionList;
+(function (InlineCompletionList) {
+    function create(items) {
+        return { items };
+    }
+    InlineCompletionList.create = create;
+})(InlineCompletionList || (InlineCompletionList = {}));
+/**
+ * Describes how an {@link InlineCompletionItemProvider inline completion provider} was triggered.
+ *
+ * @since 3.18.0
+ * @proposed
+ */
+var InlineCompletionTriggerKind;
+(function (InlineCompletionTriggerKind) {
+    /**
+     * Completion was triggered explicitly by a user gesture.
+     */
+    InlineCompletionTriggerKind.Invoked = 0;
+    /**
+     * Completion was triggered automatically while editing.
+     */
+    InlineCompletionTriggerKind.Automatic = 1;
+})(InlineCompletionTriggerKind || (InlineCompletionTriggerKind = {}));
+var SelectedCompletionInfo;
+(function (SelectedCompletionInfo) {
+    function create(range, text) {
+        return { range, text };
+    }
+    SelectedCompletionInfo.create = create;
+})(SelectedCompletionInfo || (SelectedCompletionInfo = {}));
+var InlineCompletionContext;
+(function (InlineCompletionContext) {
+    function create(triggerKind, selectedCompletionInfo) {
+        return { triggerKind, selectedCompletionInfo };
+    }
+    InlineCompletionContext.create = create;
+})(InlineCompletionContext || (InlineCompletionContext = {}));
+var WorkspaceFolder;
+(function (WorkspaceFolder) {
+    function is(value) {
+        const candidate = value;
+        return Is.objectLiteral(candidate) && URI.is(candidate.uri) && Is.string(candidate.name);
+    }
+    WorkspaceFolder.is = is;
+})(WorkspaceFolder || (WorkspaceFolder = {}));
+/**
+ * @deprecated Use the text document from the new vscode-languageserver-textdocument package.
+ */
+var TextDocument;
+(function (TextDocument) {
+    /**
+     * Creates a new ITextDocument literal from the given uri and content.
+     * @param uri The document's uri.
+     * @param languageId The document's language Id.
+     * @param version The document's version.
+     * @param content The document's content.
+     */
+    function create(uri, languageId, version, content) {
+        return new FullTextDocument(uri, languageId, version, content);
+    }
+    TextDocument.create = create;
+    /**
+     * Checks whether the given literal conforms to the {@link ITextDocument} interface.
+     */
+    function is(value) {
+        let candidate = value;
+        return Is.defined(candidate) && Is.string(candidate.uri) && (Is.undefined(candidate.languageId) || Is.string(candidate.languageId)) && Is.uinteger(candidate.lineCount)
+            && Is.func(candidate.getText) && Is.func(candidate.positionAt) && Is.func(candidate.offsetAt) ? true : false;
+    }
+    TextDocument.is = is;
+    function applyEdits(document, edits) {
+        let text = document.getText();
+        let sortedEdits = mergeSort(edits, (a, b) => {
+            let diff = a.range.start.line - b.range.start.line;
+            if (diff === 0) {
+                return a.range.start.character - b.range.start.character;
+            }
+            return diff;
+        });
+        let lastModifiedOffset = text.length;
+        for (let i = sortedEdits.length - 1; i >= 0; i--) {
+            let e = sortedEdits[i];
+            let startOffset = document.offsetAt(e.range.start);
+            let endOffset = document.offsetAt(e.range.end);
+            if (endOffset <= lastModifiedOffset) {
+                text = text.substring(0, startOffset) + e.newText + text.substring(endOffset, text.length);
+            }
+            else {
+                throw new Error('Overlapping edit');
+            }
+            lastModifiedOffset = startOffset;
+        }
+        return text;
+    }
+    TextDocument.applyEdits = applyEdits;
+    function mergeSort(data, compare) {
+        if (data.length <= 1) {
+            // sorted
+            return data;
+        }
+        const p = (data.length / 2) | 0;
+        const left = data.slice(0, p);
+        const right = data.slice(p);
+        mergeSort(left, compare);
+        mergeSort(right, compare);
+        let leftIdx = 0;
+        let rightIdx = 0;
+        let i = 0;
+        while (leftIdx < left.length && rightIdx < right.length) {
+            let ret = compare(left[leftIdx], right[rightIdx]);
+            if (ret <= 0) {
+                // smaller_equal -> take left to preserve order
+                data[i++] = left[leftIdx++];
+            }
+            else {
+                // greater -> take right
+                data[i++] = right[rightIdx++];
+            }
+        }
+        while (leftIdx < left.length) {
+            data[i++] = left[leftIdx++];
+        }
+        while (rightIdx < right.length) {
+            data[i++] = right[rightIdx++];
+        }
+        return data;
+    }
+})(TextDocument || (TextDocument = {}));
+/**
+ * @deprecated Use the text document from the new vscode-languageserver-textdocument package.
+ */
+class FullTextDocument {
+    constructor(uri, languageId, version, content) {
+        this._uri = uri;
+        this._languageId = languageId;
+        this._version = version;
+        this._content = content;
+        this._lineOffsets = undefined;
+    }
+    get uri() {
+        return this._uri;
+    }
+    get languageId() {
+        return this._languageId;
+    }
+    get version() {
+        return this._version;
+    }
+    getText(range) {
+        if (range) {
+            let start = this.offsetAt(range.start);
+            let end = this.offsetAt(range.end);
+            return this._content.substring(start, end);
+        }
+        return this._content;
+    }
+    update(event, version) {
+        this._content = event.text;
+        this._version = version;
+        this._lineOffsets = undefined;
+    }
+    getLineOffsets() {
+        if (this._lineOffsets === undefined) {
+            let lineOffsets = [];
+            let text = this._content;
+            let isLineStart = true;
+            for (let i = 0; i < text.length; i++) {
+                if (isLineStart) {
+                    lineOffsets.push(i);
+                    isLineStart = false;
+                }
+                let ch = text.charAt(i);
+                isLineStart = (ch === '\r' || ch === '\n');
+                if (ch === '\r' && i + 1 < text.length && text.charAt(i + 1) === '\n') {
+                    i++;
+                }
+            }
+            if (isLineStart && text.length > 0) {
+                lineOffsets.push(text.length);
+            }
+            this._lineOffsets = lineOffsets;
+        }
+        return this._lineOffsets;
+    }
+    positionAt(offset) {
+        offset = Math.max(Math.min(offset, this._content.length), 0);
+        let lineOffsets = this.getLineOffsets();
+        let low = 0, high = lineOffsets.length;
+        if (high === 0) {
+            return Position.create(0, offset);
+        }
+        while (low < high) {
+            let mid = Math.floor((low + high) / 2);
+            if (lineOffsets[mid] > offset) {
+                high = mid;
+            }
+            else {
+                low = mid + 1;
+            }
+        }
+        // low is the least x for which the line offset is larger than the current offset
+        // or array.length if no line offset is larger than the current offset
+        let line = low - 1;
+        return Position.create(line, offset - lineOffsets[line]);
+    }
+    offsetAt(position) {
+        let lineOffsets = this.getLineOffsets();
+        if (position.line >= lineOffsets.length) {
+            return this._content.length;
+        }
+        else if (position.line < 0) {
+            return 0;
+        }
+        let lineOffset = lineOffsets[position.line];
+        let nextLineOffset = (position.line + 1 < lineOffsets.length) ? lineOffsets[position.line + 1] : this._content.length;
+        return Math.max(Math.min(lineOffset + position.character, nextLineOffset), lineOffset);
+    }
+    get lineCount() {
+        return this.getLineOffsets().length;
+    }
+}
+var Is;
+(function (Is) {
+    const toString = Object.prototype.toString;
+    function defined(value) {
+        return typeof value !== 'undefined';
+    }
+    Is.defined = defined;
+    function undefined$1(value) {
+        return typeof value === 'undefined';
+    }
+    Is.undefined = undefined$1;
+    function boolean(value) {
+        return value === true || value === false;
+    }
+    Is.boolean = boolean;
+    function string(value) {
+        return toString.call(value) === '[object String]';
+    }
+    Is.string = string;
+    function number(value) {
+        return toString.call(value) === '[object Number]';
+    }
+    Is.number = number;
+    function numberRange(value, min, max) {
+        return toString.call(value) === '[object Number]' && min <= value && value <= max;
+    }
+    Is.numberRange = numberRange;
+    function integer(value) {
+        return toString.call(value) === '[object Number]' && -2147483648 <= value && value <= 2147483647;
+    }
+    Is.integer = integer;
+    function uinteger(value) {
+        return toString.call(value) === '[object Number]' && 0 <= value && value <= 2147483647;
+    }
+    Is.uinteger = uinteger;
+    function func(value) {
+        return toString.call(value) === '[object Function]';
+    }
+    Is.func = func;
+    function objectLiteral(value) {
+        // Strictly speaking class instances pass this check as well. Since the LSP
+        // doesn't use classes we ignore this for now. If we do we need to add something
+        // like this: `Object.getPrototypeOf(Object.getPrototypeOf(x)) === null`
+        return value !== null && typeof value === 'object';
+    }
+    Is.objectLiteral = objectLiteral;
+    function typedArray(value, check) {
+        return Array.isArray(value) && value.every(check);
+    }
+    Is.typedArray = typedArray;
+})(Is || (Is = {}));
+
+
+
+// EXTERNAL MODULE: ./node_modules/monaco-editor/esm/external/vscode-languageserver-textdocument/lib/esm/main.js
+var main = __webpack_require__(51341);
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/jsonLanguageTypes.js
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+/**
+ * Error codes used by diagnostics
+ */
+var ErrorCode;
+(function (ErrorCode) {
+    ErrorCode[ErrorCode["Undefined"] = 0] = "Undefined";
+    ErrorCode[ErrorCode["EnumValueMismatch"] = 1] = "EnumValueMismatch";
+    ErrorCode[ErrorCode["Deprecated"] = 2] = "Deprecated";
+    ErrorCode[ErrorCode["UnexpectedEndOfComment"] = 257] = "UnexpectedEndOfComment";
+    ErrorCode[ErrorCode["UnexpectedEndOfString"] = 258] = "UnexpectedEndOfString";
+    ErrorCode[ErrorCode["UnexpectedEndOfNumber"] = 259] = "UnexpectedEndOfNumber";
+    ErrorCode[ErrorCode["InvalidUnicode"] = 260] = "InvalidUnicode";
+    ErrorCode[ErrorCode["InvalidEscapeCharacter"] = 261] = "InvalidEscapeCharacter";
+    ErrorCode[ErrorCode["InvalidCharacter"] = 262] = "InvalidCharacter";
+    ErrorCode[ErrorCode["PropertyExpected"] = 513] = "PropertyExpected";
+    ErrorCode[ErrorCode["CommaExpected"] = 514] = "CommaExpected";
+    ErrorCode[ErrorCode["ColonExpected"] = 515] = "ColonExpected";
+    ErrorCode[ErrorCode["ValueExpected"] = 516] = "ValueExpected";
+    ErrorCode[ErrorCode["CommaOrCloseBacketExpected"] = 517] = "CommaOrCloseBacketExpected";
+    ErrorCode[ErrorCode["CommaOrCloseBraceExpected"] = 518] = "CommaOrCloseBraceExpected";
+    ErrorCode[ErrorCode["TrailingComma"] = 519] = "TrailingComma";
+    ErrorCode[ErrorCode["DuplicateKey"] = 520] = "DuplicateKey";
+    ErrorCode[ErrorCode["CommentNotPermitted"] = 521] = "CommentNotPermitted";
+    ErrorCode[ErrorCode["PropertyKeysMustBeDoublequoted"] = 528] = "PropertyKeysMustBeDoublequoted";
+    ErrorCode[ErrorCode["SchemaResolveError"] = 768] = "SchemaResolveError";
+    ErrorCode[ErrorCode["SchemaUnsupportedFeature"] = 769] = "SchemaUnsupportedFeature";
+})(ErrorCode || (ErrorCode = {}));
+var SchemaDraft;
+(function (SchemaDraft) {
+    SchemaDraft[SchemaDraft["v3"] = 3] = "v3";
+    SchemaDraft[SchemaDraft["v4"] = 4] = "v4";
+    SchemaDraft[SchemaDraft["v6"] = 6] = "v6";
+    SchemaDraft[SchemaDraft["v7"] = 7] = "v7";
+    SchemaDraft[SchemaDraft["v2019_09"] = 19] = "v2019_09";
+    SchemaDraft[SchemaDraft["v2020_12"] = 20] = "v2020_12";
+})(SchemaDraft || (SchemaDraft = {}));
+var ClientCapabilities;
+(function (ClientCapabilities) {
+    ClientCapabilities.LATEST = {
+        textDocument: {
+            completion: {
+                completionItem: {
+                    documentationFormat: [MarkupKind.Markdown, MarkupKind.PlainText],
+                    commitCharactersSupport: true,
+                    labelDetailsSupport: true
+                }
+            }
+        }
+    };
+})(ClientCapabilities || (ClientCapabilities = {}));
+
+
+
+// EXTERNAL MODULE: ./node_modules/monaco-editor/esm/external/@vscode/l10n/dist/browser.js
+var browser = __webpack_require__(92146);
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/parser/jsonParser.js
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const formats = {
+    'color-hex': { errorMessage: (0,browser.t)('Invalid color format. Use #RGB, #RGBA, #RRGGBB or #RRGGBBAA.'), pattern: /^#([0-9A-Fa-f]{3,4}|([0-9A-Fa-f]{2}){3,4})$/ },
+    'date-time': { errorMessage: (0,browser.t)('String is not a RFC3339 date-time.'), pattern: /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)([01][0-9]|2[0-3]):([0-5][0-9]))$/i },
+    'date': { errorMessage: (0,browser.t)('String is not a RFC3339 date.'), pattern: /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/i },
+    'time': { errorMessage: (0,browser.t)('String is not a RFC3339 time.'), pattern: /^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?(Z|(\+|-)([01][0-9]|2[0-3]):([0-5][0-9]))$/i },
+    'email': { errorMessage: (0,browser.t)('String is not an e-mail address.'), pattern: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}))$/ },
+    'hostname': { errorMessage: (0,browser.t)('String is not a hostname.'), pattern: /^(?=.{1,253}\.?$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[-0-9a-z]{0,61}[0-9a-z])?)*\.?$/i },
+    'ipv4': { errorMessage: (0,browser.t)('String is not an IPv4 address.'), pattern: /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/ },
+    'ipv6': { errorMessage: (0,browser.t)('String is not an IPv6 address.'), pattern: /^((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))$/i },
+};
+class ASTNodeImpl {
+    constructor(parent, offset, length = 0) {
+        this.offset = offset;
+        this.length = length;
+        this.parent = parent;
+    }
+    get children() {
+        return [];
+    }
+    toString() {
+        return 'type: ' + this.type + ' (' + this.offset + '/' + this.length + ')' + (this.parent ? ' parent: {' + this.parent.toString() + '}' : '');
+    }
+}
+class NullASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, offset) {
+        super(parent, offset);
+        this.type = 'null';
+        this.value = null;
+    }
+}
+class BooleanASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, boolValue, offset) {
+        super(parent, offset);
+        this.type = 'boolean';
+        this.value = boolValue;
+    }
+}
+class ArrayASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, offset) {
+        super(parent, offset);
+        this.type = 'array';
+        this.items = [];
+    }
+    get children() {
+        return this.items;
+    }
+}
+class NumberASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, offset) {
+        super(parent, offset);
+        this.type = 'number';
+        this.isInteger = true;
+        this.value = Number.NaN;
+    }
+}
+class StringASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, offset, length) {
+        super(parent, offset, length);
+        this.type = 'string';
+        this.value = '';
+    }
+}
+class PropertyASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, offset, keyNode) {
+        super(parent, offset);
+        this.type = 'property';
+        this.colonOffset = -1;
+        this.keyNode = keyNode;
+    }
+    get children() {
+        return this.valueNode ? [this.keyNode, this.valueNode] : [this.keyNode];
+    }
+}
+class ObjectASTNodeImpl extends ASTNodeImpl {
+    constructor(parent, offset) {
+        super(parent, offset);
+        this.type = 'object';
+        this.properties = [];
+    }
+    get children() {
+        return this.properties;
+    }
+}
+function asSchema(schema) {
+    if (isBoolean(schema)) {
+        return schema ? {} : { "not": {} };
+    }
+    return schema;
+}
+var EnumMatch;
+(function (EnumMatch) {
+    EnumMatch[EnumMatch["Key"] = 0] = "Key";
+    EnumMatch[EnumMatch["Enum"] = 1] = "Enum";
+})(EnumMatch || (EnumMatch = {}));
+const schemaDraftFromId = {
+    'http://json-schema.org/draft-03/schema#': SchemaDraft.v3,
+    'http://json-schema.org/draft-04/schema#': SchemaDraft.v4,
+    'http://json-schema.org/draft-06/schema#': SchemaDraft.v6,
+    'http://json-schema.org/draft-07/schema#': SchemaDraft.v7,
+    'https://json-schema.org/draft/2019-09/schema': SchemaDraft.v2019_09,
+    'https://json-schema.org/draft/2020-12/schema': SchemaDraft.v2020_12
+};
+class EvaluationContext {
+    constructor(schemaDraft) {
+        this.schemaDraft = schemaDraft;
+    }
+}
+class SchemaCollector {
+    constructor(focusOffset = -1, exclude) {
+        this.focusOffset = focusOffset;
+        this.exclude = exclude;
+        this.schemas = [];
+    }
+    add(schema) {
+        this.schemas.push(schema);
+    }
+    merge(other) {
+        Array.prototype.push.apply(this.schemas, other.schemas);
+    }
+    include(node) {
+        return (this.focusOffset === -1 || jsonParser_contains(node, this.focusOffset)) && (node !== this.exclude);
+    }
+    newSub() {
+        return new SchemaCollector(-1, this.exclude);
+    }
+}
+class NoOpSchemaCollector {
+    constructor() { }
+    get schemas() { return []; }
+    add(_schema) { }
+    merge(_other) { }
+    include(_node) { return true; }
+    newSub() { return this; }
+}
+NoOpSchemaCollector.instance = new NoOpSchemaCollector();
+class ValidationResult {
+    constructor() {
+        this.problems = [];
+        this.propertiesMatches = 0;
+        this.processedProperties = new Set();
+        this.propertiesValueMatches = 0;
+        this.primaryValueMatches = 0;
+        this.enumValueMatch = false;
+        this.enumValues = undefined;
+    }
+    hasProblems() {
+        return !!this.problems.length;
+    }
+    merge(validationResult) {
+        this.problems = this.problems.concat(validationResult.problems);
+        this.propertiesMatches += validationResult.propertiesMatches;
+        this.propertiesValueMatches += validationResult.propertiesValueMatches;
+        this.mergeProcessedProperties(validationResult);
+    }
+    mergeEnumValues(validationResult) {
+        if (!this.enumValueMatch && !validationResult.enumValueMatch && this.enumValues && validationResult.enumValues) {
+            this.enumValues = this.enumValues.concat(validationResult.enumValues);
+            for (const error of this.problems) {
+                if (error.code === ErrorCode.EnumValueMismatch) {
+                    error.message = (0,browser.t)('Value is not accepted. Valid values: {0}.', this.enumValues.map(v => JSON.stringify(v)).join(', '));
+                }
+            }
+        }
+    }
+    mergePropertyMatch(propertyValidationResult) {
+        this.problems = this.problems.concat(propertyValidationResult.problems);
+        this.propertiesMatches++;
+        if (propertyValidationResult.enumValueMatch || !propertyValidationResult.hasProblems() && propertyValidationResult.propertiesMatches) {
+            this.propertiesValueMatches++;
+        }
+        if (propertyValidationResult.enumValueMatch && propertyValidationResult.enumValues && propertyValidationResult.enumValues.length === 1) {
+            this.primaryValueMatches++;
+        }
+    }
+    mergeProcessedProperties(validationResult) {
+        validationResult.processedProperties.forEach(p => this.processedProperties.add(p));
+    }
+    compare(other) {
+        const hasProblems = this.hasProblems();
+        if (hasProblems !== other.hasProblems()) {
+            return hasProblems ? -1 : 1;
+        }
+        if (this.enumValueMatch !== other.enumValueMatch) {
+            return other.enumValueMatch ? -1 : 1;
+        }
+        if (this.primaryValueMatches !== other.primaryValueMatches) {
+            return this.primaryValueMatches - other.primaryValueMatches;
+        }
+        if (this.propertiesValueMatches !== other.propertiesValueMatches) {
+            return this.propertiesValueMatches - other.propertiesValueMatches;
+        }
+        return this.propertiesMatches - other.propertiesMatches;
+    }
+}
+function newJSONDocument(root, diagnostics = []) {
+    return new JSONDocument(root, diagnostics, []);
+}
+function jsonParser_getNodeValue(node) {
+    return main_getNodeValue(node);
+}
+function jsonParser_getNodePath(node) {
+    return main_getNodePath(node);
+}
+function jsonParser_contains(node, offset, includeRightBound = false) {
+    return offset >= node.offset && offset < (node.offset + node.length) || includeRightBound && offset === (node.offset + node.length);
+}
+class JSONDocument {
+    constructor(root, syntaxErrors = [], comments = []) {
+        this.root = root;
+        this.syntaxErrors = syntaxErrors;
+        this.comments = comments;
+    }
+    getNodeFromOffset(offset, includeRightBound = false) {
+        if (this.root) {
+            return main_findNodeAtOffset(this.root, offset, includeRightBound);
+        }
+        return undefined;
+    }
+    visit(visitor) {
+        if (this.root) {
+            const doVisit = (node) => {
+                let ctn = visitor(node);
+                const children = node.children;
+                if (Array.isArray(children)) {
+                    for (let i = 0; i < children.length && ctn; i++) {
+                        ctn = doVisit(children[i]);
+                    }
+                }
+                return ctn;
+            };
+            doVisit(this.root);
+        }
+    }
+    validate(textDocument, schema, severity = DiagnosticSeverity.Warning, schemaDraft) {
+        if (this.root && schema) {
+            const validationResult = new ValidationResult();
+            validate(this.root, schema, validationResult, NoOpSchemaCollector.instance, new EvaluationContext(schemaDraft ?? getSchemaDraft(schema)));
+            return validationResult.problems.map(p => {
+                const range = Range.create(textDocument.positionAt(p.location.offset), textDocument.positionAt(p.location.offset + p.location.length));
+                return Diagnostic.create(range, p.message, p.severity ?? severity, p.code);
+            });
+        }
+        return undefined;
+    }
+    getMatchingSchemas(schema, focusOffset = -1, exclude) {
+        if (this.root && schema) {
+            const matchingSchemas = new SchemaCollector(focusOffset, exclude);
+            const schemaDraft = getSchemaDraft(schema);
+            const context = new EvaluationContext(schemaDraft);
+            validate(this.root, schema, new ValidationResult(), matchingSchemas, context);
+            return matchingSchemas.schemas;
+        }
+        return [];
+    }
+}
+function getSchemaDraft(schema, fallBack = SchemaDraft.v2020_12) {
+    let schemaId = schema.$schema;
+    if (schemaId) {
+        return schemaDraftFromId[schemaId] ?? fallBack;
+    }
+    return fallBack;
+}
+function validate(n, schema, validationResult, matchingSchemas, context) {
+    if (!n || !matchingSchemas.include(n)) {
+        return;
+    }
+    if (n.type === 'property') {
+        return validate(n.valueNode, schema, validationResult, matchingSchemas, context);
+    }
+    const node = n;
+    _validateNode();
+    switch (node.type) {
+        case 'object':
+            _validateObjectNode(node);
+            break;
+        case 'array':
+            _validateArrayNode(node);
+            break;
+        case 'string':
+            _validateStringNode(node);
+            break;
+        case 'number':
+            _validateNumberNode(node);
+            break;
+    }
+    matchingSchemas.add({ node: node, schema: schema });
+    function _validateNode() {
+        function matchesType(type) {
+            return node.type === type || (type === 'integer' && node.type === 'number' && node.isInteger);
+        }
+        if (Array.isArray(schema.type)) {
+            if (!schema.type.some(matchesType)) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.errorMessage || (0,browser.t)('Incorrect type. Expected one of {0}.', schema.type.join(', '))
+                });
+            }
+        }
+        else if (schema.type) {
+            if (!matchesType(schema.type)) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.errorMessage || (0,browser.t)('Incorrect type. Expected "{0}".', schema.type)
+                });
+            }
+        }
+        if (Array.isArray(schema.allOf)) {
+            for (const subSchemaRef of schema.allOf) {
+                const subValidationResult = new ValidationResult();
+                const subMatchingSchemas = matchingSchemas.newSub();
+                validate(node, asSchema(subSchemaRef), subValidationResult, subMatchingSchemas, context);
+                validationResult.merge(subValidationResult);
+                matchingSchemas.merge(subMatchingSchemas);
+            }
+        }
+        const notSchema = asSchema(schema.not);
+        if (notSchema) {
+            const subValidationResult = new ValidationResult();
+            const subMatchingSchemas = matchingSchemas.newSub();
+            validate(node, notSchema, subValidationResult, subMatchingSchemas, context);
+            if (!subValidationResult.hasProblems()) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.errorMessage || (0,browser.t)("Matches a schema that is not allowed.")
+                });
+            }
+            for (const ms of subMatchingSchemas.schemas) {
+                ms.inverted = !ms.inverted;
+                matchingSchemas.add(ms);
+            }
+        }
+        const testAlternatives = (alternatives, maxOneMatch) => {
+            const matches = [];
+            // remember the best match that is used for error messages
+            let bestMatch = undefined;
+            for (const subSchemaRef of alternatives) {
+                const subSchema = asSchema(subSchemaRef);
+                const subValidationResult = new ValidationResult();
+                const subMatchingSchemas = matchingSchemas.newSub();
+                validate(node, subSchema, subValidationResult, subMatchingSchemas, context);
+                if (!subValidationResult.hasProblems()) {
+                    matches.push(subSchema);
+                }
+                if (!bestMatch) {
+                    bestMatch = { schema: subSchema, validationResult: subValidationResult, matchingSchemas: subMatchingSchemas };
+                }
+                else {
+                    if (!maxOneMatch && !subValidationResult.hasProblems() && !bestMatch.validationResult.hasProblems()) {
+                        // no errors, both are equally good matches
+                        bestMatch.matchingSchemas.merge(subMatchingSchemas);
+                        bestMatch.validationResult.propertiesMatches += subValidationResult.propertiesMatches;
+                        bestMatch.validationResult.propertiesValueMatches += subValidationResult.propertiesValueMatches;
+                        bestMatch.validationResult.mergeProcessedProperties(subValidationResult);
+                    }
+                    else {
+                        const compareResult = subValidationResult.compare(bestMatch.validationResult);
+                        if (compareResult > 0) {
+                            // our node is the best matching so far
+                            bestMatch = { schema: subSchema, validationResult: subValidationResult, matchingSchemas: subMatchingSchemas };
+                        }
+                        else if (compareResult === 0) {
+                            // there's already a best matching but we are as good
+                            bestMatch.matchingSchemas.merge(subMatchingSchemas);
+                            bestMatch.validationResult.mergeEnumValues(subValidationResult);
+                        }
+                    }
+                }
+            }
+            if (matches.length > 1 && maxOneMatch) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: 1 },
+                    message: (0,browser.t)("Matches multiple schemas when only one must validate.")
+                });
+            }
+            if (bestMatch) {
+                validationResult.merge(bestMatch.validationResult);
+                matchingSchemas.merge(bestMatch.matchingSchemas);
+            }
+            return matches.length;
+        };
+        if (Array.isArray(schema.anyOf)) {
+            testAlternatives(schema.anyOf, false);
+        }
+        if (Array.isArray(schema.oneOf)) {
+            testAlternatives(schema.oneOf, true);
+        }
+        const testBranch = (schema) => {
+            const subValidationResult = new ValidationResult();
+            const subMatchingSchemas = matchingSchemas.newSub();
+            validate(node, asSchema(schema), subValidationResult, subMatchingSchemas, context);
+            validationResult.merge(subValidationResult);
+            matchingSchemas.merge(subMatchingSchemas);
+        };
+        const testCondition = (ifSchema, thenSchema, elseSchema) => {
+            const subSchema = asSchema(ifSchema);
+            const subValidationResult = new ValidationResult();
+            const subMatchingSchemas = matchingSchemas.newSub();
+            validate(node, subSchema, subValidationResult, subMatchingSchemas, context);
+            matchingSchemas.merge(subMatchingSchemas);
+            validationResult.mergeProcessedProperties(subValidationResult);
+            if (!subValidationResult.hasProblems()) {
+                if (thenSchema) {
+                    testBranch(thenSchema);
+                }
+            }
+            else if (elseSchema) {
+                testBranch(elseSchema);
+            }
+        };
+        const ifSchema = asSchema(schema.if);
+        if (ifSchema) {
+            testCondition(ifSchema, asSchema(schema.then), asSchema(schema.else));
+        }
+        if (Array.isArray(schema.enum)) {
+            const val = jsonParser_getNodeValue(node);
+            let enumValueMatch = false;
+            for (const e of schema.enum) {
+                if (equals(val, e)) {
+                    enumValueMatch = true;
+                    break;
+                }
+            }
+            validationResult.enumValues = schema.enum;
+            validationResult.enumValueMatch = enumValueMatch;
+            if (!enumValueMatch) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    code: ErrorCode.EnumValueMismatch,
+                    message: schema.errorMessage || (0,browser.t)('Value is not accepted. Valid values: {0}.', schema.enum.map(v => JSON.stringify(v)).join(', '))
+                });
+            }
+        }
+        if (isDefined(schema.const)) {
+            const val = jsonParser_getNodeValue(node);
+            if (!equals(val, schema.const)) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    code: ErrorCode.EnumValueMismatch,
+                    message: schema.errorMessage || (0,browser.t)('Value must be {0}.', JSON.stringify(schema.const))
+                });
+                validationResult.enumValueMatch = false;
+            }
+            else {
+                validationResult.enumValueMatch = true;
+            }
+            validationResult.enumValues = [schema.const];
+        }
+        let deprecationMessage = schema.deprecationMessage;
+        if (deprecationMessage || schema.deprecated) {
+            deprecationMessage = deprecationMessage || (0,browser.t)('Value is deprecated');
+            let targetNode = node.parent?.type === 'property' ? node.parent : node;
+            validationResult.problems.push({
+                location: { offset: targetNode.offset, length: targetNode.length },
+                severity: DiagnosticSeverity.Warning,
+                message: deprecationMessage,
+                code: ErrorCode.Deprecated
+            });
+        }
+    }
+    function _validateNumberNode(node) {
+        const val = node.value;
+        function normalizeFloats(float) {
+            const parts = /^(-?\d+)(?:\.(\d+))?(?:e([-+]\d+))?$/.exec(float.toString());
+            return parts && {
+                value: Number(parts[1] + (parts[2] || '')),
+                multiplier: (parts[2]?.length || 0) - (parseInt(parts[3]) || 0)
+            };
+        }
+        if (isNumber(schema.multipleOf)) {
+            let remainder = -1;
+            if (Number.isInteger(schema.multipleOf)) {
+                remainder = val % schema.multipleOf;
+            }
+            else {
+                let normMultipleOf = normalizeFloats(schema.multipleOf);
+                let normValue = normalizeFloats(val);
+                if (normMultipleOf && normValue) {
+                    const multiplier = 10 ** Math.abs(normValue.multiplier - normMultipleOf.multiplier);
+                    if (normValue.multiplier < normMultipleOf.multiplier) {
+                        normValue.value *= multiplier;
+                    }
+                    else {
+                        normMultipleOf.value *= multiplier;
+                    }
+                    remainder = normValue.value % normMultipleOf.value;
+                }
+            }
+            if (remainder !== 0) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: (0,browser.t)('Value is not divisible by {0}.', schema.multipleOf)
+                });
+            }
+        }
+        function getExclusiveLimit(limit, exclusive) {
+            if (isNumber(exclusive)) {
+                return exclusive;
+            }
+            if (isBoolean(exclusive) && exclusive) {
+                return limit;
+            }
+            return undefined;
+        }
+        function getLimit(limit, exclusive) {
+            if (!isBoolean(exclusive) || !exclusive) {
+                return limit;
+            }
+            return undefined;
+        }
+        const exclusiveMinimum = getExclusiveLimit(schema.minimum, schema.exclusiveMinimum);
+        if (isNumber(exclusiveMinimum) && val <= exclusiveMinimum) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('Value is below the exclusive minimum of {0}.', exclusiveMinimum)
+            });
+        }
+        const exclusiveMaximum = getExclusiveLimit(schema.maximum, schema.exclusiveMaximum);
+        if (isNumber(exclusiveMaximum) && val >= exclusiveMaximum) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('Value is above the exclusive maximum of {0}.', exclusiveMaximum)
+            });
+        }
+        const minimum = getLimit(schema.minimum, schema.exclusiveMinimum);
+        if (isNumber(minimum) && val < minimum) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('Value is below the minimum of {0}.', minimum)
+            });
+        }
+        const maximum = getLimit(schema.maximum, schema.exclusiveMaximum);
+        if (isNumber(maximum) && val > maximum) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('Value is above the maximum of {0}.', maximum)
+            });
+        }
+    }
+    function _validateStringNode(node) {
+        if (isNumber(schema.minLength) && stringLength(node.value) < schema.minLength) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('String is shorter than the minimum length of {0}.', schema.minLength)
+            });
+        }
+        if (isNumber(schema.maxLength) && stringLength(node.value) > schema.maxLength) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('String is longer than the maximum length of {0}.', schema.maxLength)
+            });
+        }
+        if (isString(schema.pattern)) {
+            const regex = extendedRegExp(schema.pattern);
+            if (!(regex?.test(node.value))) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.patternErrorMessage || schema.errorMessage || (0,browser.t)('String does not match the pattern of "{0}".', schema.pattern)
+                });
+            }
+        }
+        if (schema.format) {
+            switch (schema.format) {
+                case 'uri':
+                case 'uri-reference':
+                    {
+                        let errorMessage;
+                        if (!node.value) {
+                            errorMessage = (0,browser.t)('URI expected.');
+                        }
+                        else {
+                            const match = /^(([^:/?#]+?):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/.exec(node.value);
+                            if (!match) {
+                                errorMessage = (0,browser.t)('URI is expected.');
+                            }
+                            else if (!match[2] && schema.format === 'uri') {
+                                errorMessage = (0,browser.t)('URI with a scheme is expected.');
+                            }
+                        }
+                        if (errorMessage) {
+                            validationResult.problems.push({
+                                location: { offset: node.offset, length: node.length },
+                                message: schema.patternErrorMessage || schema.errorMessage || (0,browser.t)('String is not a URI: {0}', errorMessage)
+                            });
+                        }
+                    }
+                    break;
+                case 'color-hex':
+                case 'date-time':
+                case 'date':
+                case 'time':
+                case 'email':
+                case 'hostname':
+                case 'ipv4':
+                case 'ipv6':
+                    const format = formats[schema.format];
+                    if (!node.value || !format.pattern.exec(node.value)) {
+                        validationResult.problems.push({
+                            location: { offset: node.offset, length: node.length },
+                            message: schema.patternErrorMessage || schema.errorMessage || format.errorMessage
+                        });
+                    }
+            }
+        }
+    }
+    function _validateArrayNode(node) {
+        let prefixItemsSchemas;
+        let additionalItemSchema;
+        if (context.schemaDraft >= SchemaDraft.v2020_12) {
+            prefixItemsSchemas = schema.prefixItems;
+            additionalItemSchema = !Array.isArray(schema.items) ? schema.items : undefined;
+        }
+        else {
+            prefixItemsSchemas = Array.isArray(schema.items) ? schema.items : undefined;
+            additionalItemSchema = !Array.isArray(schema.items) ? schema.items : schema.additionalItems;
+        }
+        let index = 0;
+        if (prefixItemsSchemas !== undefined) {
+            const max = Math.min(prefixItemsSchemas.length, node.items.length);
+            for (; index < max; index++) {
+                const subSchemaRef = prefixItemsSchemas[index];
+                const subSchema = asSchema(subSchemaRef);
+                const itemValidationResult = new ValidationResult();
+                const item = node.items[index];
+                if (item) {
+                    validate(item, subSchema, itemValidationResult, matchingSchemas, context);
+                    validationResult.mergePropertyMatch(itemValidationResult);
+                }
+                validationResult.processedProperties.add(String(index));
+            }
+        }
+        if (additionalItemSchema !== undefined && index < node.items.length) {
+            if (typeof additionalItemSchema === 'boolean') {
+                if (additionalItemSchema === false) {
+                    validationResult.problems.push({
+                        location: { offset: node.offset, length: node.length },
+                        message: (0,browser.t)('Array has too many items according to schema. Expected {0} or fewer.', index)
+                    });
+                }
+                for (; index < node.items.length; index++) {
+                    validationResult.processedProperties.add(String(index));
+                    validationResult.propertiesValueMatches++;
+                }
+            }
+            else {
+                for (; index < node.items.length; index++) {
+                    const itemValidationResult = new ValidationResult();
+                    validate(node.items[index], additionalItemSchema, itemValidationResult, matchingSchemas, context);
+                    validationResult.mergePropertyMatch(itemValidationResult);
+                    validationResult.processedProperties.add(String(index));
+                }
+            }
+        }
+        const containsSchema = asSchema(schema.contains);
+        if (containsSchema) {
+            let containsCount = 0;
+            for (let index = 0; index < node.items.length; index++) {
+                const item = node.items[index];
+                const itemValidationResult = new ValidationResult();
+                validate(item, containsSchema, itemValidationResult, NoOpSchemaCollector.instance, context);
+                if (!itemValidationResult.hasProblems()) {
+                    containsCount++;
+                    if (context.schemaDraft >= SchemaDraft.v2020_12) {
+                        validationResult.processedProperties.add(String(index));
+                    }
+                }
+            }
+            if (containsCount === 0 && !isNumber(schema.minContains)) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.errorMessage || (0,browser.t)('Array does not contain required item.')
+                });
+            }
+            if (isNumber(schema.minContains) && containsCount < schema.minContains) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.errorMessage || (0,browser.t)('Array has too few items that match the contains contraint. Expected {0} or more.', schema.minContains)
+                });
+            }
+            if (isNumber(schema.maxContains) && containsCount > schema.maxContains) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: schema.errorMessage || (0,browser.t)('Array has too many items that match the contains contraint. Expected {0} or less.', schema.maxContains)
+                });
+            }
+        }
+        const unevaluatedItems = schema.unevaluatedItems;
+        if (unevaluatedItems !== undefined) {
+            for (let i = 0; i < node.items.length; i++) {
+                if (!validationResult.processedProperties.has(String(i))) {
+                    if (unevaluatedItems === false) {
+                        validationResult.problems.push({
+                            location: { offset: node.offset, length: node.length },
+                            message: (0,browser.t)('Item does not match any validation rule from the array.')
+                        });
+                    }
+                    else {
+                        const itemValidationResult = new ValidationResult();
+                        validate(node.items[i], schema.unevaluatedItems, itemValidationResult, matchingSchemas, context);
+                        validationResult.mergePropertyMatch(itemValidationResult);
+                    }
+                }
+                validationResult.processedProperties.add(String(i));
+                validationResult.propertiesValueMatches++;
+            }
+        }
+        if (isNumber(schema.minItems) && node.items.length < schema.minItems) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('Array has too few items. Expected {0} or more.', schema.minItems)
+            });
+        }
+        if (isNumber(schema.maxItems) && node.items.length > schema.maxItems) {
+            validationResult.problems.push({
+                location: { offset: node.offset, length: node.length },
+                message: (0,browser.t)('Array has too many items. Expected {0} or fewer.', schema.maxItems)
+            });
+        }
+        if (schema.uniqueItems === true) {
+            const values = jsonParser_getNodeValue(node);
+            function hasDuplicates() {
+                for (let i = 0; i < values.length - 1; i++) {
+                    const value = values[i];
+                    for (let j = i + 1; j < values.length; j++) {
+                        if (equals(value, values[j])) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            if (hasDuplicates()) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: (0,browser.t)('Array has duplicate items.')
+                });
+            }
+        }
+    }
+    function _validateObjectNode(node) {
+        const seenKeys = Object.create(null);
+        const unprocessedProperties = new Set();
+        for (const propertyNode of node.properties) {
+            const key = propertyNode.keyNode.value;
+            seenKeys[key] = propertyNode.valueNode;
+            unprocessedProperties.add(key);
+        }
+        if (Array.isArray(schema.required)) {
+            for (const propertyName of schema.required) {
+                if (!seenKeys[propertyName]) {
+                    const keyNode = node.parent && node.parent.type === 'property' && node.parent.keyNode;
+                    const location = keyNode ? { offset: keyNode.offset, length: keyNode.length } : { offset: node.offset, length: 1 };
+                    validationResult.problems.push({
+                        location: location,
+                        message: (0,browser.t)('Missing property "{0}".', propertyName)
+                    });
+                }
+            }
+        }
+        const propertyProcessed = (prop) => {
+            unprocessedProperties.delete(prop);
+            validationResult.processedProperties.add(prop);
+        };
+        if (schema.properties) {
+            for (const propertyName of Object.keys(schema.properties)) {
+                propertyProcessed(propertyName);
+                const propertySchema = schema.properties[propertyName];
+                const child = seenKeys[propertyName];
+                if (child) {
+                    if (isBoolean(propertySchema)) {
+                        if (!propertySchema) {
+                            const propertyNode = child.parent;
+                            validationResult.problems.push({
+                                location: { offset: propertyNode.keyNode.offset, length: propertyNode.keyNode.length },
+                                message: schema.errorMessage || (0,browser.t)('Property {0} is not allowed.', propertyName)
+                            });
+                        }
+                        else {
+                            validationResult.propertiesMatches++;
+                            validationResult.propertiesValueMatches++;
+                        }
+                    }
+                    else {
+                        const propertyValidationResult = new ValidationResult();
+                        validate(child, propertySchema, propertyValidationResult, matchingSchemas, context);
+                        validationResult.mergePropertyMatch(propertyValidationResult);
+                    }
+                }
+            }
+        }
+        if (schema.patternProperties) {
+            for (const propertyPattern of Object.keys(schema.patternProperties)) {
+                const regex = extendedRegExp(propertyPattern);
+                if (regex) {
+                    const processed = [];
+                    for (const propertyName of unprocessedProperties) {
+                        if (regex.test(propertyName)) {
+                            processed.push(propertyName);
+                            const child = seenKeys[propertyName];
+                            if (child) {
+                                const propertySchema = schema.patternProperties[propertyPattern];
+                                if (isBoolean(propertySchema)) {
+                                    if (!propertySchema) {
+                                        const propertyNode = child.parent;
+                                        validationResult.problems.push({
+                                            location: { offset: propertyNode.keyNode.offset, length: propertyNode.keyNode.length },
+                                            message: schema.errorMessage || (0,browser.t)('Property {0} is not allowed.', propertyName)
+                                        });
+                                    }
+                                    else {
+                                        validationResult.propertiesMatches++;
+                                        validationResult.propertiesValueMatches++;
+                                    }
+                                }
+                                else {
+                                    const propertyValidationResult = new ValidationResult();
+                                    validate(child, propertySchema, propertyValidationResult, matchingSchemas, context);
+                                    validationResult.mergePropertyMatch(propertyValidationResult);
+                                }
+                            }
+                        }
+                    }
+                    processed.forEach(propertyProcessed);
+                }
+            }
+        }
+        const additionalProperties = schema.additionalProperties;
+        if (additionalProperties !== undefined) {
+            for (const propertyName of unprocessedProperties) {
+                propertyProcessed(propertyName);
+                const child = seenKeys[propertyName];
+                if (child) {
+                    if (additionalProperties === false) {
+                        const propertyNode = child.parent;
+                        validationResult.problems.push({
+                            location: { offset: propertyNode.keyNode.offset, length: propertyNode.keyNode.length },
+                            message: schema.errorMessage || (0,browser.t)('Property {0} is not allowed.', propertyName)
+                        });
+                    }
+                    else if (additionalProperties !== true) {
+                        const propertyValidationResult = new ValidationResult();
+                        validate(child, additionalProperties, propertyValidationResult, matchingSchemas, context);
+                        validationResult.mergePropertyMatch(propertyValidationResult);
+                    }
+                }
+            }
+        }
+        const unevaluatedProperties = schema.unevaluatedProperties;
+        if (unevaluatedProperties !== undefined) {
+            const processed = [];
+            for (const propertyName of unprocessedProperties) {
+                if (!validationResult.processedProperties.has(propertyName)) {
+                    processed.push(propertyName);
+                    const child = seenKeys[propertyName];
+                    if (child) {
+                        if (unevaluatedProperties === false) {
+                            const propertyNode = child.parent;
+                            validationResult.problems.push({
+                                location: { offset: propertyNode.keyNode.offset, length: propertyNode.keyNode.length },
+                                message: schema.errorMessage || (0,browser.t)('Property {0} is not allowed.', propertyName)
+                            });
+                        }
+                        else if (unevaluatedProperties !== true) {
+                            const propertyValidationResult = new ValidationResult();
+                            validate(child, unevaluatedProperties, propertyValidationResult, matchingSchemas, context);
+                            validationResult.mergePropertyMatch(propertyValidationResult);
+                        }
+                    }
+                }
+            }
+            processed.forEach(propertyProcessed);
+        }
+        if (isNumber(schema.maxProperties)) {
+            if (node.properties.length > schema.maxProperties) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: (0,browser.t)('Object has more properties than limit of {0}.', schema.maxProperties)
+                });
+            }
+        }
+        if (isNumber(schema.minProperties)) {
+            if (node.properties.length < schema.minProperties) {
+                validationResult.problems.push({
+                    location: { offset: node.offset, length: node.length },
+                    message: (0,browser.t)('Object has fewer properties than the required number of {0}', schema.minProperties)
+                });
+            }
+        }
+        if (schema.dependentRequired) {
+            for (const key in schema.dependentRequired) {
+                const prop = seenKeys[key];
+                const propertyDeps = schema.dependentRequired[key];
+                if (prop && Array.isArray(propertyDeps)) {
+                    _validatePropertyDependencies(key, propertyDeps);
+                }
+            }
+        }
+        if (schema.dependentSchemas) {
+            for (const key in schema.dependentSchemas) {
+                const prop = seenKeys[key];
+                const propertyDeps = schema.dependentSchemas[key];
+                if (prop && isObject(propertyDeps)) {
+                    _validatePropertyDependencies(key, propertyDeps);
+                }
+            }
+        }
+        if (schema.dependencies) {
+            for (const key in schema.dependencies) {
+                const prop = seenKeys[key];
+                if (prop) {
+                    _validatePropertyDependencies(key, schema.dependencies[key]);
+                }
+            }
+        }
+        const propertyNames = asSchema(schema.propertyNames);
+        if (propertyNames) {
+            for (const f of node.properties) {
+                const key = f.keyNode;
+                if (key) {
+                    validate(key, propertyNames, validationResult, NoOpSchemaCollector.instance, context);
+                }
+            }
+        }
+        function _validatePropertyDependencies(key, propertyDep) {
+            if (Array.isArray(propertyDep)) {
+                for (const requiredProp of propertyDep) {
+                    if (!seenKeys[requiredProp]) {
+                        validationResult.problems.push({
+                            location: { offset: node.offset, length: node.length },
+                            message: (0,browser.t)('Object is missing property {0} required by property {1}.', requiredProp, key)
+                        });
+                    }
+                    else {
+                        validationResult.propertiesValueMatches++;
+                    }
+                }
+            }
+            else {
+                const propertySchema = asSchema(propertyDep);
+                if (propertySchema) {
+                    const propertyValidationResult = new ValidationResult();
+                    validate(node, propertySchema, propertyValidationResult, matchingSchemas, context);
+                    validationResult.mergePropertyMatch(propertyValidationResult);
+                }
+            }
+        }
+    }
+}
+function jsonParser_parse(textDocument, config) {
+    const problems = [];
+    let lastProblemOffset = -1;
+    const text = textDocument.getText();
+    const scanner = main_createScanner(text, false);
+    const commentRanges = config && config.collectComments ? [] : undefined;
+    function _scanNext() {
+        while (true) {
+            const token = scanner.scan();
+            _checkScanError();
+            switch (token) {
+                case 12 /* Json.SyntaxKind.LineCommentTrivia */:
+                case 13 /* Json.SyntaxKind.BlockCommentTrivia */:
+                    if (Array.isArray(commentRanges)) {
+                        commentRanges.push(Range.create(textDocument.positionAt(scanner.getTokenOffset()), textDocument.positionAt(scanner.getTokenOffset() + scanner.getTokenLength())));
+                    }
+                    break;
+                case 15 /* Json.SyntaxKind.Trivia */:
+                case 14 /* Json.SyntaxKind.LineBreakTrivia */:
+                    break;
+                default:
+                    return token;
+            }
+        }
+    }
+    function _errorAtRange(message, code, startOffset, endOffset, severity = DiagnosticSeverity.Error) {
+        if (problems.length === 0 || startOffset !== lastProblemOffset) {
+            const range = Range.create(textDocument.positionAt(startOffset), textDocument.positionAt(endOffset));
+            problems.push(Diagnostic.create(range, message, severity, code, textDocument.languageId));
+            lastProblemOffset = startOffset;
+        }
+    }
+    function _error(message, code, node = undefined, skipUntilAfter = [], skipUntil = []) {
+        let start = scanner.getTokenOffset();
+        let end = scanner.getTokenOffset() + scanner.getTokenLength();
+        if (start === end && start > 0) {
+            start--;
+            while (start > 0 && /\s/.test(text.charAt(start))) {
+                start--;
+            }
+            end = start + 1;
+        }
+        _errorAtRange(message, code, start, end);
+        if (node) {
+            _finalize(node, false);
+        }
+        if (skipUntilAfter.length + skipUntil.length > 0) {
+            let token = scanner.getToken();
+            while (token !== 17 /* Json.SyntaxKind.EOF */) {
+                if (skipUntilAfter.indexOf(token) !== -1) {
+                    _scanNext();
+                    break;
+                }
+                else if (skipUntil.indexOf(token) !== -1) {
+                    break;
+                }
+                token = _scanNext();
+            }
+        }
+        return node;
+    }
+    function _checkScanError() {
+        switch (scanner.getTokenError()) {
+            case 4 /* Json.ScanError.InvalidUnicode */:
+                _error((0,browser.t)('Invalid unicode sequence in string.'), ErrorCode.InvalidUnicode);
+                return true;
+            case 5 /* Json.ScanError.InvalidEscapeCharacter */:
+                _error((0,browser.t)('Invalid escape character in string.'), ErrorCode.InvalidEscapeCharacter);
+                return true;
+            case 3 /* Json.ScanError.UnexpectedEndOfNumber */:
+                _error((0,browser.t)('Unexpected end of number.'), ErrorCode.UnexpectedEndOfNumber);
+                return true;
+            case 1 /* Json.ScanError.UnexpectedEndOfComment */:
+                _error((0,browser.t)('Unexpected end of comment.'), ErrorCode.UnexpectedEndOfComment);
+                return true;
+            case 2 /* Json.ScanError.UnexpectedEndOfString */:
+                _error((0,browser.t)('Unexpected end of string.'), ErrorCode.UnexpectedEndOfString);
+                return true;
+            case 6 /* Json.ScanError.InvalidCharacter */:
+                _error((0,browser.t)('Invalid characters in string. Control characters must be escaped.'), ErrorCode.InvalidCharacter);
+                return true;
+        }
+        return false;
+    }
+    function _finalize(node, scanNext) {
+        node.length = scanner.getTokenOffset() + scanner.getTokenLength() - node.offset;
+        if (scanNext) {
+            _scanNext();
+        }
+        return node;
+    }
+    function _parseArray(parent) {
+        if (scanner.getToken() !== 3 /* Json.SyntaxKind.OpenBracketToken */) {
+            return undefined;
+        }
+        const node = new ArrayASTNodeImpl(parent, scanner.getTokenOffset());
+        _scanNext(); // consume OpenBracketToken
+        let needsComma = false;
+        while (scanner.getToken() !== 4 /* Json.SyntaxKind.CloseBracketToken */ && scanner.getToken() !== 17 /* Json.SyntaxKind.EOF */) {
+            if (scanner.getToken() === 5 /* Json.SyntaxKind.CommaToken */) {
+                if (!needsComma) {
+                    _error((0,browser.t)('Value expected'), ErrorCode.ValueExpected);
+                }
+                const commaOffset = scanner.getTokenOffset();
+                _scanNext(); // consume comma
+                if (scanner.getToken() === 4 /* Json.SyntaxKind.CloseBracketToken */) {
+                    if (needsComma) {
+                        _errorAtRange((0,browser.t)('Trailing comma'), ErrorCode.TrailingComma, commaOffset, commaOffset + 1);
+                    }
+                    continue;
+                }
+            }
+            else if (needsComma) {
+                _error((0,browser.t)('Expected comma'), ErrorCode.CommaExpected);
+            }
+            const item = _parseValue(node);
+            if (!item) {
+                _error((0,browser.t)('Value expected'), ErrorCode.ValueExpected, undefined, [], [4 /* Json.SyntaxKind.CloseBracketToken */, 5 /* Json.SyntaxKind.CommaToken */]);
+            }
+            else {
+                node.items.push(item);
+            }
+            needsComma = true;
+        }
+        if (scanner.getToken() !== 4 /* Json.SyntaxKind.CloseBracketToken */) {
+            return _error((0,browser.t)('Expected comma or closing bracket'), ErrorCode.CommaOrCloseBacketExpected, node);
+        }
+        return _finalize(node, true);
+    }
+    const keyPlaceholder = new StringASTNodeImpl(undefined, 0, 0);
+    function _parseProperty(parent, keysSeen) {
+        const node = new PropertyASTNodeImpl(parent, scanner.getTokenOffset(), keyPlaceholder);
+        let key = _parseString(node);
+        if (!key) {
+            if (scanner.getToken() === 16 /* Json.SyntaxKind.Unknown */) {
+                // give a more helpful error message
+                _error((0,browser.t)('Property keys must be doublequoted'), ErrorCode.PropertyKeysMustBeDoublequoted);
+                const keyNode = new StringASTNodeImpl(node, scanner.getTokenOffset(), scanner.getTokenLength());
+                keyNode.value = scanner.getTokenValue();
+                key = keyNode;
+                _scanNext(); // consume Unknown
+            }
+            else {
+                return undefined;
+            }
+        }
+        node.keyNode = key;
+        // For JSON files that forbid code comments, there is a convention to use the key name "//" to add comments.
+        // Multiple instances of "//" are okay.
+        if (key.value !== "//") {
+            const seen = keysSeen[key.value];
+            if (seen) {
+                _errorAtRange((0,browser.t)("Duplicate object key"), ErrorCode.DuplicateKey, node.keyNode.offset, node.keyNode.offset + node.keyNode.length, DiagnosticSeverity.Warning);
+                if (isObject(seen)) {
+                    _errorAtRange((0,browser.t)("Duplicate object key"), ErrorCode.DuplicateKey, seen.keyNode.offset, seen.keyNode.offset + seen.keyNode.length, DiagnosticSeverity.Warning);
+                }
+                keysSeen[key.value] = true; // if the same key is duplicate again, avoid duplicate error reporting
+            }
+            else {
+                keysSeen[key.value] = node;
+            }
+        }
+        if (scanner.getToken() === 6 /* Json.SyntaxKind.ColonToken */) {
+            node.colonOffset = scanner.getTokenOffset();
+            _scanNext(); // consume ColonToken
+        }
+        else {
+            _error((0,browser.t)('Colon expected'), ErrorCode.ColonExpected);
+            if (scanner.getToken() === 10 /* Json.SyntaxKind.StringLiteral */ && textDocument.positionAt(key.offset + key.length).line < textDocument.positionAt(scanner.getTokenOffset()).line) {
+                node.length = key.length;
+                return node;
+            }
+        }
+        const value = _parseValue(node);
+        if (!value) {
+            return _error((0,browser.t)('Value expected'), ErrorCode.ValueExpected, node, [], [2 /* Json.SyntaxKind.CloseBraceToken */, 5 /* Json.SyntaxKind.CommaToken */]);
+        }
+        node.valueNode = value;
+        node.length = value.offset + value.length - node.offset;
+        return node;
+    }
+    function _parseObject(parent) {
+        if (scanner.getToken() !== 1 /* Json.SyntaxKind.OpenBraceToken */) {
+            return undefined;
+        }
+        const node = new ObjectASTNodeImpl(parent, scanner.getTokenOffset());
+        const keysSeen = Object.create(null);
+        _scanNext(); // consume OpenBraceToken
+        let needsComma = false;
+        while (scanner.getToken() !== 2 /* Json.SyntaxKind.CloseBraceToken */ && scanner.getToken() !== 17 /* Json.SyntaxKind.EOF */) {
+            if (scanner.getToken() === 5 /* Json.SyntaxKind.CommaToken */) {
+                if (!needsComma) {
+                    _error((0,browser.t)('Property expected'), ErrorCode.PropertyExpected);
+                }
+                const commaOffset = scanner.getTokenOffset();
+                _scanNext(); // consume comma
+                if (scanner.getToken() === 2 /* Json.SyntaxKind.CloseBraceToken */) {
+                    if (needsComma) {
+                        _errorAtRange((0,browser.t)('Trailing comma'), ErrorCode.TrailingComma, commaOffset, commaOffset + 1);
+                    }
+                    continue;
+                }
+            }
+            else if (needsComma) {
+                _error((0,browser.t)('Expected comma'), ErrorCode.CommaExpected);
+            }
+            const property = _parseProperty(node, keysSeen);
+            if (!property) {
+                _error((0,browser.t)('Property expected'), ErrorCode.PropertyExpected, undefined, [], [2 /* Json.SyntaxKind.CloseBraceToken */, 5 /* Json.SyntaxKind.CommaToken */]);
+            }
+            else {
+                node.properties.push(property);
+            }
+            needsComma = true;
+        }
+        if (scanner.getToken() !== 2 /* Json.SyntaxKind.CloseBraceToken */) {
+            return _error((0,browser.t)('Expected comma or closing brace'), ErrorCode.CommaOrCloseBraceExpected, node);
+        }
+        return _finalize(node, true);
+    }
+    function _parseString(parent) {
+        if (scanner.getToken() !== 10 /* Json.SyntaxKind.StringLiteral */) {
+            return undefined;
+        }
+        const node = new StringASTNodeImpl(parent, scanner.getTokenOffset());
+        node.value = scanner.getTokenValue();
+        return _finalize(node, true);
+    }
+    function _parseNumber(parent) {
+        if (scanner.getToken() !== 11 /* Json.SyntaxKind.NumericLiteral */) {
+            return undefined;
+        }
+        const node = new NumberASTNodeImpl(parent, scanner.getTokenOffset());
+        if (scanner.getTokenError() === 0 /* Json.ScanError.None */) {
+            const tokenValue = scanner.getTokenValue();
+            try {
+                const numberValue = JSON.parse(tokenValue);
+                if (!isNumber(numberValue)) {
+                    return _error((0,browser.t)('Invalid number format.'), ErrorCode.Undefined, node);
+                }
+                node.value = numberValue;
+            }
+            catch (e) {
+                return _error((0,browser.t)('Invalid number format.'), ErrorCode.Undefined, node);
+            }
+            node.isInteger = tokenValue.indexOf('.') === -1;
+        }
+        return _finalize(node, true);
+    }
+    function _parseLiteral(parent) {
+        switch (scanner.getToken()) {
+            case 7 /* Json.SyntaxKind.NullKeyword */:
+                return _finalize(new NullASTNodeImpl(parent, scanner.getTokenOffset()), true);
+            case 8 /* Json.SyntaxKind.TrueKeyword */:
+                return _finalize(new BooleanASTNodeImpl(parent, true, scanner.getTokenOffset()), true);
+            case 9 /* Json.SyntaxKind.FalseKeyword */:
+                return _finalize(new BooleanASTNodeImpl(parent, false, scanner.getTokenOffset()), true);
+            default:
+                return undefined;
+        }
+    }
+    function _parseValue(parent) {
+        return _parseArray(parent) || _parseObject(parent) || _parseString(parent) || _parseNumber(parent) || _parseLiteral(parent);
+    }
+    let _root = undefined;
+    const token = _scanNext();
+    if (token !== 17 /* Json.SyntaxKind.EOF */) {
+        _root = _parseValue(_root);
+        if (!_root) {
+            _error((0,browser.t)('Expected a JSON object, array or literal.'), ErrorCode.Undefined);
+        }
+        else if (scanner.getToken() !== 17 /* Json.SyntaxKind.EOF */) {
+            _error((0,browser.t)('End of file expected.'), ErrorCode.Undefined);
+        }
+    }
+    return new JSONDocument(_root, problems, commentRanges);
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/json.js
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) Microsoft Corporation. All rights reserved.
+*  Licensed under the MIT License. See License.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+function stringifyObject(obj, indent, stringifyLiteral) {
+    if (obj !== null && typeof obj === 'object') {
+        const newIndent = indent + '\t';
+        if (Array.isArray(obj)) {
+            if (obj.length === 0) {
+                return '[]';
+            }
+            let result = '[\n';
+            for (let i = 0; i < obj.length; i++) {
+                result += newIndent + stringifyObject(obj[i], newIndent, stringifyLiteral);
+                if (i < obj.length - 1) {
+                    result += ',';
+                }
+                result += '\n';
+            }
+            result += indent + ']';
+            return result;
+        }
+        else {
+            const keys = Object.keys(obj);
+            if (keys.length === 0) {
+                return '{}';
+            }
+            let result = '{\n';
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                result += newIndent + JSON.stringify(key) + ': ' + stringifyObject(obj[key], newIndent, stringifyLiteral);
+                if (i < keys.length - 1) {
+                    result += ',';
+                }
+                result += '\n';
+            }
+            result += indent + '}';
+            return result;
+        }
+    }
+    return stringifyLiteral(obj);
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonCompletion.js
+
+
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+class JSONCompletion {
+    constructor(schemaService, contributions = [], promiseConstructor = Promise, clientCapabilities = {}) {
+        this.schemaService = schemaService;
+        this.contributions = contributions;
+        this.promiseConstructor = promiseConstructor;
+        this.clientCapabilities = clientCapabilities;
+    }
+    doResolve(item) {
+        for (let i = this.contributions.length - 1; i >= 0; i--) {
+            const resolveCompletion = this.contributions[i].resolveCompletion;
+            if (resolveCompletion) {
+                const resolver = resolveCompletion(item);
+                if (resolver) {
+                    return resolver;
+                }
+            }
+        }
+        return this.promiseConstructor.resolve(item);
+    }
+    doComplete(document, position, doc) {
+        const result = {
+            items: [],
+            isIncomplete: false
+        };
+        const text = document.getText();
+        const offset = document.offsetAt(position);
+        let node = doc.getNodeFromOffset(offset, true);
+        if (this.isInComment(document, node ? node.offset : 0, offset)) {
+            return Promise.resolve(result);
+        }
+        if (node && (offset === node.offset + node.length) && offset > 0) {
+            const ch = text[offset - 1];
+            if (node.type === 'object' && ch === '}' || node.type === 'array' && ch === ']') {
+                // after ] or }
+                node = node.parent;
+            }
+        }
+        const currentWord = this.getCurrentWord(document, offset);
+        let overwriteRange;
+        if (node && (node.type === 'string' || node.type === 'number' || node.type === 'boolean' || node.type === 'null')) {
+            overwriteRange = Range.create(document.positionAt(node.offset), document.positionAt(node.offset + node.length));
+        }
+        else {
+            let overwriteStart = offset - currentWord.length;
+            if (overwriteStart > 0 && text[overwriteStart - 1] === '"') {
+                overwriteStart--;
+            }
+            overwriteRange = Range.create(document.positionAt(overwriteStart), position);
+        }
+        const proposed = new Map();
+        const collector = {
+            add: (suggestion) => {
+                let label = suggestion.label;
+                const existing = proposed.get(label);
+                if (!existing) {
+                    label = label.replace(/[\n]/g, '↵');
+                    if (label.length > 60) {
+                        const shortendedLabel = label.substr(0, 57).trim() + '...';
+                        if (!proposed.has(shortendedLabel)) {
+                            label = shortendedLabel;
+                        }
+                    }
+                    suggestion.textEdit = TextEdit.replace(overwriteRange, suggestion.insertText);
+                    suggestion.label = label;
+                    proposed.set(label, suggestion);
+                    result.items.push(suggestion);
+                }
+                else {
+                    if (!existing.documentation) {
+                        existing.documentation = suggestion.documentation;
+                    }
+                    if (!existing.detail) {
+                        existing.detail = suggestion.detail;
+                    }
+                    if (!existing.labelDetails) {
+                        existing.labelDetails = suggestion.labelDetails;
+                    }
+                }
+            },
+            setAsIncomplete: () => {
+                result.isIncomplete = true;
+            },
+            error: (message) => {
+                console.error(message);
+            },
+            getNumberOfProposals: () => {
+                return result.items.length;
+            }
+        };
+        return this.schemaService.getSchemaForResource(document.uri, doc).then((schema) => {
+            const collectionPromises = [];
+            let addValue = true;
+            let currentKey = '';
+            let currentProperty = undefined;
+            if (node) {
+                if (node.type === 'string') {
+                    const parent = node.parent;
+                    if (parent && parent.type === 'property' && parent.keyNode === node) {
+                        addValue = !parent.valueNode;
+                        currentProperty = parent;
+                        currentKey = text.substr(node.offset + 1, node.length - 2);
+                        if (parent) {
+                            node = parent.parent;
+                        }
+                    }
+                }
+            }
+            // proposals for properties
+            if (node && node.type === 'object') {
+                // don't suggest keys when the cursor is just before the opening curly brace
+                if (node.offset === offset) {
+                    return result;
+                }
+                // don't suggest properties that are already present
+                const properties = node.properties;
+                properties.forEach(p => {
+                    if (!currentProperty || currentProperty !== p) {
+                        proposed.set(p.keyNode.value, CompletionItem.create('__'));
+                    }
+                });
+                let separatorAfter = '';
+                if (addValue) {
+                    separatorAfter = this.evaluateSeparatorAfter(document, document.offsetAt(overwriteRange.end));
+                }
+                if (schema) {
+                    // property proposals with schema
+                    this.getPropertyCompletions(schema, doc, node, addValue, separatorAfter, collector);
+                }
+                else {
+                    // property proposals without schema
+                    this.getSchemaLessPropertyCompletions(doc, node, currentKey, collector);
+                }
+                const location = jsonParser_getNodePath(node);
+                this.contributions.forEach((contribution) => {
+                    const collectPromise = contribution.collectPropertyCompletions(document.uri, location, currentWord, addValue, separatorAfter === '', collector);
+                    if (collectPromise) {
+                        collectionPromises.push(collectPromise);
+                    }
+                });
+                if ((!schema && currentWord.length > 0 && text.charAt(offset - currentWord.length - 1) !== '"')) {
+                    collector.add({
+                        kind: CompletionItemKind.Property,
+                        label: this.getLabelForValue(currentWord),
+                        insertText: this.getInsertTextForProperty(currentWord, undefined, false, separatorAfter),
+                        insertTextFormat: InsertTextFormat.Snippet, documentation: '',
+                    });
+                    collector.setAsIncomplete();
+                }
+            }
+            // proposals for values
+            const types = {};
+            if (schema) {
+                // value proposals with schema
+                this.getValueCompletions(schema, doc, node, offset, document, collector, types);
+            }
+            else {
+                // value proposals without schema
+                this.getSchemaLessValueCompletions(doc, node, offset, document, collector);
+            }
+            if (this.contributions.length > 0) {
+                this.getContributedValueCompletions(doc, node, offset, document, collector, collectionPromises);
+            }
+            return this.promiseConstructor.all(collectionPromises).then(() => {
+                if (collector.getNumberOfProposals() === 0) {
+                    let offsetForSeparator = offset;
+                    if (node && (node.type === 'string' || node.type === 'number' || node.type === 'boolean' || node.type === 'null')) {
+                        offsetForSeparator = node.offset + node.length;
+                    }
+                    const separatorAfter = this.evaluateSeparatorAfter(document, offsetForSeparator);
+                    this.addFillerValueCompletions(types, separatorAfter, collector);
+                }
+                return result;
+            });
+        });
+    }
+    getPropertyCompletions(schema, doc, node, addValue, separatorAfter, collector) {
+        const matchingSchemas = doc.getMatchingSchemas(schema.schema, node.offset);
+        matchingSchemas.forEach((s) => {
+            if (s.node === node && !s.inverted) {
+                const schemaProperties = s.schema.properties;
+                if (schemaProperties) {
+                    Object.keys(schemaProperties).forEach((key) => {
+                        const propertySchema = schemaProperties[key];
+                        if (typeof propertySchema === 'object' && !propertySchema.deprecationMessage && !propertySchema.doNotSuggest) {
+                            const proposal = {
+                                kind: CompletionItemKind.Property,
+                                label: key,
+                                insertText: this.getInsertTextForProperty(key, propertySchema, addValue, separatorAfter),
+                                insertTextFormat: InsertTextFormat.Snippet,
+                                filterText: this.getFilterTextForValue(key),
+                                documentation: this.fromMarkup(propertySchema.markdownDescription) || propertySchema.description || '',
+                            };
+                            if (propertySchema.suggestSortText !== undefined) {
+                                proposal.sortText = propertySchema.suggestSortText;
+                            }
+                            if (proposal.insertText && endsWith(proposal.insertText, `$1${separatorAfter}`)) {
+                                proposal.command = {
+                                    title: 'Suggest',
+                                    command: 'editor.action.triggerSuggest'
+                                };
+                            }
+                            collector.add(proposal);
+                        }
+                    });
+                }
+                const schemaPropertyNames = s.schema.propertyNames;
+                if (typeof schemaPropertyNames === 'object' && !schemaPropertyNames.deprecationMessage && !schemaPropertyNames.doNotSuggest) {
+                    const propertyNameCompletionItem = (name, enumDescription = undefined) => {
+                        const proposal = {
+                            kind: CompletionItemKind.Property,
+                            label: name,
+                            insertText: this.getInsertTextForProperty(name, undefined, addValue, separatorAfter),
+                            insertTextFormat: InsertTextFormat.Snippet,
+                            filterText: this.getFilterTextForValue(name),
+                            documentation: enumDescription || this.fromMarkup(schemaPropertyNames.markdownDescription) || schemaPropertyNames.description || '',
+                        };
+                        if (schemaPropertyNames.suggestSortText !== undefined) {
+                            proposal.sortText = schemaPropertyNames.suggestSortText;
+                        }
+                        if (proposal.insertText && endsWith(proposal.insertText, `$1${separatorAfter}`)) {
+                            proposal.command = {
+                                title: 'Suggest',
+                                command: 'editor.action.triggerSuggest'
+                            };
+                        }
+                        collector.add(proposal);
+                    };
+                    if (schemaPropertyNames.enum) {
+                        for (let i = 0; i < schemaPropertyNames.enum.length; i++) {
+                            let enumDescription = undefined;
+                            if (schemaPropertyNames.markdownEnumDescriptions && i < schemaPropertyNames.markdownEnumDescriptions.length) {
+                                enumDescription = this.fromMarkup(schemaPropertyNames.markdownEnumDescriptions[i]);
+                            }
+                            else if (schemaPropertyNames.enumDescriptions && i < schemaPropertyNames.enumDescriptions.length) {
+                                enumDescription = schemaPropertyNames.enumDescriptions[i];
+                            }
+                            propertyNameCompletionItem(schemaPropertyNames.enum[i], enumDescription);
+                        }
+                    }
+                    if (schemaPropertyNames.const) {
+                        propertyNameCompletionItem(schemaPropertyNames.const);
+                    }
+                }
+            }
+        });
+    }
+    getSchemaLessPropertyCompletions(doc, node, currentKey, collector) {
+        const collectCompletionsForSimilarObject = (obj) => {
+            obj.properties.forEach((p) => {
+                const key = p.keyNode.value;
+                collector.add({
+                    kind: CompletionItemKind.Property,
+                    label: key,
+                    insertText: this.getInsertTextForValue(key, ''),
+                    insertTextFormat: InsertTextFormat.Snippet,
+                    filterText: this.getFilterTextForValue(key),
+                    documentation: ''
+                });
+            });
+        };
+        if (node.parent) {
+            if (node.parent.type === 'property') {
+                // if the object is a property value, check the tree for other objects that hang under a property of the same name
+                const parentKey = node.parent.keyNode.value;
+                doc.visit(n => {
+                    if (n.type === 'property' && n !== node.parent && n.keyNode.value === parentKey && n.valueNode && n.valueNode.type === 'object') {
+                        collectCompletionsForSimilarObject(n.valueNode);
+                    }
+                    return true;
+                });
+            }
+            else if (node.parent.type === 'array') {
+                // if the object is in an array, use all other array elements as similar objects
+                node.parent.items.forEach(n => {
+                    if (n.type === 'object' && n !== node) {
+                        collectCompletionsForSimilarObject(n);
+                    }
+                });
+            }
+        }
+        else if (node.type === 'object') {
+            collector.add({
+                kind: CompletionItemKind.Property,
+                label: '$schema',
+                insertText: this.getInsertTextForProperty('$schema', undefined, true, ''),
+                insertTextFormat: InsertTextFormat.Snippet, documentation: '',
+                filterText: this.getFilterTextForValue("$schema")
+            });
+        }
+    }
+    getSchemaLessValueCompletions(doc, node, offset, document, collector) {
+        let offsetForSeparator = offset;
+        if (node && (node.type === 'string' || node.type === 'number' || node.type === 'boolean' || node.type === 'null')) {
+            offsetForSeparator = node.offset + node.length;
+            node = node.parent;
+        }
+        if (!node) {
+            collector.add({
+                kind: this.getSuggestionKind('object'),
+                label: 'Empty object',
+                insertText: this.getInsertTextForValue({}, ''),
+                insertTextFormat: InsertTextFormat.Snippet,
+                documentation: ''
+            });
+            collector.add({
+                kind: this.getSuggestionKind('array'),
+                label: 'Empty array',
+                insertText: this.getInsertTextForValue([], ''),
+                insertTextFormat: InsertTextFormat.Snippet,
+                documentation: ''
+            });
+            return;
+        }
+        const separatorAfter = this.evaluateSeparatorAfter(document, offsetForSeparator);
+        const collectSuggestionsForValues = (value) => {
+            if (value.parent && !jsonParser_contains(value.parent, offset, true)) {
+                collector.add({
+                    kind: this.getSuggestionKind(value.type),
+                    label: this.getLabelTextForMatchingNode(value, document),
+                    insertText: this.getInsertTextForMatchingNode(value, document, separatorAfter),
+                    insertTextFormat: InsertTextFormat.Snippet, documentation: ''
+                });
+            }
+            if (value.type === 'boolean') {
+                this.addBooleanValueCompletion(!value.value, separatorAfter, collector);
+            }
+        };
+        if (node.type === 'property') {
+            if (offset > (node.colonOffset || 0)) {
+                const valueNode = node.valueNode;
+                if (valueNode && (offset > (valueNode.offset + valueNode.length) || valueNode.type === 'object' || valueNode.type === 'array')) {
+                    return;
+                }
+                // suggest values at the same key
+                const parentKey = node.keyNode.value;
+                doc.visit(n => {
+                    if (n.type === 'property' && n.keyNode.value === parentKey && n.valueNode) {
+                        collectSuggestionsForValues(n.valueNode);
+                    }
+                    return true;
+                });
+                if (parentKey === '$schema' && node.parent && !node.parent.parent) {
+                    this.addDollarSchemaCompletions(separatorAfter, collector);
+                }
+            }
+        }
+        if (node.type === 'array') {
+            if (node.parent && node.parent.type === 'property') {
+                // suggest items of an array at the same key
+                const parentKey = node.parent.keyNode.value;
+                doc.visit((n) => {
+                    if (n.type === 'property' && n.keyNode.value === parentKey && n.valueNode && n.valueNode.type === 'array') {
+                        n.valueNode.items.forEach(collectSuggestionsForValues);
+                    }
+                    return true;
+                });
+            }
+            else {
+                // suggest items in the same array
+                node.items.forEach(collectSuggestionsForValues);
+            }
+        }
+    }
+    getValueCompletions(schema, doc, node, offset, document, collector, types) {
+        let offsetForSeparator = offset;
+        let parentKey = undefined;
+        let valueNode = undefined;
+        if (node && (node.type === 'string' || node.type === 'number' || node.type === 'boolean' || node.type === 'null')) {
+            offsetForSeparator = node.offset + node.length;
+            valueNode = node;
+            node = node.parent;
+        }
+        if (!node) {
+            this.addSchemaValueCompletions(schema.schema, '', collector, types);
+            return;
+        }
+        if ((node.type === 'property') && offset > (node.colonOffset || 0)) {
+            const valueNode = node.valueNode;
+            if (valueNode && offset > (valueNode.offset + valueNode.length)) {
+                return; // we are past the value node
+            }
+            parentKey = node.keyNode.value;
+            node = node.parent;
+        }
+        if (node && (parentKey !== undefined || node.type === 'array')) {
+            const separatorAfter = this.evaluateSeparatorAfter(document, offsetForSeparator);
+            const matchingSchemas = doc.getMatchingSchemas(schema.schema, node.offset, valueNode);
+            for (const s of matchingSchemas) {
+                if (s.node === node && !s.inverted && s.schema) {
+                    if (node.type === 'array' && s.schema.items) {
+                        let c = collector;
+                        if (s.schema.uniqueItems) {
+                            const existingValues = new Set();
+                            node.children.forEach(n => {
+                                if (n.type !== 'array' && n.type !== 'object') {
+                                    existingValues.add(this.getLabelForValue(jsonParser_getNodeValue(n)));
+                                }
+                            });
+                            c = {
+                                ...collector,
+                                add(suggestion) {
+                                    if (!existingValues.has(suggestion.label)) {
+                                        collector.add(suggestion);
+                                    }
+                                }
+                            };
+                        }
+                        if (Array.isArray(s.schema.items)) {
+                            const index = this.findItemAtOffset(node, document, offset);
+                            if (index < s.schema.items.length) {
+                                this.addSchemaValueCompletions(s.schema.items[index], separatorAfter, c, types);
+                            }
+                        }
+                        else {
+                            this.addSchemaValueCompletions(s.schema.items, separatorAfter, c, types);
+                        }
+                    }
+                    if (parentKey !== undefined) {
+                        let propertyMatched = false;
+                        if (s.schema.properties) {
+                            const propertySchema = s.schema.properties[parentKey];
+                            if (propertySchema) {
+                                propertyMatched = true;
+                                this.addSchemaValueCompletions(propertySchema, separatorAfter, collector, types);
+                            }
+                        }
+                        if (s.schema.patternProperties && !propertyMatched) {
+                            for (const pattern of Object.keys(s.schema.patternProperties)) {
+                                const regex = extendedRegExp(pattern);
+                                if (regex?.test(parentKey)) {
+                                    propertyMatched = true;
+                                    const propertySchema = s.schema.patternProperties[pattern];
+                                    this.addSchemaValueCompletions(propertySchema, separatorAfter, collector, types);
+                                }
+                            }
+                        }
+                        if (s.schema.additionalProperties && !propertyMatched) {
+                            const propertySchema = s.schema.additionalProperties;
+                            this.addSchemaValueCompletions(propertySchema, separatorAfter, collector, types);
+                        }
+                    }
+                }
+            }
+            if (parentKey === '$schema' && !node.parent) {
+                this.addDollarSchemaCompletions(separatorAfter, collector);
+            }
+            if (types['boolean']) {
+                this.addBooleanValueCompletion(true, separatorAfter, collector);
+                this.addBooleanValueCompletion(false, separatorAfter, collector);
+            }
+            if (types['null']) {
+                this.addNullValueCompletion(separatorAfter, collector);
+            }
+        }
+    }
+    getContributedValueCompletions(doc, node, offset, document, collector, collectionPromises) {
+        if (!node) {
+            this.contributions.forEach((contribution) => {
+                const collectPromise = contribution.collectDefaultCompletions(document.uri, collector);
+                if (collectPromise) {
+                    collectionPromises.push(collectPromise);
+                }
+            });
+        }
+        else {
+            if (node.type === 'string' || node.type === 'number' || node.type === 'boolean' || node.type === 'null') {
+                node = node.parent;
+            }
+            if (node && (node.type === 'property') && offset > (node.colonOffset || 0)) {
+                const parentKey = node.keyNode.value;
+                const valueNode = node.valueNode;
+                if ((!valueNode || offset <= (valueNode.offset + valueNode.length)) && node.parent) {
+                    const location = jsonParser_getNodePath(node.parent);
+                    this.contributions.forEach((contribution) => {
+                        const collectPromise = contribution.collectValueCompletions(document.uri, location, parentKey, collector);
+                        if (collectPromise) {
+                            collectionPromises.push(collectPromise);
+                        }
+                    });
+                }
+            }
+        }
+    }
+    addSchemaValueCompletions(schema, separatorAfter, collector, types) {
+        if (typeof schema === 'object') {
+            this.addEnumValueCompletions(schema, separatorAfter, collector);
+            this.addDefaultValueCompletions(schema, separatorAfter, collector);
+            this.collectTypes(schema, types);
+            if (Array.isArray(schema.allOf)) {
+                schema.allOf.forEach(s => this.addSchemaValueCompletions(s, separatorAfter, collector, types));
+            }
+            if (Array.isArray(schema.anyOf)) {
+                schema.anyOf.forEach(s => this.addSchemaValueCompletions(s, separatorAfter, collector, types));
+            }
+            if (Array.isArray(schema.oneOf)) {
+                schema.oneOf.forEach(s => this.addSchemaValueCompletions(s, separatorAfter, collector, types));
+            }
+        }
+    }
+    addDefaultValueCompletions(schema, separatorAfter, collector, arrayDepth = 0) {
+        let hasProposals = false;
+        if (isDefined(schema.default)) {
+            let type = schema.type;
+            let value = schema.default;
+            for (let i = arrayDepth; i > 0; i--) {
+                value = [value];
+                type = 'array';
+            }
+            const completionItem = {
+                kind: this.getSuggestionKind(type),
+                label: this.getLabelForValue(value),
+                insertText: this.getInsertTextForValue(value, separatorAfter),
+                insertTextFormat: InsertTextFormat.Snippet
+            };
+            if (this.doesSupportsLabelDetails()) {
+                completionItem.labelDetails = { description: (0,browser.t)('Default value') };
+            }
+            else {
+                completionItem.detail = (0,browser.t)('Default value');
+            }
+            collector.add(completionItem);
+            hasProposals = true;
+        }
+        if (Array.isArray(schema.examples)) {
+            schema.examples.forEach(example => {
+                let type = schema.type;
+                let value = example;
+                for (let i = arrayDepth; i > 0; i--) {
+                    value = [value];
+                    type = 'array';
+                }
+                collector.add({
+                    kind: this.getSuggestionKind(type),
+                    label: this.getLabelForValue(value),
+                    insertText: this.getInsertTextForValue(value, separatorAfter),
+                    insertTextFormat: InsertTextFormat.Snippet
+                });
+                hasProposals = true;
+            });
+        }
+        if (Array.isArray(schema.defaultSnippets)) {
+            schema.defaultSnippets.forEach(s => {
+                let type = schema.type;
+                let value = s.body;
+                let label = s.label;
+                let insertText;
+                let filterText;
+                if (isDefined(value)) {
+                    schema.type;
+                    for (let i = arrayDepth; i > 0; i--) {
+                        value = [value];
+                    }
+                    insertText = this.getInsertTextForSnippetValue(value, separatorAfter);
+                    filterText = this.getFilterTextForSnippetValue(value);
+                    label = label || this.getLabelForSnippetValue(value);
+                }
+                else if (typeof s.bodyText === 'string') {
+                    let prefix = '', suffix = '', indent = '';
+                    for (let i = arrayDepth; i > 0; i--) {
+                        prefix = prefix + indent + '[\n';
+                        suffix = suffix + '\n' + indent + ']';
+                        indent += '\t';
+                        type = 'array';
+                    }
+                    insertText = prefix + indent + s.bodyText.split('\n').join('\n' + indent) + suffix + separatorAfter;
+                    label = label || insertText,
+                        filterText = insertText.replace(/[\n]/g, ''); // remove new lines
+                }
+                else {
+                    return;
+                }
+                collector.add({
+                    kind: this.getSuggestionKind(type),
+                    label,
+                    documentation: this.fromMarkup(s.markdownDescription) || s.description,
+                    insertText,
+                    insertTextFormat: InsertTextFormat.Snippet,
+                    filterText
+                });
+                hasProposals = true;
+            });
+        }
+        if (!hasProposals && typeof schema.items === 'object' && !Array.isArray(schema.items) && arrayDepth < 5 /* beware of recursion */) {
+            this.addDefaultValueCompletions(schema.items, separatorAfter, collector, arrayDepth + 1);
+        }
+    }
+    addEnumValueCompletions(schema, separatorAfter, collector) {
+        if (isDefined(schema.const)) {
+            collector.add({
+                kind: this.getSuggestionKind(schema.type),
+                label: this.getLabelForValue(schema.const),
+                insertText: this.getInsertTextForValue(schema.const, separatorAfter),
+                insertTextFormat: InsertTextFormat.Snippet,
+                documentation: this.fromMarkup(schema.markdownDescription) || schema.description
+            });
+        }
+        if (Array.isArray(schema.enum)) {
+            for (let i = 0, length = schema.enum.length; i < length; i++) {
+                const enm = schema.enum[i];
+                let documentation = this.fromMarkup(schema.markdownDescription) || schema.description;
+                if (schema.markdownEnumDescriptions && i < schema.markdownEnumDescriptions.length && this.doesSupportMarkdown()) {
+                    documentation = this.fromMarkup(schema.markdownEnumDescriptions[i]);
+                }
+                else if (schema.enumDescriptions && i < schema.enumDescriptions.length) {
+                    documentation = schema.enumDescriptions[i];
+                }
+                collector.add({
+                    kind: this.getSuggestionKind(schema.type),
+                    label: this.getLabelForValue(enm),
+                    insertText: this.getInsertTextForValue(enm, separatorAfter),
+                    insertTextFormat: InsertTextFormat.Snippet,
+                    documentation
+                });
+            }
+        }
+    }
+    collectTypes(schema, types) {
+        if (Array.isArray(schema.enum) || isDefined(schema.const)) {
+            return;
+        }
+        const type = schema.type;
+        if (Array.isArray(type)) {
+            type.forEach(t => types[t] = true);
+        }
+        else if (type) {
+            types[type] = true;
+        }
+    }
+    addFillerValueCompletions(types, separatorAfter, collector) {
+        if (types['object']) {
+            collector.add({
+                kind: this.getSuggestionKind('object'),
+                label: '{}',
+                insertText: this.getInsertTextForGuessedValue({}, separatorAfter),
+                insertTextFormat: InsertTextFormat.Snippet,
+                detail: (0,browser.t)('New object'),
+                documentation: ''
+            });
+        }
+        if (types['array']) {
+            collector.add({
+                kind: this.getSuggestionKind('array'),
+                label: '[]',
+                insertText: this.getInsertTextForGuessedValue([], separatorAfter),
+                insertTextFormat: InsertTextFormat.Snippet,
+                detail: (0,browser.t)('New array'),
+                documentation: ''
+            });
+        }
+    }
+    addBooleanValueCompletion(value, separatorAfter, collector) {
+        collector.add({
+            kind: this.getSuggestionKind('boolean'),
+            label: value ? 'true' : 'false',
+            insertText: this.getInsertTextForValue(value, separatorAfter),
+            insertTextFormat: InsertTextFormat.Snippet,
+            documentation: ''
+        });
+    }
+    addNullValueCompletion(separatorAfter, collector) {
+        collector.add({
+            kind: this.getSuggestionKind('null'),
+            label: 'null',
+            insertText: 'null' + separatorAfter,
+            insertTextFormat: InsertTextFormat.Snippet,
+            documentation: ''
+        });
+    }
+    addDollarSchemaCompletions(separatorAfter, collector) {
+        const schemaIds = this.schemaService.getRegisteredSchemaIds(schema => schema === 'http' || schema === 'https');
+        schemaIds.forEach(schemaId => {
+            if (schemaId.startsWith('http://json-schema.org/draft-')) {
+                schemaId = schemaId + '#';
+            }
+            collector.add({
+                kind: CompletionItemKind.Module,
+                label: this.getLabelForValue(schemaId),
+                filterText: this.getFilterTextForValue(schemaId),
+                insertText: this.getInsertTextForValue(schemaId, separatorAfter),
+                insertTextFormat: InsertTextFormat.Snippet, documentation: ''
+            });
+        });
+    }
+    getLabelForValue(value) {
+        return JSON.stringify(value);
+    }
+    getValueFromLabel(value) {
+        return JSON.parse(value);
+    }
+    getFilterTextForValue(value) {
+        return JSON.stringify(value);
+    }
+    getFilterTextForSnippetValue(value) {
+        return JSON.stringify(value).replace(/\$\{\d+:([^}]+)\}|\$\d+/g, '$1');
+    }
+    getLabelForSnippetValue(value) {
+        const label = JSON.stringify(value);
+        return label.replace(/\$\{\d+:([^}]+)\}|\$\d+/g, '$1');
+    }
+    getInsertTextForPlainText(text) {
+        return text.replace(/[\\\$\}]/g, '\\$&'); // escape $, \ and }
+    }
+    getInsertTextForValue(value, separatorAfter) {
+        const text = JSON.stringify(value, null, '\t');
+        if (text === '{}') {
+            return '{$1}' + separatorAfter;
+        }
+        else if (text === '[]') {
+            return '[$1]' + separatorAfter;
+        }
+        return this.getInsertTextForPlainText(text + separatorAfter);
+    }
+    getInsertTextForSnippetValue(value, separatorAfter) {
+        const replacer = (value) => {
+            if (typeof value === 'string') {
+                if (value[0] === '^') {
+                    return value.substr(1);
+                }
+            }
+            return JSON.stringify(value);
+        };
+        return stringifyObject(value, '', replacer) + separatorAfter;
+    }
+    getInsertTextForGuessedValue(value, separatorAfter) {
+        switch (typeof value) {
+            case 'object':
+                if (value === null) {
+                    return '${1:null}' + separatorAfter;
+                }
+                return this.getInsertTextForValue(value, separatorAfter);
+            case 'string':
+                let snippetValue = JSON.stringify(value);
+                snippetValue = snippetValue.substr(1, snippetValue.length - 2); // remove quotes
+                snippetValue = this.getInsertTextForPlainText(snippetValue); // escape \ and }
+                return '"${1:' + snippetValue + '}"' + separatorAfter;
+            case 'number':
+            case 'boolean':
+                return '${1:' + JSON.stringify(value) + '}' + separatorAfter;
+        }
+        return this.getInsertTextForValue(value, separatorAfter);
+    }
+    getSuggestionKind(type) {
+        if (Array.isArray(type)) {
+            const array = type;
+            type = array.length > 0 ? array[0] : undefined;
+        }
+        if (!type) {
+            return CompletionItemKind.Value;
+        }
+        switch (type) {
+            case 'string': return CompletionItemKind.Value;
+            case 'object': return CompletionItemKind.Module;
+            case 'property': return CompletionItemKind.Property;
+            default: return CompletionItemKind.Value;
+        }
+    }
+    getLabelTextForMatchingNode(node, document) {
+        switch (node.type) {
+            case 'array':
+                return '[]';
+            case 'object':
+                return '{}';
+            default:
+                const content = document.getText().substr(node.offset, node.length);
+                return content;
+        }
+    }
+    getInsertTextForMatchingNode(node, document, separatorAfter) {
+        switch (node.type) {
+            case 'array':
+                return this.getInsertTextForValue([], separatorAfter);
+            case 'object':
+                return this.getInsertTextForValue({}, separatorAfter);
+            default:
+                const content = document.getText().substr(node.offset, node.length) + separatorAfter;
+                return this.getInsertTextForPlainText(content);
+        }
+    }
+    getInsertTextForProperty(key, propertySchema, addValue, separatorAfter) {
+        const propertyText = this.getInsertTextForValue(key, '');
+        if (!addValue) {
+            return propertyText;
+        }
+        const resultText = propertyText + ': ';
+        let value;
+        let nValueProposals = 0;
+        if (propertySchema) {
+            if (Array.isArray(propertySchema.defaultSnippets)) {
+                if (propertySchema.defaultSnippets.length === 1) {
+                    const body = propertySchema.defaultSnippets[0].body;
+                    if (isDefined(body)) {
+                        value = this.getInsertTextForSnippetValue(body, '');
+                    }
+                }
+                nValueProposals += propertySchema.defaultSnippets.length;
+            }
+            if (propertySchema.enum) {
+                if (!value && propertySchema.enum.length === 1) {
+                    value = this.getInsertTextForGuessedValue(propertySchema.enum[0], '');
+                }
+                nValueProposals += propertySchema.enum.length;
+            }
+            if (isDefined(propertySchema.const)) {
+                if (!value) {
+                    value = this.getInsertTextForGuessedValue(propertySchema.const, '');
+                }
+                nValueProposals++;
+            }
+            if (isDefined(propertySchema.default)) {
+                if (!value) {
+                    value = this.getInsertTextForGuessedValue(propertySchema.default, '');
+                }
+                nValueProposals++;
+            }
+            if (Array.isArray(propertySchema.examples) && propertySchema.examples.length) {
+                if (!value) {
+                    value = this.getInsertTextForGuessedValue(propertySchema.examples[0], '');
+                }
+                nValueProposals += propertySchema.examples.length;
+            }
+            if (nValueProposals === 0) {
+                let type = Array.isArray(propertySchema.type) ? propertySchema.type[0] : propertySchema.type;
+                if (!type) {
+                    if (propertySchema.properties) {
+                        type = 'object';
+                    }
+                    else if (propertySchema.items) {
+                        type = 'array';
+                    }
+                }
+                switch (type) {
+                    case 'boolean':
+                        value = '$1';
+                        break;
+                    case 'string':
+                        value = '"$1"';
+                        break;
+                    case 'object':
+                        value = '{$1}';
+                        break;
+                    case 'array':
+                        value = '[$1]';
+                        break;
+                    case 'number':
+                    case 'integer':
+                        value = '${1:0}';
+                        break;
+                    case 'null':
+                        value = '${1:null}';
+                        break;
+                    default:
+                        return propertyText;
+                }
+            }
+        }
+        if (!value || nValueProposals > 1) {
+            value = '$1';
+        }
+        return resultText + value + separatorAfter;
+    }
+    getCurrentWord(document, offset) {
+        let i = offset - 1;
+        const text = document.getText();
+        while (i >= 0 && ' \t\n\r\v":{[,]}'.indexOf(text.charAt(i)) === -1) {
+            i--;
+        }
+        return text.substring(i + 1, offset);
+    }
+    evaluateSeparatorAfter(document, offset) {
+        const scanner = main_createScanner(document.getText(), true);
+        scanner.setPosition(offset);
+        const token = scanner.scan();
+        switch (token) {
+            case 5 /* Json.SyntaxKind.CommaToken */:
+            case 2 /* Json.SyntaxKind.CloseBraceToken */:
+            case 4 /* Json.SyntaxKind.CloseBracketToken */:
+            case 17 /* Json.SyntaxKind.EOF */:
+                return '';
+            default:
+                return ',';
+        }
+    }
+    findItemAtOffset(node, document, offset) {
+        const scanner = main_createScanner(document.getText(), true);
+        const children = node.items;
+        for (let i = children.length - 1; i >= 0; i--) {
+            const child = children[i];
+            if (offset > child.offset + child.length) {
+                scanner.setPosition(child.offset + child.length);
+                const token = scanner.scan();
+                if (token === 5 /* Json.SyntaxKind.CommaToken */ && offset >= scanner.getTokenOffset() + scanner.getTokenLength()) {
+                    return i + 1;
+                }
+                return i;
+            }
+            else if (offset >= child.offset) {
+                return i;
+            }
+        }
+        return 0;
+    }
+    isInComment(document, start, offset) {
+        const scanner = main_createScanner(document.getText(), false);
+        scanner.setPosition(start);
+        let token = scanner.scan();
+        while (token !== 17 /* Json.SyntaxKind.EOF */ && (scanner.getTokenOffset() + scanner.getTokenLength() < offset)) {
+            token = scanner.scan();
+        }
+        return (token === 12 /* Json.SyntaxKind.LineCommentTrivia */ || token === 13 /* Json.SyntaxKind.BlockCommentTrivia */) && scanner.getTokenOffset() <= offset;
+    }
+    fromMarkup(markupString) {
+        if (markupString && this.doesSupportMarkdown()) {
+            return {
+                kind: MarkupKind.Markdown,
+                value: markupString
+            };
+        }
+        return undefined;
+    }
+    doesSupportMarkdown() {
+        if (!isDefined(this.supportsMarkdown)) {
+            const documentationFormat = this.clientCapabilities.textDocument?.completion?.completionItem?.documentationFormat;
+            this.supportsMarkdown = Array.isArray(documentationFormat) && documentationFormat.indexOf(MarkupKind.Markdown) !== -1;
+        }
+        return this.supportsMarkdown;
+    }
+    doesSupportsCommitCharacters() {
+        if (!isDefined(this.supportsCommitCharacters)) {
+            this.labelDetailsSupport = this.clientCapabilities.textDocument?.completion?.completionItem?.commitCharactersSupport;
+        }
+        return this.supportsCommitCharacters;
+    }
+    doesSupportsLabelDetails() {
+        if (!isDefined(this.labelDetailsSupport)) {
+            this.labelDetailsSupport = this.clientCapabilities.textDocument?.completion?.completionItem?.labelDetailsSupport;
+        }
+        return this.labelDetailsSupport;
+    }
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonHover.js
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+class JSONHover {
+    constructor(schemaService, contributions = [], promiseConstructor) {
+        this.schemaService = schemaService;
+        this.contributions = contributions;
+        this.promise = promiseConstructor || Promise;
+    }
+    doHover(document, position, doc) {
+        const offset = document.offsetAt(position);
+        let node = doc.getNodeFromOffset(offset);
+        if (!node || (node.type === 'object' || node.type === 'array') && offset > node.offset + 1 && offset < node.offset + node.length - 1) {
+            return this.promise.resolve(null);
+        }
+        const hoverRangeNode = node;
+        // use the property description when hovering over an object key
+        if (node.type === 'string') {
+            const parent = node.parent;
+            if (parent && parent.type === 'property' && parent.keyNode === node) {
+                node = parent.valueNode;
+                if (!node) {
+                    return this.promise.resolve(null);
+                }
+            }
+        }
+        const hoverRange = Range.create(document.positionAt(hoverRangeNode.offset), document.positionAt(hoverRangeNode.offset + hoverRangeNode.length));
+        const createHover = (contents) => {
+            const result = {
+                contents: contents,
+                range: hoverRange
+            };
+            return result;
+        };
+        const location = jsonParser_getNodePath(node);
+        for (let i = this.contributions.length - 1; i >= 0; i--) {
+            const contribution = this.contributions[i];
+            const promise = contribution.getInfoContribution(document.uri, location);
+            if (promise) {
+                return promise.then(htmlContent => createHover(htmlContent));
+            }
+        }
+        return this.schemaService.getSchemaForResource(document.uri, doc).then((schema) => {
+            if (schema && node) {
+                const matchingSchemas = doc.getMatchingSchemas(schema.schema, node.offset);
+                let title = undefined;
+                let markdownDescription = undefined;
+                let markdownEnumValueDescription = undefined, enumValue = undefined;
+                matchingSchemas.every((s) => {
+                    if (s.node === node && !s.inverted && s.schema) {
+                        title = title || s.schema.title;
+                        markdownDescription = markdownDescription || s.schema.markdownDescription || toMarkdown(s.schema.description);
+                        if (s.schema.enum) {
+                            const idx = s.schema.enum.indexOf(jsonParser_getNodeValue(node));
+                            if (s.schema.markdownEnumDescriptions) {
+                                markdownEnumValueDescription = s.schema.markdownEnumDescriptions[idx];
+                            }
+                            else if (s.schema.enumDescriptions) {
+                                markdownEnumValueDescription = toMarkdown(s.schema.enumDescriptions[idx]);
+                            }
+                            if (markdownEnumValueDescription) {
+                                enumValue = s.schema.enum[idx];
+                                if (typeof enumValue !== 'string') {
+                                    enumValue = JSON.stringify(enumValue);
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                });
+                let result = '';
+                if (title) {
+                    result = toMarkdown(title);
+                }
+                if (markdownDescription) {
+                    if (result.length > 0) {
+                        result += "\n\n";
+                    }
+                    result += markdownDescription;
+                }
+                if (markdownEnumValueDescription) {
+                    if (result.length > 0) {
+                        result += "\n\n";
+                    }
+                    result += `\`${toMarkdownCodeBlock(enumValue)}\`: ${markdownEnumValueDescription}`;
+                }
+                return createHover([result]);
+            }
+            return null;
+        });
+    }
+}
+function toMarkdown(plain) {
+    if (plain) {
+        const res = plain.replace(/([^\n\r])(\r?\n)([^\n\r])/gm, '$1\n\n$3'); // single new lines to \n\n (Markdown paragraph)
+        return res.replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&"); // escape markdown syntax tokens: http://daringfireball.net/projects/markdown/syntax#backslash
+    }
+    return undefined;
+}
+function toMarkdownCodeBlock(content) {
+    // see https://daringfireball.net/projects/markdown/syntax#precode
+    if (content.indexOf('`') !== -1) {
+        return '`` ' + content + ' ``';
+    }
+    return content;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonValidation.js
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+class JSONValidation {
+    constructor(jsonSchemaService, promiseConstructor) {
+        this.jsonSchemaService = jsonSchemaService;
+        this.promise = promiseConstructor;
+        this.validationEnabled = true;
+    }
+    configure(raw) {
+        if (raw) {
+            this.validationEnabled = raw.validate !== false;
+            this.commentSeverity = raw.allowComments ? undefined : DiagnosticSeverity.Error;
+        }
+    }
+    doValidation(textDocument, jsonDocument, documentSettings, schema) {
+        if (!this.validationEnabled) {
+            return this.promise.resolve([]);
+        }
+        const diagnostics = [];
+        const added = {};
+        const addProblem = (problem) => {
+            // remove duplicated messages
+            const signature = problem.range.start.line + ' ' + problem.range.start.character + ' ' + problem.message;
+            if (!added[signature]) {
+                added[signature] = true;
+                diagnostics.push(problem);
+            }
+        };
+        const getDiagnostics = (schema) => {
+            let trailingCommaSeverity = documentSettings?.trailingCommas ? toDiagnosticSeverity(documentSettings.trailingCommas) : DiagnosticSeverity.Error;
+            let commentSeverity = documentSettings?.comments ? toDiagnosticSeverity(documentSettings.comments) : this.commentSeverity;
+            let schemaValidation = documentSettings?.schemaValidation ? toDiagnosticSeverity(documentSettings.schemaValidation) : DiagnosticSeverity.Warning;
+            let schemaRequest = documentSettings?.schemaRequest ? toDiagnosticSeverity(documentSettings.schemaRequest) : DiagnosticSeverity.Warning;
+            if (schema) {
+                const addSchemaProblem = (errorMessage, errorCode) => {
+                    if (jsonDocument.root && schemaRequest) {
+                        const astRoot = jsonDocument.root;
+                        const property = astRoot.type === 'object' ? astRoot.properties[0] : undefined;
+                        if (property && property.keyNode.value === '$schema') {
+                            const node = property.valueNode || property;
+                            const range = Range.create(textDocument.positionAt(node.offset), textDocument.positionAt(node.offset + node.length));
+                            addProblem(Diagnostic.create(range, errorMessage, schemaRequest, errorCode));
+                        }
+                        else {
+                            const range = Range.create(textDocument.positionAt(astRoot.offset), textDocument.positionAt(astRoot.offset + 1));
+                            addProblem(Diagnostic.create(range, errorMessage, schemaRequest, errorCode));
+                        }
+                    }
+                };
+                if (schema.errors.length) {
+                    addSchemaProblem(schema.errors[0], ErrorCode.SchemaResolveError);
+                }
+                else if (schemaValidation) {
+                    for (const warning of schema.warnings) {
+                        addSchemaProblem(warning, ErrorCode.SchemaUnsupportedFeature);
+                    }
+                    const semanticErrors = jsonDocument.validate(textDocument, schema.schema, schemaValidation, documentSettings?.schemaDraft);
+                    if (semanticErrors) {
+                        semanticErrors.forEach(addProblem);
+                    }
+                }
+                if (schemaAllowsComments(schema.schema)) {
+                    commentSeverity = undefined;
+                }
+                if (schemaAllowsTrailingCommas(schema.schema)) {
+                    trailingCommaSeverity = undefined;
+                }
+            }
+            for (const p of jsonDocument.syntaxErrors) {
+                if (p.code === ErrorCode.TrailingComma) {
+                    if (typeof trailingCommaSeverity !== 'number') {
+                        continue;
+                    }
+                    p.severity = trailingCommaSeverity;
+                }
+                addProblem(p);
+            }
+            if (typeof commentSeverity === 'number') {
+                const message = (0,browser.t)('Comments are not permitted in JSON.');
+                jsonDocument.comments.forEach(c => {
+                    addProblem(Diagnostic.create(c, message, commentSeverity, ErrorCode.CommentNotPermitted));
+                });
+            }
+            return diagnostics;
+        };
+        if (schema) {
+            const uri = schema.id || ('schemaservice://untitled/' + idCounter++);
+            const handle = this.jsonSchemaService.registerExternalSchema({ uri, schema });
+            return handle.getResolvedSchema().then(resolvedSchema => {
+                return getDiagnostics(resolvedSchema);
+            });
+        }
+        return this.jsonSchemaService.getSchemaForResource(textDocument.uri, jsonDocument).then(schema => {
+            return getDiagnostics(schema);
+        });
+    }
+    getLanguageStatus(textDocument, jsonDocument) {
+        return { schemas: this.jsonSchemaService.getSchemaURIsForResource(textDocument.uri, jsonDocument) };
+    }
+}
+let idCounter = 0;
+function schemaAllowsComments(schemaRef) {
+    if (schemaRef && typeof schemaRef === 'object') {
+        if (isBoolean(schemaRef.allowComments)) {
+            return schemaRef.allowComments;
+        }
+        if (schemaRef.allOf) {
+            for (const schema of schemaRef.allOf) {
+                const allow = schemaAllowsComments(schema);
+                if (isBoolean(allow)) {
+                    return allow;
+                }
+            }
+        }
+    }
+    return undefined;
+}
+function schemaAllowsTrailingCommas(schemaRef) {
+    if (schemaRef && typeof schemaRef === 'object') {
+        if (isBoolean(schemaRef.allowTrailingCommas)) {
+            return schemaRef.allowTrailingCommas;
+        }
+        const deprSchemaRef = schemaRef;
+        if (isBoolean(deprSchemaRef['allowsTrailingCommas'])) { // deprecated
+            return deprSchemaRef['allowsTrailingCommas'];
+        }
+        if (schemaRef.allOf) {
+            for (const schema of schemaRef.allOf) {
+                const allow = schemaAllowsTrailingCommas(schema);
+                if (isBoolean(allow)) {
+                    return allow;
+                }
+            }
+        }
+    }
+    return undefined;
+}
+function toDiagnosticSeverity(severityLevel) {
+    switch (severityLevel) {
+        case 'error': return DiagnosticSeverity.Error;
+        case 'warning': return DiagnosticSeverity.Warning;
+        case 'ignore': return undefined;
+    }
+    return undefined;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/colors.js
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const Digit0 = 48;
+const Digit9 = 57;
+const A = 65;
+const a = 97;
+const f = 102;
+function hexDigit(charCode) {
+    if (charCode < Digit0) {
+        return 0;
+    }
+    if (charCode <= Digit9) {
+        return charCode - Digit0;
+    }
+    if (charCode < a) {
+        charCode += (a - A);
+    }
+    if (charCode >= a && charCode <= f) {
+        return charCode - a + 10;
+    }
+    return 0;
+}
+function colorFromHex(text) {
+    if (text[0] !== '#') {
+        return undefined;
+    }
+    switch (text.length) {
+        case 4:
+            return {
+                red: (hexDigit(text.charCodeAt(1)) * 0x11) / 255.0,
+                green: (hexDigit(text.charCodeAt(2)) * 0x11) / 255.0,
+                blue: (hexDigit(text.charCodeAt(3)) * 0x11) / 255.0,
+                alpha: 1
+            };
+        case 5:
+            return {
+                red: (hexDigit(text.charCodeAt(1)) * 0x11) / 255.0,
+                green: (hexDigit(text.charCodeAt(2)) * 0x11) / 255.0,
+                blue: (hexDigit(text.charCodeAt(3)) * 0x11) / 255.0,
+                alpha: (hexDigit(text.charCodeAt(4)) * 0x11) / 255.0,
+            };
+        case 7:
+            return {
+                red: (hexDigit(text.charCodeAt(1)) * 0x10 + hexDigit(text.charCodeAt(2))) / 255.0,
+                green: (hexDigit(text.charCodeAt(3)) * 0x10 + hexDigit(text.charCodeAt(4))) / 255.0,
+                blue: (hexDigit(text.charCodeAt(5)) * 0x10 + hexDigit(text.charCodeAt(6))) / 255.0,
+                alpha: 1
+            };
+        case 9:
+            return {
+                red: (hexDigit(text.charCodeAt(1)) * 0x10 + hexDigit(text.charCodeAt(2))) / 255.0,
+                green: (hexDigit(text.charCodeAt(3)) * 0x10 + hexDigit(text.charCodeAt(4))) / 255.0,
+                blue: (hexDigit(text.charCodeAt(5)) * 0x10 + hexDigit(text.charCodeAt(6))) / 255.0,
+                alpha: (hexDigit(text.charCodeAt(7)) * 0x10 + hexDigit(text.charCodeAt(8))) / 255.0
+            };
+    }
+    return undefined;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonDocumentSymbols.js
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+class JSONDocumentSymbols {
+    constructor(schemaService) {
+        this.schemaService = schemaService;
+    }
+    findDocumentSymbols(document, doc, context = { resultLimit: Number.MAX_VALUE }) {
+        const root = doc.root;
+        if (!root) {
+            return [];
+        }
+        let limit = context.resultLimit || Number.MAX_VALUE;
+        // special handling for key bindings
+        const resourceString = document.uri;
+        if ((resourceString === 'vscode://defaultsettings/keybindings.json') || endsWith(resourceString.toLowerCase(), '/user/keybindings.json')) {
+            if (root.type === 'array') {
+                const result = [];
+                for (const item of root.items) {
+                    if (item.type === 'object') {
+                        for (const property of item.properties) {
+                            if (property.keyNode.value === 'key' && property.valueNode) {
+                                const location = Location.create(document.uri, getRange(document, item));
+                                result.push({ name: getName(property.valueNode), kind: SymbolKind.Function, location: location });
+                                limit--;
+                                if (limit <= 0) {
+                                    if (context && context.onResultLimitExceeded) {
+                                        context.onResultLimitExceeded(resourceString);
+                                    }
+                                    return result;
+                                }
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+        const toVisit = [
+            { node: root, containerName: '' }
+        ];
+        let nextToVisit = 0;
+        let limitExceeded = false;
+        const result = [];
+        const collectOutlineEntries = (node, containerName) => {
+            if (node.type === 'array') {
+                node.items.forEach(node => {
+                    if (node) {
+                        toVisit.push({ node, containerName });
+                    }
+                });
+            }
+            else if (node.type === 'object') {
+                node.properties.forEach((property) => {
+                    const valueNode = property.valueNode;
+                    if (valueNode) {
+                        if (limit > 0) {
+                            limit--;
+                            const location = Location.create(document.uri, getRange(document, property));
+                            const childContainerName = containerName ? containerName + '.' + property.keyNode.value : property.keyNode.value;
+                            result.push({ name: this.getKeyLabel(property), kind: this.getSymbolKind(valueNode.type), location: location, containerName: containerName });
+                            toVisit.push({ node: valueNode, containerName: childContainerName });
+                        }
+                        else {
+                            limitExceeded = true;
+                        }
+                    }
+                });
+            }
+        };
+        // breath first traversal
+        while (nextToVisit < toVisit.length) {
+            const next = toVisit[nextToVisit++];
+            collectOutlineEntries(next.node, next.containerName);
+        }
+        if (limitExceeded && context && context.onResultLimitExceeded) {
+            context.onResultLimitExceeded(resourceString);
+        }
+        return result;
+    }
+    findDocumentSymbols2(document, doc, context = { resultLimit: Number.MAX_VALUE }) {
+        const root = doc.root;
+        if (!root) {
+            return [];
+        }
+        let limit = context.resultLimit || Number.MAX_VALUE;
+        // special handling for key bindings
+        const resourceString = document.uri;
+        if ((resourceString === 'vscode://defaultsettings/keybindings.json') || endsWith(resourceString.toLowerCase(), '/user/keybindings.json')) {
+            if (root.type === 'array') {
+                const result = [];
+                for (const item of root.items) {
+                    if (item.type === 'object') {
+                        for (const property of item.properties) {
+                            if (property.keyNode.value === 'key' && property.valueNode) {
+                                const range = getRange(document, item);
+                                const selectionRange = getRange(document, property.keyNode);
+                                result.push({ name: getName(property.valueNode), kind: SymbolKind.Function, range, selectionRange });
+                                limit--;
+                                if (limit <= 0) {
+                                    if (context && context.onResultLimitExceeded) {
+                                        context.onResultLimitExceeded(resourceString);
+                                    }
+                                    return result;
+                                }
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+        const result = [];
+        const toVisit = [
+            { node: root, result }
+        ];
+        let nextToVisit = 0;
+        let limitExceeded = false;
+        const collectOutlineEntries = (node, result) => {
+            if (node.type === 'array') {
+                node.items.forEach((node, index) => {
+                    if (node) {
+                        if (limit > 0) {
+                            limit--;
+                            const range = getRange(document, node);
+                            const selectionRange = range;
+                            const name = String(index);
+                            const symbol = { name, kind: this.getSymbolKind(node.type), range, selectionRange, children: [] };
+                            result.push(symbol);
+                            toVisit.push({ result: symbol.children, node });
+                        }
+                        else {
+                            limitExceeded = true;
+                        }
+                    }
+                });
+            }
+            else if (node.type === 'object') {
+                node.properties.forEach((property) => {
+                    const valueNode = property.valueNode;
+                    if (valueNode) {
+                        if (limit > 0) {
+                            limit--;
+                            const range = getRange(document, property);
+                            const selectionRange = getRange(document, property.keyNode);
+                            const children = [];
+                            const symbol = { name: this.getKeyLabel(property), kind: this.getSymbolKind(valueNode.type), range, selectionRange, children, detail: this.getDetail(valueNode) };
+                            result.push(symbol);
+                            toVisit.push({ result: children, node: valueNode });
+                        }
+                        else {
+                            limitExceeded = true;
+                        }
+                    }
+                });
+            }
+        };
+        // breath first traversal
+        while (nextToVisit < toVisit.length) {
+            const next = toVisit[nextToVisit++];
+            collectOutlineEntries(next.node, next.result);
+        }
+        if (limitExceeded && context && context.onResultLimitExceeded) {
+            context.onResultLimitExceeded(resourceString);
+        }
+        return result;
+    }
+    getSymbolKind(nodeType) {
+        switch (nodeType) {
+            case 'object':
+                return SymbolKind.Module;
+            case 'string':
+                return SymbolKind.String;
+            case 'number':
+                return SymbolKind.Number;
+            case 'array':
+                return SymbolKind.Array;
+            case 'boolean':
+                return SymbolKind.Boolean;
+            default: // 'null'
+                return SymbolKind.Variable;
+        }
+    }
+    getKeyLabel(property) {
+        let name = property.keyNode.value;
+        if (name) {
+            name = name.replace(/[\n]/g, '↵');
+        }
+        if (name && name.trim()) {
+            return name;
+        }
+        return `"${name}"`;
+    }
+    getDetail(node) {
+        if (!node) {
+            return undefined;
+        }
+        if (node.type === 'boolean' || node.type === 'number' || node.type === 'null' || node.type === 'string') {
+            return String(node.value);
+        }
+        else {
+            if (node.type === 'array') {
+                return node.children.length ? undefined : '[]';
+            }
+            else if (node.type === 'object') {
+                return node.children.length ? undefined : '{}';
+            }
+        }
+        return undefined;
+    }
+    findDocumentColors(document, doc, context) {
+        return this.schemaService.getSchemaForResource(document.uri, doc).then(schema => {
+            const result = [];
+            if (schema) {
+                let limit = context && typeof context.resultLimit === 'number' ? context.resultLimit : Number.MAX_VALUE;
+                const matchingSchemas = doc.getMatchingSchemas(schema.schema);
+                const visitedNode = {};
+                for (const s of matchingSchemas) {
+                    if (!s.inverted && s.schema && (s.schema.format === 'color' || s.schema.format === 'color-hex') && s.node && s.node.type === 'string') {
+                        const nodeId = String(s.node.offset);
+                        if (!visitedNode[nodeId]) {
+                            const color = colorFromHex(jsonParser_getNodeValue(s.node));
+                            if (color) {
+                                const range = getRange(document, s.node);
+                                result.push({ color, range });
+                            }
+                            visitedNode[nodeId] = true;
+                            limit--;
+                            if (limit <= 0) {
+                                if (context && context.onResultLimitExceeded) {
+                                    context.onResultLimitExceeded(document.uri);
+                                }
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        });
+    }
+    getColorPresentations(document, doc, color, range) {
+        const result = [];
+        const red256 = Math.round(color.red * 255), green256 = Math.round(color.green * 255), blue256 = Math.round(color.blue * 255);
+        function toTwoDigitHex(n) {
+            const r = n.toString(16);
+            return r.length !== 2 ? '0' + r : r;
+        }
+        let label;
+        if (color.alpha === 1) {
+            label = `#${toTwoDigitHex(red256)}${toTwoDigitHex(green256)}${toTwoDigitHex(blue256)}`;
+        }
+        else {
+            label = `#${toTwoDigitHex(red256)}${toTwoDigitHex(green256)}${toTwoDigitHex(blue256)}${toTwoDigitHex(Math.round(color.alpha * 255))}`;
+        }
+        result.push({ label: label, textEdit: TextEdit.replace(range, JSON.stringify(label)) });
+        return result;
+    }
+}
+function getRange(document, node) {
+    return Range.create(document.positionAt(node.offset), document.positionAt(node.offset + node.length));
+}
+function getName(node) {
+    return jsonParser_getNodeValue(node) || (0,browser.t)('<empty>');
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/configuration.js
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const schemaContributions = {
+    schemaAssociations: [],
+    schemas: {
+        // bundle the schema-schema to include (localized) descriptions
+        'http://json-schema.org/draft-04/schema#': {
+            '$schema': 'http://json-schema.org/draft-04/schema#',
+            'definitions': {
+                'schemaArray': {
+                    'type': 'array',
+                    'minItems': 1,
+                    'items': {
+                        '$ref': '#'
+                    }
+                },
+                'positiveInteger': {
+                    'type': 'integer',
+                    'minimum': 0
+                },
+                'positiveIntegerDefault0': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveInteger'
+                        },
+                        {
+                            'default': 0
+                        }
+                    ]
+                },
+                'simpleTypes': {
+                    'type': 'string',
+                    'enum': [
+                        'array',
+                        'boolean',
+                        'integer',
+                        'null',
+                        'number',
+                        'object',
+                        'string'
+                    ]
+                },
+                'stringArray': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string'
+                    },
+                    'minItems': 1,
+                    'uniqueItems': true
+                }
+            },
+            'type': 'object',
+            'properties': {
+                'id': {
+                    'type': 'string',
+                    'format': 'uri'
+                },
+                '$schema': {
+                    'type': 'string',
+                    'format': 'uri'
+                },
+                'title': {
+                    'type': 'string'
+                },
+                'description': {
+                    'type': 'string'
+                },
+                'default': {},
+                'multipleOf': {
+                    'type': 'number',
+                    'minimum': 0,
+                    'exclusiveMinimum': true
+                },
+                'maximum': {
+                    'type': 'number'
+                },
+                'exclusiveMaximum': {
+                    'type': 'boolean',
+                    'default': false
+                },
+                'minimum': {
+                    'type': 'number'
+                },
+                'exclusiveMinimum': {
+                    'type': 'boolean',
+                    'default': false
+                },
+                'maxLength': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveInteger'
+                        }
+                    ]
+                },
+                'minLength': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveIntegerDefault0'
+                        }
+                    ]
+                },
+                'pattern': {
+                    'type': 'string',
+                    'format': 'regex'
+                },
+                'additionalItems': {
+                    'anyOf': [
+                        {
+                            'type': 'boolean'
+                        },
+                        {
+                            '$ref': '#'
+                        }
+                    ],
+                    'default': {}
+                },
+                'items': {
+                    'anyOf': [
+                        {
+                            '$ref': '#'
+                        },
+                        {
+                            '$ref': '#/definitions/schemaArray'
+                        }
+                    ],
+                    'default': {}
+                },
+                'maxItems': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveInteger'
+                        }
+                    ]
+                },
+                'minItems': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveIntegerDefault0'
+                        }
+                    ]
+                },
+                'uniqueItems': {
+                    'type': 'boolean',
+                    'default': false
+                },
+                'maxProperties': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveInteger'
+                        }
+                    ]
+                },
+                'minProperties': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/positiveIntegerDefault0'
+                        }
+                    ]
+                },
+                'required': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/stringArray'
+                        }
+                    ]
+                },
+                'additionalProperties': {
+                    'anyOf': [
+                        {
+                            'type': 'boolean'
+                        },
+                        {
+                            '$ref': '#'
+                        }
+                    ],
+                    'default': {}
+                },
+                'definitions': {
+                    'type': 'object',
+                    'additionalProperties': {
+                        '$ref': '#'
+                    },
+                    'default': {}
+                },
+                'properties': {
+                    'type': 'object',
+                    'additionalProperties': {
+                        '$ref': '#'
+                    },
+                    'default': {}
+                },
+                'patternProperties': {
+                    'type': 'object',
+                    'additionalProperties': {
+                        '$ref': '#'
+                    },
+                    'default': {}
+                },
+                'dependencies': {
+                    'type': 'object',
+                    'additionalProperties': {
+                        'anyOf': [
+                            {
+                                '$ref': '#'
+                            },
+                            {
+                                '$ref': '#/definitions/stringArray'
+                            }
+                        ]
+                    }
+                },
+                'enum': {
+                    'type': 'array',
+                    'minItems': 1,
+                    'uniqueItems': true
+                },
+                'type': {
+                    'anyOf': [
+                        {
+                            '$ref': '#/definitions/simpleTypes'
+                        },
+                        {
+                            'type': 'array',
+                            'items': {
+                                '$ref': '#/definitions/simpleTypes'
+                            },
+                            'minItems': 1,
+                            'uniqueItems': true
+                        }
+                    ]
+                },
+                'format': {
+                    'anyOf': [
+                        {
+                            'type': 'string',
+                            'enum': [
+                                'date-time',
+                                'uri',
+                                'email',
+                                'hostname',
+                                'ipv4',
+                                'ipv6',
+                                'regex'
+                            ]
+                        },
+                        {
+                            'type': 'string'
+                        }
+                    ]
+                },
+                'allOf': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/schemaArray'
+                        }
+                    ]
+                },
+                'anyOf': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/schemaArray'
+                        }
+                    ]
+                },
+                'oneOf': {
+                    'allOf': [
+                        {
+                            '$ref': '#/definitions/schemaArray'
+                        }
+                    ]
+                },
+                'not': {
+                    'allOf': [
+                        {
+                            '$ref': '#'
+                        }
+                    ]
+                }
+            },
+            'dependencies': {
+                'exclusiveMaximum': [
+                    'maximum'
+                ],
+                'exclusiveMinimum': [
+                    'minimum'
+                ]
+            },
+            'default': {}
+        },
+        'http://json-schema.org/draft-07/schema#': {
+            'definitions': {
+                'schemaArray': {
+                    'type': 'array',
+                    'minItems': 1,
+                    'items': { '$ref': '#' }
+                },
+                'nonNegativeInteger': {
+                    'type': 'integer',
+                    'minimum': 0
+                },
+                'nonNegativeIntegerDefault0': {
+                    'allOf': [
+                        { '$ref': '#/definitions/nonNegativeInteger' },
+                        { 'default': 0 }
+                    ]
+                },
+                'simpleTypes': {
+                    'enum': [
+                        'array',
+                        'boolean',
+                        'integer',
+                        'null',
+                        'number',
+                        'object',
+                        'string'
+                    ]
+                },
+                'stringArray': {
+                    'type': 'array',
+                    'items': { 'type': 'string' },
+                    'uniqueItems': true,
+                    'default': []
+                }
+            },
+            'type': ['object', 'boolean'],
+            'properties': {
+                '$id': {
+                    'type': 'string',
+                    'format': 'uri-reference'
+                },
+                '$schema': {
+                    'type': 'string',
+                    'format': 'uri'
+                },
+                '$ref': {
+                    'type': 'string',
+                    'format': 'uri-reference'
+                },
+                '$comment': {
+                    'type': 'string'
+                },
+                'title': {
+                    'type': 'string'
+                },
+                'description': {
+                    'type': 'string'
+                },
+                'default': true,
+                'readOnly': {
+                    'type': 'boolean',
+                    'default': false
+                },
+                'examples': {
+                    'type': 'array',
+                    'items': true
+                },
+                'multipleOf': {
+                    'type': 'number',
+                    'exclusiveMinimum': 0
+                },
+                'maximum': {
+                    'type': 'number'
+                },
+                'exclusiveMaximum': {
+                    'type': 'number'
+                },
+                'minimum': {
+                    'type': 'number'
+                },
+                'exclusiveMinimum': {
+                    'type': 'number'
+                },
+                'maxLength': { '$ref': '#/definitions/nonNegativeInteger' },
+                'minLength': { '$ref': '#/definitions/nonNegativeIntegerDefault0' },
+                'pattern': {
+                    'type': 'string',
+                    'format': 'regex'
+                },
+                'additionalItems': { '$ref': '#' },
+                'items': {
+                    'anyOf': [
+                        { '$ref': '#' },
+                        { '$ref': '#/definitions/schemaArray' }
+                    ],
+                    'default': true
+                },
+                'maxItems': { '$ref': '#/definitions/nonNegativeInteger' },
+                'minItems': { '$ref': '#/definitions/nonNegativeIntegerDefault0' },
+                'uniqueItems': {
+                    'type': 'boolean',
+                    'default': false
+                },
+                'contains': { '$ref': '#' },
+                'maxProperties': { '$ref': '#/definitions/nonNegativeInteger' },
+                'minProperties': { '$ref': '#/definitions/nonNegativeIntegerDefault0' },
+                'required': { '$ref': '#/definitions/stringArray' },
+                'additionalProperties': { '$ref': '#' },
+                'definitions': {
+                    'type': 'object',
+                    'additionalProperties': { '$ref': '#' },
+                    'default': {}
+                },
+                'properties': {
+                    'type': 'object',
+                    'additionalProperties': { '$ref': '#' },
+                    'default': {}
+                },
+                'patternProperties': {
+                    'type': 'object',
+                    'additionalProperties': { '$ref': '#' },
+                    'propertyNames': { 'format': 'regex' },
+                    'default': {}
+                },
+                'dependencies': {
+                    'type': 'object',
+                    'additionalProperties': {
+                        'anyOf': [
+                            { '$ref': '#' },
+                            { '$ref': '#/definitions/stringArray' }
+                        ]
+                    }
+                },
+                'propertyNames': { '$ref': '#' },
+                'const': true,
+                'enum': {
+                    'type': 'array',
+                    'items': true,
+                    'minItems': 1,
+                    'uniqueItems': true
+                },
+                'type': {
+                    'anyOf': [
+                        { '$ref': '#/definitions/simpleTypes' },
+                        {
+                            'type': 'array',
+                            'items': { '$ref': '#/definitions/simpleTypes' },
+                            'minItems': 1,
+                            'uniqueItems': true
+                        }
+                    ]
+                },
+                'format': { 'type': 'string' },
+                'contentMediaType': { 'type': 'string' },
+                'contentEncoding': { 'type': 'string' },
+                'if': { '$ref': '#' },
+                'then': { '$ref': '#' },
+                'else': { '$ref': '#' },
+                'allOf': { '$ref': '#/definitions/schemaArray' },
+                'anyOf': { '$ref': '#/definitions/schemaArray' },
+                'oneOf': { '$ref': '#/definitions/schemaArray' },
+                'not': { '$ref': '#' }
+            },
+            'default': true
+        }
+    }
+};
+const descriptions = {
+    id: (0,browser.t)("A unique identifier for the schema."),
+    $schema: (0,browser.t)("The schema to verify this document against."),
+    title: (0,browser.t)("A descriptive title of the element."),
+    description: (0,browser.t)("A long description of the element. Used in hover menus and suggestions."),
+    default: (0,browser.t)("A default value. Used by suggestions."),
+    multipleOf: (0,browser.t)("A number that should cleanly divide the current value (i.e. have no remainder)."),
+    maximum: (0,browser.t)("The maximum numerical value, inclusive by default."),
+    exclusiveMaximum: (0,browser.t)("Makes the maximum property exclusive."),
+    minimum: (0,browser.t)("The minimum numerical value, inclusive by default."),
+    exclusiveMinimum: (0,browser.t)("Makes the minimum property exclusive."),
+    maxLength: (0,browser.t)("The maximum length of a string."),
+    minLength: (0,browser.t)("The minimum length of a string."),
+    pattern: (0,browser.t)("A regular expression to match the string against. It is not implicitly anchored."),
+    additionalItems: (0,browser.t)("For arrays, only when items is set as an array. If it is a schema, then this schema validates items after the ones specified by the items array. If it is false, then additional items will cause validation to fail."),
+    items: (0,browser.t)("For arrays. Can either be a schema to validate every element against or an array of schemas to validate each item against in order (the first schema will validate the first element, the second schema will validate the second element, and so on."),
+    maxItems: (0,browser.t)("The maximum number of items that can be inside an array. Inclusive."),
+    minItems: (0,browser.t)("The minimum number of items that can be inside an array. Inclusive."),
+    uniqueItems: (0,browser.t)("If all of the items in the array must be unique. Defaults to false."),
+    maxProperties: (0,browser.t)("The maximum number of properties an object can have. Inclusive."),
+    minProperties: (0,browser.t)("The minimum number of properties an object can have. Inclusive."),
+    required: (0,browser.t)("An array of strings that lists the names of all properties required on this object."),
+    additionalProperties: (0,browser.t)("Either a schema or a boolean. If a schema, then used to validate all properties not matched by 'properties' or 'patternProperties'. If false, then any properties not matched by either will cause this schema to fail."),
+    definitions: (0,browser.t)("Not used for validation. Place subschemas here that you wish to reference inline with $ref."),
+    properties: (0,browser.t)("A map of property names to schemas for each property."),
+    patternProperties: (0,browser.t)("A map of regular expressions on property names to schemas for matching properties."),
+    dependencies: (0,browser.t)("A map of property names to either an array of property names or a schema. An array of property names means the property named in the key depends on the properties in the array being present in the object in order to be valid. If the value is a schema, then the schema is only applied to the object if the property in the key exists on the object."),
+    enum: (0,browser.t)("The set of literal values that are valid."),
+    type: (0,browser.t)("Either a string of one of the basic schema types (number, integer, null, array, object, boolean, string) or an array of strings specifying a subset of those types."),
+    format: (0,browser.t)("Describes the format expected for the value."),
+    allOf: (0,browser.t)("An array of schemas, all of which must match."),
+    anyOf: (0,browser.t)("An array of schemas, where at least one must match."),
+    oneOf: (0,browser.t)("An array of schemas, exactly one of which must match."),
+    not: (0,browser.t)("A schema which must not match."),
+    $id: (0,browser.t)("A unique identifier for the schema."),
+    $ref: (0,browser.t)("Reference a definition hosted on any location."),
+    $comment: (0,browser.t)("Comments from schema authors to readers or maintainers of the schema."),
+    readOnly: (0,browser.t)("Indicates that the value of the instance is managed exclusively by the owning authority."),
+    examples: (0,browser.t)("Sample JSON values associated with a particular schema, for the purpose of illustrating usage."),
+    contains: (0,browser.t)("An array instance is valid against \"contains\" if at least one of its elements is valid against the given schema."),
+    propertyNames: (0,browser.t)("If the instance is an object, this keyword validates if every property name in the instance validates against the provided schema."),
+    const: (0,browser.t)("An instance validates successfully against this keyword if its value is equal to the value of the keyword."),
+    contentMediaType: (0,browser.t)("Describes the media type of a string property."),
+    contentEncoding: (0,browser.t)("Describes the content encoding of a string property."),
+    if: (0,browser.t)("The validation outcome of the \"if\" subschema controls which of the \"then\" or \"else\" keywords are evaluated."),
+    then: (0,browser.t)("The \"if\" subschema is used for validation when the \"if\" subschema succeeds."),
+    else: (0,browser.t)("The \"else\" subschema is used for validation when the \"if\" subschema fails.")
+};
+for (const schemaName in schemaContributions.schemas) {
+    const schema = schemaContributions.schemas[schemaName];
+    for (const property in schema.properties) {
+        let propertyObject = schema.properties[property];
+        if (typeof propertyObject === 'boolean') {
+            propertyObject = schema.properties[property] = {};
+        }
+        const description = descriptions[property];
+        if (description) {
+            propertyObject['description'] = description;
+        }
+    }
+}
+
+
+
+// EXTERNAL MODULE: ./node_modules/monaco-editor/esm/external/vscode-uri/lib/esm/index.js
+var esm = __webpack_require__(74562);
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/glob.js
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Copyright (c) 2013, Nick Fitzgerald
+ *  Licensed under the MIT License. See LICENCE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+function createRegex(glob, opts) {
+    if (typeof glob !== 'string') {
+        throw new TypeError('Expected a string');
+    }
+    const str = String(glob);
+    // The regexp we are building, as a string.
+    let reStr = "";
+    // Whether we are matching so called "extended" globs (like bash) and should
+    // support single character matching, matching ranges of characters, group
+    // matching, etc.
+    const extended = opts ? true : false;
+    // When globstar is _false_ (default), '/foo/*' is translated a regexp like
+    // '^\/foo\/.*$' which will match any string beginning with '/foo/'
+    // When globstar is _true_, '/foo/*' is translated to regexp like
+    // '^\/foo\/[^/]*$' which will match any string beginning with '/foo/' BUT
+    // which does not have a '/' to the right of it.
+    // E.g. with '/foo/*' these will match: '/foo/bar', '/foo/bar.txt' but
+    // these will not '/foo/bar/baz', '/foo/bar/baz.txt'
+    // Lastely, when globstar is _true_, '/foo/**' is equivelant to '/foo/*' when
+    // globstar is _false_
+    const globstar = opts ? true : false;
+    // If we are doing extended matching, this boolean is true when we are inside
+    // a group (eg {*.html,*.js}), and false otherwise.
+    let inGroup = false;
+    // RegExp flags (eg "i" ) to pass in to RegExp constructor.
+    const flags = opts && typeof (opts.flags) === "string" ? opts.flags : "";
+    let c;
+    for (let i = 0, len = str.length; i < len; i++) {
+        c = str[i];
+        switch (c) {
+            case "/":
+            case "$":
+            case "^":
+            case "+":
+            case ".":
+            case "(":
+            case ")":
+            case "=":
+            case "!":
+            case "|":
+                reStr += "\\" + c;
+                break;
+            case "?":
+                if (extended) {
+                    reStr += ".";
+                    break;
+                }
+            case "[":
+            case "]":
+                if (extended) {
+                    reStr += c;
+                    break;
+                }
+            case "{":
+                if (extended) {
+                    inGroup = true;
+                    reStr += "(";
+                    break;
+                }
+            case "}":
+                if (extended) {
+                    inGroup = false;
+                    reStr += ")";
+                    break;
+                }
+            case ",":
+                if (inGroup) {
+                    reStr += "|";
+                    break;
+                }
+                reStr += "\\" + c;
+                break;
+            case "*":
+                // Move over all consecutive "*"'s.
+                // Also store the previous and next characters
+                const prevChar = str[i - 1];
+                let starCount = 1;
+                while (str[i + 1] === "*") {
+                    starCount++;
+                    i++;
+                }
+                const nextChar = str[i + 1];
+                if (!globstar) {
+                    // globstar is disabled, so treat any number of "*" as one
+                    reStr += ".*";
+                }
+                else {
+                    // globstar is enabled, so determine if this is a globstar segment
+                    const isGlobstar = starCount > 1 // multiple "*"'s
+                        && (prevChar === "/" || prevChar === undefined || prevChar === '{' || prevChar === ',') // from the start of the segment
+                        && (nextChar === "/" || nextChar === undefined || nextChar === ',' || nextChar === '}'); // to the end of the segment
+                    if (isGlobstar) {
+                        if (nextChar === "/") {
+                            i++; // move over the "/"
+                        }
+                        else if (prevChar === '/' && reStr.endsWith('\\/')) {
+                            reStr = reStr.substr(0, reStr.length - 2);
+                        }
+                        // it's a globstar, so match zero or more path segments
+                        reStr += "((?:[^/]*(?:\/|$))*)";
+                    }
+                    else {
+                        // it's not a globstar, so only match one path segment
+                        reStr += "([^/]*)";
+                    }
+                }
+                break;
+            default:
+                reStr += c;
+        }
+    }
+    // When regexp 'g' flag is specified don't
+    // constrain the regular expression with ^ & $
+    if (!flags || !~flags.indexOf('g')) {
+        reStr = "^" + reStr + "$";
+    }
+    return new RegExp(reStr, flags);
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonSchemaService.js
+
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const BANG = '!';
+const PATH_SEP = '/';
+class FilePatternAssociation {
+    constructor(pattern, folderUri, uris) {
+        this.folderUri = folderUri;
+        this.uris = uris;
+        this.globWrappers = [];
+        try {
+            for (let patternString of pattern) {
+                const include = patternString[0] !== BANG;
+                if (!include) {
+                    patternString = patternString.substring(1);
+                }
+                if (patternString.length > 0) {
+                    if (patternString[0] === PATH_SEP) {
+                        patternString = patternString.substring(1);
+                    }
+                    this.globWrappers.push({
+                        regexp: createRegex('**/' + patternString, { extended: true, globstar: true }),
+                        include: include,
+                    });
+                }
+            }
+            ;
+            if (folderUri) {
+                folderUri = normalizeResourceForMatching(folderUri);
+                if (!folderUri.endsWith('/')) {
+                    folderUri = folderUri + '/';
+                }
+                this.folderUri = folderUri;
+            }
+        }
+        catch (e) {
+            this.globWrappers.length = 0;
+            this.uris = [];
+        }
+    }
+    matchesPattern(fileName) {
+        if (this.folderUri && !fileName.startsWith(this.folderUri)) {
+            return false;
+        }
+        let match = false;
+        for (const { regexp, include } of this.globWrappers) {
+            if (regexp.test(fileName)) {
+                match = include;
+            }
+        }
+        return match;
+    }
+    getURIs() {
+        return this.uris;
+    }
+}
+class SchemaHandle {
+    constructor(service, uri, unresolvedSchemaContent) {
+        this.service = service;
+        this.uri = uri;
+        this.dependencies = new Set();
+        this.anchors = undefined;
+        if (unresolvedSchemaContent) {
+            this.unresolvedSchema = this.service.promise.resolve(new UnresolvedSchema(unresolvedSchemaContent));
+        }
+    }
+    getUnresolvedSchema() {
+        if (!this.unresolvedSchema) {
+            this.unresolvedSchema = this.service.loadSchema(this.uri);
+        }
+        return this.unresolvedSchema;
+    }
+    getResolvedSchema() {
+        if (!this.resolvedSchema) {
+            this.resolvedSchema = this.getUnresolvedSchema().then(unresolved => {
+                return this.service.resolveSchemaContent(unresolved, this);
+            });
+        }
+        return this.resolvedSchema;
+    }
+    clearSchema() {
+        const hasChanges = !!this.unresolvedSchema;
+        this.resolvedSchema = undefined;
+        this.unresolvedSchema = undefined;
+        this.dependencies.clear();
+        this.anchors = undefined;
+        return hasChanges;
+    }
+}
+class UnresolvedSchema {
+    constructor(schema, errors = []) {
+        this.schema = schema;
+        this.errors = errors;
+    }
+}
+class ResolvedSchema {
+    constructor(schema, errors = [], warnings = [], schemaDraft) {
+        this.schema = schema;
+        this.errors = errors;
+        this.warnings = warnings;
+        this.schemaDraft = schemaDraft;
+    }
+    getSection(path) {
+        const schemaRef = this.getSectionRecursive(path, this.schema);
+        if (schemaRef) {
+            return asSchema(schemaRef);
+        }
+        return undefined;
+    }
+    getSectionRecursive(path, schema) {
+        if (!schema || typeof schema === 'boolean' || path.length === 0) {
+            return schema;
+        }
+        const next = path.shift();
+        if (schema.properties && typeof schema.properties[next]) {
+            return this.getSectionRecursive(path, schema.properties[next]);
+        }
+        else if (schema.patternProperties) {
+            for (const pattern of Object.keys(schema.patternProperties)) {
+                const regex = extendedRegExp(pattern);
+                if (regex?.test(next)) {
+                    return this.getSectionRecursive(path, schema.patternProperties[pattern]);
+                }
+            }
+        }
+        else if (typeof schema.additionalProperties === 'object') {
+            return this.getSectionRecursive(path, schema.additionalProperties);
+        }
+        else if (next.match('[0-9]+')) {
+            if (Array.isArray(schema.items)) {
+                const index = parseInt(next, 10);
+                if (!isNaN(index) && schema.items[index]) {
+                    return this.getSectionRecursive(path, schema.items[index]);
+                }
+            }
+            else if (schema.items) {
+                return this.getSectionRecursive(path, schema.items);
+            }
+        }
+        return undefined;
+    }
+}
+class JSONSchemaService {
+    constructor(requestService, contextService, promiseConstructor) {
+        this.contextService = contextService;
+        this.requestService = requestService;
+        this.promiseConstructor = promiseConstructor || Promise;
+        this.callOnDispose = [];
+        this.contributionSchemas = {};
+        this.contributionAssociations = [];
+        this.schemasById = {};
+        this.filePatternAssociations = [];
+        this.registeredSchemasIds = {};
+    }
+    getRegisteredSchemaIds(filter) {
+        return Object.keys(this.registeredSchemasIds).filter(id => {
+            const scheme = esm/* URI */.r.parse(id).scheme;
+            return scheme !== 'schemaservice' && (!filter || filter(scheme));
+        });
+    }
+    get promise() {
+        return this.promiseConstructor;
+    }
+    dispose() {
+        while (this.callOnDispose.length > 0) {
+            this.callOnDispose.pop()();
+        }
+    }
+    onResourceChange(uri) {
+        // always clear this local cache when a resource changes
+        this.cachedSchemaForResource = undefined;
+        let hasChanges = false;
+        uri = normalizeId(uri);
+        const toWalk = [uri];
+        const all = Object.keys(this.schemasById).map(key => this.schemasById[key]);
+        while (toWalk.length) {
+            const curr = toWalk.pop();
+            for (let i = 0; i < all.length; i++) {
+                const handle = all[i];
+                if (handle && (handle.uri === curr || handle.dependencies.has(curr))) {
+                    if (handle.uri !== curr) {
+                        toWalk.push(handle.uri);
+                    }
+                    if (handle.clearSchema()) {
+                        hasChanges = true;
+                    }
+                    all[i] = undefined;
+                }
+            }
+        }
+        return hasChanges;
+    }
+    setSchemaContributions(schemaContributions) {
+        if (schemaContributions.schemas) {
+            const schemas = schemaContributions.schemas;
+            for (const id in schemas) {
+                const normalizedId = normalizeId(id);
+                this.contributionSchemas[normalizedId] = this.addSchemaHandle(normalizedId, schemas[id]);
+            }
+        }
+        if (Array.isArray(schemaContributions.schemaAssociations)) {
+            const schemaAssociations = schemaContributions.schemaAssociations;
+            for (let schemaAssociation of schemaAssociations) {
+                const uris = schemaAssociation.uris.map(normalizeId);
+                const association = this.addFilePatternAssociation(schemaAssociation.pattern, schemaAssociation.folderUri, uris);
+                this.contributionAssociations.push(association);
+            }
+        }
+    }
+    addSchemaHandle(id, unresolvedSchemaContent) {
+        const schemaHandle = new SchemaHandle(this, id, unresolvedSchemaContent);
+        this.schemasById[id] = schemaHandle;
+        return schemaHandle;
+    }
+    getOrAddSchemaHandle(id, unresolvedSchemaContent) {
+        return this.schemasById[id] || this.addSchemaHandle(id, unresolvedSchemaContent);
+    }
+    addFilePatternAssociation(pattern, folderUri, uris) {
+        const fpa = new FilePatternAssociation(pattern, folderUri, uris);
+        this.filePatternAssociations.push(fpa);
+        return fpa;
+    }
+    registerExternalSchema(config) {
+        const id = normalizeId(config.uri);
+        this.registeredSchemasIds[id] = true;
+        this.cachedSchemaForResource = undefined;
+        if (config.fileMatch && config.fileMatch.length) {
+            this.addFilePatternAssociation(config.fileMatch, config.folderUri, [id]);
+        }
+        return config.schema ? this.addSchemaHandle(id, config.schema) : this.getOrAddSchemaHandle(id);
+    }
+    clearExternalSchemas() {
+        this.schemasById = {};
+        this.filePatternAssociations = [];
+        this.registeredSchemasIds = {};
+        this.cachedSchemaForResource = undefined;
+        for (const id in this.contributionSchemas) {
+            this.schemasById[id] = this.contributionSchemas[id];
+            this.registeredSchemasIds[id] = true;
+        }
+        for (const contributionAssociation of this.contributionAssociations) {
+            this.filePatternAssociations.push(contributionAssociation);
+        }
+    }
+    getResolvedSchema(schemaId) {
+        const id = normalizeId(schemaId);
+        const schemaHandle = this.schemasById[id];
+        if (schemaHandle) {
+            return schemaHandle.getResolvedSchema();
+        }
+        return this.promise.resolve(undefined);
+    }
+    loadSchema(url) {
+        if (!this.requestService) {
+            const errorMessage = (0,browser.t)('Unable to load schema from \'{0}\'. No schema request service available', toDisplayString(url));
+            return this.promise.resolve(new UnresolvedSchema({}, [errorMessage]));
+        }
+        if (url.startsWith('http://json-schema.org/')) {
+            url = 'https' + url.substring(4); // always access json-schema.org with https. See https://github.com/microsoft/vscode/issues/195189
+        }
+        return this.requestService(url).then(content => {
+            if (!content) {
+                const errorMessage = (0,browser.t)('Unable to load schema from \'{0}\': No content.', toDisplayString(url));
+                return new UnresolvedSchema({}, [errorMessage]);
+            }
+            const errors = [];
+            if (content.charCodeAt(0) === 65279) {
+                errors.push((0,browser.t)('Problem reading content from \'{0}\': UTF-8 with BOM detected, only UTF 8 is allowed.', toDisplayString(url)));
+                content = content.trimStart();
+            }
+            let schemaContent = {};
+            const jsonErrors = [];
+            schemaContent = main_parse(content, jsonErrors);
+            if (jsonErrors.length) {
+                errors.push((0,browser.t)('Unable to parse content from \'{0}\': Parse error at offset {1}.', toDisplayString(url), jsonErrors[0].offset));
+            }
+            return new UnresolvedSchema(schemaContent, errors);
+        }, (error) => {
+            let errorMessage = error.toString();
+            const errorSplit = error.toString().split('Error: ');
+            if (errorSplit.length > 1) {
+                // more concise error message, URL and context are attached by caller anyways
+                errorMessage = errorSplit[1];
+            }
+            if (endsWith(errorMessage, '.')) {
+                errorMessage = errorMessage.substr(0, errorMessage.length - 1);
+            }
+            return new UnresolvedSchema({}, [(0,browser.t)('Unable to load schema from \'{0}\': {1}.', toDisplayString(url), errorMessage)]);
+        });
+    }
+    resolveSchemaContent(schemaToResolve, handle) {
+        const resolveErrors = schemaToResolve.errors.slice(0);
+        const schema = schemaToResolve.schema;
+        let schemaDraft = schema.$schema ? normalizeId(schema.$schema) : undefined;
+        if (schemaDraft === 'http://json-schema.org/draft-03/schema') {
+            return this.promise.resolve(new ResolvedSchema({}, [(0,browser.t)("Draft-03 schemas are not supported.")], [], schemaDraft));
+        }
+        let usesUnsupportedFeatures = new Set();
+        const contextService = this.contextService;
+        const findSectionByJSONPointer = (schema, path) => {
+            path = decodeURIComponent(path);
+            let current = schema;
+            if (path[0] === '/') {
+                path = path.substring(1);
+            }
+            path.split('/').some((part) => {
+                part = part.replace(/~1/g, '/').replace(/~0/g, '~');
+                current = current[part];
+                return !current;
+            });
+            return current;
+        };
+        const findSchemaById = (schema, handle, id) => {
+            if (!handle.anchors) {
+                handle.anchors = collectAnchors(schema);
+            }
+            return handle.anchors.get(id);
+        };
+        const merge = (target, section) => {
+            for (const key in section) {
+                if (section.hasOwnProperty(key) && key !== 'id' && key !== '$id') {
+                    target[key] = section[key];
+                }
+            }
+        };
+        const mergeRef = (target, sourceRoot, sourceHandle, refSegment) => {
+            let section;
+            if (refSegment === undefined || refSegment.length === 0) {
+                section = sourceRoot;
+            }
+            else if (refSegment.charAt(0) === '/') {
+                // A $ref to a JSON Pointer (i.e #/definitions/foo)
+                section = findSectionByJSONPointer(sourceRoot, refSegment);
+            }
+            else {
+                // A $ref to a sub-schema with an $id (i.e #hello)
+                section = findSchemaById(sourceRoot, sourceHandle, refSegment);
+            }
+            if (section) {
+                merge(target, section);
+            }
+            else {
+                resolveErrors.push((0,browser.t)('$ref \'{0}\' in \'{1}\' can not be resolved.', refSegment || '', sourceHandle.uri));
+            }
+        };
+        const resolveExternalLink = (node, uri, refSegment, parentHandle) => {
+            if (contextService && !/^[A-Za-z][A-Za-z0-9+\-.+]*:\/\/.*/.test(uri)) {
+                uri = contextService.resolveRelativePath(uri, parentHandle.uri);
+            }
+            uri = normalizeId(uri);
+            const referencedHandle = this.getOrAddSchemaHandle(uri);
+            return referencedHandle.getUnresolvedSchema().then(unresolvedSchema => {
+                parentHandle.dependencies.add(uri);
+                if (unresolvedSchema.errors.length) {
+                    const loc = refSegment ? uri + '#' + refSegment : uri;
+                    resolveErrors.push((0,browser.t)('Problems loading reference \'{0}\': {1}', loc, unresolvedSchema.errors[0]));
+                }
+                mergeRef(node, unresolvedSchema.schema, referencedHandle, refSegment);
+                return resolveRefs(node, unresolvedSchema.schema, referencedHandle);
+            });
+        };
+        const resolveRefs = (node, parentSchema, parentHandle) => {
+            const openPromises = [];
+            this.traverseNodes(node, next => {
+                const seenRefs = new Set();
+                while (next.$ref) {
+                    const ref = next.$ref;
+                    const segments = ref.split('#', 2);
+                    delete next.$ref;
+                    if (segments[0].length > 0) {
+                        // This is a reference to an external schema
+                        openPromises.push(resolveExternalLink(next, segments[0], segments[1], parentHandle));
+                        return;
+                    }
+                    else {
+                        // This is a reference inside the current schema
+                        if (!seenRefs.has(ref)) {
+                            const id = segments[1];
+                            mergeRef(next, parentSchema, parentHandle, id);
+                            seenRefs.add(ref);
+                        }
+                    }
+                }
+                if (next.$recursiveRef) {
+                    usesUnsupportedFeatures.add('$recursiveRef');
+                }
+                if (next.$dynamicRef) {
+                    usesUnsupportedFeatures.add('$dynamicRef');
+                }
+            });
+            return this.promise.all(openPromises);
+        };
+        const collectAnchors = (root) => {
+            const result = new Map();
+            this.traverseNodes(root, next => {
+                const id = next.$id || next.id;
+                const anchor = isString(id) && id.charAt(0) === '#' ? id.substring(1) : next.$anchor;
+                if (anchor) {
+                    if (result.has(anchor)) {
+                        resolveErrors.push((0,browser.t)('Duplicate anchor declaration: \'{0}\'', anchor));
+                    }
+                    else {
+                        result.set(anchor, next);
+                    }
+                }
+                if (next.$recursiveAnchor) {
+                    usesUnsupportedFeatures.add('$recursiveAnchor');
+                }
+                if (next.$dynamicAnchor) {
+                    usesUnsupportedFeatures.add('$dynamicAnchor');
+                }
+            });
+            return result;
+        };
+        return resolveRefs(schema, schema, handle).then(_ => {
+            let resolveWarnings = [];
+            if (usesUnsupportedFeatures.size) {
+                resolveWarnings.push((0,browser.t)('The schema uses meta-schema features ({0}) that are not yet supported by the validator.', Array.from(usesUnsupportedFeatures.keys()).join(', ')));
+            }
+            return new ResolvedSchema(schema, resolveErrors, resolveWarnings, schemaDraft);
+        });
+    }
+    traverseNodes(root, handle) {
+        if (!root || typeof root !== 'object') {
+            return Promise.resolve(null);
+        }
+        const seen = new Set();
+        const collectEntries = (...entries) => {
+            for (const entry of entries) {
+                if (isObject(entry)) {
+                    toWalk.push(entry);
+                }
+            }
+        };
+        const collectMapEntries = (...maps) => {
+            for (const map of maps) {
+                if (isObject(map)) {
+                    for (const k in map) {
+                        const key = k;
+                        const entry = map[key];
+                        if (isObject(entry)) {
+                            toWalk.push(entry);
+                        }
+                    }
+                }
+            }
+        };
+        const collectArrayEntries = (...arrays) => {
+            for (const array of arrays) {
+                if (Array.isArray(array)) {
+                    for (const entry of array) {
+                        if (isObject(entry)) {
+                            toWalk.push(entry);
+                        }
+                    }
+                }
+            }
+        };
+        const collectEntryOrArrayEntries = (items) => {
+            if (Array.isArray(items)) {
+                for (const entry of items) {
+                    if (isObject(entry)) {
+                        toWalk.push(entry);
+                    }
+                }
+            }
+            else if (isObject(items)) {
+                toWalk.push(items);
+            }
+        };
+        const toWalk = [root];
+        let next = toWalk.pop();
+        while (next) {
+            if (!seen.has(next)) {
+                seen.add(next);
+                handle(next);
+                collectEntries(next.additionalItems, next.additionalProperties, next.not, next.contains, next.propertyNames, next.if, next.then, next.else, next.unevaluatedItems, next.unevaluatedProperties);
+                collectMapEntries(next.definitions, next.$defs, next.properties, next.patternProperties, next.dependencies, next.dependentSchemas);
+                collectArrayEntries(next.anyOf, next.allOf, next.oneOf, next.prefixItems);
+                collectEntryOrArrayEntries(next.items);
+            }
+            next = toWalk.pop();
+        }
+    }
+    ;
+    getSchemaFromProperty(resource, document) {
+        if (document.root?.type === 'object') {
+            for (const p of document.root.properties) {
+                if (p.keyNode.value === '$schema' && p.valueNode?.type === 'string') {
+                    let schemaId = p.valueNode.value;
+                    if (this.contextService && !/^\w[\w\d+.-]*:/.test(schemaId)) { // has scheme
+                        schemaId = this.contextService.resolveRelativePath(schemaId, resource);
+                    }
+                    return schemaId;
+                }
+            }
+        }
+        return undefined;
+    }
+    getAssociatedSchemas(resource) {
+        const seen = Object.create(null);
+        const schemas = [];
+        const normalizedResource = normalizeResourceForMatching(resource);
+        for (const entry of this.filePatternAssociations) {
+            if (entry.matchesPattern(normalizedResource)) {
+                for (const schemaId of entry.getURIs()) {
+                    if (!seen[schemaId]) {
+                        schemas.push(schemaId);
+                        seen[schemaId] = true;
+                    }
+                }
+            }
+        }
+        return schemas;
+    }
+    getSchemaURIsForResource(resource, document) {
+        let schemeId = document && this.getSchemaFromProperty(resource, document);
+        if (schemeId) {
+            return [schemeId];
+        }
+        return this.getAssociatedSchemas(resource);
+    }
+    getSchemaForResource(resource, document) {
+        if (document) {
+            // first use $schema if present
+            let schemeId = this.getSchemaFromProperty(resource, document);
+            if (schemeId) {
+                const id = normalizeId(schemeId);
+                return this.getOrAddSchemaHandle(id).getResolvedSchema();
+            }
+        }
+        if (this.cachedSchemaForResource && this.cachedSchemaForResource.resource === resource) {
+            return this.cachedSchemaForResource.resolvedSchema;
+        }
+        const schemas = this.getAssociatedSchemas(resource);
+        const resolvedSchema = schemas.length > 0 ? this.createCombinedSchema(resource, schemas).getResolvedSchema() : this.promise.resolve(undefined);
+        this.cachedSchemaForResource = { resource, resolvedSchema };
+        return resolvedSchema;
+    }
+    createCombinedSchema(resource, schemaIds) {
+        if (schemaIds.length === 1) {
+            return this.getOrAddSchemaHandle(schemaIds[0]);
+        }
+        else {
+            const combinedSchemaId = 'schemaservice://combinedSchema/' + encodeURIComponent(resource);
+            const combinedSchema = {
+                allOf: schemaIds.map(schemaId => ({ $ref: schemaId }))
+            };
+            return this.addSchemaHandle(combinedSchemaId, combinedSchema);
+        }
+    }
+    getMatchingSchemas(document, jsonDocument, schema) {
+        if (schema) {
+            const id = schema.id || ('schemaservice://untitled/matchingSchemas/' + jsonSchemaService_idCounter++);
+            const handle = this.addSchemaHandle(id, schema);
+            return handle.getResolvedSchema().then(resolvedSchema => {
+                return jsonDocument.getMatchingSchemas(resolvedSchema.schema).filter(s => !s.inverted);
+            });
+        }
+        return this.getSchemaForResource(document.uri, jsonDocument).then(schema => {
+            if (schema) {
+                return jsonDocument.getMatchingSchemas(schema.schema).filter(s => !s.inverted);
+            }
+            return [];
+        });
+    }
+}
+let jsonSchemaService_idCounter = 0;
+function normalizeId(id) {
+    // remove trailing '#', normalize drive capitalization
+    try {
+        return esm/* URI */.r.parse(id).toString(true);
+    }
+    catch (e) {
+        return id;
+    }
+}
+function normalizeResourceForMatching(resource) {
+    // remove queries and fragments, normalize drive capitalization
+    try {
+        return esm/* URI */.r.parse(resource).with({ fragment: null, query: null }).toString(true);
+    }
+    catch (e) {
+        return resource;
+    }
+}
+function toDisplayString(url) {
+    try {
+        const uri = esm/* URI */.r.parse(url);
+        if (uri.scheme === 'file') {
+            return uri.fsPath;
+        }
+    }
+    catch (e) {
+        // ignore
+    }
+    return url;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonFolding.js
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+function getFoldingRanges(document, context) {
+    const ranges = [];
+    const nestingLevels = [];
+    const stack = [];
+    let prevStart = -1;
+    const scanner = main_createScanner(document.getText(), false);
+    let token = scanner.scan();
+    function addRange(range) {
+        ranges.push(range);
+        nestingLevels.push(stack.length);
+    }
+    while (token !== 17 /* SyntaxKind.EOF */) {
+        switch (token) {
+            case 1 /* SyntaxKind.OpenBraceToken */:
+            case 3 /* SyntaxKind.OpenBracketToken */: {
+                const startLine = document.positionAt(scanner.getTokenOffset()).line;
+                const range = { startLine, endLine: startLine, kind: token === 1 /* SyntaxKind.OpenBraceToken */ ? 'object' : 'array' };
+                stack.push(range);
+                break;
+            }
+            case 2 /* SyntaxKind.CloseBraceToken */:
+            case 4 /* SyntaxKind.CloseBracketToken */: {
+                const kind = token === 2 /* SyntaxKind.CloseBraceToken */ ? 'object' : 'array';
+                if (stack.length > 0 && stack[stack.length - 1].kind === kind) {
+                    const range = stack.pop();
+                    const line = document.positionAt(scanner.getTokenOffset()).line;
+                    if (range && line > range.startLine + 1 && prevStart !== range.startLine) {
+                        range.endLine = line - 1;
+                        addRange(range);
+                        prevStart = range.startLine;
+                    }
+                }
+                break;
+            }
+            case 13 /* SyntaxKind.BlockCommentTrivia */: {
+                const startLine = document.positionAt(scanner.getTokenOffset()).line;
+                const endLine = document.positionAt(scanner.getTokenOffset() + scanner.getTokenLength()).line;
+                if (scanner.getTokenError() === 1 /* ScanError.UnexpectedEndOfComment */ && startLine + 1 < document.lineCount) {
+                    scanner.setPosition(document.offsetAt(Position.create(startLine + 1, 0)));
+                }
+                else {
+                    if (startLine < endLine) {
+                        addRange({ startLine, endLine, kind: FoldingRangeKind.Comment });
+                        prevStart = startLine;
+                    }
+                }
+                break;
+            }
+            case 12 /* SyntaxKind.LineCommentTrivia */: {
+                const text = document.getText().substr(scanner.getTokenOffset(), scanner.getTokenLength());
+                const m = text.match(/^\/\/\s*#(region\b)|(endregion\b)/);
+                if (m) {
+                    const line = document.positionAt(scanner.getTokenOffset()).line;
+                    if (m[1]) { // start pattern match
+                        const range = { startLine: line, endLine: line, kind: FoldingRangeKind.Region };
+                        stack.push(range);
+                    }
+                    else {
+                        let i = stack.length - 1;
+                        while (i >= 0 && stack[i].kind !== FoldingRangeKind.Region) {
+                            i--;
+                        }
+                        if (i >= 0) {
+                            const range = stack[i];
+                            stack.length = i;
+                            if (line > range.startLine && prevStart !== range.startLine) {
+                                range.endLine = line;
+                                addRange(range);
+                                prevStart = range.startLine;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        token = scanner.scan();
+    }
+    const rangeLimit = context && context.rangeLimit;
+    if (typeof rangeLimit !== 'number' || ranges.length <= rangeLimit) {
+        return ranges;
+    }
+    if (context && context.onRangeLimitExceeded) {
+        context.onRangeLimitExceeded(document.uri);
+    }
+    const counts = [];
+    for (let level of nestingLevels) {
+        if (level < 30) {
+            counts[level] = (counts[level] || 0) + 1;
+        }
+    }
+    let entries = 0;
+    let maxLevel = 0;
+    for (let i = 0; i < counts.length; i++) {
+        const n = counts[i];
+        if (n) {
+            if (n + entries > rangeLimit) {
+                maxLevel = i;
+                break;
+            }
+            entries += n;
+        }
+    }
+    const result = [];
+    for (let i = 0; i < ranges.length; i++) {
+        const level = nestingLevels[i];
+        if (typeof level === 'number') {
+            if (level < maxLevel || (level === maxLevel && entries++ < rangeLimit)) {
+                result.push(ranges[i]);
+            }
+        }
+    }
+    return result;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonSelectionRanges.js
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+function getSelectionRanges(document, positions, doc) {
+    function getSelectionRange(position) {
+        let offset = document.offsetAt(position);
+        let node = doc.getNodeFromOffset(offset, true);
+        const result = [];
+        while (node) {
+            switch (node.type) {
+                case 'string':
+                case 'object':
+                case 'array':
+                    // range without ", [ or {
+                    const cStart = node.offset + 1, cEnd = node.offset + node.length - 1;
+                    if (cStart < cEnd && offset >= cStart && offset <= cEnd) {
+                        result.push(newRange(cStart, cEnd));
+                    }
+                    result.push(newRange(node.offset, node.offset + node.length));
+                    break;
+                case 'number':
+                case 'boolean':
+                case 'null':
+                case 'property':
+                    result.push(newRange(node.offset, node.offset + node.length));
+                    break;
+            }
+            if (node.type === 'property' || node.parent && node.parent.type === 'array') {
+                const afterCommaOffset = getOffsetAfterNextToken(node.offset + node.length, 5 /* SyntaxKind.CommaToken */);
+                if (afterCommaOffset !== -1) {
+                    result.push(newRange(node.offset, afterCommaOffset));
+                }
+            }
+            node = node.parent;
+        }
+        let current = undefined;
+        for (let index = result.length - 1; index >= 0; index--) {
+            current = SelectionRange.create(result[index], current);
+        }
+        if (!current) {
+            current = SelectionRange.create(Range.create(position, position));
+        }
+        return current;
+    }
+    function newRange(start, end) {
+        return Range.create(document.positionAt(start), document.positionAt(end));
+    }
+    const scanner = main_createScanner(document.getText(), true);
+    function getOffsetAfterNextToken(offset, expectedToken) {
+        scanner.setPosition(offset);
+        let token = scanner.scan();
+        if (token === expectedToken) {
+            return scanner.getTokenOffset() + scanner.getTokenLength();
+        }
+        return -1;
+    }
+    return positions.map(getSelectionRange);
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/format.js
+
+
+
+
+function format_format(documentToFormat, formattingOptions, formattingRange) {
+    let range = undefined;
+    if (formattingRange) {
+        const offset = documentToFormat.offsetAt(formattingRange.start);
+        const length = documentToFormat.offsetAt(formattingRange.end) - offset;
+        range = { offset, length };
+    }
+    const options = {
+        tabSize: formattingOptions ? formattingOptions.tabSize : 4,
+        insertSpaces: formattingOptions?.insertSpaces === true,
+        insertFinalNewline: formattingOptions?.insertFinalNewline === true,
+        eol: '\n',
+        keepLines: formattingOptions?.keepLines === true
+    };
+    return main_format(documentToFormat.getText(), range, options).map(edit => {
+        return TextEdit.replace(Range.create(documentToFormat.positionAt(edit.offset), documentToFormat.positionAt(edit.offset + edit.length)), edit.content);
+    });
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/propertyTree.js
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) Microsoft Corporation. All rights reserved.
+*  Licensed under the MIT License. See License.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+var Container;
+(function (Container) {
+    Container[Container["Object"] = 0] = "Object";
+    Container[Container["Array"] = 1] = "Array";
+})(Container || (Container = {}));
+class PropertyTree {
+    constructor(propertyName, beginningLineNumber) {
+        this.propertyName = propertyName ?? '';
+        this.beginningLineNumber = beginningLineNumber;
+        this.childrenProperties = [];
+        this.lastProperty = false;
+        this.noKeyName = false;
+    }
+    addChildProperty(childProperty) {
+        childProperty.parent = this;
+        if (this.childrenProperties.length > 0) {
+            let insertionIndex = 0;
+            if (childProperty.noKeyName) {
+                insertionIndex = this.childrenProperties.length;
+            }
+            else {
+                insertionIndex = binarySearchOnPropertyArray(this.childrenProperties, childProperty, compareProperties);
+            }
+            if (insertionIndex < 0) {
+                insertionIndex = (insertionIndex * -1) - 1;
+            }
+            this.childrenProperties.splice(insertionIndex, 0, childProperty);
+        }
+        else {
+            this.childrenProperties.push(childProperty);
+        }
+        return childProperty;
+    }
+}
+function compareProperties(propertyTree1, propertyTree2) {
+    const propertyName1 = propertyTree1.propertyName.toLowerCase();
+    const propertyName2 = propertyTree2.propertyName.toLowerCase();
+    if (propertyName1 < propertyName2) {
+        return -1;
+    }
+    else if (propertyName1 > propertyName2) {
+        return 1;
+    }
+    return 0;
+}
+function binarySearchOnPropertyArray(propertyTreeArray, propertyTree, compare_fn) {
+    const propertyName = propertyTree.propertyName.toLowerCase();
+    const firstPropertyInArrayName = propertyTreeArray[0].propertyName.toLowerCase();
+    const lastPropertyInArrayName = propertyTreeArray[propertyTreeArray.length - 1].propertyName.toLowerCase();
+    if (propertyName < firstPropertyInArrayName) {
+        return 0;
+    }
+    if (propertyName > lastPropertyInArrayName) {
+        return propertyTreeArray.length;
+    }
+    let m = 0;
+    let n = propertyTreeArray.length - 1;
+    while (m <= n) {
+        let k = (n + m) >> 1;
+        let cmp = compare_fn(propertyTree, propertyTreeArray[k]);
+        if (cmp > 0) {
+            m = k + 1;
+        }
+        else if (cmp < 0) {
+            n = k - 1;
+        }
+        else {
+            return k;
+        }
+    }
+    return -m - 1;
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/utils/sort.js
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+*  Copyright (c) Microsoft Corporation. All rights reserved.
+*  Licensed under the MIT License. See License.txt in the project root for license information.
+*--------------------------------------------------------------------------------------------*/
+// import { TextEdit} from 'vscode-languageserver-textdocument';
+function sort(documentToSort, formattingOptions) {
+    const options = {
+        ...formattingOptions,
+        keepLines: false, // keepLines must be false so that the properties are on separate lines for the sorting
+    };
+    const formattedJsonString = main/* TextDocument */.V.applyEdits(documentToSort, format_format(documentToSort, options, undefined));
+    const formattedJsonDocument = main/* TextDocument */.V.create('test://test.json', 'json', 0, formattedJsonString);
+    const jsonPropertyTree = findJsoncPropertyTree(formattedJsonDocument);
+    const sortedJsonDocument = sortJsoncDocument(formattedJsonDocument, jsonPropertyTree);
+    const edits = format_format(sortedJsonDocument, options, undefined);
+    const sortedAndFormattedJsonDocument = main/* TextDocument */.V.applyEdits(sortedJsonDocument, edits);
+    return [TextEdit.replace(Range.create(Position.create(0, 0), documentToSort.positionAt(documentToSort.getText().length)), sortedAndFormattedJsonDocument)];
+}
+function findJsoncPropertyTree(formattedDocument) {
+    const formattedString = formattedDocument.getText();
+    const scanner = main_createScanner(formattedString, false);
+    // The tree that will be returned
+    let rootTree = new PropertyTree();
+    // The tree where the current properties can be added as children
+    let currentTree = rootTree;
+    // The tree representing the current property analyzed
+    let currentProperty = rootTree;
+    // The tree representing the previous property analyzed
+    let lastProperty = rootTree;
+    // The current scanned token
+    let token = undefined;
+    // Line number of the last token found
+    let lastTokenLine = 0;
+    // Total number of characters on the lines prior to current line 
+    let numberOfCharactersOnPreviousLines = 0;
+    // The last token scanned that is not trivial, nor a comment
+    let lastNonTriviaNonCommentToken = undefined;
+    // The second to last token scanned that is not trivial, nor a comment
+    let secondToLastNonTriviaNonCommentToken = undefined;
+    // Line number of last token that is not trivial, nor a comment
+    let lineOfLastNonTriviaNonCommentToken = -1;
+    // End index on its line of last token that is not trivial, nor a comment
+    let endIndexOfLastNonTriviaNonCommentToken = -1;
+    // Line number of the start of the range of current/next property
+    let beginningLineNumber = 0;
+    // Line number of the end of the range of current/next property
+    let endLineNumber = 0;
+    // Stack indicating whether we are inside of an object or an array
+    let currentContainerStack = [];
+    // Boolean indicating that the current property end line number needs to be updated. Used only when block comments are encountered.
+    let updateLastPropertyEndLineNumber = false;
+    // Boolean indicating that the beginning line number should be updated. Used only when block comments are encountered. 
+    let updateBeginningLineNumber = false;
+    while ((token = scanner.scan()) !== 17 /* SyntaxKind.EOF */) {
+        // In the case when a block comment has been encountered that starts on the same line as the comma ending a property, update the end line of that
+        // property so that it covers the block comment. For example, if we have: 
+        // 1. "key" : {}, /* some block
+        // 2. comment */
+        // Then, the end line of the property "key" should be line 2 not line 1
+        if (updateLastPropertyEndLineNumber === true
+            && token !== 14 /* SyntaxKind.LineBreakTrivia */
+            && token !== 15 /* SyntaxKind.Trivia */
+            && token !== 12 /* SyntaxKind.LineCommentTrivia */
+            && token !== 13 /* SyntaxKind.BlockCommentTrivia */
+            && currentProperty.endLineNumber === undefined) {
+            let endLineNumber = scanner.getTokenStartLine();
+            // Update the end line number in the case when the last property visited is a container (object or array)
+            if (secondToLastNonTriviaNonCommentToken === 2 /* SyntaxKind.CloseBraceToken */
+                || secondToLastNonTriviaNonCommentToken === 4 /* SyntaxKind.CloseBracketToken */) {
+                lastProperty.endLineNumber = endLineNumber - 1;
+            }
+            // Update the end line number in the case when the last property visited is a simple property 
+            else {
+                currentProperty.endLineNumber = endLineNumber - 1;
+            }
+            beginningLineNumber = endLineNumber;
+            updateLastPropertyEndLineNumber = false;
+        }
+        // When a block comment follows an open brace or an open bracket, that block comment should be associated to that brace or bracket, not the property below it. For example, for:
+        // 1. { /*
+        // 2. ... */
+        // 3. "key" : {}
+        // 4. }
+        // Instead of associating the block comment to the property on line 3, it is associate to the property on line 1
+        if (updateBeginningLineNumber === true
+            && token !== 14 /* SyntaxKind.LineBreakTrivia */
+            && token !== 15 /* SyntaxKind.Trivia */
+            && token !== 12 /* SyntaxKind.LineCommentTrivia */
+            && token !== 13 /* SyntaxKind.BlockCommentTrivia */) {
+            beginningLineNumber = scanner.getTokenStartLine();
+            updateBeginningLineNumber = false;
+        }
+        // Update the number of characters on all the previous lines each time the new token is on a different line to the previous token
+        if (scanner.getTokenStartLine() !== lastTokenLine) {
+            for (let i = lastTokenLine; i < scanner.getTokenStartLine(); i++) {
+                const lengthOfLine = formattedDocument.getText(Range.create(Position.create(i, 0), Position.create(i + 1, 0))).length;
+                numberOfCharactersOnPreviousLines = numberOfCharactersOnPreviousLines + lengthOfLine;
+            }
+            lastTokenLine = scanner.getTokenStartLine();
+        }
+        switch (token) {
+            // When a string is found, if it follows an open brace or a comma token and it is within an object, then it corresponds to a key name, not a simple string
+            case 10 /* SyntaxKind.StringLiteral */: {
+                if ((lastNonTriviaNonCommentToken === undefined
+                    || lastNonTriviaNonCommentToken === 1 /* SyntaxKind.OpenBraceToken */
+                    || (lastNonTriviaNonCommentToken === 5 /* SyntaxKind.CommaToken */
+                        && currentContainerStack[currentContainerStack.length - 1] === Container.Object))) {
+                    // In that case create the child property which starts at beginningLineNumber, add it to the current tree
+                    const childProperty = new PropertyTree(scanner.getTokenValue(), beginningLineNumber);
+                    lastProperty = currentProperty;
+                    currentProperty = currentTree.addChildProperty(childProperty);
+                }
+                break;
+            }
+            // When the token is an open bracket, then we enter into an array
+            case 3 /* SyntaxKind.OpenBracketToken */: {
+                // If the root tree beginning line number is not defined, then this open bracket is the first open bracket in the document
+                if (rootTree.beginningLineNumber === undefined) {
+                    rootTree.beginningLineNumber = scanner.getTokenStartLine();
+                }
+                // Suppose we are inside of an object, then the current array is associated to a key, and has already been created
+                // We have the following configuration: {"a": "val", "array": [...], "b": "val"}
+                // In that case navigate down to the child property
+                if (currentContainerStack[currentContainerStack.length - 1] === Container.Object) {
+                    currentTree = currentProperty;
+                }
+                // Suppose we are inside of an array, then since the current array is not associated to a key, it has not been created yet
+                // We have the following configuration: ["a", [...], "b"]
+                // In that case create the property and navigate down
+                else if (currentContainerStack[currentContainerStack.length - 1] === Container.Array) {
+                    const childProperty = new PropertyTree(scanner.getTokenValue(), beginningLineNumber);
+                    childProperty.noKeyName = true;
+                    lastProperty = currentProperty;
+                    currentProperty = currentTree.addChildProperty(childProperty);
+                    currentTree = currentProperty;
+                }
+                currentContainerStack.push(Container.Array);
+                currentProperty.type = Container.Array;
+                beginningLineNumber = scanner.getTokenStartLine();
+                beginningLineNumber++;
+                break;
+            }
+            // When the token is an open brace, then we enter into an object
+            case 1 /* SyntaxKind.OpenBraceToken */: {
+                // If the root tree beginning line number is not defined, then this open brace is the first open brace in the document
+                if (rootTree.beginningLineNumber === undefined) {
+                    rootTree.beginningLineNumber = scanner.getTokenStartLine();
+                }
+                // 1. If we are inside of an objet, the current object is associated to a key and has already been created
+                // We have the following configuration: {"a": "val", "object": {...}, "b": "val"}
+                // 2. Otherwise the current object property is inside of an array, not associated to a key name and the property has not yet been created
+                // We have the following configuration: ["a", {...}, "b"]
+                else if (currentContainerStack[currentContainerStack.length - 1] === Container.Array) {
+                    const childProperty = new PropertyTree(scanner.getTokenValue(), beginningLineNumber);
+                    childProperty.noKeyName = true;
+                    lastProperty = currentProperty;
+                    currentProperty = currentTree.addChildProperty(childProperty);
+                }
+                currentProperty.type = Container.Object;
+                currentContainerStack.push(Container.Object);
+                currentTree = currentProperty;
+                beginningLineNumber = scanner.getTokenStartLine();
+                beginningLineNumber++;
+                break;
+            }
+            case 4 /* SyntaxKind.CloseBracketToken */: {
+                endLineNumber = scanner.getTokenStartLine();
+                currentContainerStack.pop();
+                // If the last non-trivial non-comment token is a closing brace or bracket, then the currentProperty end line number has not been set yet so set it
+                // The configuration considered is: [..., {}] or [..., []]
+                if (currentProperty.endLineNumber === undefined
+                    && (lastNonTriviaNonCommentToken === 2 /* SyntaxKind.CloseBraceToken */
+                        || lastNonTriviaNonCommentToken === 4 /* SyntaxKind.CloseBracketToken */)) {
+                    currentProperty.endLineNumber = endLineNumber - 1;
+                    currentProperty.lastProperty = true;
+                    currentProperty.lineWhereToAddComma = lineOfLastNonTriviaNonCommentToken;
+                    currentProperty.indexWhereToAddComa = endIndexOfLastNonTriviaNonCommentToken;
+                    lastProperty = currentProperty;
+                    currentProperty = currentProperty ? currentProperty.parent : undefined;
+                    currentTree = currentProperty;
+                }
+                rootTree.endLineNumber = endLineNumber;
+                beginningLineNumber = endLineNumber + 1;
+                break;
+            }
+            case 2 /* SyntaxKind.CloseBraceToken */: {
+                endLineNumber = scanner.getTokenStartLine();
+                currentContainerStack.pop();
+                // If we are not inside of an empty object
+                if (lastNonTriviaNonCommentToken !== 1 /* SyntaxKind.OpenBraceToken */) {
+                    // If current property end line number has not yet been defined, define it
+                    if (currentProperty.endLineNumber === undefined) {
+                        currentProperty.endLineNumber = endLineNumber - 1;
+                        // The current property is also the last property
+                        currentProperty.lastProperty = true;
+                        // The last property of an object is associated with the line and index of where to add the comma, in case after sorting, it is no longer the last property
+                        currentProperty.lineWhereToAddComma = lineOfLastNonTriviaNonCommentToken;
+                        currentProperty.indexWhereToAddComa = endIndexOfLastNonTriviaNonCommentToken;
+                    }
+                    lastProperty = currentProperty;
+                    currentProperty = currentProperty ? currentProperty.parent : undefined;
+                    currentTree = currentProperty;
+                }
+                rootTree.endLineNumber = scanner.getTokenStartLine();
+                beginningLineNumber = endLineNumber + 1;
+                break;
+            }
+            case 5 /* SyntaxKind.CommaToken */: {
+                endLineNumber = scanner.getTokenStartLine();
+                // If the current container is an object or the current container is an array and the last non-trivia non-comment token is a closing brace or a closing bracket
+                // Then update the end line number of the current property
+                if (currentProperty.endLineNumber === undefined
+                    && (currentContainerStack[currentContainerStack.length - 1] === Container.Object
+                        || (currentContainerStack[currentContainerStack.length - 1] === Container.Array
+                            && (lastNonTriviaNonCommentToken === 2 /* SyntaxKind.CloseBraceToken */
+                                || lastNonTriviaNonCommentToken === 4 /* SyntaxKind.CloseBracketToken */)))) {
+                    currentProperty.endLineNumber = endLineNumber;
+                    // Store the line and the index of the comma in case it needs to be removed during the sorting
+                    currentProperty.commaIndex = scanner.getTokenOffset() - numberOfCharactersOnPreviousLines;
+                    currentProperty.commaLine = endLineNumber;
+                }
+                if (lastNonTriviaNonCommentToken === 2 /* SyntaxKind.CloseBraceToken */
+                    || lastNonTriviaNonCommentToken === 4 /* SyntaxKind.CloseBracketToken */) {
+                    lastProperty = currentProperty;
+                    currentProperty = currentProperty ? currentProperty.parent : undefined;
+                    currentTree = currentProperty;
+                }
+                beginningLineNumber = endLineNumber + 1;
+                break;
+            }
+            case 13 /* SyntaxKind.BlockCommentTrivia */: {
+                // If the last non trivia non-comment token is a comma and the block comment starts on the same line as the comma, then update the end line number of the current property. For example if:
+                // 1. {}, /* ...
+                // 2. ..*/
+                // The the property on line 1 shoud end on line 2, not line 1
+                // In the case we are in an array we update the end line number only if the second to last non-trivia non-comment token is a closing brace or bracket
+                if (lastNonTriviaNonCommentToken === 5 /* SyntaxKind.CommaToken */
+                    && lineOfLastNonTriviaNonCommentToken === scanner.getTokenStartLine()
+                    && (currentContainerStack[currentContainerStack.length - 1] === Container.Array
+                        && (secondToLastNonTriviaNonCommentToken === 2 /* SyntaxKind.CloseBraceToken */
+                            || secondToLastNonTriviaNonCommentToken === 4 /* SyntaxKind.CloseBracketToken */)
+                        || currentContainerStack[currentContainerStack.length - 1] === Container.Object)) {
+                    if (currentContainerStack[currentContainerStack.length - 1] === Container.Array && (secondToLastNonTriviaNonCommentToken === 2 /* SyntaxKind.CloseBraceToken */ || secondToLastNonTriviaNonCommentToken === 4 /* SyntaxKind.CloseBracketToken */) || currentContainerStack[currentContainerStack.length - 1] === Container.Object) {
+                        currentProperty.endLineNumber = undefined;
+                        updateLastPropertyEndLineNumber = true;
+                    }
+                }
+                // When the block comment follows an open brace or an open token, we have the following scenario:
+                // { /**
+                // ../
+                // }
+                // The block comment should be assigned to the open brace not the first property below it
+                if ((lastNonTriviaNonCommentToken === 1 /* SyntaxKind.OpenBraceToken */
+                    || lastNonTriviaNonCommentToken === 3 /* SyntaxKind.OpenBracketToken */)
+                    && lineOfLastNonTriviaNonCommentToken === scanner.getTokenStartLine()) {
+                    updateBeginningLineNumber = true;
+                }
+                break;
+            }
+        }
+        // Update the last and second to last non-trivia non-comment tokens
+        if (token !== 14 /* SyntaxKind.LineBreakTrivia */
+            && token !== 13 /* SyntaxKind.BlockCommentTrivia */
+            && token !== 12 /* SyntaxKind.LineCommentTrivia */
+            && token !== 15 /* SyntaxKind.Trivia */) {
+            secondToLastNonTriviaNonCommentToken = lastNonTriviaNonCommentToken;
+            lastNonTriviaNonCommentToken = token;
+            lineOfLastNonTriviaNonCommentToken = scanner.getTokenStartLine();
+            endIndexOfLastNonTriviaNonCommentToken = scanner.getTokenOffset() + scanner.getTokenLength() - numberOfCharactersOnPreviousLines;
+        }
+    }
+    return rootTree;
+}
+function sortJsoncDocument(jsonDocument, propertyTree) {
+    if (propertyTree.childrenProperties.length === 0) {
+        return jsonDocument;
+    }
+    const sortedJsonDocument = main/* TextDocument */.V.create('test://test.json', 'json', 0, jsonDocument.getText());
+    const queueToSort = [];
+    updateSortingQueue(queueToSort, propertyTree, propertyTree.beginningLineNumber);
+    while (queueToSort.length > 0) {
+        const dataToSort = queueToSort.shift();
+        const propertyTreeArray = dataToSort.propertyTreeArray;
+        let beginningLineNumber = dataToSort.beginningLineNumber;
+        for (let i = 0; i < propertyTreeArray.length; i++) {
+            const propertyTree = propertyTreeArray[i];
+            const range = Range.create(Position.create(propertyTree.beginningLineNumber, 0), Position.create(propertyTree.endLineNumber + 1, 0));
+            const jsonContentToReplace = jsonDocument.getText(range);
+            const jsonDocumentToReplace = main/* TextDocument */.V.create('test://test.json', 'json', 0, jsonContentToReplace);
+            if (propertyTree.lastProperty === true && i !== propertyTreeArray.length - 1) {
+                const lineWhereToAddComma = propertyTree.lineWhereToAddComma - propertyTree.beginningLineNumber;
+                const indexWhereToAddComma = propertyTree.indexWhereToAddComa;
+                const edit = {
+                    range: Range.create(Position.create(lineWhereToAddComma, indexWhereToAddComma), Position.create(lineWhereToAddComma, indexWhereToAddComma)),
+                    text: ','
+                };
+                main/* TextDocument */.V.update(jsonDocumentToReplace, [edit], 1);
+            }
+            else if (propertyTree.lastProperty === false && i === propertyTreeArray.length - 1) {
+                const commaIndex = propertyTree.commaIndex;
+                const commaLine = propertyTree.commaLine;
+                const lineWhereToRemoveComma = commaLine - propertyTree.beginningLineNumber;
+                const edit = {
+                    range: Range.create(Position.create(lineWhereToRemoveComma, commaIndex), Position.create(lineWhereToRemoveComma, commaIndex + 1)),
+                    text: ''
+                };
+                main/* TextDocument */.V.update(jsonDocumentToReplace, [edit], 1);
+            }
+            const length = propertyTree.endLineNumber - propertyTree.beginningLineNumber + 1;
+            const edit = {
+                range: Range.create(Position.create(beginningLineNumber, 0), Position.create(beginningLineNumber + length, 0)),
+                text: jsonDocumentToReplace.getText()
+            };
+            main/* TextDocument */.V.update(sortedJsonDocument, [edit], 1);
+            updateSortingQueue(queueToSort, propertyTree, beginningLineNumber);
+            beginningLineNumber = beginningLineNumber + length;
+        }
+    }
+    return sortedJsonDocument;
+}
+function updateSortingQueue(queue, propertyTree, beginningLineNumber) {
+    if (propertyTree.childrenProperties.length === 0) {
+        return;
+    }
+    if (propertyTree.type === Container.Object) {
+        let minimumBeginningLineNumber = Infinity;
+        for (const childProperty of propertyTree.childrenProperties) {
+            if (childProperty.beginningLineNumber < minimumBeginningLineNumber) {
+                minimumBeginningLineNumber = childProperty.beginningLineNumber;
+            }
+        }
+        const diff = minimumBeginningLineNumber - propertyTree.beginningLineNumber;
+        beginningLineNumber = beginningLineNumber + diff;
+        queue.push(new SortingRange(beginningLineNumber, propertyTree.childrenProperties));
+    }
+    else if (propertyTree.type === Container.Array) {
+        updateSortingQueueForArrayProperties(queue, propertyTree, beginningLineNumber);
+    }
+}
+function updateSortingQueueForArrayProperties(queue, propertyTree, beginningLineNumber) {
+    for (const subObject of propertyTree.childrenProperties) {
+        // If the child property of the array is an object, then you can sort the properties within this object
+        if (subObject.type === Container.Object) {
+            let minimumBeginningLineNumber = Infinity;
+            for (const childProperty of subObject.childrenProperties) {
+                if (childProperty.beginningLineNumber < minimumBeginningLineNumber) {
+                    minimumBeginningLineNumber = childProperty.beginningLineNumber;
+                }
+            }
+            const diff = minimumBeginningLineNumber - subObject.beginningLineNumber;
+            queue.push(new SortingRange(beginningLineNumber + subObject.beginningLineNumber - propertyTree.beginningLineNumber + diff, subObject.childrenProperties));
+        }
+        // If the child property of the array is an array, then you need to recurse on the children properties, until you find an object to sort
+        if (subObject.type === Container.Array) {
+            updateSortingQueueForArrayProperties(queue, subObject, beginningLineNumber + subObject.beginningLineNumber - propertyTree.beginningLineNumber);
+        }
+    }
+}
+class SortingRange {
+    constructor(beginningLineNumber, propertyTreeArray) {
+        this.beginningLineNumber = beginningLineNumber;
+        this.propertyTreeArray = propertyTreeArray;
+    }
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/services/jsonLinks.js
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+function findLinks(document, doc) {
+    const links = [];
+    doc.visit(node => {
+        if (node.type === "property" && node.keyNode.value === "$ref" && node.valueNode?.type === 'string') {
+            const path = node.valueNode.value;
+            const targetNode = findTargetNode(doc, path);
+            if (targetNode) {
+                const targetPos = document.positionAt(targetNode.offset);
+                links.push({
+                    target: `${document.uri}#${targetPos.line + 1},${targetPos.character + 1}`,
+                    range: createRange(document, node.valueNode)
+                });
+            }
+        }
+        return true;
+    });
+    return Promise.resolve(links);
+}
+function createRange(document, node) {
+    return Range.create(document.positionAt(node.offset + 1), document.positionAt(node.offset + node.length - 1));
+}
+function findTargetNode(doc, path) {
+    const tokens = parseJSONPointer(path);
+    if (!tokens) {
+        return null;
+    }
+    return findNode(tokens, doc.root);
+}
+function findNode(pointer, node) {
+    if (!node) {
+        return null;
+    }
+    if (pointer.length === 0) {
+        return node;
+    }
+    const token = pointer.shift();
+    if (node && node.type === 'object') {
+        const propertyNode = node.properties.find((propertyNode) => propertyNode.keyNode.value === token);
+        if (!propertyNode) {
+            return null;
+        }
+        return findNode(pointer, propertyNode.valueNode);
+    }
+    else if (node && node.type === 'array') {
+        if (token.match(/^(0|[1-9][0-9]*)$/)) {
+            const index = Number.parseInt(token);
+            const arrayItem = node.items[index];
+            if (!arrayItem) {
+                return null;
+            }
+            return findNode(pointer, arrayItem);
+        }
+    }
+    return null;
+}
+function parseJSONPointer(path) {
+    if (path === "#") {
+        return [];
+    }
+    if (path[0] !== '#' || path[1] !== '/') {
+        return null;
+    }
+    return path.substring(2).split(/\//).map(jsonLinks_unescape);
+}
+function jsonLinks_unescape(str) {
+    return str.replace(/~1/g, '/').replace(/~0/g, '~');
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/external/vscode-json-languageservice/lib/esm/jsonLanguageService.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+function getLanguageService(params) {
+    const promise = params.promiseConstructor || Promise;
+    const jsonSchemaService = new JSONSchemaService(params.schemaRequestService, params.workspaceContext, promise);
+    jsonSchemaService.setSchemaContributions(schemaContributions);
+    const jsonCompletion = new JSONCompletion(jsonSchemaService, params.contributions, promise, params.clientCapabilities);
+    const jsonHover = new JSONHover(jsonSchemaService, params.contributions, promise);
+    const jsonDocumentSymbols = new JSONDocumentSymbols(jsonSchemaService);
+    const jsonValidation = new JSONValidation(jsonSchemaService, promise);
+    return {
+        configure: (settings) => {
+            jsonSchemaService.clearExternalSchemas();
+            settings.schemas?.forEach(jsonSchemaService.registerExternalSchema.bind(jsonSchemaService));
+            jsonValidation.configure(settings);
+        },
+        resetSchema: (uri) => jsonSchemaService.onResourceChange(uri),
+        doValidation: jsonValidation.doValidation.bind(jsonValidation),
+        getLanguageStatus: jsonValidation.getLanguageStatus.bind(jsonValidation),
+        parseJSONDocument: (document) => jsonParser_parse(document, { collectComments: true }),
+        newJSONDocument: (root, diagnostics) => newJSONDocument(root, diagnostics),
+        getMatchingSchemas: jsonSchemaService.getMatchingSchemas.bind(jsonSchemaService),
+        doResolve: jsonCompletion.doResolve.bind(jsonCompletion),
+        doComplete: jsonCompletion.doComplete.bind(jsonCompletion),
+        findDocumentSymbols: jsonDocumentSymbols.findDocumentSymbols.bind(jsonDocumentSymbols),
+        findDocumentSymbols2: jsonDocumentSymbols.findDocumentSymbols2.bind(jsonDocumentSymbols),
+        findDocumentColors: jsonDocumentSymbols.findDocumentColors.bind(jsonDocumentSymbols),
+        getColorPresentations: jsonDocumentSymbols.getColorPresentations.bind(jsonDocumentSymbols),
+        doHover: jsonHover.doHover.bind(jsonHover),
+        getFoldingRanges: getFoldingRanges,
+        getSelectionRanges: getSelectionRanges,
+        findDefinition: () => Promise.resolve([]),
+        findLinks: findLinks,
+        format: (document, range, options) => format_format(document, options, range),
+        sort: (document, options) => sort(document, options)
+    };
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/vs/language/json/jsonWorker.js
+
+
+
+
+
+let defaultSchemaRequestService;
+if (typeof fetch !== "undefined") {
+  defaultSchemaRequestService = function(url) {
+    return fetch(url).then((response) => response.text());
+  };
+}
+class JSONWorker {
+  constructor(ctx, createData) {
+    this._ctx = ctx;
+    this._languageSettings = createData.languageSettings;
+    this._languageId = createData.languageId;
+    this._languageService = getLanguageService({
+      workspaceContext: {
+        resolveRelativePath: (relativePath, resource) => {
+          const base = resource.substr(0, resource.lastIndexOf("/") + 1);
+          return resolvePath(base, relativePath);
+        }
+      },
+      schemaRequestService: createData.enableSchemaRequest ? defaultSchemaRequestService : void 0,
+      clientCapabilities: ClientCapabilities.LATEST
+    });
+    this._languageService.configure(this._languageSettings);
+  }
+  async doValidation(uri) {
+    let document = this._getTextDocument(uri);
+    if (document) {
+      let jsonDocument = this._languageService.parseJSONDocument(document);
+      return this._languageService.doValidation(document, jsonDocument, this._languageSettings);
+    }
+    return Promise.resolve([]);
+  }
+  async doComplete(uri, position) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return null;
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    return this._languageService.doComplete(document, position, jsonDocument);
+  }
+  async doResolve(item) {
+    return this._languageService.doResolve(item);
+  }
+  async doHover(uri, position) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return null;
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    return this._languageService.doHover(document, position, jsonDocument);
+  }
+  async format(uri, range, options) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let textEdits = this._languageService.format(document, range, options);
+    return Promise.resolve(textEdits);
+  }
+  async resetSchema(uri) {
+    return Promise.resolve(this._languageService.resetSchema(uri));
+  }
+  async findDocumentSymbols(uri) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    let symbols = this._languageService.findDocumentSymbols2(document, jsonDocument);
+    return Promise.resolve(symbols);
+  }
+  async findDocumentColors(uri) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    let colorSymbols = this._languageService.findDocumentColors(document, jsonDocument);
+    return Promise.resolve(colorSymbols);
+  }
+  async getColorPresentations(uri, color, range) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    let colorPresentations = this._languageService.getColorPresentations(
+      document,
+      jsonDocument,
+      color,
+      range
+    );
+    return Promise.resolve(colorPresentations);
+  }
+  async getFoldingRanges(uri, context) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let ranges = this._languageService.getFoldingRanges(document, context);
+    return Promise.resolve(ranges);
+  }
+  async getSelectionRanges(uri, positions) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    let ranges = this._languageService.getSelectionRanges(document, positions, jsonDocument);
+    return Promise.resolve(ranges);
+  }
+  async parseJSONDocument(uri) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return null;
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    return Promise.resolve(jsonDocument);
+  }
+  async getMatchingSchemas(uri) {
+    let document = this._getTextDocument(uri);
+    if (!document) {
+      return [];
+    }
+    let jsonDocument = this._languageService.parseJSONDocument(document);
+    return Promise.resolve(this._languageService.getMatchingSchemas(document, jsonDocument));
+  }
+  _getTextDocument(uri) {
+    let models = this._ctx.getMirrorModels();
+    for (let model of models) {
+      if (model.uri.toString() === uri) {
+        return main/* TextDocument */.V.create(
+          uri,
+          this._languageId,
+          model.version,
+          model.getValue()
+        );
+      }
+    }
+    return null;
+  }
+}
+const Slash = "/".charCodeAt(0);
+const Dot = ".".charCodeAt(0);
+function isAbsolutePath(path) {
+  return path.charCodeAt(0) === Slash;
+}
+function resolvePath(uriString, path) {
+  if (isAbsolutePath(path)) {
+    const uri = esm/* URI */.r.parse(uriString);
+    const parts = path.split("/");
+    return uri.with({ path: normalizePath(parts) }).toString();
+  }
+  return joinPath(uriString, path);
+}
+function normalizePath(parts) {
+  const newParts = [];
+  for (const part of parts) {
+    if (part.length === 0 || part.length === 1 && part.charCodeAt(0) === Dot) ; else if (part.length === 2 && part.charCodeAt(0) === Dot && part.charCodeAt(1) === Dot) {
+      newParts.pop();
+    } else {
+      newParts.push(part);
+    }
+  }
+  if (parts.length > 1 && parts[parts.length - 1].length === 0) {
+    newParts.push("");
+  }
+  let res = newParts.join("/");
+  if (parts[0].length === 0) {
+    res = "/" + res;
+  }
+  return res;
+}
+function joinPath(uriString, ...paths) {
+  const uri = esm/* URI */.r.parse(uriString);
+  const parts = uri.path.split("/");
+  for (let path of paths) {
+    parts.push(...path.split("/"));
+  }
+  return uri.with({ path: normalizePath(parts) }).toString();
+}
+
+
+
+;// ./node_modules/monaco-editor/esm/vs/language/json/json.worker.js
+
+
+
+self.onmessage = () => {
+  (0,initialize/* initialize */.n)((ctx, createData) => {
+    return new JSONWorker(ctx, createData);
+  });
+};
+
+
+/***/ }
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/******/ 	// the startup function
+/******/ 	__webpack_require__.x = () => {
+/******/ 		// Load entry module and return exports
+/******/ 		// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 		var __webpack_exports__ = __webpack_require__.O(undefined, [4508,5323], () => (__webpack_require__(82184)))
+/******/ 		__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 		return __webpack_exports__;
+/******/ 	};
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/ensure chunk */
+/******/ 	(() => {
+/******/ 		__webpack_require__.f = {};
+/******/ 		// This file contains only the entry chunk.
+/******/ 		// The chunk loading function for additional chunks
+/******/ 		__webpack_require__.e = (chunkId) => {
+/******/ 			return Promise.all(Object.keys(__webpack_require__.f).reduce((promises, key) => {
+/******/ 				__webpack_require__.f[key](chunkId, promises);
+/******/ 				return promises;
+/******/ 			}, []));
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get javascript chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks and chunks that the entrypoint depends on
+/******/ 		__webpack_require__.u = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".bundle.js";
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/publicPath */
+/******/ 	(() => {
+/******/ 		__webpack_require__.p = "./";
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/importScripts chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded chunks
+/******/ 		// "1" means "already loaded"
+/******/ 		var installedChunks = {
+/******/ 			2184: 1
+/******/ 		};
+/******/ 		
+/******/ 		// importScripts chunk loading
+/******/ 		var installChunk = (data) => {
+/******/ 			var [chunkIds, moreModules, runtime] = data;
+/******/ 			for(var moduleId in moreModules) {
+/******/ 				if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 					__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 				}
+/******/ 			}
+/******/ 			if(runtime) runtime(__webpack_require__);
+/******/ 			while(chunkIds.length)
+/******/ 				installedChunks[chunkIds.pop()] = 1;
+/******/ 			parentChunkLoadingFunction(data);
+/******/ 		};
+/******/ 		__webpack_require__.f.i = (chunkId, promises) => {
+/******/ 			// "1" is the signal for "already loaded"
+/******/ 			if(!installedChunks[chunkId]) {
+/******/ 				if(true) { // all chunks have JS
+/******/ 					importScripts(__webpack_require__.p + __webpack_require__.u(chunkId));
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunk_cBlockly"] = self["webpackChunk_cBlockly"] || [];
+/******/ 		var parentChunkLoadingFunction = chunkLoadingGlobal.push.bind(chunkLoadingGlobal);
+/******/ 		chunkLoadingGlobal.push = installChunk;
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/startup chunk dependencies */
+/******/ 	(() => {
+/******/ 		var next = __webpack_require__.x;
+/******/ 		__webpack_require__.x = () => {
+/******/ 			return Promise.all([
+/******/ 				__webpack_require__.e(4508),
+/******/ 				__webpack_require__.e(5323)
+/******/ 			]).then(next);
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// run startup
+/******/ 	var __webpack_exports__ = __webpack_require__.x();
+/******/ 	
+/******/ })()
+;

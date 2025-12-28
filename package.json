@@ -8,6 +8,7 @@
   "scripts": {
     "audit": "npm audit fix",
     "build": "webpack --mode production",
+    "build:local": "webpack --config webpack.local.config.mjs",
     "lint": "eslint src --fix --ignore-pattern src/out/**",
     "dev": "webpack serve --open --mode development",
     "update": "npm update"
