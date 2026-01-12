@@ -5,6 +5,7 @@
     "declarationMap": true,
     "module": "ES2015",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "outDir": "build",
     "paths": {
         "*": ["types/*"]

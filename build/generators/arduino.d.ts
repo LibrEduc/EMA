@@ -14,6 +14,7 @@ export * from './arduino/diagnostic';
 export * from './arduino/test_generator';
 export * from './arduino/debug_variables_typed';
 export * from './arduino/block_definitions';
+export * from './arduino/block_types_registry';
 /**
  * Arduino code generator instance.
  * {@type ArduinoGenerator}

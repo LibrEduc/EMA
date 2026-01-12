@@ -28,6 +28,7 @@
  */
 
 import * as Blockly from "blockly";
+import { inferAndUpdateVariableTypes } from "./generators/arduino/variable_type_inference";
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -138,6 +139,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
       ) {
         return;
       }
+      
+      // Infer and update variable types based on block connections
+      // This is similar to BlocklyArduino's approach
+      inferAndUpdateVariableTypes(this.workspace);
+      
       µcB_codeEditor.setValue(arduinoGenerator.workspaceToCode(this.workspace));
       div_content_code.textContent = arduinoGenerator.workspaceToCode(this.workspace);
     });

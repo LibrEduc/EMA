@@ -165,45 +165,49 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.nameDB_.populateVariables(workspace);
     this.nameDB_.populateProcedures(workspace);
 
-    const defvars = [];
+    // Map to store variable names with their types
+    const variableNamesByType: Record<string, string[]> = {};
+    
     // Add developer variables (not created or named by the user).
     const devVarList = Blockly.Variables.allDeveloperVariables(workspace);
-    for (let i = 0; i < devVarList.length; i++) {
-      defvars.push(
-        this.nameDB_!.getName(
-          devVarList[i],
-          Blockly.Names.NameType.DEVELOPER_VARIABLE,
-        ),
+    for (const devVar of devVarList) {
+      const varName = this.nameDB_!.getName(
+        devVar,
+        Blockly.Names.NameType.DEVELOPER_VARIABLE,
       );
+      // Developer variables default to 'int'
+      const varType = 'int';
+      if (!variableNamesByType[varType]) {
+        variableNamesByType[varType] = [];
+      }
+      variableNamesByType[varType].push(varName);
     }
 
     // Add user variables, but only ones that are being used.
     const variables = Blockly.Variables.allUsedVarModels(workspace);
-    for (let i = 0; i < variables.length; i++) {
-      defvars.push(
-        this.nameDB_!.getName(
-          variables[i].getId(),
-          Blockly.Names.NameType.VARIABLE,
-        ),
+    for (const variable of variables) {
+      const varName = this.nameDB_!.getName(
+        variable.getId(),
+        Blockly.Names.NameType.VARIABLE,
       );
+      
+      // Get the type from the VariableModel, default to 'undefined' if no type
+      const varType = variable.getType() || null;
+      
+      // Group variables by type (including undefined type)
+      // Use 'undefined' as string key for variables without type
+      const typeKey = varType === null ? 'undefined' : varType;
+      if (!variableNamesByType[typeKey]) {
+        variableNamesByType[typeKey] = [];
+      }
+      variableNamesByType[typeKey].push(varName);
     }
 
     // Declare all of the variables.
-    if (defvars.length) {
-      // Group variables by type for better code organization
-      const variablesByType: Record<string, string[]> = {};
-      
-      for (const varName of defvars) {
-        const varType = this.getVariableType(varName);
-        if (!variablesByType[varType]) {
-          variablesByType[varType] = [];
-        }
-        variablesByType[varType].push(varName);
-      }
-      
+    if (Object.keys(variableNamesByType).length > 0) {
       // Create typed variable declarations
       const varDeclarations: string[] = [];
-      for (const [varType, varNames] of Object.entries(variablesByType)) {
+      for (const [varType, varNames] of Object.entries(variableNamesByType)) {
         if (varNames.length > 0) {
           varDeclarations.push(`${varType} ${varNames.join(', ')};`);
         }
@@ -224,7 +228,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   finish(code: string): string {
     const includes = Object.values(this.includes_);
     const defines = Object.values(this.defines_);
-    const variables = Object.values(this.variables_);
+    // Get variables from definitions_ (set in init()) instead of variables_
+    const variablesDeclaration = this.definitions_["variables"] || '';
+    const variables = variablesDeclaration ? [variablesDeclaration] : [];
     const codeFunctions = Object.values(this.codeFunctions_);
     const userFunctions = Object.values(this.userFunctions_);
     const functionNames = Object.values(this.functionNames_);

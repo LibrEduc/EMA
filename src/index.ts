@@ -77,45 +77,20 @@ if (typeof window !== 'undefined') {
   console.log('Propriétés disponibles:', Object.keys((window as any).Blockly));
 }
 
-// Fonction pour définir les blocs de variables typées
+// Fonction de compatibilité pour définir les blocs de variables typées
+// Utilise maintenant la fonction principale depuis block_definitions.ts
 function defineTypedVariableBlocks() {
   if (typeof Blockly !== 'undefined') {
-    // Bloc pour obtenir la valeur d'une variable typée
-    Blockly.Blocks['variables_get_dynamic'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldVariable('item'), 'VAR');
-        this.setOutput(true, null);
-        this.setColour(330);
-        this.setTooltip('Gets the value of a typed variable');
-        this.setHelpUrl('');
-      }
-    };
-
-    // Bloc pour définir la valeur d'une variable typée
-    Blockly.Blocks['variables_set_dynamic'] = {
-      init: function() {
-        this.appendDummyInput()
-            .appendField('set')
-            .appendField(new Blockly.FieldVariable('item'), 'VAR')
-            .appendField('to');
-        this.appendValueInput('VALUE')
-            .setCheck(null);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(330);
-        this.setTooltip('Sets the value of a typed variable');
-        this.setHelpUrl('');
-      }
-    };
-    
-    console.log('Blocs de variables typées définis avec succès');
+    defineAllTypedVariableBlocks();
     return true;
   }
   return false;
 }
 
 import { arduinoGenerator } from "./generators/arduino";
+import { defineAllTypedVariableBlocks } from "./generators/arduino/block_definitions";
+import { applyBlockTypesFromRegistry } from "./generators/arduino/block_types_registry";
+import { configureStandardBlocks } from "./generators/arduino/configure_standard_blocks";
 import {
   HTML_populateLanguages,
   changeLanguageToolbox,
@@ -672,6 +647,13 @@ DomIsLoaded((): void => {
         console.error('❌ Impossible de définir les blocs de variables typées');
       }
     }, 100);
+  }
+  
+  // Appliquer les types de blocs depuis le registre
+  if (typeof Blockly !== 'undefined') {
+    applyBlockTypesFromRegistry();
+    // Configurer les blocs standards (controls_if, etc.)
+    configureStandardBlocks();
   }
   
   HTML_populateLanguages(µcB);

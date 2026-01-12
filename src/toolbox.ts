@@ -196,6 +196,16 @@ export const basic_toolbox: ToolboxConfiguration = {
       'name': 'CAT_VARIABLES',
       'categorystyle': 'variable_category',
       'custom': 'VARIABLE',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'variables_set',
+        },
+        {
+          'kind': 'block',
+          'type': 'variables_get',
+        },
+      ],
     },
     {
       'kind': 'category',
@@ -877,6 +887,16 @@ export const basic_toolbox2: ToolboxConfiguration = {
       'name': 'CAT_VARIABLES',
       'categorystyle': 'variable_category',
       'custom': 'VARIABLE',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'variables_set',
+        },
+        {
+          'kind': 'block',
+          'type': 'variables_get',
+        },
+      ],
     },
     {
       'kind': 'category',
