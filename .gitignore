@@ -11,8 +11,8 @@ tmp/
 exemples/
 
 # Generated files
-# build/
-#dist/
+build/
+dist/
 .DS_Store
 
 # Optional npm cache directory

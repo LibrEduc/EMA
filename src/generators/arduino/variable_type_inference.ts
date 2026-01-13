@@ -264,19 +264,52 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
       // For variables_set, check what's connected to VALUE input
       const valueInput = block.getInput('VALUE');
       if (valueInput && valueInput.connection) {
-        const targetBlock = valueInput.connection.targetBlock();
+        // Try to get the connected block
+        // Use targetConnection to get the source connection, then getSourceBlock()
+        // This is more reliable than targetBlock() in some cases
+        const targetConnection = valueInput.connection.targetConnection;
+        const targetBlock = targetConnection ? targetConnection.getSourceBlock() : 
+                          valueInput.connection.targetBlock();
+        
         if (targetBlock) {
+          console.log(`    → Bloc connecté à VALUE (assignment): ${targetBlock.type}`);
+          
+          // First, try to use getBlockType() if available (this is what StrictConnectionChecker uses)
           const blockDef = targetBlock as Blockly.Block & { getBlockType?: () => string | null };
           if (blockDef.getBlockType) {
             const type = blockDef.getBlockType();
-            if (type) {
-              assignmentTypes.push(type);
+            if (type && type !== '__NO_TYPE__' && type !== 'null' && type !== 'undefined') {
+              // Convert Blockly types to internal types
+              const internalType = convertBlocklyTypeToInternalType(type) || type;
+              console.log(`    → Type détecté depuis getBlockType (assignment): ${internalType} (original: ${type})`);
+              assignmentTypes.push(internalType);
+            } else {
+              console.log(`    → getBlockType() retourne: ${type} (ignoré)`);
             }
-          } else if (targetBlock.outputConnection) {
+          } 
+          // Fallback: try to get from output connection check
+          if (targetBlock.outputConnection) {
             const check = targetBlock.outputConnection.getCheck();
             const convertedType = convertBlocklyTypeToInternalType(check);
             if (convertedType) {
+              console.log(`    → Type détecté depuis output check (assignment): ${convertedType}`);
               assignmentTypes.push(convertedType);
+            }
+          }
+        } else {
+          console.log(`    → Aucun bloc connecté à VALUE (assignment)`);
+          // No block connected yet - check if there's a shadow block
+          const shadowDom = (valueInput.connection as any).getShadowDom ? 
+            (valueInput.connection as any).getShadowDom() : null;
+          if (shadowDom) {
+            // Try to infer from shadow block type attribute
+            const shadowType = shadowDom.getAttribute('type');
+            if (shadowType) {
+              const convertedType = convertBlocklyTypeToInternalType(shadowType);
+              if (convertedType) {
+                console.log(`    → Type détecté depuis shadow block (assignment): ${convertedType}`);
+                assignmentTypes.push(convertedType);
+              }
             }
           }
         }

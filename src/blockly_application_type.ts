@@ -29,6 +29,7 @@
 
 import * as Blockly from "blockly";
 import { inferAndUpdateVariableTypes } from "./generators/arduino/variable_type_inference";
+import { registerStrictConnectionChecker } from "./generators/arduino/strict_connection_checker";
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -47,10 +48,12 @@ import { ContentHighlight } from "@blockly/workspace-content-highlight";
 import { Modal } from "@blockly/plugin-modal";
 import { PositionedMinimap } from "@blockly/workspace-minimap";
 import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
-import { TypedVariableModal } from "@blockly/plugin-typed-variable-modal";
+//import { TypedVariableModal } from "@blockly/plugin-typed-variable-modal";
 
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ZoomToFitControl } from "@blockly/zoom-to-fit";
+// Don't use the official plugin - it's too strict for our use case
+// import {pluginInfo as StrictConnectionsPluginInfo} from '@blockly/plugin-strict-connection-checker';
 //import * as SuggestedBlocks from '@blockly/suggested-blocks';
 //import { Multiselect } from '@mit-app-inventor/blockly-plugin-workspace-multiselect';
 //import { LexicalVariablesPlugin } from '@mit-app-inventor/blockly-block-lexical-variables';
@@ -89,8 +92,18 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.PLUGINS = [];
     this.WORKSPACE_OPTIONS = WORKSPACE_OPTIONS;
 
+    // Don't use the official plugin - it's too strict and blocks typed blocks from connecting to untyped inputs
+    // We use our own StrictConnectionChecker which allows typed blocks to connect to untyped inputs
+    // (needed for type inference: a 'true' block (Boolean) should be able to connect to variables_set_dynamic (null) 
+    // to infer the variable type)
+    
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
+    
+    // Register our custom strict connection checker
+    // This checker allows typed blocks to connect to untyped inputs (for type inference)
+    // but blocks untyped blocks (__NO_TYPE__) from connecting to typed inputs
+    registerStrictConnectionChecker(this.workspace);
   }
   backpackOptions = {
     allowEmptyBackpackOpen: true,
@@ -210,7 +223,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       'TYPED_VARIABLES',
       createFlyout,
     );
-    const typedVarModal = new TypedVariableModal(this.workspace, 'callbackName', [
+    /*const typedVarModal = new TypedVariableModal(this.workspace, 'callbackName', [
       ['integer', 'int'],
       ['float', 'float'],
       ['string', 'string'],
@@ -218,7 +231,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       ['char', 'char'],
       ['array', 'array'],
     ]);
-    typedVarModal.init();
+    typedVarModal.init();*/
   }
   /**
    * Initializes the workspace by setting up flexible views that can be adjusted in size and attaching necessary event listeners.
