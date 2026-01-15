@@ -195,17 +195,7 @@ export const basic_toolbox: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_VARIABLES',
       'categorystyle': 'variable_category',
-      'custom': 'VARIABLE',
-      'contents': [
-        {
-          'kind': 'block',
-          'type': 'variables_set',
-        },
-        {
-          'kind': 'block',
-          'type': 'variables_get',
-        },
-      ],
+      'custom': 'TYPED_VARIABLES',
     },
     {
       'kind': 'category',
@@ -588,7 +578,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'VALUE': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
             'FIND': {
@@ -607,7 +597,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'VALUE': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
           },
@@ -618,7 +608,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'STRING': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
           },
@@ -742,7 +732,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'VALUE': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
           },
@@ -753,7 +743,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'VALUE': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
           },
@@ -764,7 +754,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'LIST': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
           },
@@ -775,7 +765,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
           'inputs': {
             'LIST': {
               'block': {
-                'type': 'variables_get',
+                'type': 'variables_get_dynamic',
               },
             },
           },
@@ -886,17 +876,7 @@ export const basic_toolbox2: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_VARIABLES',
       'categorystyle': 'variable_category',
-      'custom': 'VARIABLE',
-      'contents': [
-        {
-          'kind': 'block',
-          'type': 'variables_set',
-        },
-        {
-          'kind': 'block',
-          'type': 'variables_get',
-        },
-      ],
+      'custom': 'TYPED_VARIABLES',
     },
     {
       'kind': 'category',

@@ -30,6 +30,7 @@
 import * as Blockly from "blockly";
 import { inferAndUpdateVariableTypes } from "./generators/arduino/variable_type_inference";
 import { registerStrictConnectionChecker } from "./generators/arduino/strict_connection_checker";
+import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -99,11 +100,54 @@ export class BlocklyApplication implements BlocklyApplicationType {
     
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
+    this.interceptFieldVariableValidation();
+    
+    // Remove the default 'item' variable if it exists
+    this.removeDefaultItemVariable();
+    this.normalizeVariableTypes();
+    this.normalizeVariableCreationTypes();
+    
+    // Listen for variable creation events to prevent 'item' from being created
+    // Use setTimeout to ensure the deletion happens after Blockly has finished processing
+    this.workspace.addChangeListener((e: Blockly.Events.Abstract) => {
+      if (e.type === Blockly.Events.VAR_CREATE) {
+        const varEvent = e as Blockly.Events.VarCreate;
+        if (varEvent.varId) {
+          this.normalizeVariableTypeById(varEvent.varId);
+        }
+        if (varEvent.varName === 'item' && varEvent.varId) {
+          // Delete the 'item' variable after a short delay to avoid interfering with Blockly's internal processing
+          setTimeout(() => {
+            try {
+              const variable = this.workspace.getVariableMap().getVariableById(varEvent.varId!);
+              if (variable && variable.getName() === 'item') {
+                // Before deleting, update all blocks that reference this variable to use null
+                const allBlocks = this.workspace.getAllBlocks(false);
+                allBlocks.forEach(block => {
+                  const varField = block.getField('VAR') as Blockly.FieldVariable | null;
+                  if (varField && varField.getValue() === varEvent.varId) {
+                    // Clear the variable field
+                    varField.setValue(null);
+                  }
+                });
+                
+                // Now delete the variable
+                this.workspace.getVariableMap().deleteVariable(variable);
+                console.log('🗑️ Variable "item" supprimée automatiquement');
+              }
+            } catch (err) {
+              console.debug('Error deleting item variable:', err);
+            }
+          }, 0);
+        }
+      }
+    });
     
     // Register our custom strict connection checker
     // This checker allows typed blocks to connect to untyped inputs (for type inference)
     // but blocks untyped blocks (__NO_TYPE__) from connecting to typed inputs
     registerStrictConnectionChecker(this.workspace);
+    registerTypedVariablesCategory(this.workspace as Blockly.WorkspaceSvg);
   }
   backpackOptions = {
     allowEmptyBackpackOpen: true,
@@ -162,77 +206,28 @@ export class BlocklyApplication implements BlocklyApplicationType {
     });
   };
 
-  public readonly typedVariableSwitch = (): void => {
-    const typedVariableSwitch = document.getElementById("typedVariableSwitch") as HTMLInputElement;
-    if (typedVariableSwitch.checked) {
-      const categoryExists = this.toolbox["contents"].some(
-        (item: Record<string, unknown>) => item.custom === "TYPED_VARIABLES",
-      );
-      if (!categoryExists) {
-        this.toolbox["contents"].push({
-          kind: "category",
-          name: "CAT_TYPEDVARIABLES",
-          categorystyle: "variable_category",
-          custom: "TYPED_VARIABLES",
-        });
+  /**
+   * Remove the default 'item' variable if it exists
+   * This should be called after workspace initialization and after loading blocks
+   */
+  public removeDefaultItemVariable(): void {
+    try {
+      const variableMap = this.workspace.getVariableMap();
+      const allVariables = variableMap.getAllVariables();
+      
+      // Find and delete the 'item' variable
+      for (const variable of allVariables) {
+        if (variable.getName() === 'item') {
+          variableMap.deleteVariable(variable);
+          console.log('🗑️ Variable "item" supprimée');
+          break;
+        }
       }
-    } else {
-      const categoryExists = this.toolbox["contents"].some(
-        (item: Record<string, unknown>) => item.custom === "TYPED_VARIABLES",
-      );
-      if (categoryExists) {
-        this.toolbox["contents"] = this.toolbox["contents"].filter(
-          (item: Record<string, unknown>) => item.custom !== "TYPED_VARIABLES",
-        );
-      }
+    } catch (e) {
+      console.debug('Error removing default item variable:', e);
     }
-    
-    // Mettre à jour WORKSPACE_OPTIONS.toolbox pour que les changements soient pris en compte
-    const temp_toolboxCopy: ToolboxConfiguration = JSON.parse(JSON.stringify(this.toolbox));
-    this.WORKSPACE_OPTIONS.toolbox = JSON.parse(JSON.stringify(temp_toolboxCopy));
-    
-    const createFlyout = () => {
-      const xmlList: Element[] = [];
-      // Add your button and give it a callback name.
-      const button = document.createElement('button');
-      button.setAttribute('text', 'Create Typed Variable');
-      button.setAttribute('callbackKey', 'callbackName');    
-      xmlList.push(button);
-    
-      // This gets all the variables that the user creates and adds them to the
-      // flyout.
-      // Dans Blockly 12.x, nous devons créer manuellement les blocs de variables
-      const variables = this.workspace.getVariableMap().getAllVariables();
-      variables.forEach((variable) => {
-        // Créer un bloc variables_get_dynamic
-        const getBlock = document.createElement('block');
-        getBlock.setAttribute('type', 'variables_get_dynamic');
-        getBlock.setAttribute('id', 'var_get_' + variable.getId());
-        
-        // Créer un bloc variables_set_dynamic
-        const setBlock = document.createElement('block');
-        setBlock.setAttribute('type', 'variables_set_dynamic');
-        setBlock.setAttribute('id', 'var_set_' + variable.getId());
-        
-        xmlList.push(getBlock);
-        xmlList.push(setBlock);
-      });
-      return xmlList;
-    };
-    (this.workspace as Blockly.WorkspaceSvg).registerToolboxCategoryCallback(
-      'TYPED_VARIABLES',
-      createFlyout,
-    );
-    /*const typedVarModal = new TypedVariableModal(this.workspace, 'callbackName', [
-      ['integer', 'int'],
-      ['float', 'float'],
-      ['string', 'string'],
-      ['boolean', 'bool'],
-      ['char', 'char'],
-      ['array', 'array'],
-    ]);
-    typedVarModal.init();*/
   }
+
   /**
    * Initializes the workspace by setting up flexible views that can be adjusted in size and attaching necessary event listeners.
    * Initially, an event listener is attached to the window to manage resizing events, using the µcB_workspaceOnResize function. 
@@ -295,7 +290,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       div_workspace_content_blockly,
       this.WORKSPACE_OPTIONS,
     );
-    this.typedVariableSwitch();
+    registerTypedVariablesCategory(this.workspace as Blockly.WorkspaceSvg);
+    this.interceptFieldVariableValidation();
+    this.normalizeVariableCreationTypes();
     this.workspaceSetupPlugins(false);
     //specific to this plugin
     const isThereMinimap: HTMLElement = document.getElementsByClassName(
@@ -310,6 +307,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
         : "hidden";
     }
     this.workspaceLoadBlocks("mainWorkspace_blocks");
+    // Remove 'item' variable after reboot (it might be recreated)
+    this.removeDefaultItemVariable();
     (this.workspace as Blockly.WorkspaceSvg).scrollCenter();
   };
 
@@ -426,11 +425,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       codeEditorSwitchCheck.checked = true;
       codeEditorSwitchCheck.dispatchEvent(new Event('change'));
     }
-    if ((window.sessionStorage.getItem('typedVariableSwitch') == "true") || (paramsURL.includes('typedVariable'))) {
-      const typedVariableSwitchCheck: HTMLInputElement = document.getElementById("typedVariableSwitch") as HTMLInputElement;
-      typedVariableSwitchCheck.checked = true;
-      typedVariableSwitchCheck.dispatchEvent(new Event('change'));
-    }
   };
   /**
    * The function `workspaceSaveBlocks` saves the blocks in a Blockly workspace to the local storage.
@@ -453,7 +447,110 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const data = window.sessionStorage?.getItem(storageKeyWorkspaceBlocks);
     if (!data) return;
     Blockly.serialization.workspaces.load(JSON.parse(data), this.workspace);
+    // Remove 'item' variable after loading blocks (it might be recreated during load)
+    this.removeDefaultItemVariable();
+    this.normalizeVariableTypes();
   };
+  /**
+   * Ensure variables with null/'null' types are normalized to empty string.
+   * This prevents FieldVariable type mismatch warnings during validation.
+   */
+  private normalizeVariableTypes(): void {
+    try {
+      const variableMap = this.workspace.getVariableMap();
+      const allVariables = variableMap.getAllVariables();
+      allVariables.forEach((variable) => {
+        const currentType = variable.getType();
+        if (currentType === null || currentType === 'null') {
+          if (typeof (variable as any).setType === 'function') {
+            (variable as any).setType('');
+          }
+        }
+      });
+    } catch (e) {
+      console.debug('Error normalizing variable types:', e);
+    }
+  }
+
+  private normalizeVariableTypeById(variableId: string): void {
+    try {
+      const variable = this.workspace.getVariableMap().getVariableById(variableId);
+      if (!variable) return;
+      const currentType = variable.getType();
+      if (currentType === null || currentType === 'null') {
+        if (typeof (variable as any).setType === 'function') {
+          (variable as any).setType('');
+        }
+      }
+    } catch (e) {
+      console.debug('Error normalizing variable type:', e);
+    }
+  }
+
+  private normalizeVariableCreationTypes(): void {
+    try {
+      const variableMap = this.workspace.getVariableMap();
+      const originalCreateVariable = variableMap.createVariable.bind(variableMap);
+      (variableMap as any).createVariable = function(
+        name: string,
+        opt_type?: string | null,
+        opt_id?: string | null,
+      ) {
+        const type = opt_type === null || opt_type === 'null' ? '' : opt_type;
+        const id = opt_id === null ? undefined : opt_id;
+        return originalCreateVariable(name, type, id);
+      };
+    } catch (e) {
+      console.debug('Error normalizing variable creation types:', e);
+    }
+  }
+
+  private interceptFieldVariableValidation(): void {
+    try {
+      if (!Blockly.FieldVariable) return;
+      const proto = Blockly.FieldVariable.prototype as any;
+      if (!proto.__ucbPatchedVariableValidation) {
+        const originalValidation = proto.doClassValidation_;
+        proto.doClassValidation_ = function(
+        newValue: string | null,
+        ) {
+          if (!newValue) return newValue;
+          const field = this as any;
+          const workspace = field.getSourceBlock?.()?.workspace || field.workspace_;
+          const variableMap = workspace?.getVariableMap?.();
+          if (!variableMap) {
+            return originalValidation.call(this, newValue);
+          }
+          const variable = variableMap.getVariableById(newValue);
+          if (!variable) {
+            // Prevent creation of phantom variables due to invalid IDs.
+            return null;
+          }
+          // Accept existing variables regardless of type mismatch warnings.
+          return newValue;
+        };
+        proto.__ucbPatchedVariableValidation = true;
+      }
+
+      if (!proto.__ucbPatchedVariableInitModel) {
+        const originalInitModel = proto.initModel;
+        proto.initModel = function() {
+          const field = this as any;
+          const block = field.getSourceBlock?.();
+          const workspace = block?.workspace || field.workspace_;
+          // Avoid auto-creating variables for flyout/insertion marker blocks.
+          if (workspace?.isFlyout || block?.isInsertionMarker?.()) {
+            field.value_ = null;
+            return;
+          }
+          return originalInitModel.call(this);
+        };
+        proto.__ucbPatchedVariableInitModel = true;
+      }
+    } catch (e) {
+      console.debug('Error intercepting field variable validation:', e);
+    }
+  }
 
   /**
    * The function checks if the language of a Blockly object is right-to-left (RTL).

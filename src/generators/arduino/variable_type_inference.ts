@@ -344,6 +344,9 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
   console.log(`🔍 [Type Inference] Analyse de ${allVariables.length} variables`);
   
   for (const variable of allVariables) {
+    if (!variable) {
+      continue;
+    }
     const variableId = variable.getId();
     const currentType = variable.getType() || null;
     
@@ -373,7 +376,7 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
         
         // Method 1: Try to use setType if it exists (internal API)
         if (typeof varModel.setType === 'function') {
-          varModel.setType(inferredType);
+          varModel.setType(inferredType || '');
           typeUpdated = true;
           console.log(`✅ Type mis à jour (setType): variable '${variable.getName()}' : '${currentType}' → '${inferredType}'`);
         } 
@@ -399,7 +402,7 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
         
         // Method 1: Try to use setType if it exists (internal API)
         if (typeof varModel.setType === 'function') {
-          varModel.setType(null);
+          varModel.setType('');
           typeReverted = true;
           console.log(`✅ Type remis à 'null' (setType): variable '${variable.getName()}'`);
         } 

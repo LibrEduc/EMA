@@ -12,8 +12,18 @@ import { getCompatibleTypesForCheck, checkTypeCompatibility } from "./block_type
 export function defineVariablesGetDynamicBlock(): void {
   Blockly.Blocks['variables_get_dynamic'] = {
     init: function(this: Blockly.Block) {
+      // Use Field.SKIP_SETUP to prevent automatic creation of default 'item' variable
+      // This is the same approach used by Blockly's built-in variable blocks
       this.appendDummyInput()
-          .appendField(new Blockly.FieldVariable(null), 'VAR');
+          .appendField(
+            new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ''),
+            'VAR',
+          );
+      const varField = this.getField('VAR') as Blockly.FieldVariable | null;
+      if (varField) {
+        (varField as any).variableTypes = null;
+        (varField as any).defaultType = '';
+      }
       this.setOutput(true);
       this.setColour(330);
       this.setTooltip('Gets the value of a typed variable');
@@ -112,12 +122,22 @@ export function defineVariablesGetDynamicBlock(): void {
 export function defineVariablesSetDynamicBlock(): void {
   Blockly.Blocks['variables_set_dynamic'] = {
     init: function(this: Blockly.Block) {
-      this.appendDummyInput()
-          .appendField('set')
-          .appendField(new Blockly.FieldVariable(null), 'VAR')
-          .appendField('to');
+      // Use Field.SKIP_SETUP to prevent automatic creation of default 'item' variable
+      // This is the same approach used by Blockly's built-in variable blocks
       this.appendValueInput('VALUE')
-          .setCheck(null);
+          .setCheck(null)
+          .appendField('set')
+          .appendField(
+            new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ''),
+            'VAR',
+          )
+          .appendField('to');
+      const varField = this.getField('VAR') as Blockly.FieldVariable | null;
+      if (varField) {
+        (varField as any).variableTypes = null;
+        (varField as any).defaultType = '';
+      };
+      this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(330);
@@ -134,11 +154,31 @@ export function defineVariablesSetDynamicBlock(): void {
       if (event.type !== Blockly.Events.BLOCK_CHANGE && 
           event.type !== Blockly.Events.BLOCK_CREATE &&
           event.type !== Blockly.Events.BLOCK_MOVE &&
-          event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE) {
+          event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+          event.type !== Blockly.Events.VAR_DELETE) {
         return;
       }
       
       const variableId = this.getFieldValue('VAR');
+      
+      // If variable is 'item', clear it immediately to prevent blocking menus
+      if (variableId) {
+        try {
+          const variable = this.workspace.getVariableMap().getVariableById(variableId);
+          if (variable && variable.getName() === 'item') {
+            // Clear the field to prevent 'item' from being used
+            const varField = this.getField('VAR') as Blockly.FieldVariable | null;
+            if (varField) {
+              varField.setValue(null);
+            }
+            this.setWarningText(null);
+            return;
+          }
+        } catch (e) {
+          // Variable might have been deleted, continue
+        }
+      }
+      
       if (!variableId) {
         this.setWarningText(null);
         return;
@@ -248,6 +288,25 @@ function extendStandardVariablesGetBlock(): void {
       }
       
       const variableId = this.getFieldValue('VAR');
+      
+      // If variable is 'item', clear it immediately
+      if (variableId) {
+        try {
+          const variable = this.workspace.getVariableMap().getVariableById(variableId);
+          if (variable && variable.getName() === 'item') {
+            // Clear the field to prevent 'item' from being used
+            const varField = this.getField('VAR') as Blockly.FieldVariable | null;
+            if (varField) {
+              varField.setValue(null);
+            }
+            this.setOutput(true, '__NO_TYPE__');
+            return;
+          }
+        } catch (e) {
+          // Variable might have been deleted, continue
+        }
+      }
+      
       if (!variableId) {
         this.setOutput(true, '__NO_TYPE__');
         return;
@@ -290,11 +349,31 @@ function extendStandardVariablesSetBlock(): void {
       if (event.type !== Blockly.Events.BLOCK_CHANGE && 
           event.type !== Blockly.Events.BLOCK_CREATE &&
           event.type !== Blockly.Events.BLOCK_MOVE &&
-          event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE) {
+          event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+          event.type !== Blockly.Events.VAR_DELETE) {
         return;
       }
       
       const variableId = this.getFieldValue('VAR');
+      
+      // If variable is 'item', clear it immediately to prevent blocking menus
+      if (variableId) {
+        try {
+          const variable = this.workspace.getVariableMap().getVariableById(variableId);
+          if (variable && variable.getName() === 'item') {
+            // Clear the field to prevent 'item' from being used
+            const varField = this.getField('VAR') as Blockly.FieldVariable | null;
+            if (varField) {
+              varField.setValue(null);
+            }
+            this.setWarningText(null);
+            return;
+          }
+        } catch (e) {
+          // Variable might have been deleted, continue
+        }
+      }
+      
       if (!variableId) {
         this.setWarningText(null);
         return;

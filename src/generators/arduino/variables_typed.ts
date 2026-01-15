@@ -23,8 +23,8 @@ export const variables_set_dynamic = function(
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
-  // Typed variable setter - the variable name is in the VAR input
-  const varName = generator.valueToCode(block, 'VAR', Order.ATOMIC) || 'variable';
+  // Typed variable setter - use standard variable name resolution
+  const varName = generator.getVariableName(block.getFieldValue('VAR'));
   const value = generator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
   
   // Ensure we have a valid variable name
@@ -47,8 +47,8 @@ export const variables_get_dynamic = function(
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
-  // Typed variable getter - the variable name is in the VAR input
-  const varName = generator.valueToCode(block, 'VAR', Order.ATOMIC) || 'variable';
+  // Typed variable getter - use standard variable name resolution
+  const varName = generator.getVariableName(block.getFieldValue('VAR'));
   
   // Ensure we have a valid variable name
   if (!varName || varName === 'variable') {

@@ -71,7 +71,11 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      * Blockly workspace where the blocks are being used.
      */
     private readonly workspaceListeners;
-    readonly typedVariableSwitch: () => void;
+    /**
+     * Remove the default 'item' variable if it exists
+     * This should be called after workspace initialization and after loading blocks
+     */
+    removeDefaultItemVariable(): void;
     /**
      * Initializes the workspace by setting up flexible views that can be adjusted in size and attaching necessary event listeners.
      * Initially, an event listener is attached to the window to manage resizing events, using the µcB_workspaceOnResize function.
@@ -115,6 +119,14 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      * returned.
      */
     workspaceLoadBlocks: (storageKeyWorkspaceBlocks: string) => void;
+    /**
+     * Ensure variables with null/'null' types are normalized to empty string.
+     * This prevents FieldVariable type mismatch warnings during validation.
+     */
+    private normalizeVariableTypes;
+    private normalizeVariableTypeById;
+    private normalizeVariableCreationTypes;
+    private interceptFieldVariableValidation;
     /**
      * The function checks if the language of a Blockly object is right-to-left (RTL).
      * @param blocklyObject - The `blocklyObject` parameter is an object that

@@ -59,7 +59,6 @@ export interface LanguageItem {
   PLUGIN_MINIMAP: string;
   PLUGIN_HIGHLIGHT: string;
   PLUGIN_CONTINUOUSTOOLBOX: string;
-  PLUGIN_TYPEDVARIABLES: string;
   CAT_LOGIC: string;
   CAT_LOOPS: string;
   CAT_MATHS: string;
@@ -67,7 +66,6 @@ export interface LanguageItem {
   CAT_LISTS: string;
   CAT_COLOR: string;
   CAT_VARIABLES: string;
-  CAT_TYPEDVARIABLES: string;
   CAT_FUNCTIONS: string;
   THEME_CLASSIC: string;
   THEME_MODERN: string;

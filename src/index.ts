@@ -159,9 +159,6 @@ const elements = {
   codeEditorSwitch: document.getElementById(
     "codeEditorSwitch",
   ) as HTMLInputElement,
-  typedVariableSwitch: document.getElementById(
-    "typedVariableSwitch",
-  ) as HTMLInputElement,
 };
 
 // Verify all required elements exist
@@ -177,7 +174,6 @@ const requiredElements = [
   "pluginHighlight",
   "pluginContinuousToolbox",
   "codeEditorSwitch",
-  "typedVariableSwitch",
 ];
 
 requiredElements.forEach((id) => {
@@ -575,12 +571,6 @@ const HTML_onChange = (): void => {
     }
     setPluginsInURL("codeEditorSwitch", "codeEditor");
   };
-
-  elements.typedVariableSwitch.onchange = () => {
-    setPluginsInURL("typedVariableSwitch", "typedVariable");
-    µcB.typedVariableSwitch();
-    µcB.workspaceReboot();
-  };
 };
 
 /**
@@ -740,12 +730,6 @@ window.onload = (): void => {
     µcB.workspaceLoadBlocks("mainWorkspace_blocks");
     (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
     µcB.pluginsSetupWorkspace();
-    // Si des plugins ont été activés depuis l'URL, forcer un reboot du workspace
-    // pour que les changements de toolbox soient pris en compte
-    const searchParams = new URLSearchParams(window.location.search);
-    if (searchParams.get("options")?.includes("typedVariable")) {
-      µcB.workspaceReboot();
-    }
   });
 
   // Attacher l'événement de clic sur le titre pour réinitialiser tous les paramètres

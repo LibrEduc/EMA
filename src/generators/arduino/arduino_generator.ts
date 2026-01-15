@@ -173,7 +173,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     for (const devVar of devVarList) {
       const varName = this.nameDB_!.getName(
         devVar,
-        Blockly.Names.NameType.DEVELOPER_VARIABLE,
+          Blockly.Names.NameType.DEVELOPER_VARIABLE,
       );
       // Developer variables default to 'int'
       const varType = 'int';
@@ -186,6 +186,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     // Add user variables, but only ones that are being used.
     const variables = Blockly.Variables.allUsedVarModels(workspace);
     for (const variable of variables) {
+      if (!variable) {
+        continue;
+      }
       const varName = this.nameDB_!.getName(
         variable.getId(),
         Blockly.Names.NameType.VARIABLE,
