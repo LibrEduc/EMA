@@ -117,10 +117,6 @@ export const basic_toolbox: ToolboxConfiguration = {
         },
         {
           'kind': 'block',
-          'type': 'logic_null',
-        },
-        {
-          'kind': 'block',
           'type': 'logic_ternary',
         },
       ],
@@ -177,10 +173,6 @@ export const basic_toolbox: ToolboxConfiguration = {
               },
             },
           },
-        },
-        {
-          'kind': 'block',
-          'type': 'controls_forEach',
         },
         {
           'kind': 'block',
@@ -236,10 +228,6 @@ export const basic_toolbox2: ToolboxConfiguration = {
         },
         {
           'kind': 'block',
-          'type': 'logic_null',
-        },
-        {
-          'kind': 'block',
           'type': 'logic_ternary',
         },
       ],
@@ -296,10 +284,6 @@ export const basic_toolbox2: ToolboxConfiguration = {
               },
             },
           },
-        },
-        {
-          'kind': 'block',
-          'type': 'controls_forEach',
         },
         {
           'kind': 'block',

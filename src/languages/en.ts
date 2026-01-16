@@ -36,5 +36,11 @@ export const enLang: LanguageMap = {
     TYPED_VAR_MODAL_CANCEL_BUTTON: "Cancel",
     TYPED_VAR_MODAL_TITLE: "Create Typed Variable",
     TYPED_VAR_MODAL_INVALID_NAME: "Name is not valid. Please choose a different name.",
+    TYPED_VAR_UNTYPED_WARNING: "Untyped variable. Connect a value to determine the type.",
+    TYPED_VAR_TYPE_MISMATCH: "Type mismatch: the variable is '%1' but receives '%2'.",
+    TYPED_VAR_SET_LABEL: "set",
+    TYPED_VAR_TO_LABEL: "to",
+    TYPED_VAR_TYPE_SET_LABEL: "set type of",
+    TYPED_VAR_TYPE_TO_LABEL: "to",
   }
 };

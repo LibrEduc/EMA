@@ -83,9 +83,10 @@ function findBlocksUsingVariable(workspace: Blockly.Workspace, variableId: strin
   console.log(`🔍 [Type Inference] Recherche de blocs utilisant la variable ID '${variableId}' parmi ${allBlocks.length} blocs`);
   
   for (const block of allBlocks) {
-    // Check if this is a variable block (dynamic or standard)
+    // Check if this is a variable block (dynamic or standard or manual typing)
     if (block.type === 'variables_get_dynamic' || block.type === 'variables_set_dynamic' ||
-        block.type === 'variables_get' || block.type === 'variables_set') {
+        block.type === 'variables_get' || block.type === 'variables_set' ||
+        block.type === 'variables_set_type') {
       const varId = block.getFieldValue('VAR');
       if (varId === variableId) {
         console.log(`  ✓ Bloc trouvé: ${block.type} utilisant la variable '${variableId}'`);
@@ -129,6 +130,34 @@ function convertBlocklyTypeToInternalType(blocklyType: string | string[] | null)
   };
   
   return typeMap[blocklyType] || blocklyType;
+}
+
+function inferProcedureCallReturnType(
+  block: Blockly.Block,
+): string | null {
+  if (block.type !== "procedures_callreturn") {
+    return null;
+  }
+  const name = block.getFieldValue?.("NAME");
+  if (!name || !block.workspace) {
+    return null;
+  }
+  const defBlock = Blockly.Procedures.getDefinition(name, block.workspace);
+  const returnBlock = defBlock?.getInputTargetBlock?.("RETURN");
+  if (!returnBlock) {
+    return "int";
+  }
+  const blockDef = returnBlock as Blockly.Block & { getBlockType?: () => string | null };
+  const rawType = blockDef.getBlockType ? blockDef.getBlockType() : null;
+  const converted = convertBlocklyTypeToInternalType(rawType);
+  if (converted) {
+    return converted;
+  }
+  if (returnBlock.outputConnection) {
+    const check = returnBlock.outputConnection.getCheck();
+    return convertBlocklyTypeToInternalType(check);
+  }
+  return "int";
 }
 
 /**
@@ -285,6 +314,17 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
               assignmentTypes.push(internalType);
             } else {
               console.log(`    → getBlockType() retourne: ${type} (ignoré)`);
+              const procType = inferProcedureCallReturnType(targetBlock);
+              if (procType) {
+                console.log(`    → Type détecté depuis procedures_callreturn (assignment): ${procType}`);
+                assignmentTypes.push(procType);
+              }
+            }
+          } else if (targetBlock.type === "procedures_callreturn") {
+            const procType = inferProcedureCallReturnType(targetBlock);
+            if (procType) {
+              console.log(`    → Type détecté depuis procedures_callreturn (assignment): ${procType}`);
+              assignmentTypes.push(procType);
             }
           } 
           // Fallback: try to get from output connection check
@@ -347,6 +387,11 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
     if (!variable) {
       continue;
     }
+    const manualType = (variable as { __ucbManualType?: boolean }).__ucbManualType === true;
+    if (manualType) {
+      console.log(`🔒 [Type Inference] Variable '${variable.getName()}' typée manuellement, inférence ignorée`);
+      continue;
+    }
     const variableId = variable.getId();
     const currentType = variable.getType() || null;
     
@@ -357,12 +402,35 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
     
     // Check if blocks are connected to determine if we should revert to 'int'
     const blocks = findBlocksUsingVariable(workspace, variableId);
+    const manualTypeBlock = blocks.find(block => block.type === 'variables_set_type') || null;
+    if (manualTypeBlock) {
+      const selectedType = manualTypeBlock.getFieldValue('TYPE');
+      if (selectedType && selectedType !== currentType) {
+        try {
+          const varModel = variable as any;
+          if (typeof varModel.setType === 'function') {
+            varModel.setType(selectedType);
+            console.log(`✅ Type manuel appliqué: variable '${variable.getName()}' → '${selectedType}'`);
+          } else if ('type_' in varModel) {
+            varModel.type_ = selectedType;
+            console.log(`✅ Type manuel appliqué (type_): variable '${variable.getName()}' → '${selectedType}'`);
+          }
+        } catch (e) {
+          console.debug('Error applying manual type:', e);
+        }
+      }
+      console.log(`🔒 [Type Inference] Variable '${variable.getName()}' typée manuellement, inférence ignorée`);
+      continue;
+    }
+
     const hasConnectedBlocks = blocks.some(block => {
       if (block.type === 'variables_set_dynamic' || block.type === 'variables_set') {
         const valueInput = block.getInput('VALUE');
         return valueInput && valueInput.connection && valueInput.connection.targetBlock();
       } else if (block.type === 'variables_get_dynamic' || block.type === 'variables_get') {
         return block.outputConnection && block.outputConnection.targetConnection;
+      } else if (block.type === 'variables_set_type') {
+        return true;
       }
       return false;
     });

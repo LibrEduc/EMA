@@ -87,4 +87,10 @@ export interface LanguageItem {
   TYPED_VAR_MODAL_CANCEL_BUTTON: string;
   TYPED_VAR_MODAL_TITLE: string;
   TYPED_VAR_MODAL_INVALID_NAME: string;
+  TYPED_VAR_UNTYPED_WARNING: string;
+  TYPED_VAR_TYPE_MISMATCH: string;
+  TYPED_VAR_SET_LABEL: string;
+  TYPED_VAR_TO_LABEL: string;
+  TYPED_VAR_TYPE_SET_LABEL: string;
+  TYPED_VAR_TYPE_TO_LABEL: string;
 }

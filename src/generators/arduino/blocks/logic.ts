@@ -11,8 +11,8 @@
 // Former goog.module ID: Blockly.JavaScript.logic
 
 import type { Block } from "blockly/core/block";
-import type { ArduinoGenerator } from "./arduino_generator";
-import { Order } from "./arduino_generator";
+import type { ArduinoGenerator } from "../arduino_generator";
+import { Order } from "../arduino_generator";
 
 export function controls_if(block: Block, generator: ArduinoGenerator) {
   // If/elseif/else condition.

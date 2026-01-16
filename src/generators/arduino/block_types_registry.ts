@@ -137,7 +137,27 @@ export function getCompatibleTypesForCheck(type: string | null | undefined): str
  * @param targetType - The target type (input expected)
  * @returns true if compatible
  */
-export function checkTypeCompatibility(sourceType: string | null | undefined, targetType: string | null | undefined): boolean {
+export function checkTypeCompatibility(
+  sourceType: string | null | undefined,
+  targetType: string | null | undefined,
+): boolean {
+  if (!sourceType || !targetType) {
+    return false;
+  }
+
+  // Treat Blockly types as compatible with internal types.
+  const numericTypes = new Set(["Number", "number", "int", "float"]);
+  if (numericTypes.has(sourceType) && numericTypes.has(targetType)) {
+    return true;
+  }
+
+  if (
+    (sourceType === "Boolean" || sourceType === "bool") &&
+    (targetType === "Boolean" || targetType === "bool")
+  ) {
+    return true;
+  }
+
   return isTypeCompatible(sourceType, targetType);
 }
 
@@ -165,8 +185,10 @@ export function applyBlockTypesFromRegistry(): void {
         };
         appliedCount++;
       } else if (typeof typeDef === 'function') {
-        // Dynamic type (function)
-        blockDefinition.getBlockType = typeDef;
+        // Dynamic type (function) - bind to the block instance.
+        blockDefinition.getBlockType = function(this: Blockly.Block): string {
+          return typeDef(this);
+        };
         appliedCount++;
       }
     }

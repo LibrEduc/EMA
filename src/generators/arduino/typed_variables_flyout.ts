@@ -3,23 +3,29 @@ import * as Blockly from "blockly";
 export const TYPED_VARIABLES_CATEGORY_ID = "TYPED_VARIABLES";
 const TYPED_VARIABLES_BUTTON_ID = "CREATE_TYPED_VARIABLE";
 
+const getBlocklyMsg = (key: string): string => {
+  const msg = (Blockly.Msg as Record<string, string> | undefined)?.[key];
+  return msg || key;
+};
+
 export function createTypedVariablesFlyout(
   workspace: Blockly.WorkspaceSvg,
 ): Element[] {
   const xmlList: Element[] = [];
   const button = document.createElement("button");
-  const buttonText =
-    (Blockly.Msg as Record<string, string> | undefined)?.NEW_VARIABLE ??
-    "Create variable";
+  const buttonText = getBlocklyMsg("NEW_VARIABLE");
   button.setAttribute("text", buttonText);
   button.setAttribute("callbackKey", TYPED_VARIABLES_BUTTON_ID);
   xmlList.push(button);
 
   const variables = workspace.getVariableMap().getAllVariables();
-  if (variables.length === 0) {
+  const safeVariables = variables.filter(
+    (variable): variable is Blockly.VariableModel => Boolean(variable),
+  );
+  if (safeVariables.length === 0) {
     return xmlList;
   }
-  const defaultVariable = variables[0];
+  const defaultVariable = safeVariables[0];
   const defaultType = defaultVariable.getType() ?? "";
 
   const setBlock = document.createElement("block");
@@ -45,6 +51,24 @@ export function createTypedVariablesFlyout(
   getField.textContent = defaultVariable.getName();
   getBlock.appendChild(getField);
   xmlList.push(getBlock);
+
+  const typeBlock = document.createElement("block");
+  typeBlock.setAttribute("type", "variables_set_type");
+  const typeVarField = document.createElement("field");
+  typeVarField.setAttribute("name", "VAR");
+  typeVarField.setAttribute("id", defaultVariable.getId());
+  if (defaultType) {
+    typeVarField.setAttribute("variabletype", defaultType);
+  }
+  typeVarField.textContent = defaultVariable.getName();
+  typeBlock.appendChild(typeVarField);
+  if (defaultType) {
+    const typeField = document.createElement("field");
+    typeField.setAttribute("name", "TYPE");
+    typeField.textContent = defaultType;
+    typeBlock.appendChild(typeField);
+  }
+  xmlList.push(typeBlock);
 
   return xmlList;
 }

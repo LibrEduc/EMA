@@ -36,5 +36,11 @@ export const esLang: LanguageMap = {
     TYPED_VAR_MODAL_CANCEL_BUTTON: "Cancelar",
     TYPED_VAR_MODAL_TITLE: "Crear variable tipada",
     TYPED_VAR_MODAL_INVALID_NAME: "El nombre no es válido. Por favor elija un nombre diferente.",
+    TYPED_VAR_UNTYPED_WARNING: "Variable sin tipo. Conecte un valor para determinar el tipo.",
+    TYPED_VAR_TYPE_MISMATCH: "Tipo incompatible: la variable es de tipo '%1' pero recibe '%2'.",
+    TYPED_VAR_SET_LABEL: "poner",
+    TYPED_VAR_TO_LABEL: "a",
+    TYPED_VAR_TYPE_SET_LABEL: "definir tipo de",
+    TYPED_VAR_TYPE_TO_LABEL: "a",
   }
 };

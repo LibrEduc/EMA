@@ -58,3 +58,14 @@ export const variables_get_dynamic = function(
   
   return [varName, Order.ATOMIC];
 };
+
+/**
+ * Generator for variables_set_type block.
+ * This block only changes the variable type in the workspace.
+ */
+export const variables_set_type = function(
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  return '';
+};

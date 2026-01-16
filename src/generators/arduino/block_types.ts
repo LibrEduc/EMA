@@ -23,7 +23,7 @@ export const BLOCK_TYPES_VERSION = '1.0.0';
  * - 'float' peut recevoir 'int' (promotion implicite)
  * - 'int' ne peut pas recevoir 'float' (perte de précision)
  * 
- * Format : { type_cible: [types_compatibles] }
+ * Format : `type_cible: [types_compatibles]`
  * Les types compatibles incluent toujours le type lui-même.
  */
 export const TYPE_COMPATIBILITY: Record<string, string[]> = {
@@ -42,6 +42,16 @@ export const TYPE_COMPATIBILITY: Record<string, string[]> = {
   'null': ['null'], // null n'accepte que null
   'array': ['array'], // array n'accepte que array
 };
+
+const EXCLUDED_DROPDOWN_TYPES = new Set(['null', 'array']);
+
+export const VARIABLE_TYPE_OPTIONS = Object.keys(TYPE_COMPATIBILITY).filter(
+  (type) => !EXCLUDED_DROPDOWN_TYPES.has(type),
+);
+
+export function getVariableTypeOptions(): string[] {
+  return [...VARIABLE_TYPE_OPTIONS];
+}
 
 /**
  * Obtenir les types compatibles pour un type donné
@@ -91,7 +101,7 @@ export const BLOCK_TYPES = {
   logic_negate: 'bool',
   logic_boolean: 'bool',
   logic_null: 'null',
-  logic_ternary: '__DYNAMIC__ternary', // Type déterminé par les branches THEN/ELSE
+  logic_ternary: 'bool', // Le test renvoie un booléen
 
   // ============================================
   // Blocs mathématiques

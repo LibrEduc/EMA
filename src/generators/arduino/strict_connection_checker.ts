@@ -150,6 +150,12 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return true;
     }
 
+    // Special case: Blockly uses "Number" while Arduino types are "int"/"float".
+    const numericTypes = new Set(['Number', 'number', 'int', 'float']);
+    if (numericTypes.has(sourceType) && numericTypes.has(targetType)) {
+      return true;
+    }
+
     // Special case: Boolean type matching
     // Blockly uses 'Boolean' (capital B), we use 'bool'
     if ((sourceType === 'Boolean' || sourceType === 'bool') && 

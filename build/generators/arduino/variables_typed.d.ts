@@ -25,4 +25,9 @@ export declare const variables_set_dynamic: (block: Blockly.Block, generator: Ar
  * @returns Generated Arduino code.
  */
 export declare const variables_get_dynamic: (block: Blockly.Block, generator: ArduinoGenerator) => string | [string, number];
+/**
+ * Generator for variables_set_type block.
+ * This block only changes the variable type in the workspace.
+ */
+export declare const variables_set_type: (block: Blockly.Block, generator: ArduinoGenerator) => string;
 //# sourceMappingURL=variables_typed.d.ts.map

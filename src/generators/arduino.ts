@@ -12,8 +12,11 @@
 import {ArduinoGenerator} from './arduino/arduino_generator';
 /* import * as colour from './arduino/colour.js';
 import * as lists from './arduino/lists.js'; */
-import * as logic from './arduino/logic';
-import * as variables from './arduino/variables';
+import * as logic from './arduino/blocks/logic';
+import * as loops from './arduino/blocks/loops';
+import * as math from './arduino/blocks/math';
+import * as procedures from './arduino/blocks/procedures';
+import * as variables from './arduino/blocks/variables';
 import * as variablesTyped from './arduino/variables_typed';
 /* import * as loops from './arduino/loops.js';
 import * as math from './arduino/math.js';
@@ -40,6 +43,9 @@ arduinoGenerator.addReservedWords('math,random,Number');
 // Install per-block-type generator functions:
 const generators: typeof arduinoGenerator.forBlock = {
   ...logic,
+  ...loops,
+  ...math,
+  ...procedures,
   ...variables,
   ...variablesTyped,
 };

@@ -194,12 +194,12 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         Blockly.Names.NameType.VARIABLE,
       );
       
-      // Get the type from the VariableModel, default to 'undefined' if no type
-      const varType = variable.getType() || null;
-      
-      // Group variables by type (including undefined type)
-      // Use 'undefined' as string key for variables without type
-      const typeKey = varType === null ? 'undefined' : varType;
+      // Normalize variable type to avoid emitting 'undefined' in declarations.
+      const rawType = variable.getType();
+      const typeKey =
+        rawType && rawType !== "null" && rawType !== "undefined" && rawType !== "__NO_TYPE__"
+          ? rawType
+          : "__NO_TYPE__";
       if (!variableNamesByType[typeKey]) {
         variableNamesByType[typeKey] = [];
       }

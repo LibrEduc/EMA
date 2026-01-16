@@ -1,6 +1,6 @@
 /**
  * @packageDocumentation Configuration for standard Blockly blocks
- * @author scanet@libreduc.cc (Sébastien Canet)
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  */
 /**
  * Configure standard Blockly blocks to work with our type system

@@ -180,7 +180,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.workspace.addChangeListener((e: Blockly.Events.Abstract): void => {
       // UI events are things like scrolling, zooming, etc.
       // No need to save after one of these.
-      if (e.isUiEvent) return;
+      if (e.isUiEvent || (this.workspace as Blockly.WorkspaceSvg).isDragging()) return;
       this.workspaceSaveBlocks("mainWorkspace_blocks");
     });
 
@@ -217,6 +217,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       
       // Find and delete the 'item' variable
       for (const variable of allVariables) {
+        if (!variable) {
+          continue;
+        }
         if (variable.getName() === 'item') {
           variableMap.deleteVariable(variable);
           console.log('🗑️ Variable "item" supprimée');
@@ -460,6 +463,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       const variableMap = this.workspace.getVariableMap();
       const allVariables = variableMap.getAllVariables();
       allVariables.forEach((variable) => {
+        if (!variable) {
+          return;
+        }
         const currentType = variable.getType();
         if (currentType === null || currentType === 'null') {
           if (typeof (variable as any).setType === 'function') {
@@ -538,8 +544,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
           const field = this as any;
           const block = field.getSourceBlock?.();
           const workspace = block?.workspace || field.workspace_;
-          // Avoid auto-creating variables for flyout/insertion marker blocks.
-          if (workspace?.isFlyout || block?.isInsertionMarker?.()) {
+          // Allow flyout blocks to initialize a local variable to avoid null IDs in serialization.
+          if (workspace?.isFlyout) {
+            return originalInitModel.call(this);
+          }
+          // Avoid auto-creating variables for insertion markers in the main workspace.
+          if (block?.isInsertionMarker?.()) {
             field.value_ = null;
             return;
           }
@@ -616,6 +626,28 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const rtl: boolean = this.isLangRtl();
     HTML_changeLanguage(newLang);
     Blockly.setLocale(languagesMapBlockly[newLang]);
+    const customMessages = languagesMap[newLang];
+    if (customMessages) {
+      const msg = Blockly.Msg as Record<string, string>;
+      if (customMessages.TYPED_VAR_UNTYPED_WARNING) {
+        msg["TYPED_VAR_UNTYPED_WARNING"] = customMessages.TYPED_VAR_UNTYPED_WARNING;
+      }
+      if (customMessages.TYPED_VAR_TYPE_MISMATCH) {
+        msg["TYPED_VAR_TYPE_MISMATCH"] = customMessages.TYPED_VAR_TYPE_MISMATCH;
+      }
+      if (customMessages.TYPED_VAR_SET_LABEL) {
+        msg["TYPED_VAR_SET_LABEL"] = customMessages.TYPED_VAR_SET_LABEL;
+      }
+      if (customMessages.TYPED_VAR_TO_LABEL) {
+        msg["TYPED_VAR_TO_LABEL"] = customMessages.TYPED_VAR_TO_LABEL;
+      }
+      if (customMessages.TYPED_VAR_TYPE_SET_LABEL) {
+        msg["TYPED_VAR_TYPE_SET_LABEL"] = customMessages.TYPED_VAR_TYPE_SET_LABEL;
+      }
+      if (customMessages.TYPED_VAR_TYPE_TO_LABEL) {
+        msg["TYPED_VAR_TYPE_TO_LABEL"] = customMessages.TYPED_VAR_TYPE_TO_LABEL;
+      }
+    }
     this.changeLanguageToolbox(newLang);
     this.setParamsBlockly();
     return rtl;

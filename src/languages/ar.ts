@@ -36,5 +36,11 @@ export const arLang: LanguageMap = {
     TYPED_VAR_MODAL_CANCEL_BUTTON: "إلغاء",
     TYPED_VAR_MODAL_TITLE: "إنشاء متغير مُحدد النوع",
     TYPED_VAR_MODAL_INVALID_NAME: "الاسم غير صالح. يرجى اختيار اسم مختلف.",
+    TYPED_VAR_UNTYPED_WARNING: "متغير غير مُحدد النوع. صِل قيمة لتحديد النوع.",
+    TYPED_VAR_TYPE_MISMATCH: "نوع غير متوافق: المتغير من النوع '%1' لكنه يستقبل '%2'.",
+    TYPED_VAR_SET_LABEL: "عيّن",
+    TYPED_VAR_TO_LABEL: "إلى",
+    TYPED_VAR_TYPE_SET_LABEL: "عيّن نوع",
+    TYPED_VAR_TYPE_TO_LABEL: "إلى",
   }
 };

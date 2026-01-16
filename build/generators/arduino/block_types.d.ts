@@ -21,10 +21,12 @@ export declare const BLOCK_TYPES_VERSION = "1.0.0";
  * - 'float' peut recevoir 'int' (promotion implicite)
  * - 'int' ne peut pas recevoir 'float' (perte de précision)
  *
- * Format : { type_cible: [types_compatibles] }
+ * Format : `type_cible: [types_compatibles]`
  * Les types compatibles incluent toujours le type lui-même.
  */
 export declare const TYPE_COMPATIBILITY: Record<string, string[]>;
+export declare const VARIABLE_TYPE_OPTIONS: string[];
+export declare function getVariableTypeOptions(): string[];
 /**
  * Obtenir les types compatibles pour un type donné
  * @param targetType - Le type cible
@@ -48,7 +50,7 @@ export declare const BLOCK_TYPES: {
     readonly logic_negate: "bool";
     readonly logic_boolean: "bool";
     readonly logic_null: "null";
-    readonly logic_ternary: "__DYNAMIC__ternary";
+    readonly logic_ternary: "bool";
     readonly math_number: "__DYNAMIC__identifyNumber";
     readonly inout_angle_maths: "int";
     readonly math_arithmetic: "int";

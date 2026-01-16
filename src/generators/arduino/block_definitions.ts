@@ -5,6 +5,44 @@
 
 import * as Blockly from "blockly";
 import { getCompatibleTypesForCheck, checkTypeCompatibility } from "./block_types_registry";
+import { getVariableTypeOptions } from "./block_types";
+
+const getBlocklyMsg = (key: string): string => {
+  const msg = (Blockly.Msg as Record<string, string> | undefined)?.[key];
+  return msg || key;
+};
+
+const getUntypedWarningText = (): string => getBlocklyMsg("TYPED_VAR_UNTYPED_WARNING");
+
+const getTypeMismatchWarningText = (varType: string, connectedType: string): string =>
+  getBlocklyMsg("TYPED_VAR_TYPE_MISMATCH")
+    .replace("%1", varType)
+    .replace("%2", connectedType);
+
+const normalizeBlocklyTypeToVariableType = (type: string): string => {
+  if (type === "Boolean") return "bool";
+  if (type === "Number") return "int";
+  if (type === "String") return "string";
+  return type;
+};
+
+const configureTypedVariableField = (field: Blockly.FieldVariable): void => {
+  const fieldWithTypes = field as unknown as {
+    variableTypes?: string[] | null;
+    defaultType?: string;
+  };
+  fieldWithTypes.variableTypes = null;
+  fieldWithTypes.defaultType = '';
+};
+
+type VariableWithMutableType = Blockly.VariableModel & {
+  setType?: (type: string) => void;
+  type_?: string;
+  __ucbManualType?: boolean;
+};
+
+const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
+  getVariableTypeOptions().map((type) => [type, type] as Blockly.MenuOption);
 
 /**
  * Define the variables_get_dynamic block
@@ -21,12 +59,11 @@ export function defineVariablesGetDynamicBlock(): void {
           );
       const varField = this.getField('VAR') as Blockly.FieldVariable | null;
       if (varField) {
-        (varField as any).variableTypes = null;
-        (varField as any).defaultType = '';
+        configureTypedVariableField(varField);
       }
       this.setOutput(true);
       this.setColour(330);
-      this.setTooltip('Gets the value of a typed variable');
+      this.setTooltip(getBlocklyMsg('VARIABLES_GET_TOOLTIP'));
       this.setHelpUrl('');
     },
     /**
@@ -57,8 +94,8 @@ export function defineVariablesGetDynamicBlock(): void {
           // Other types remain the same (int, float, string, char, array)
           return varType;
         }
-      } catch (e) {
-        console.debug('Variable not found:', variableId);
+      } catch (error) {
+        console.debug('Variable not found:', variableId, error);
       }
       // Variable not found - return a type that won't match anything
       return '__NO_TYPE__';
@@ -108,8 +145,8 @@ export function defineVariablesGetDynamicBlock(): void {
           // Variable not found - block all typed connections
           this.setOutput(true, '__NO_TYPE__');
         }
-      } catch (e) {
-        console.debug('Error updating variable type check:', e);
+      } catch (error) {
+        console.debug('Error updating variable type check:', error);
         this.setOutput(true, '__NO_TYPE__');
       }
     }
@@ -126,22 +163,21 @@ export function defineVariablesSetDynamicBlock(): void {
       // This is the same approach used by Blockly's built-in variable blocks
       this.appendValueInput('VALUE')
           .setCheck(null)
-          .appendField('set')
+          .appendField(getBlocklyMsg('TYPED_VAR_SET_LABEL'))
           .appendField(
             new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ''),
             'VAR',
           )
-          .appendField('to');
+          .appendField(getBlocklyMsg('TYPED_VAR_TO_LABEL'));
       const varField = this.getField('VAR') as Blockly.FieldVariable | null;
       if (varField) {
-        (varField as any).variableTypes = null;
-        (varField as any).defaultType = '';
-      };
+        configureTypedVariableField(varField);
+      }
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(330);
-      this.setTooltip('Sets the value of a typed variable');
+      this.setTooltip(getBlocklyMsg('VARIABLES_SET_TOOLTIP'));
       this.setHelpUrl('');
     },
     /**
@@ -174,8 +210,9 @@ export function defineVariablesSetDynamicBlock(): void {
             this.setWarningText(null);
             return;
           }
-        } catch (e) {
+        } catch (error) {
           // Variable might have been deleted, continue
+          console.debug('Variable lookup failed in variables_set_dynamic:', error);
         }
       }
       
@@ -192,11 +229,15 @@ export function defineVariablesSetDynamicBlock(): void {
         }
         
         const varType = variable.getType();
+        const isNoType = !varType || varType === '__NO_TYPE__';
+        if (isNoType) {
+          this.setWarningText(getUntypedWarningText());
+        }
         
         // Update the input check to accept compatible types (e.g., float accepts int)
         const valueInput = this.getInput('VALUE');
         if (valueInput && valueInput.connection) {
-          if (!varType) {
+          if (!varType || isNoType) {
             // Variable has no type yet - accept all types to allow type inference
             // This allows typed blocks (like 'true' with Boolean) to connect and infer the variable type
             valueInput.connection.setCheck(null);
@@ -212,27 +253,163 @@ export function defineVariablesSetDynamicBlock(): void {
             const blockDef = connectedBlock as Blockly.Block & { getBlockType?: () => string | null };
             const connectedType = blockDef.getBlockType ? blockDef.getBlockType() : null;
             
-            if (!varType && connectedType) {
-              // Variable has no type but a block is connected - trigger type inference
-              // The type inference system will update the variable type automatically
-              this.setWarningText(null);
+            if ((!varType || isNoType) && connectedType) {
+              const normalizedType = normalizeBlocklyTypeToVariableType(connectedType);
+              if (
+                normalizedType &&
+                normalizedType !== "__NO_TYPE__" &&
+                normalizedType !== "null" &&
+                normalizedType !== "undefined"
+              ) {
+                // Update variable type immediately for smoother inference.
+                const typedVariable = variable as VariableWithMutableType;
+                if (typedVariable.__ucbManualType) {
+                  return;
+                }
+                if (typeof typedVariable.setType === "function") {
+                  typedVariable.setType(normalizedType);
+                } else if ("type_" in typedVariable) {
+                  typedVariable.type_ = normalizedType;
+                }
+                const compatibleTypes = getCompatibleTypesForCheck(normalizedType);
+                valueInput.connection.setCheck(compatibleTypes);
+                this.setWarningText(null);
+                return;
+              }
             } else if (varType && connectedType && !checkTypeCompatibility(connectedType, varType)) {
-              // Type mismatch: show warning and disconnect
-              this.setWarningText(`Type incompatible: la variable est de type '${varType}' mais reçoit '${connectedType}'`);
-              // Disconnect the incompatible block
+              const normalizedType = normalizeBlocklyTypeToVariableType(connectedType);
+              if (
+                normalizedType &&
+                normalizedType !== "__NO_TYPE__" &&
+                normalizedType !== "null" &&
+                normalizedType !== "undefined"
+              ) {
+                // Prefer inference: update variable type from the connected block.
+                const typedVariable = variable as VariableWithMutableType;
+                if (typedVariable.__ucbManualType) {
+                  this.setWarningText(getTypeMismatchWarningText(varType, connectedType));
+                  if (valueInput.connection && valueInput.connection.targetBlock()) {
+                    valueInput.connection.disconnect();
+                  }
+                  return;
+                }
+                if (typeof typedVariable.setType === "function") {
+                  typedVariable.setType(normalizedType);
+                } else if ("type_" in typedVariable) {
+                  typedVariable.type_ = normalizedType;
+                }
+                const compatibleTypes = getCompatibleTypesForCheck(normalizedType);
+                valueInput.connection.setCheck(compatibleTypes);
+                this.setWarningText(null);
+                return;
+              }
+
+              // Type mismatch: show warning and disconnect if no valid inference.
+              this.setWarningText(getTypeMismatchWarningText(varType, connectedType));
               if (valueInput.connection && valueInput.connection.targetBlock()) {
                 valueInput.connection.disconnect();
               }
             } else {
-              this.setWarningText(null);
+              if (!isNoType) {
+                this.setWarningText(null);
+              }
             }
           } else {
-            this.setWarningText(null);
+            if (!isNoType) {
+              this.setWarningText(null);
+            }
           }
         }
-      } catch (e) {
-        console.debug('Error in variables_set_dynamic onchange:', e);
+      } catch (error) {
+        console.debug('Error in variables_set_dynamic onchange:', error);
         this.setWarningText(null);
+      }
+    }
+  };
+}
+
+/**
+ * Define the variables_set_type block
+ */
+export function defineVariablesSetTypeBlock(): void {
+  Blockly.Blocks['variables_set_type'] = {
+    init: function(this: Blockly.Block) {
+      this.appendDummyInput()
+          .appendField(getBlocklyMsg('TYPED_VAR_TYPE_SET_LABEL'))
+          .appendField(
+            new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ''),
+            'VAR',
+          )
+          .appendField(getBlocklyMsg('TYPED_VAR_TYPE_TO_LABEL'))
+          .appendField(
+            new Blockly.FieldDropdown(getVariableTypeDropdownOptions),
+            'TYPE',
+          );
+      const varField = this.getField('VAR') as Blockly.FieldVariable | null;
+      if (varField) {
+        configureTypedVariableField(varField);
+      }
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(330);
+      this.setTooltip(getBlocklyMsg('VARIABLES_SET_TOOLTIP'));
+      this.setHelpUrl('');
+    },
+    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (event.type !== Blockly.Events.BLOCK_CHANGE && 
+          event.type !== Blockly.Events.BLOCK_CREATE &&
+          event.type !== Blockly.Events.BLOCK_MOVE &&
+          event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+          event.type !== Blockly.Events.VAR_RENAME &&
+          event.type !== Blockly.Events.VAR_DELETE &&
+          event.type !== Blockly.Events.VAR_CREATE) {
+        return;
+      }
+      const variableId = this.getFieldValue('VAR');
+      const typeField = this.getField('TYPE') as Blockly.FieldDropdown | null;
+      if (!variableId || !typeField) {
+        return;
+      }
+
+      const selectedType = typeField.getValue();
+      if (!selectedType) {
+        return;
+      }
+
+      if (
+        event.type === Blockly.Events.BLOCK_CHANGE &&
+        (event as Blockly.Events.BlockChange).element === "field" &&
+        (event as Blockly.Events.BlockChange).name === "TYPE"
+      ) {
+        try {
+          const variable = this.workspace.getVariableMap().getVariableById(variableId);
+          if (variable && variable.getType() !== selectedType) {
+            const typedVariable = variable as VariableWithMutableType;
+            if (typeof typedVariable.setType === "function") {
+              typedVariable.setType(selectedType);
+            } else if ("type_" in typedVariable) {
+              typedVariable.type_ = selectedType;
+            }
+            typedVariable.__ucbManualType = true;
+          }
+        } catch (error) {
+          console.debug('Error setting variable type:', error);
+        }
+        return;
+      }
+
+      try {
+        const variable = this.workspace.getVariableMap().getVariableById(variableId);
+        if (!variable) {
+          return;
+        }
+        const varType = variable.getType();
+        if (varType && varType !== selectedType) {
+          typeField.setValue(varType);
+        }
+      } catch (error) {
+        console.debug('Error syncing variable type:', error);
       }
     }
   };
@@ -262,8 +439,8 @@ function extendStandardVariablesGetBlock(): void {
           }
           return varType;
         }
-      } catch (e) {
-        console.debug('Variable not found:', variableId);
+      } catch (error) {
+        console.debug('Variable not found:', variableId, error);
       }
       return '__NO_TYPE__';
     };
@@ -302,8 +479,9 @@ function extendStandardVariablesGetBlock(): void {
             this.setOutput(true, '__NO_TYPE__');
             return;
           }
-        } catch (e) {
+        } catch (error) {
           // Variable might have been deleted, continue
+          console.debug('Variable lookup failed in variables_set:', error);
         }
       }
       
@@ -325,8 +503,8 @@ function extendStandardVariablesGetBlock(): void {
         } else {
           this.setOutput(true, '__NO_TYPE__');
         }
-      } catch (e) {
-        console.debug('Error updating variable type check:', e);
+      } catch (error) {
+        console.debug('Error updating variable type check:', error);
         this.setOutput(true, '__NO_TYPE__');
       }
     };
@@ -369,8 +547,9 @@ function extendStandardVariablesSetBlock(): void {
             this.setWarningText(null);
             return;
           }
-        } catch (e) {
+        } catch (error) {
           // Variable might have been deleted, continue
+          console.debug('Variable lookup failed in variables_set:', error);
         }
       }
       
@@ -387,9 +566,13 @@ function extendStandardVariablesSetBlock(): void {
         }
         
         const varType = variable.getType();
+        const isNoType = !varType || varType === '__NO_TYPE__';
+        if (isNoType) {
+          this.setWarningText(getUntypedWarningText());
+        }
         const valueInput = this.getInput('VALUE');
         if (valueInput && valueInput.connection) {
-          if (!varType) {
+          if (!varType || isNoType) {
             // Variable has no type yet - accept all types to allow type inference
             valueInput.connection.setCheck(null);
           } else {
@@ -398,8 +581,8 @@ function extendStandardVariablesSetBlock(): void {
             valueInput.connection.setCheck(compatibleTypes);
           }
         }
-      } catch (e) {
-        console.debug('Error in variables_set onchange:', e);
+      } catch (error) {
+        console.debug('Error in variables_set onchange:', error);
         this.setWarningText(null);
       }
     };
@@ -412,6 +595,7 @@ function extendStandardVariablesSetBlock(): void {
 export function defineAllTypedVariableBlocks(): void {
   defineVariablesGetDynamicBlock();
   defineVariablesSetDynamicBlock();
+  defineVariablesSetTypeBlock();
   
   // Also extend the standard blocks to support type checking
   extendStandardVariablesGetBlock();
