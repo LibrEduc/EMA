@@ -14,61 +14,6 @@
  */
 
 import * as Blockly from "blockly";
-import { checkTypeCompatibility } from "./block_types_registry";
-
-/**
- * Infer the expected type from a block's input connection
- * @param input - The input connection
- * @returns The expected type or null if unknown
- */
-function inferTypeFromInput(input: Blockly.Input): string | null {
-  if (!input.connection) {
-    return null;
-  }
-  
-  // Get the target block connected to this input
-  const targetBlock = input.connection.targetBlock();
-  if (!targetBlock) {
-    return null;
-  }
-  
-  // Check if the block has a getBlockType method
-  const blockDef = targetBlock as Blockly.Block & { getBlockType?: () => string | null };
-  if (blockDef.getBlockType) {
-    return blockDef.getBlockType() || null;
-  }
-  
-  return null;
-}
-
-/**
- * Infer the expected type from a block's output connection check
- * @param outputConnection - The output connection
- * @returns The expected type or null if unknown
- */
-function inferTypeFromOutputCheck(outputConnection: Blockly.Connection): string | null {
-  if (!outputConnection) {
-    return null;
-  }
-  
-  // Check what types this connection accepts
-  const check = outputConnection.getCheck();
-  if (!check) {
-    return null; // Accepts all types
-  }
-  
-  // If it's a single type string, return it
-  if (typeof check === 'string') {
-    return check;
-  }
-  
-  // If it's an array, return the first type (preferred type)
-  if (Array.isArray(check) && check.length > 0) {
-    return check[0] as string;
-  }
-  
-  return null;
-}
 
 /**
  * Find all blocks that use a specific variable

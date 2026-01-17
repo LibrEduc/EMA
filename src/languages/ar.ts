@@ -42,5 +42,6 @@ export const arLang: LanguageMap = {
     TYPED_VAR_TO_LABEL: "إلى",
     TYPED_VAR_TYPE_SET_LABEL: "عيّن نوع",
     TYPED_VAR_TYPE_TO_LABEL: "إلى",
+    TYPED_VAR_ARG_TYPE_LABEL: "النوع",
   }
 };

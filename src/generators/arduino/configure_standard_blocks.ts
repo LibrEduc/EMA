@@ -4,6 +4,8 @@
  */
 
 import * as Blockly from "blockly";
+import { getVariableTypeOptions } from "./block_types";
+import { getCompatibleTypesForCheck } from "./block_types_registry";
 
 /**
  * Configure standard Blockly blocks to work with our type system
@@ -38,8 +40,33 @@ export function configureStandardBlocks(): void {
   type ProcedureBlockDef = Blockly.Block & {
     onchange?: (this: Blockly.Block, event: Blockly.Events.Abstract) => void;
     getBlockType?: (this: Blockly.Block) => string | null;
+    updateShape_?: (this: Blockly.Block) => void;
     __typedConfigured?: boolean;
   };
+
+  const getBlocklyMsg = (key: string): string => {
+    const msg = (Blockly.Msg as Record<string, string> | undefined)?.[key];
+    return msg || key;
+  };
+
+  type VariableWithMutableType = Blockly.VariableModel & {
+    setType?: (type: string) => void;
+    type_?: string;
+    __ucbManualType?: boolean;
+  };
+
+  const setVariableType = (variable: Blockly.VariableModel, type: string): void => {
+    const typedVariable = variable as VariableWithMutableType;
+    if (typeof typedVariable.setType === "function") {
+      typedVariable.setType(type);
+    } else if ("type_" in typedVariable) {
+      typedVariable.type_ = type;
+    }
+    typedVariable.__ucbManualType = true;
+  };
+
+  const getTypeDropdownOptions = (): Blockly.MenuOption[] =>
+    getVariableTypeOptions().map((type) => [type, type] as Blockly.MenuOption);
 
   const toInternalType = (rawType: string | string[] | null | undefined): string | null => {
     if (!rawType) return null;
@@ -122,38 +149,163 @@ export function configureStandardBlocks(): void {
   const defReturn = Blockly.Blocks["procedures_defreturn"] as ProcedureBlockDef | undefined;
   if (defReturn && !defReturn.__typedConfigured) {
     defReturn.__typedConfigured = true;
-    const originalOnchange = defReturn.onchange;
-    defReturn.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
-      if (originalOnchange) {
-        originalOnchange.call(this, event);
+    const originalInit = defReturn.init;
+    defReturn.init = function(this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
       }
-      if (event.type === Blockly.Events.UI || event.type === Blockly.Events.FINISHED_LOADING) {
+      if ((this as any).__typedPatched) {
         return;
       }
-      if (event.type === Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE) {
+      (this as any).__typedPatched = true;
+      const originalDecompose = this.decompose;
+      const originalCompose = this.compose;
+      const originalOnchange = this.onchange;
+      this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
+        const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
+        if (container) {
+          const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+          if (argModels && argModels.length > 0) {
+            const typeByName = new Map(argModels.map((model) => [model.getName(), model.getType()]));
+            let argBlock = container.getInputTargetBlock("STACK");
+            while (argBlock && !argBlock.isInsertionMarker()) {
+              const name = argBlock.getFieldValue("NAME");
+              const argType = typeByName.get(name);
+              if (argType) {
+                try {
+                  argBlock.setFieldValue(argType, "TYPE");
+                } catch {
+                  // Ignore if type is not available in dropdown.
+                }
+              }
+              argBlock = argBlock.nextConnection?.targetBlock() || null;
+            }
+          }
+        }
+        return container as Blockly.Block;
+      };
+      this.compose = function(this: Blockly.Block, container: Blockly.Block) {
+        if (originalCompose) {
+          originalCompose.call(this, container);
+        }
+        const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+        if (!argModels || argModels.length === 0) {
+          return;
+        }
+        const typeByName = new Map<string, string>();
+        let argBlock = container.getInputTargetBlock("STACK");
+        while (argBlock && !argBlock.isInsertionMarker()) {
+          const name = argBlock.getFieldValue("NAME");
+          const argType = argBlock.getFieldValue("TYPE");
+          if (name && argType) {
+            typeByName.set(name, argType);
+          }
+          argBlock = argBlock.nextConnection?.targetBlock() || null;
+        }
+        for (const model of argModels) {
+          const argType = typeByName.get(model.getName());
+          if (argType && model.getType() !== argType) {
+            setVariableType(model, argType);
+          }
+        }
+      };
+      this.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+        if (originalOnchange) {
+          originalOnchange.call(this, event);
+        }
+        if (event.type === Blockly.Events.UI || event.type === Blockly.Events.FINISHED_LOADING) {
+          return;
+        }
+        if (event.type === Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE) {
+          return;
+        }
+        if (
+          event.type === Blockly.Events.BLOCK_CHANGE &&
+          (event as Blockly.Events.BlockChange).element === "field" &&
+          (event as Blockly.Events.BlockChange).name === "NAME"
+        ) {
+          return;
+        }
+        const model = getProcedureModel(this);
+        if (!model || typeof model.setReturnTypes !== "function") {
+          return;
+        }
+        const returnBlock = this.getInputTargetBlock("RETURN");
+        const inferredType = getBlockOutputType(returnBlock);
+        if (!inferredType) {
+          return;
+        }
+        const currentTypes: string[] | null | undefined = model.getReturnTypes?.();
+        if (currentTypes && currentTypes.length === 1 && currentTypes[0] === inferredType) {
+          return;
+        }
+        model.setReturnTypes([inferredType]);
+      };
+    };
+  }
+
+  const defNoReturn = Blockly.Blocks["procedures_defnoreturn"] as ProcedureBlockDef | undefined;
+  if (defNoReturn && !defNoReturn.__typedConfigured) {
+    defNoReturn.__typedConfigured = true;
+    const originalInit = defNoReturn.init;
+    defNoReturn.init = function(this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
+      }
+      if ((this as any).__typedPatched) {
         return;
       }
-      if (
-        event.type === Blockly.Events.BLOCK_CHANGE &&
-        (event as Blockly.Events.BlockChange).element === "field" &&
-        (event as Blockly.Events.BlockChange).name === "NAME"
-      ) {
-        return;
-      }
-      const model = getProcedureModel(this);
-      if (!model || typeof model.setReturnTypes !== "function") {
-        return;
-      }
-      const returnBlock = this.getInputTargetBlock("RETURN");
-      const inferredType = getBlockOutputType(returnBlock);
-      if (!inferredType) {
-        return;
-      }
-      const currentTypes: string[] | null | undefined = model.getReturnTypes?.();
-      if (currentTypes && currentTypes.length === 1 && currentTypes[0] === inferredType) {
-        return;
-      }
-      model.setReturnTypes([inferredType]);
+      (this as any).__typedPatched = true;
+      const originalDecompose = this.decompose;
+      const originalCompose = this.compose;
+      this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
+        const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
+        if (container) {
+          const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+          if (argModels && argModels.length > 0) {
+            const typeByName = new Map(argModels.map((model) => [model.getName(), model.getType()]));
+            let argBlock = container.getInputTargetBlock("STACK");
+            while (argBlock && !argBlock.isInsertionMarker()) {
+              const name = argBlock.getFieldValue("NAME");
+              const argType = typeByName.get(name);
+              if (argType) {
+                try {
+                  argBlock.setFieldValue(argType, "TYPE");
+                } catch {
+                  // Ignore if type is not available in dropdown.
+                }
+              }
+              argBlock = argBlock.nextConnection?.targetBlock() || null;
+            }
+          }
+        }
+        return container as Blockly.Block;
+      };
+      this.compose = function(this: Blockly.Block, container: Blockly.Block) {
+        if (originalCompose) {
+          originalCompose.call(this, container);
+        }
+        const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+        if (!argModels || argModels.length === 0) {
+          return;
+        }
+        const typeByName = new Map<string, string>();
+        let argBlock = container.getInputTargetBlock("STACK");
+        while (argBlock && !argBlock.isInsertionMarker()) {
+          const name = argBlock.getFieldValue("NAME");
+          const argType = argBlock.getFieldValue("TYPE");
+          if (name && argType) {
+            typeByName.set(name, argType);
+          }
+          argBlock = argBlock.nextConnection?.targetBlock() || null;
+        }
+        for (const model of argModels) {
+          const argType = typeByName.get(model.getName());
+          if (argType && model.getType() !== argType) {
+            setVariableType(model, argType);
+          }
+        }
+      };
     };
   }
 
@@ -162,6 +314,73 @@ export function configureStandardBlocks(): void {
     callReturn.__typedConfigured = true;
     callReturn.getBlockType = function(this: Blockly.Block): string | null {
       return getProcedureReturnType(this);
+    };
+    const originalUpdateShape = callReturn.updateShape_;
+    callReturn.updateShape_ = function(this: Blockly.Block) {
+      if (originalUpdateShape) {
+        originalUpdateShape.call(this);
+      }
+      const defName = (this as any).getProcedureCall?.();
+      if (!defName || !this.workspace) {
+        return;
+      }
+      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as any;
+      const argModels = defBlock?.argumentVarModels_ as Blockly.VariableModel[] | undefined;
+      if (!argModels || argModels.length === 0) {
+        return;
+      }
+      for (let i = 0; i < argModels.length; i += 1) {
+        const input = this.getInput(`ARG${i}`);
+        const argType = argModels[i]?.getType?.();
+        if (input?.connection) {
+          input.connection.setCheck(getCompatibleTypesForCheck(argType));
+        }
+      }
+    };
+  }
+
+  const callNoReturn = Blockly.Blocks["procedures_callnoreturn"] as ProcedureBlockDef | undefined;
+  if (callNoReturn && !callNoReturn.__typedConfigured) {
+    callNoReturn.__typedConfigured = true;
+    const originalUpdateShape = callNoReturn.updateShape_;
+    callNoReturn.updateShape_ = function(this: Blockly.Block) {
+      if (originalUpdateShape) {
+        originalUpdateShape.call(this);
+      }
+      const defName = (this as any).getProcedureCall?.();
+      if (!defName || !this.workspace) {
+        return;
+      }
+      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as any;
+      const argModels = defBlock?.argumentVarModels_ as Blockly.VariableModel[] | undefined;
+      if (!argModels || argModels.length === 0) {
+        return;
+      }
+      for (let i = 0; i < argModels.length; i += 1) {
+        const input = this.getInput(`ARG${i}`);
+        const argType = argModels[i]?.getType?.();
+        if (input?.connection) {
+          input.connection.setCheck(getCompatibleTypesForCheck(argType));
+        }
+      }
+    };
+  }
+
+  const mutatorArg = Blockly.Blocks["procedures_mutatorarg"] as ProcedureBlockDef | undefined;
+  if (mutatorArg && !mutatorArg.__typedConfigured) {
+    mutatorArg.__typedConfigured = true;
+    const originalInit = mutatorArg.init;
+    mutatorArg.init = function(this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
+      }
+      const input = this.inputList[0];
+      if (!input || input.fieldRow.some((field) => field.name === "TYPE")) {
+        return;
+      }
+      input
+        .appendField(getBlocklyMsg("TYPED_VAR_ARG_TYPE_LABEL"))
+        .appendField(new Blockly.FieldDropdown(getTypeDropdownOptions), "TYPE");
     };
   }
 

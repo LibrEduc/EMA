@@ -42,5 +42,6 @@ export const esLang: LanguageMap = {
     TYPED_VAR_TO_LABEL: "a",
     TYPED_VAR_TYPE_SET_LABEL: "definir tipo de",
     TYPED_VAR_TYPE_TO_LABEL: "a",
+    TYPED_VAR_ARG_TYPE_LABEL: "tipo",
   }
 };

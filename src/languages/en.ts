@@ -42,5 +42,6 @@ export const enLang: LanguageMap = {
     TYPED_VAR_TO_LABEL: "to",
     TYPED_VAR_TYPE_SET_LABEL: "set type of",
     TYPED_VAR_TYPE_TO_LABEL: "to",
+    TYPED_VAR_ARG_TYPE_LABEL: "type",
   }
 };

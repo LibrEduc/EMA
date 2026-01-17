@@ -93,4 +93,5 @@ export interface LanguageItem {
   TYPED_VAR_TO_LABEL: string;
   TYPED_VAR_TYPE_SET_LABEL: string;
   TYPED_VAR_TYPE_TO_LABEL: string;
+  TYPED_VAR_ARG_TYPE_LABEL: string;
 }

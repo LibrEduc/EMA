@@ -647,6 +647,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       if (customMessages.TYPED_VAR_TYPE_TO_LABEL) {
         msg["TYPED_VAR_TYPE_TO_LABEL"] = customMessages.TYPED_VAR_TYPE_TO_LABEL;
       }
+      if (customMessages.TYPED_VAR_ARG_TYPE_LABEL) {
+        msg["TYPED_VAR_ARG_TYPE_LABEL"] = customMessages.TYPED_VAR_ARG_TYPE_LABEL;
+      }
     }
     this.changeLanguageToolbox(newLang);
     this.setParamsBlockly();
