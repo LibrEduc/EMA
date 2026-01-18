@@ -28,13 +28,22 @@
  */
 
 import * as Blockly from "blockly";
+import { SeparatorAxis } from "blockly/core/flyout_separator";
 import * as monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 
 // Configuration de Monaco Editor pour utilisation locale (chemins relatifs)
 // Force la définition de MonacoEnvironment pour s'assurer que les chemins sont corrects
-(window as any).MonacoEnvironment = {
+const globalWindow = window as Window & {
+  MonacoEnvironment?: {
+    getWorkerUrl: (moduleId: string, label: string) => string;
+  };
+  Blockly?: typeof Blockly;
+  arduinoGenerator?: typeof arduinoGenerator;
+};
+
+globalWindow.MonacoEnvironment = {
   getWorkerUrl: function (_moduleId: string, label: string) {
     if (label === 'json') {
       return './json.worker.js';
@@ -55,10 +64,10 @@ import "@blockly/toolbox-search";
 // Exposer Blockly globalement IMMÉDIATEMENT après l'import
 if (typeof window !== 'undefined') {
   // Exposer Blockly et toutes ses propriétés
-  (window as any).Blockly = Blockly;
+  globalWindow.Blockly = Blockly;
   
   // Exposer également les propriétés principales individuellement
-  (window as any).Blockly = {
+  globalWindow.Blockly = {
     ...Blockly,
     Blocks: Blockly.Blocks,
     VERSION: Blockly.VERSION,
@@ -74,7 +83,7 @@ if (typeof window !== 'undefined') {
   };
   
   console.log('✅ Blockly et toutes ses propriétés exposés globalement immédiatement');
-  console.log('Propriétés disponibles:', Object.keys((window as any).Blockly));
+  console.log('Propriétés disponibles:', Object.keys(globalWindow.Blockly));
 }
 
 // Fonction de compatibilité pour définir les blocs de variables typées
@@ -101,22 +110,11 @@ import {
 // Exposer arduinoGenerator globalement IMMÉDIATEMENT après l'import
 if (typeof window !== 'undefined') {
   // Exposer arduinoGenerator et ses propriétés principales
-  (window as any).arduinoGenerator = {
-    ...arduinoGenerator,
-    forBlock: arduinoGenerator.forBlock,
-    workspaceToCode: arduinoGenerator.workspaceToCode,
-    init: arduinoGenerator.init,
-    finish: arduinoGenerator.finish,
-    scrub_: arduinoGenerator.scrub_,
-    scrubArduino_: arduinoGenerator.scrubArduino_,
-    addVariable: arduinoGenerator.addVariable,
-    setVariableType: arduinoGenerator.setVariableType,
-    getVariableType: arduinoGenerator.getVariableType,
-    debugGeneratorState: arduinoGenerator.debugGeneratorState
-  };
+  const exposedArduinoGenerator = arduinoGenerator;
+  globalWindow.arduinoGenerator = exposedArduinoGenerator;
   
   console.log('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
-  console.log('Propriétés arduinoGenerator disponibles:', Object.keys((window as any).arduinoGenerator));
+  console.log('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
 }
 import { setPluginsInURL } from "./tools";
 import { basic_toolbox } from "./toolbox";
@@ -159,6 +157,7 @@ const elements = {
   codeEditorSwitch: document.getElementById(
     "codeEditorSwitch",
   ) as HTMLInputElement,
+  debugSwitch: document.getElementById("debugSwitch") as HTMLInputElement,
 };
 
 // Verify all required elements exist
@@ -174,6 +173,7 @@ const requiredElements = [
   "pluginHighlight",
   "pluginContinuousToolbox",
   "codeEditorSwitch",
+  "debugSwitch",
 ];
 
 requiredElements.forEach((id) => {
@@ -394,6 +394,30 @@ export const µcB_addFlexResizerEvents = (): void => {
   });
 };
 
+class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
+  load(_state: object, flyout: Blockly.IFlyout): Blockly.FlyoutItem {
+    void _state;
+    const axis = flyout.horizontalLayout ? SeparatorAxis.X : SeparatorAxis.Y;
+    const separator = new Blockly.FlyoutSeparator(0, axis);
+    return new Blockly.FlyoutItem(separator, this.getType());
+  }
+
+  gapForItem(_state: object, _defaultGap: number): number {
+    void _state;
+    void _defaultGap;
+    return 0;
+  }
+
+  disposeItem(_item: Blockly.FlyoutItem): void {
+    void _item;
+    // No-op: empty placeholder item.
+  }
+
+  getType(): string {
+    return "category";
+  }
+}
+
 export const registerContinuousToolboxComponents = (): void => {
   Blockly.registry.register(
     Blockly.registry.Type.TOOLBOX_ITEM,
@@ -427,6 +451,12 @@ export const registerContinuousToolboxComponents = (): void => {
     Blockly.registry.Type.FLYOUT_INFLATER,
     "block",
     RecyclableBlockFlyoutInflater,
+    true,
+  );
+  Blockly.registry.register(
+    Blockly.registry.Type.FLYOUT_INFLATER,
+    "category",
+    CategoryFlyoutInflater,
     true,
   );
 
@@ -466,6 +496,26 @@ export const unregisterContinuousToolboxComponents = (): void => {
       style.remove();
     }
   });
+  // Restaurer la catégorie standard de Blockly
+  Blockly.registry.register(
+    Blockly.registry.Type.TOOLBOX_ITEM,
+    Blockly.ToolboxCategory.registrationName,
+    Blockly.ToolboxCategory,
+    true,
+  );
+  // Restaurer l'inflater de bloc par défaut
+  Blockly.registry.register(
+    Blockly.registry.Type.FLYOUT_INFLATER,
+    "block",
+    Blockly.BlockFlyoutInflater,
+    true,
+  );
+  // Supprimer l'inflater "category" spécifique à la toolbox continue
+  try {
+    Blockly.registry.unregister(Blockly.registry.Type.FLYOUT_INFLATER, "category");
+  } catch {
+    // Ignore if already unregistered
+  }
   const style = document.createElement("style");
   style.textContent = `
     .categoryBubble {
@@ -480,6 +530,9 @@ export const unregisterContinuousToolboxComponents = (): void => {
       display: flex;
       flex-direction: row;
       align-items: center;
+    }
+    .blocklyToolboxCategoryLabel {
+      vertical-align: middle;
     }
   `;
   document.head.appendChild(style);
@@ -542,17 +595,8 @@ const HTML_onChange = (): void => {
   };
 
   elements.alwaysOpenedToolboxFlyout.onchange = () => {
-    const flyout = (µcB.workspace as Blockly.WorkspaceSvg)
-      .getToolbox()!
-      .getFlyout();
-    (flyout as Blockly.Flyout).setAutoClose(
-      !elements.alwaysOpenedToolboxFlyout.checked,
-    );
-    (flyout as Blockly.Flyout).autoHide(
-      !elements.alwaysOpenedToolboxFlyout.checked,
-    );
-    if (elements.alwaysOpenedToolboxFlyout.checked)
-      (flyout as Blockly.Flyout).setVisible(true);
+    µcB.applyAlwaysOpenedToolboxFlyout();
+    setPluginsInURL("alwaysOpenedToolboxFlyout", "flyout");
   };
 
   elements.codeEditorSwitch.onchange = () => {
@@ -570,6 +614,21 @@ const HTML_onChange = (): void => {
       }
     }
     setPluginsInURL("codeEditorSwitch", "codeEditor");
+  };
+
+  elements.debugSwitch.onchange = () => {
+    const enabled = elements.debugSwitch.checked;
+    (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ = enabled;
+    try {
+      if (enabled) {
+        window.localStorage?.setItem("ucbDebug", "1");
+      } else {
+        window.localStorage?.removeItem("ucbDebug");
+      }
+    } catch {
+      // Ignore storage errors
+    }
+    setPluginsInURL("debugSwitch", "debug");
   };
 };
 

@@ -13,11 +13,22 @@ import type { Block } from "blockly/core/block";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 
+type ProcedureParameter = { getName: () => string };
+type ProcedureModelLike = {
+  getName?: () => string;
+  getParameters?: () => ProcedureParameter[];
+  getReturnTypes?: () => string[] | null;
+};
+type ProcedureBlockLike = Block & {
+  getProcedureModel?: () => ProcedureModelLike | null;
+  getVars?: () => string[] | null;
+};
+
 function getProcedureName(
   block: Block,
   generator: ArduinoGenerator,
 ): string {
-  const model = (block as any).getProcedureModel?.();
+  const model = (block as ProcedureBlockLike).getProcedureModel?.();
   const rawName = model?.getName?.() || block.getFieldValue("NAME") || "";
   if (generator.nameDB_) {
     return generator.nameDB_.getName(
@@ -30,13 +41,13 @@ function getProcedureName(
 
 function getProcedureParams(block: Block, generator: ArduinoGenerator): string[] {
   let paramNames: string[] = [];
-  const vars = (block as any).getVars?.();
+  const vars = (block as ProcedureBlockLike).getVars?.();
   if (Array.isArray(vars)) {
     paramNames = vars.filter(Boolean);
   } else {
-    const model = (block as any).getProcedureModel?.();
+    const model = (block as ProcedureBlockLike).getProcedureModel?.();
     if (model?.getParameters) {
-      paramNames = model.getParameters().map((param: any) => param.getName());
+      paramNames = model.getParameters().map((param) => param.getName());
     }
   }
 
@@ -82,7 +93,7 @@ function getReturnType(block: Block): string {
     }
   }
 
-  const model = (block as any).getProcedureModel?.();
+  const model = (block as ProcedureBlockLike).getProcedureModel?.();
   const returnTypes: string[] | null | undefined = model?.getReturnTypes?.();
   if (returnTypes && returnTypes.length > 0) {
     if (returnTypes.includes("bool")) return "bool";

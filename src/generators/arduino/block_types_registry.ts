@@ -12,7 +12,9 @@
  */
 
 import * as Blockly from "blockly";
-import { BLOCK_TYPES, getCompatibleTypes, isTypeCompatible } from "./block_types";
+import { BLOCK_TYPES } from "./block_types/index";
+import { getCompatibleTypes, isTypeCompatible } from "./block_types";
+import { debugLog } from "./debug";
 
 /**
  * Type mapping from BlocklyArduino types to Arduino types
@@ -107,7 +109,7 @@ function initializeBlockTypeRegistry(): void {
     }
   }
 
-  console.log(`✅ Registre de types initialisé avec ${Object.keys(BLOCK_TYPE_REGISTRY).length} blocs depuis block_types.ts`);
+  debugLog(`✅ Registre de types initialisé avec ${Object.keys(BLOCK_TYPE_REGISTRY).length} blocs depuis block_types.ts`);
 }
 
 /**
@@ -194,7 +196,7 @@ export function applyBlockTypesFromRegistry(): void {
     }
   }
   
-  console.log(`✅ Types appliqués à ${appliedCount} blocs depuis le registre`);
+  debugLog(`✅ Types appliqués à ${appliedCount} blocs depuis le registre`);
 }
 
 // Initialize the registry when the module is loaded

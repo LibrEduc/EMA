@@ -1,14 +1,12 @@
 /**
- * @fileoverview Registre centralisé des types de blocs Blockly pour Arduino
- * @description Ce fichier contient toutes les définitions de types de blocs.
- * Les types statiques sont définis comme des chaînes de caractères (ex: "int", "float", "bool").
- * Les types dynamiques utilisent le préfixe "__DYNAMIC__" suivi du nom de la fonction.
- * 
+ * @fileoverview Types de base pour le typage Blockly Arduino
+ * @description Les définitions de types de blocs sont maintenant dans src/generators/arduino/block_types/.
+ * Chaque catégorie exporte un objet de types, puis l'index les agrège.
+ *
  * Pour ajouter un nouveau type de bloc :
- * 1. Ajoutez une entrée dans l'objet BLOCK_TYPES
- * 2. Pour un type statique : "nom_du_bloc": "int"
- * 3. Pour un type dynamique : "nom_du_bloc": "__DYNAMIC__nom_fonction"
- * 4. Si c'est un type dynamique, créez la fonction dans DYNAMIC_TYPE_FUNCTIONS dans block_types_registry.ts
+ * 1. Choisissez le fichier de catégorie dans block_types/ (ou créez-en un)
+ * 2. Ajoutez "nom_du_bloc": "int" (statique) ou "__DYNAMIC__nom_fonction" (dynamique)
+ * 3. Si dynamique, ajoutez la fonction dans DYNAMIC_TYPE_FUNCTIONS dans block_types_registry.ts
  */
 
 /**
@@ -92,41 +90,3 @@ export function isTypeCompatible(sourceType: string | null | undefined, targetTy
  * Registre des types de blocs
  * Basé sur les informations extraites de BlocklyArduino dans src/types/
  */
-export const BLOCK_TYPES = {
-  // ============================================
-  // Blocs logiques
-  // ============================================
-  logic_compare: 'bool',
-  logic_operation: 'bool',
-  logic_negate: 'bool',
-  logic_boolean: 'bool',
-  logic_null: 'null',
-  logic_ternary: 'bool', // Le test renvoie un booléen
-
-  // ============================================
-  // Blocs mathématiques
-  // ============================================
-  math_number: '__DYNAMIC__identifyNumber', // Type déterminé par la valeur (int ou float)
-  inout_angle_maths: 'int',
-  math_arithmetic: 'int',
-  math_interval: 'int',
-  math_single: 'float', // Fonctions mathématiques simples (sin, cos, etc.)
-  math_trig: 'float', // Fonctions trigonométriques
-  math_constant: 'float', // Constantes mathématiques (PI, E, etc.)
-  math_number_property: 'bool', // Propriétés des nombres (pair, impair, etc.)
-  math_round: 'float', // Arrondi
-  math_modulo: 'int', // Modulo
-  math_random_int: 'int', // Nombre aléatoire entier
-  math_random_float: 'float', // Nombre aléatoire décimal
-
-  // ============================================
-  // Blocs texte
-  // ============================================
-  text: 'string',
-  text_char: 'string',
-  text_join: 'string', // Concaténation de chaînes
-  text_append: 'string', // Ajout de texte
-  text_length: 'int', // Longueur d'une chaîne
-  text_isEmpty: 'bool', // Test si chaîne vide
-} as const;
-

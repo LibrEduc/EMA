@@ -4,6 +4,7 @@
  */
 
 import * as Blockly from "blockly";
+import { debugLog } from "./debug";
 import { getCompatibleTypesForCheck, checkTypeCompatibility } from "./block_types_registry";
 import { getVariableTypeOptions } from "./block_types";
 
@@ -62,7 +63,7 @@ export function defineVariablesGetDynamicBlock(): void {
         configureTypedVariableField(varField);
       }
       this.setOutput(true);
-      this.setColour(330);
+      this.setStyle("variable_dynamic_blocks");
       this.setTooltip(getBlocklyMsg('VARIABLES_GET_TOOLTIP'));
       this.setHelpUrl('');
     },
@@ -95,7 +96,7 @@ export function defineVariablesGetDynamicBlock(): void {
           return varType;
         }
       } catch (error) {
-        console.debug('Variable not found:', variableId, error);
+        debugLog('Variable not found:', variableId, error);
       }
       // Variable not found - return a type that won't match anything
       return '__NO_TYPE__';
@@ -146,7 +147,7 @@ export function defineVariablesGetDynamicBlock(): void {
           this.setOutput(true, '__NO_TYPE__');
         }
       } catch (error) {
-        console.debug('Error updating variable type check:', error);
+        debugLog('Error updating variable type check:', error);
         this.setOutput(true, '__NO_TYPE__');
       }
     }
@@ -176,7 +177,7 @@ export function defineVariablesSetDynamicBlock(): void {
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setColour(330);
+      this.setStyle("variable_dynamic_blocks");
       this.setTooltip(getBlocklyMsg('VARIABLES_SET_TOOLTIP'));
       this.setHelpUrl('');
     },
@@ -212,7 +213,7 @@ export function defineVariablesSetDynamicBlock(): void {
           }
         } catch (error) {
           // Variable might have been deleted, continue
-          console.debug('Variable lookup failed in variables_set_dynamic:', error);
+          debugLog('Variable lookup failed in variables_set_dynamic:', error);
         }
       }
       
@@ -321,7 +322,7 @@ export function defineVariablesSetDynamicBlock(): void {
           }
         }
       } catch (error) {
-        console.debug('Error in variables_set_dynamic onchange:', error);
+        debugLog('Error in variables_set_dynamic onchange:', error);
         this.setWarningText(null);
       }
     }
@@ -352,7 +353,7 @@ export function defineVariablesSetTypeBlock(): void {
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setColour(330);
+      this.setStyle("variable_dynamic_blocks");
       this.setTooltip(getBlocklyMsg('VARIABLES_SET_TOOLTIP'));
       this.setHelpUrl('');
     },
@@ -394,7 +395,7 @@ export function defineVariablesSetTypeBlock(): void {
             typedVariable.__ucbManualType = true;
           }
         } catch (error) {
-          console.debug('Error setting variable type:', error);
+          debugLog('Error setting variable type:', error);
         }
         return;
       }
@@ -409,7 +410,7 @@ export function defineVariablesSetTypeBlock(): void {
           typeField.setValue(varType);
         }
       } catch (error) {
-        console.debug('Error syncing variable type:', error);
+        debugLog('Error syncing variable type:', error);
       }
     }
   };
@@ -440,7 +441,7 @@ function extendStandardVariablesGetBlock(): void {
           return varType;
         }
       } catch (error) {
-        console.debug('Variable not found:', variableId, error);
+        debugLog('Variable not found:', variableId, error);
       }
       return '__NO_TYPE__';
     };
@@ -481,7 +482,7 @@ function extendStandardVariablesGetBlock(): void {
           }
         } catch (error) {
           // Variable might have been deleted, continue
-          console.debug('Variable lookup failed in variables_set:', error);
+          debugLog('Variable lookup failed in variables_set:', error);
         }
       }
       
@@ -504,7 +505,7 @@ function extendStandardVariablesGetBlock(): void {
           this.setOutput(true, '__NO_TYPE__');
         }
       } catch (error) {
-        console.debug('Error updating variable type check:', error);
+        debugLog('Error updating variable type check:', error);
         this.setOutput(true, '__NO_TYPE__');
       }
     };
@@ -549,7 +550,7 @@ function extendStandardVariablesSetBlock(): void {
           }
         } catch (error) {
           // Variable might have been deleted, continue
-          console.debug('Variable lookup failed in variables_set:', error);
+          debugLog('Variable lookup failed in variables_set:', error);
         }
       }
       
@@ -582,7 +583,7 @@ function extendStandardVariablesSetBlock(): void {
           }
         }
       } catch (error) {
-        console.debug('Error in variables_set onchange:', error);
+        debugLog('Error in variables_set onchange:', error);
         this.setWarningText(null);
       }
     };
@@ -601,5 +602,5 @@ export function defineAllTypedVariableBlocks(): void {
   extendStandardVariablesGetBlock();
   extendStandardVariablesSetBlock();
   
-  console.log('Blocs de variables typées définis avec succès');
+  debugLog('Blocs de variables typées définis avec succès');
 }

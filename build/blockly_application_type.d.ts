@@ -125,8 +125,6 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      */
     private normalizeVariableTypes;
     private normalizeVariableTypeById;
-    private normalizeVariableCreationTypes;
-    private interceptFieldVariableValidation;
     /**
      * The function checks if the language of a Blockly object is right-to-left (RTL).
      * @param blocklyObject - The `blocklyObject` parameter is an object that

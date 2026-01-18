@@ -14,6 +14,12 @@
  */
 
 import * as Blockly from "blockly";
+import { debugLog } from "./debug";
+import { clearVariableType, setVariableType } from "./variable_utils";
+
+type ConnectionWithShadowDom = Blockly.Connection & {
+  getShadowDom?: () => Element | null;
+};
 
 /**
  * Find all blocks that use a specific variable
@@ -25,7 +31,7 @@ function findBlocksUsingVariable(workspace: Blockly.Workspace, variableId: strin
   const blocks: Blockly.Block[] = [];
   const allBlocks = workspace.getAllBlocks(false);
   
-  console.log(`🔍 [Type Inference] Recherche de blocs utilisant la variable ID '${variableId}' parmi ${allBlocks.length} blocs`);
+  debugLog(`🔍 [Type Inference] Recherche de blocs utilisant la variable ID '${variableId}' parmi ${allBlocks.length} blocs`);
   
   for (const block of allBlocks) {
     // Check if this is a variable block (dynamic or standard or manual typing)
@@ -34,13 +40,13 @@ function findBlocksUsingVariable(workspace: Blockly.Workspace, variableId: strin
         block.type === 'variables_set_type') {
       const varId = block.getFieldValue('VAR');
       if (varId === variableId) {
-        console.log(`  ✓ Bloc trouvé: ${block.type} utilisant la variable '${variableId}'`);
+        debugLog(`  ✓ Bloc trouvé: ${block.type} utilisant la variable '${variableId}'`);
         blocks.push(block);
       }
     }
   }
   
-  console.log(`  → Total: ${blocks.length} blocs trouvés`);
+  debugLog(`  → Total: ${blocks.length} blocs trouvés`);
   return blocks;
 }
 
@@ -154,23 +160,23 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
   const blocks = findBlocksUsingVariable(workspace, variableId);
   const expectedTypes: string[] = [];
   
-  console.log(`🔍 [Type Inference] Variable ID '${variableId}' utilisée dans ${blocks.length} blocs`);
+  debugLog(`🔍 [Type Inference] Variable ID '${variableId}' utilisée dans ${blocks.length} blocs`);
   
   for (const block of blocks) {
-    console.log(`  🔍 Analyse du bloc ${block.type}`);
+    debugLog(`  🔍 Analyse du bloc ${block.type}`);
     
     if (block.type === 'variables_get_dynamic' || block.type === 'variables_get') {
       // For variables_get, check where it's connected (output)
       if (block.outputConnection) {
         const connectedInput = block.outputConnection.targetConnection;
         if (connectedInput) {
-          console.log(`    → Connexion de sortie trouvée, parent: ${connectedInput.getSourceBlock()?.type || 'null'}`);
+          debugLog(`    → Connexion de sortie trouvée, parent: ${connectedInput.getSourceBlock()?.type || 'null'}`);
           
           // First try to get from the connection's check
           const check = connectedInput.getCheck();
           const convertedType = convertBlocklyTypeToInternalType(check);
           if (convertedType) {
-            console.log(`    → Type détecté depuis check: ${convertedType}`);
+            debugLog(`    → Type détecté depuis check: ${convertedType}`);
             expectedTypes.push(convertedType);
           }
           
@@ -182,7 +188,7 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
               if (input.connection === connectedInput) {
                 const expectedType = getExpectedTypeFromBlockInput(parentBlock, input.name || '');
                 if (expectedType) {
-                  console.log(`    → Type détecté depuis parent block (${input.name}): ${expectedType}`);
+                  debugLog(`    → Type détecté depuis parent block (${input.name}): ${expectedType}`);
                   expectedTypes.push(expectedType);
                 }
                 break;
@@ -190,7 +196,7 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
             }
           }
         } else {
-          console.log(`    → Aucune connexion de sortie`);
+          debugLog(`    → Aucune connexion de sortie`);
         }
       }
     } else if (block.type === 'variables_set_dynamic' || block.type === 'variables_set') {
@@ -199,14 +205,14 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
       if (valueInput && valueInput.connection) {
         const targetBlock = valueInput.connection.targetBlock();
         if (targetBlock) {
-          console.log(`    → Bloc connecté à VALUE: ${targetBlock.type}`);
+          debugLog(`    → Bloc connecté à VALUE: ${targetBlock.type}`);
           
           // Try to get the block type using getBlockType
           const blockDef = targetBlock as Blockly.Block & { getBlockType?: () => string | null };
           if (blockDef.getBlockType) {
             const type = blockDef.getBlockType();
             if (type) {
-              console.log(`    → Type détecté depuis getBlockType: ${type}`);
+              debugLog(`    → Type détecté depuis getBlockType: ${type}`);
               expectedTypes.push(type);
             }
           }
@@ -215,15 +221,15 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
             const check = targetBlock.outputConnection.getCheck();
             const convertedType = convertBlocklyTypeToInternalType(check);
             if (convertedType) {
-              console.log(`    → Type détecté depuis output check: ${convertedType}`);
+              debugLog(`    → Type détecté depuis output check: ${convertedType}`);
               expectedTypes.push(convertedType);
             }
           }
         } else {
-          console.log(`    → Aucun bloc connecté à VALUE`);
+          debugLog(`    → Aucun bloc connecté à VALUE`);
         }
       } else {
-        console.log(`    → Pas d'input VALUE trouvé`);
+        debugLog(`    → Pas d'input VALUE trouvé`);
       }
     }
   }
@@ -246,7 +252,7 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
                           valueInput.connection.targetBlock();
         
         if (targetBlock) {
-          console.log(`    → Bloc connecté à VALUE (assignment): ${targetBlock.type}`);
+          debugLog(`    → Bloc connecté à VALUE (assignment): ${targetBlock.type}`);
           
           // First, try to use getBlockType() if available (this is what StrictConnectionChecker uses)
           const blockDef = targetBlock as Blockly.Block & { getBlockType?: () => string | null };
@@ -255,20 +261,20 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
             if (type && type !== '__NO_TYPE__' && type !== 'null' && type !== 'undefined') {
               // Convert Blockly types to internal types
               const internalType = convertBlocklyTypeToInternalType(type) || type;
-              console.log(`    → Type détecté depuis getBlockType (assignment): ${internalType} (original: ${type})`);
+              debugLog(`    → Type détecté depuis getBlockType (assignment): ${internalType} (original: ${type})`);
               assignmentTypes.push(internalType);
             } else {
-              console.log(`    → getBlockType() retourne: ${type} (ignoré)`);
+              debugLog(`    → getBlockType() retourne: ${type} (ignoré)`);
               const procType = inferProcedureCallReturnType(targetBlock);
               if (procType) {
-                console.log(`    → Type détecté depuis procedures_callreturn (assignment): ${procType}`);
+                debugLog(`    → Type détecté depuis procedures_callreturn (assignment): ${procType}`);
                 assignmentTypes.push(procType);
               }
             }
           } else if (targetBlock.type === "procedures_callreturn") {
             const procType = inferProcedureCallReturnType(targetBlock);
             if (procType) {
-              console.log(`    → Type détecté depuis procedures_callreturn (assignment): ${procType}`);
+              debugLog(`    → Type détecté depuis procedures_callreturn (assignment): ${procType}`);
               assignmentTypes.push(procType);
             }
           } 
@@ -277,22 +283,24 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
             const check = targetBlock.outputConnection.getCheck();
             const convertedType = convertBlocklyTypeToInternalType(check);
             if (convertedType) {
-              console.log(`    → Type détecté depuis output check (assignment): ${convertedType}`);
+              debugLog(`    → Type détecté depuis output check (assignment): ${convertedType}`);
               assignmentTypes.push(convertedType);
             }
           }
         } else {
-          console.log(`    → Aucun bloc connecté à VALUE (assignment)`);
+          debugLog(`    → Aucun bloc connecté à VALUE (assignment)`);
           // No block connected yet - check if there's a shadow block
-          const shadowDom = (valueInput.connection as any).getShadowDom ? 
-            (valueInput.connection as any).getShadowDom() : null;
+          const shadowConnection = valueInput.connection as ConnectionWithShadowDom | null;
+          const shadowDom = shadowConnection?.getShadowDom
+            ? shadowConnection.getShadowDom()
+            : null;
           if (shadowDom) {
             // Try to infer from shadow block type attribute
             const shadowType = shadowDom.getAttribute('type');
             if (shadowType) {
               const convertedType = convertBlocklyTypeToInternalType(shadowType);
               if (convertedType) {
-                console.log(`    → Type détecté depuis shadow block (assignment): ${convertedType}`);
+                debugLog(`    → Type détecté depuis shadow block (assignment): ${convertedType}`);
                 assignmentTypes.push(convertedType);
               }
             }
@@ -303,17 +311,17 @@ function inferVariableType(workspace: Blockly.Workspace, variableId: string): st
     // Ignore variables_get - we don't infer types from usages (parent → child)
   }
   
-  console.log(`  → Types assignments: [${assignmentTypes.join(', ')}]`);
+  debugLog(`  → Types assignments: [${assignmentTypes.join(', ')}]`);
   
   // Only use assignments (child → parent direction), never use usages (parent → child)
   if (assignmentTypes.length > 0) {
     const firstAssignmentType = assignmentTypes[0];
-    console.log(`  → Type depuis assignment: ${firstAssignmentType}`);
+    debugLog(`  → Type depuis assignment: ${firstAssignmentType}`);
     return firstAssignmentType;
   }
   
   // No assignments detected - return null (will check if blocks are connected)
-  console.log(`  → Aucun type détecté depuis assignments, retourne null`);
+  debugLog(`  → Aucun type détecté depuis assignments, retourne null`);
   return null;
 }
 
@@ -326,7 +334,7 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
   const variableMap = workspace.getVariableMap();
   const allVariables = variableMap.getAllVariables();
   
-  console.log(`🔍 [Type Inference] Analyse de ${allVariables.length} variables`);
+  debugLog(`🔍 [Type Inference] Analyse de ${allVariables.length} variables`);
   
   for (const variable of allVariables) {
     if (!variable) {
@@ -334,7 +342,7 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
     }
     const manualType = (variable as { __ucbManualType?: boolean }).__ucbManualType === true;
     if (manualType) {
-      console.log(`🔒 [Type Inference] Variable '${variable.getName()}' typée manuellement, inférence ignorée`);
+      debugLog(`🔒 [Type Inference] Variable '${variable.getName()}' typée manuellement, inférence ignorée`);
       continue;
     }
     const variableId = variable.getId();
@@ -343,7 +351,7 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
     // Infer the expected type from block connections
     const inferredType = inferVariableType(workspace, variableId);
     
-    console.log(`🔍 [Type Inference] Variable '${variable.getName()}' : type actuel='${currentType}', type inféré='${inferredType || 'null'}'`);
+    debugLog(`🔍 [Type Inference] Variable '${variable.getName()}' : type actuel='${currentType}', type inféré='${inferredType || 'null'}'`);
     
     // Check if blocks are connected to determine if we should revert to 'int'
     const blocks = findBlocksUsingVariable(workspace, variableId);
@@ -352,19 +360,18 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
       const selectedType = manualTypeBlock.getFieldValue('TYPE');
       if (selectedType && selectedType !== currentType) {
         try {
-          const varModel = variable as any;
-          if (typeof varModel.setType === 'function') {
-            varModel.setType(selectedType);
-            console.log(`✅ Type manuel appliqué: variable '${variable.getName()}' → '${selectedType}'`);
-          } else if ('type_' in varModel) {
-            varModel.type_ = selectedType;
-            console.log(`✅ Type manuel appliqué (type_): variable '${variable.getName()}' → '${selectedType}'`);
+          if (setVariableType(variable, selectedType)) {
+            debugLog(`✅ Type manuel appliqué: variable '${variable.getName()}' → '${selectedType}'`);
+          } else {
+            console.warn(
+              `⚠️ Impossible de modifier le type de la variable '${variable.getName()}' : '${currentType}' → '${selectedType}' (API non disponible)`,
+            );
           }
         } catch (e) {
-          console.debug('Error applying manual type:', e);
+          debugLog('Error applying manual type:', e);
         }
       }
-      console.log(`🔒 [Type Inference] Variable '${variable.getName()}' typée manuellement, inférence ignorée`);
+      debugLog(`🔒 [Type Inference] Variable '${variable.getName()}' typée manuellement, inférence ignorée`);
       continue;
     }
 
@@ -381,65 +388,35 @@ export function inferAndUpdateVariableTypes(workspace: Blockly.Workspace): void 
     });
     
     if (inferredType && inferredType !== currentType) {
-      console.log(`💡 [Type Inference] Changement nécessaire : '${variable.getName()}' : '${currentType}' → '${inferredType}'`);
+      debugLog(`💡 [Type Inference] Changement nécessaire : '${variable.getName()}' : '${currentType}' → '${inferredType}'`);
       // Update the variable type using Blockly's internal API
       try {
-        const varModel = variable as any;
-        let typeUpdated = false;
-        
-        // Method 1: Try to use setType if it exists (internal API)
-        if (typeof varModel.setType === 'function') {
-          varModel.setType(inferredType || '');
-          typeUpdated = true;
-          console.log(`✅ Type mis à jour (setType): variable '${variable.getName()}' : '${currentType}' → '${inferredType}'`);
-        } 
-        // Method 2: Directly set the type_ property (private property)
-        else if ('type_' in varModel) {
-          varModel.type_ = inferredType;
-          typeUpdated = true;
-          console.log(`✅ Type mis à jour (type_): variable '${variable.getName()}' : '${currentType}' → '${inferredType}'`);
-        }
-        
-        if (!typeUpdated) {
-          console.warn(`⚠️ Impossible de modifier le type de la variable '${variable.getName()}' : '${currentType}' → '${inferredType}' (API non disponible)`);
+        if (setVariableType(variable, inferredType || '')) {
+          debugLog(`✅ Type mis à jour: variable '${variable.getName()}' : '${currentType}' → '${inferredType}'`);
+        } else {
+          console.warn(
+            `⚠️ Impossible de modifier le type de la variable '${variable.getName()}' : '${currentType}' → '${inferredType}' (API non disponible)`,
+          );
         }
       } catch (e) {
-        console.debug('Error updating variable type:', e);
+        debugLog('Error updating variable type:', e);
       }
     } else if (!inferredType && !hasConnectedBlocks && currentType !== null) {
       // No type detected and no blocks connected - revert to default null
-      console.log(`💡 [Type Inference] Aucun bloc connecté, retour à 'null' pour variable '${variable.getName()}'`);
+      debugLog(`💡 [Type Inference] Aucun bloc connecté, retour à 'null' pour variable '${variable.getName()}'`);
       try {
-        const varModel = variable as any;
-        let typeReverted = false;
-        
-        // Method 1: Try to use setType if it exists (internal API)
-        if (typeof varModel.setType === 'function') {
-          varModel.setType('');
-          typeReverted = true;
-          console.log(`✅ Type remis à 'null' (setType): variable '${variable.getName()}'`);
-        } 
-        // Method 2: Directly set the type_ property (private property)
-        else if ('type_' in varModel) {
-          varModel.type_ = null;
-          typeReverted = true;
-          console.log(`✅ Type remis à 'null' (type_): variable '${variable.getName()}'`);
-          // Also try to delete the property if setting to null doesn't work
-          if (varModel.type_ !== null) {
-            delete varModel.type_;
-            console.log(`  → Propriété type_ supprimée pour forcer le retour à null`);
-          }
-        }
-        
-        if (!typeReverted) {
-          console.warn(`⚠️ Impossible de remettre le type à 'null' pour la variable '${variable.getName()}' (API non disponible)`);
-        } else {
+        if (clearVariableType(variable)) {
+          debugLog(`✅ Type remis à 'null': variable '${variable.getName()}'`);
           // Verify the change
           const newType = variable.getType();
-          console.log(`  → Vérification: type après mise à jour = '${newType || 'null'}'`);
+          debugLog(`  → Vérification: type après mise à jour = '${newType || 'null'}'`);
+        } else {
+          console.warn(
+            `⚠️ Impossible de remettre le type à 'null' pour la variable '${variable.getName()}' (API non disponible)`,
+          );
         }
       } catch (e) {
-        console.debug('Error reverting variable type to null:', e);
+        debugLog('Error reverting variable type to null:', e);
       }
     }
   }

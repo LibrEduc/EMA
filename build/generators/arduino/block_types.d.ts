@@ -1,14 +1,12 @@
 /**
- * @fileoverview Registre centralisé des types de blocs Blockly pour Arduino
- * @description Ce fichier contient toutes les définitions de types de blocs.
- * Les types statiques sont définis comme des chaînes de caractères (ex: "int", "float", "bool").
- * Les types dynamiques utilisent le préfixe "__DYNAMIC__" suivi du nom de la fonction.
+ * @fileoverview Types de base pour le typage Blockly Arduino
+ * @description Les définitions de types de blocs sont maintenant dans src/generators/arduino/block_types/.
+ * Chaque catégorie exporte un objet de types, puis l'index les agrège.
  *
  * Pour ajouter un nouveau type de bloc :
- * 1. Ajoutez une entrée dans l'objet BLOCK_TYPES
- * 2. Pour un type statique : "nom_du_bloc": "int"
- * 3. Pour un type dynamique : "nom_du_bloc": "__DYNAMIC__nom_fonction"
- * 4. Si c'est un type dynamique, créez la fonction dans DYNAMIC_TYPE_FUNCTIONS dans block_types_registry.ts
+ * 1. Choisissez le fichier de catégorie dans block_types/ (ou créez-en un)
+ * 2. Ajoutez "nom_du_bloc": "int" (statique) ou "__DYNAMIC__nom_fonction" (dynamique)
+ * 3. Si dynamique, ajoutez la fonction dans DYNAMIC_TYPE_FUNCTIONS dans block_types_registry.ts
  */
 /**
  * Version du registre 2026-01-11
@@ -44,30 +42,4 @@ export declare function isTypeCompatible(sourceType: string | null | undefined, 
  * Registre des types de blocs
  * Basé sur les informations extraites de BlocklyArduino dans src/types/
  */
-export declare const BLOCK_TYPES: {
-    readonly logic_compare: "bool";
-    readonly logic_operation: "bool";
-    readonly logic_negate: "bool";
-    readonly logic_boolean: "bool";
-    readonly logic_null: "null";
-    readonly logic_ternary: "bool";
-    readonly math_number: "__DYNAMIC__identifyNumber";
-    readonly inout_angle_maths: "int";
-    readonly math_arithmetic: "int";
-    readonly math_interval: "int";
-    readonly math_single: "float";
-    readonly math_trig: "float";
-    readonly math_constant: "float";
-    readonly math_number_property: "bool";
-    readonly math_round: "float";
-    readonly math_modulo: "int";
-    readonly math_random_int: "int";
-    readonly math_random_float: "float";
-    readonly text: "string";
-    readonly text_char: "string";
-    readonly text_join: "string";
-    readonly text_append: "string";
-    readonly text_length: "int";
-    readonly text_isEmpty: "bool";
-};
 //# sourceMappingURL=block_types.d.ts.map

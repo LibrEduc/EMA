@@ -48,23 +48,11 @@
   },
   "dependencies": {
     "@blockly/block-plus-minus": "^9.0.7",
-    "@blockly/block-shareable-procedures": "^6.0.9",
     "@blockly/continuous-toolbox": "^7.0.7",
     "@blockly/field-angle": "^6.0.7",
-    "@blockly/field-bitmap": "^6.0.7",
-    "@blockly/field-colour": "^6.0.10",
-    "@blockly/field-colour-hsv-sliders": "^6.0.10",
-    "@blockly/field-date": "^10.0.7",
-    "@blockly/field-dependent-dropdown": "^5.0.8",
-    "@blockly/field-grid-dropdown": "^6.0.8",
-    "@blockly/field-multilineinput": "^6.0.7",
-    "@blockly/field-slider": "^8.0.7",
-    "@blockly/keyboard-navigation": "^3.0.3",
     "@blockly/plugin-modal": "^8.0.7",
-    "@blockly/plugin-strict-connection-checker": "^6.0.7",
     "@blockly/plugin-workspace-search": "^10.1.6",
     "@blockly/shadow-block-converter": "^7.0.8",
-    "@blockly/suggested-blocks": "^6.0.8",
     "@blockly/theme-dark": "^8.0.3",
     "@blockly/theme-deuteranopia": "^7.0.3",
     "@blockly/theme-highcontrast": "^7.0.3",
@@ -79,9 +67,7 @@
     "@eslint/js": "^9.39.2",
     "@microsoft/api-extractor": "^7.55.2",
     "blockly": "^12.3.1",
-    "install": "^0.13.0",
     "monaco-editor": "^0.55.1",
-    "monaco-editor-webpack-plugin": "^7.1.1",
-    "swapy": "^1.0.5"
+    "monaco-editor-webpack-plugin": "^7.1.1"
   }
 }

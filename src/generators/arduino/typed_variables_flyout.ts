@@ -85,12 +85,14 @@ export function registerTypedVariablesCategory(
     TYPED_VARIABLES_BUTTON_ID,
     (button: Blockly.FlyoutButton) => {
       const targetWorkspace = button.getTargetWorkspace();
-      if (
-        Blockly.Variables &&
-        typeof (Blockly.Variables as any).createVariableButtonHandler ===
-          "function"
+    const variablesWithHandler = Blockly.Variables as typeof Blockly.Variables & {
+      createVariableButtonHandler?: (workspace: Blockly.Workspace) => void;
+    };
+    if (
+        variablesWithHandler &&
+        typeof variablesWithHandler.createVariableButtonHandler === "function"
       ) {
-        (Blockly.Variables as any).createVariableButtonHandler(targetWorkspace);
+        variablesWithHandler.createVariableButtonHandler(targetWorkspace);
         return;
       }
       targetWorkspace.createVariable("");

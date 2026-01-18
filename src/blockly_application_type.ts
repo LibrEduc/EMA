@@ -31,6 +31,8 @@ import * as Blockly from "blockly";
 import { inferAndUpdateVariableTypes } from "./generators/arduino/variable_type_inference";
 import { registerStrictConnectionChecker } from "./generators/arduino/strict_connection_checker";
 import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
+import { normalizeVariableType } from "./generators/arduino/variable_utils";
+import { patchFieldVariableValidation, patchVariableMapCreateVariable } from "./blockly_patches";
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -49,7 +51,6 @@ import { ContentHighlight } from "@blockly/workspace-content-highlight";
 import { Modal } from "@blockly/plugin-modal";
 import { PositionedMinimap } from "@blockly/workspace-minimap";
 import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
-//import { TypedVariableModal } from "@blockly/plugin-typed-variable-modal";
 
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ZoomToFitControl } from "@blockly/zoom-to-fit";
@@ -100,12 +101,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
     
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
-    this.interceptFieldVariableValidation();
+    patchFieldVariableValidation();
     
     // Remove the default 'item' variable if it exists
     this.removeDefaultItemVariable();
     this.normalizeVariableTypes();
-    this.normalizeVariableCreationTypes();
+    patchVariableMapCreateVariable(this.workspace);
     
     // Listen for variable creation events to prevent 'item' from being created
     // Use setTimeout to ensure the deletion happens after Blockly has finished processing
@@ -147,7 +148,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     // This checker allows typed blocks to connect to untyped inputs (for type inference)
     // but blocks untyped blocks (__NO_TYPE__) from connecting to typed inputs
     registerStrictConnectionChecker(this.workspace);
-    registerTypedVariablesCategory(this.workspace as Blockly.WorkspaceSvg);
+    this.registerCustomToolboxCallbacks();
   }
   backpackOptions = {
     allowEmptyBackpackOpen: true,
@@ -254,7 +255,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     if (!themeChoice)
       themeChoice = (document.getElementById('themeMenu') as HTMLSelectElement).value;
     this.WORKSPACE_OPTIONS['theme'] = themeMappings[themeChoice];
-    if (themeMappings.hasOwnProperty(themeChoice)) {
+    if (themeMappings.hasOwnProperty(themeChoice) && !this.isContinuousToolboxEnabled()) {
       (this.workspace as Blockly.WorkspaceSvg).setTheme(themeMappings[themeChoice]);
     }
     this.workspaceReboot();
@@ -269,6 +270,13 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * selected option in the `rendererMenu` HTML select element.
    */
   public changeRenderer = (renderNew: string = (document.getElementById('rendererMenu') as HTMLSelectElement).value): string => {
+    if (!Blockly.registry.hasItem(Blockly.registry.Type.RENDERER, renderNew)) {
+      renderNew = "geras";
+      const rendererMenu = document.getElementById("rendererMenu") as HTMLSelectElement | null;
+      if (rendererMenu) {
+        rendererMenu.value = renderNew;
+      }
+    }
     this.WORKSPACE_OPTIONS['renderer'] = renderNew;
     this.workspaceReboot();
     window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "renderer", renderNew));
@@ -282,6 +290,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * again, and loads the saved blocks into the new workspace.
    */
   public workspaceReboot = (): void => {
+    this.closeFlyoutForReboot();
     this.workspaceSaveBlocks("mainWorkspace_blocks");
     this.workspaceSetupPlugins(true);
     this.workspace.dispose();
@@ -289,13 +298,29 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const currentLang = getLangParamFromUrl();
     this.changeLanguageToolbox(currentLang);
     Blockly.setLocale(languagesMapBlockly[currentLang]);
+    const originalToolbox = this.WORKSPACE_OPTIONS.toolbox as
+      | ToolboxConfiguration
+      | undefined;
+    const shouldStripCustom =
+      this.isContinuousToolboxEnabled() && originalToolbox;
+    if (shouldStripCustom) {
+      this.WORKSPACE_OPTIONS.toolbox =
+        this.getToolboxWithoutCustomCategories(originalToolbox);
+    }
     this.workspace = Blockly.inject(
       div_workspace_content_blockly,
       this.WORKSPACE_OPTIONS,
     );
-    registerTypedVariablesCategory(this.workspace as Blockly.WorkspaceSvg);
-    this.interceptFieldVariableValidation();
-    this.normalizeVariableCreationTypes();
+    // Reconnecter les mécanismes requis après réinjection
+    registerStrictConnectionChecker(this.workspace);
+    this.registerCustomToolboxCallbacks();
+    if (shouldStripCustom && originalToolbox) {
+      (this.workspace as Blockly.WorkspaceSvg).updateToolbox(originalToolbox);
+      this.WORKSPACE_OPTIONS.toolbox = originalToolbox;
+    }
+    patchFieldVariableValidation();
+    patchVariableMapCreateVariable(this.workspace);
+    this.workspaceListeners();
     this.workspaceSetupPlugins(false);
     //specific to this plugin
     const isThereMinimap: HTMLElement = document.getElementsByClassName(
@@ -313,6 +338,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     // Remove 'item' variable after reboot (it might be recreated)
     this.removeDefaultItemVariable();
     (this.workspace as Blockly.WorkspaceSvg).scrollCenter();
+    this.applyAlwaysOpenedToolboxFlyout();
   };
 
   // The function `workspaceSetupPlugins` sets up all plugins added in workspace
@@ -359,6 +385,96 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const crossTabCopyPastePlugin = new CrossTabCopyPaste();
     crossTabCopyPastePlugin.init(options);*/
   };
+
+  /**
+   * Register callbacks for custom toolbox categories.
+   * This is required after any workspace re-injection.
+   */
+  private registerCustomToolboxCallbacks(): void {
+    const svgWorkspace = this.workspace as Blockly.WorkspaceSvg;
+    registerTypedVariablesCategory(svgWorkspace);
+    if (Blockly.Procedures && typeof Blockly.Procedures.flyoutCategory === "function") {
+      svgWorkspace.registerToolboxCategoryCallback(
+        Blockly.Procedures.CATEGORY_NAME ?? "PROCEDURE",
+        (workspace) => Blockly.Procedures.flyoutCategory(workspace, false),
+      );
+    }
+  }
+
+  public applyAlwaysOpenedToolboxFlyout(): void {
+    const checkbox = document.getElementById(
+      "alwaysOpenedToolboxFlyout",
+    ) as HTMLInputElement | null;
+    if (!checkbox) {
+      return;
+    }
+    const flyout = (this.workspace as Blockly.WorkspaceSvg)
+      .getToolbox()
+      ?.getFlyout();
+    if (!flyout) {
+      return;
+    }
+    const shouldStayOpen = checkbox.checked;
+    if (typeof (flyout as Blockly.Flyout).setAutoClose === "function") {
+      (flyout as Blockly.Flyout).setAutoClose(!shouldStayOpen);
+    }
+    if (typeof (flyout as Blockly.Flyout).autoHide === "function") {
+      (flyout as Blockly.Flyout).autoHide(!shouldStayOpen);
+    }
+    if (shouldStayOpen && typeof (flyout as Blockly.Flyout).setVisible === "function") {
+      (flyout as Blockly.Flyout).setVisible(true);
+    }
+  }
+
+  private closeFlyoutForReboot(): void {
+    const flyout = (this.workspace as Blockly.WorkspaceSvg)
+      .getToolbox()
+      ?.getFlyout();
+    if (!flyout) {
+      return;
+    }
+    if (typeof flyout.hide === "function") {
+      flyout.hide();
+    }
+    if (typeof flyout.setVisible === "function") {
+      flyout.setVisible(false);
+    }
+  }
+
+  private isContinuousToolboxEnabled(): boolean {
+    const plugins = this.WORKSPACE_OPTIONS["plugins"] as
+      | Record<string, unknown>
+      | undefined;
+    return plugins?.["toolbox"] === "ContinuousToolbox";
+  }
+
+  private getToolboxWithoutCustomCategories(
+    toolbox: ToolboxConfiguration,
+  ): ToolboxConfiguration {
+    const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
+    const stripCustom = (items: Array<Record<string, unknown>>) => {
+      return items.map((item) => {
+        if ("custom" in item) {
+          const rest = { ...item };
+          delete rest.custom;
+          return {
+            ...rest,
+            contents: [],
+          };
+        }
+        if (Array.isArray(item.contents)) {
+          item.contents = stripCustom(item.contents);
+        }
+        return item;
+      });
+    };
+    if (Array.isArray(clone.contents)) {
+      clone.contents = stripCustom(
+        clone.contents as Array<Record<string, unknown>>,
+      ) as unknown as ToolboxConfiguration["contents"];
+    }
+    return clone;
+  }
 
 
   /**
@@ -423,10 +539,24 @@ export class BlocklyApplication implements BlocklyApplicationType {
       pluginContinuousToolboxCheck.checked = true;
       pluginContinuousToolboxCheck.dispatchEvent(new Event('change'));
     }
+    if ((window.sessionStorage.getItem('alwaysOpenedToolboxFlyout') == "true") || (paramsURL.includes('flyout'))) {
+      const alwaysOpenedToolboxFlyoutCheck: HTMLInputElement = document.getElementById("alwaysOpenedToolboxFlyout") as HTMLInputElement;
+      alwaysOpenedToolboxFlyoutCheck.checked = true;
+      this.applyAlwaysOpenedToolboxFlyout();
+    }
     if ((window.sessionStorage.getItem('codeEditorSwitch') == "true") || (paramsURL.includes('codeEditor'))) {
       const codeEditorSwitchCheck: HTMLInputElement = document.getElementById("codeEditorSwitch") as HTMLInputElement;
       codeEditorSwitchCheck.checked = true;
       codeEditorSwitchCheck.dispatchEvent(new Event('change'));
+    }
+    if (
+      (window.sessionStorage.getItem('debugSwitch') == "true") ||
+      (paramsURL.includes('debug')) ||
+      (window.localStorage?.getItem('ucbDebug') === '1')
+    ) {
+      const debugSwitchCheck: HTMLInputElement = document.getElementById("debugSwitch") as HTMLInputElement;
+      debugSwitchCheck.checked = true;
+      debugSwitchCheck.dispatchEvent(new Event('change'));
     }
   };
   /**
@@ -466,12 +596,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         if (!variable) {
           return;
         }
-        const currentType = variable.getType();
-        if (currentType === null || currentType === 'null') {
-          if (typeof (variable as any).setType === 'function') {
-            (variable as any).setType('');
-          }
-        }
+        normalizeVariableType(variable);
       });
     } catch (e) {
       console.debug('Error normalizing variable types:', e);
@@ -482,83 +607,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
     try {
       const variable = this.workspace.getVariableMap().getVariableById(variableId);
       if (!variable) return;
-      const currentType = variable.getType();
-      if (currentType === null || currentType === 'null') {
-        if (typeof (variable as any).setType === 'function') {
-          (variable as any).setType('');
-        }
-      }
+      normalizeVariableType(variable);
     } catch (e) {
       console.debug('Error normalizing variable type:', e);
-    }
-  }
-
-  private normalizeVariableCreationTypes(): void {
-    try {
-      const variableMap = this.workspace.getVariableMap();
-      const originalCreateVariable = variableMap.createVariable.bind(variableMap);
-      (variableMap as any).createVariable = function(
-        name: string,
-        opt_type?: string | null,
-        opt_id?: string | null,
-      ) {
-        const type = opt_type === null || opt_type === 'null' ? '' : opt_type;
-        const id = opt_id === null ? undefined : opt_id;
-        return originalCreateVariable(name, type, id);
-      };
-    } catch (e) {
-      console.debug('Error normalizing variable creation types:', e);
-    }
-  }
-
-  private interceptFieldVariableValidation(): void {
-    try {
-      if (!Blockly.FieldVariable) return;
-      const proto = Blockly.FieldVariable.prototype as any;
-      if (!proto.__ucbPatchedVariableValidation) {
-        const originalValidation = proto.doClassValidation_;
-        proto.doClassValidation_ = function(
-        newValue: string | null,
-        ) {
-          if (!newValue) return newValue;
-          const field = this as any;
-          const workspace = field.getSourceBlock?.()?.workspace || field.workspace_;
-          const variableMap = workspace?.getVariableMap?.();
-          if (!variableMap) {
-            return originalValidation.call(this, newValue);
-          }
-          const variable = variableMap.getVariableById(newValue);
-          if (!variable) {
-            // Prevent creation of phantom variables due to invalid IDs.
-            return null;
-          }
-          // Accept existing variables regardless of type mismatch warnings.
-          return newValue;
-        };
-        proto.__ucbPatchedVariableValidation = true;
-      }
-
-      if (!proto.__ucbPatchedVariableInitModel) {
-        const originalInitModel = proto.initModel;
-        proto.initModel = function() {
-          const field = this as any;
-          const block = field.getSourceBlock?.();
-          const workspace = block?.workspace || field.workspace_;
-          // Allow flyout blocks to initialize a local variable to avoid null IDs in serialization.
-          if (workspace?.isFlyout) {
-            return originalInitModel.call(this);
-          }
-          // Avoid auto-creating variables for insertion markers in the main workspace.
-          if (block?.isInsertionMarker?.()) {
-            field.value_ = null;
-            return;
-          }
-          return originalInitModel.call(this);
-        };
-        proto.__ucbPatchedVariableInitModel = true;
-      }
-    } catch (e) {
-      console.debug('Error intercepting field variable validation:', e);
     }
   }
 

@@ -6,6 +6,7 @@
 import * as Blockly from "blockly";
 import { getVariableTypeOptions } from "./block_types";
 import { getCompatibleTypesForCheck } from "./block_types_registry";
+import { debugLog } from "./debug";
 
 /**
  * Configure standard Blockly blocks to work with our type system
@@ -42,6 +43,12 @@ export function configureStandardBlocks(): void {
     getBlockType?: (this: Blockly.Block) => string | null;
     updateShape_?: (this: Blockly.Block) => void;
     __typedConfigured?: boolean;
+  };
+  type ProcedureBlockWithArgs = ProcedureBlockDef & {
+    __typedPatched?: boolean;
+    argumentVarModels_?: Blockly.VariableModel[];
+    getProcedureCall?: () => string;
+    getProcedureModel?: () => Blockly.Procedures.IProcedureModel | null;
   };
 
   const getBlocklyMsg = (key: string): string => {
@@ -154,17 +161,18 @@ export function configureStandardBlocks(): void {
       if (originalInit) {
         originalInit.call(this);
       }
-      if ((this as any).__typedPatched) {
+      const typedBlock = this as ProcedureBlockWithArgs;
+      if (typedBlock.__typedPatched) {
         return;
       }
-      (this as any).__typedPatched = true;
+      typedBlock.__typedPatched = true;
       const originalDecompose = this.decompose;
       const originalCompose = this.compose;
       const originalOnchange = this.onchange;
       this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
         const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
         if (container) {
-          const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+          const argModels = (this as ProcedureBlockWithArgs).argumentVarModels_;
           if (argModels && argModels.length > 0) {
             const typeByName = new Map(argModels.map((model) => [model.getName(), model.getType()]));
             let argBlock = container.getInputTargetBlock("STACK");
@@ -188,7 +196,7 @@ export function configureStandardBlocks(): void {
         if (originalCompose) {
           originalCompose.call(this, container);
         }
-        const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+        const argModels = (this as ProcedureBlockWithArgs).argumentVarModels_;
         if (!argModels || argModels.length === 0) {
           return;
         }
@@ -252,16 +260,17 @@ export function configureStandardBlocks(): void {
       if (originalInit) {
         originalInit.call(this);
       }
-      if ((this as any).__typedPatched) {
+      const typedBlock = this as ProcedureBlockWithArgs;
+      if (typedBlock.__typedPatched) {
         return;
       }
-      (this as any).__typedPatched = true;
+      typedBlock.__typedPatched = true;
       const originalDecompose = this.decompose;
       const originalCompose = this.compose;
       this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
         const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
         if (container) {
-          const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+          const argModels = (this as ProcedureBlockWithArgs).argumentVarModels_;
           if (argModels && argModels.length > 0) {
             const typeByName = new Map(argModels.map((model) => [model.getName(), model.getType()]));
             let argBlock = container.getInputTargetBlock("STACK");
@@ -285,7 +294,7 @@ export function configureStandardBlocks(): void {
         if (originalCompose) {
           originalCompose.call(this, container);
         }
-        const argModels = (this as any).argumentVarModels_ as Blockly.VariableModel[] | undefined;
+        const argModels = (this as ProcedureBlockWithArgs).argumentVarModels_;
         if (!argModels || argModels.length === 0) {
           return;
         }
@@ -320,12 +329,12 @@ export function configureStandardBlocks(): void {
       if (originalUpdateShape) {
         originalUpdateShape.call(this);
       }
-      const defName = (this as any).getProcedureCall?.();
+      const defName = (this as ProcedureBlockWithArgs).getProcedureCall?.();
       if (!defName || !this.workspace) {
         return;
       }
-      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as any;
-      const argModels = defBlock?.argumentVarModels_ as Blockly.VariableModel[] | undefined;
+      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as ProcedureBlockWithArgs | null;
+      const argModels = defBlock?.argumentVarModels_;
       if (!argModels || argModels.length === 0) {
         return;
       }
@@ -347,12 +356,12 @@ export function configureStandardBlocks(): void {
       if (originalUpdateShape) {
         originalUpdateShape.call(this);
       }
-      const defName = (this as any).getProcedureCall?.();
+      const defName = (this as ProcedureBlockWithArgs).getProcedureCall?.();
       if (!defName || !this.workspace) {
         return;
       }
-      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as any;
-      const argModels = defBlock?.argumentVarModels_ as Blockly.VariableModel[] | undefined;
+      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as ProcedureBlockWithArgs | null;
+      const argModels = defBlock?.argumentVarModels_;
       if (!argModels || argModels.length === 0) {
         return;
       }
@@ -384,5 +393,5 @@ export function configureStandardBlocks(): void {
     };
   }
 
-  console.log("✅ Blocs standards configurés (logic_compare restreint à int/float)");
+  debugLog("✅ Blocs standards configurés (logic_compare restreint à int/float)");
 }

@@ -69,7 +69,6 @@ export type ToolboxConfiguration = {
 }
 
 /* The above code is defining a toolbox configuration for a coding environment. */
-/* The above code is defining a toolbox configuration for a coding environment. */
 export const basic_toolbox: ToolboxConfiguration = {
   'kind': 'categoryToolbox',
   'contents': [
@@ -177,6 +176,386 @@ export const basic_toolbox: ToolboxConfiguration = {
         {
           'kind': 'block',
           'type': 'controls_flow_statements',
+        },
+      ],
+    },
+    {
+      'kind': 'category',
+      'name': 'CAT_MATHS',
+      'categorystyle': 'math_category',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'math_number',
+          'fields': {
+            'NUM': 123,
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_arithmetic',
+          'inputs': {
+            'A': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
+            'B': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_single',
+          'inputs': {
+            'NUM': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 9,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_trig',
+          'inputs': {
+            'NUM': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 45,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_constant',
+        },
+        {
+          'kind': 'block',
+          'type': 'math_number_property',
+          'inputs': {
+            'NUMBER_TO_CHECK': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 0,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_round',
+          'fields': {
+            'OP': 'ROUND',
+          },
+          'inputs': {
+            'NUM': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 3.1,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_on_list',
+          'fields': {
+            'OP': 'SUM',
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_modulo',
+          'inputs': {
+            'DIVIDEND': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 64,
+                },
+              },
+            },
+            'DIVISOR': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 10,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_constrain',
+          'inputs': {
+            'VALUE': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 50,
+                },
+              },
+            },
+            'LOW': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
+            'HIGH': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 100,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_random_int',
+          'inputs': {
+            'FROM': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
+            'TO': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 100,
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_random_float',
+        },
+        {
+          'kind': 'block',
+          'type': 'math_atan2',
+          'inputs': {
+            'X': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
+            'Y': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      'kind': 'category',
+      'name': 'CAT_TEXT',
+      'categorystyle': 'text_category',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'text',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_join',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_append',
+          'inputs': {
+            'TEXT': {
+              'shadow': {
+                'type': 'text',
+                'fields': {
+                  'TEXT': '',
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_length',
+          'inputs': {
+            'VALUE': {
+              'shadow': {
+                'type': 'text',
+                'fields': {
+                  'TEXT': 'abc',
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_isEmpty',
+          'inputs': {
+            'VALUE': {
+              'shadow': {
+                'type': 'text',
+                'fields': {
+                  'TEXT': '',
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_indexOf',
+          'inputs': {
+            'VALUE': {
+              'block': {
+                'type': 'variables_get_dynamic',
+              },
+            },
+            'FIND': {
+              'shadow': {
+                'type': 'text',
+                'fields': {
+                  'TEXT': 'abc',
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_charAt',
+          'inputs': {
+            'VALUE': {
+              'block': {
+                'type': 'variables_get_dynamic',
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_getSubstring',
+          'inputs': {
+            'STRING': {
+              'block': {
+                'type': 'variables_get_dynamic',
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_changeCase',
+          'inputs': {
+            'TEXT': {
+              'shadow': {
+                'type': 'text',
+                'fields': {
+                  'TEXT': 'abc',
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_trim',
+          'inputs': {
+            'TEXT': {
+              'shadow': {
+                'type': 'text',
+                'fields': {
+                  'TEXT': 'abc',
+                },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_count',
+          'inputs': {
+            'SUB': {
+              'shadow': {
+                'type': 'text',
+              },
+            },
+            'TEXT': {
+              'shadow': {
+                'type': 'text',
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_replace',
+          'inputs': {
+            'FROM': {
+              'shadow': {
+                'type': 'text',
+              },
+            },
+            'TO': {
+              'shadow': {
+                'type': 'text',
+              },
+            },
+            'TEXT': {
+              'shadow': {
+                'type': 'text',
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'text_reverse',
+          'inputs': {
+            'TEXT': {
+              'shadow': {
+                'type': 'text',
+              },
+            },
+          },
         },
       ],
     },
@@ -505,10 +884,6 @@ export const basic_toolbox2: ToolboxConfiguration = {
         {
           'kind': 'block',
           'type': 'text',
-        },
-        {
-          'kind': 'block',
-          'type': 'text_multiline',
         },
         {
           'kind': 'block',

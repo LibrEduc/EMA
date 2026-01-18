@@ -42,6 +42,12 @@
 
 /**
  * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */

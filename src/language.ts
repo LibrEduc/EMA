@@ -67,16 +67,28 @@ export const getLangParamFromDropdown = (): string => {
  * the user wants to change to.
  */
 export const HTML_changeLanguage = (newLang: string): void => {
-  const langElements = document.querySelectorAll('.lang');
   const selectedLangItem = languagesMap[newLang];
-  if (selectedLangItem) {
-    langElements.forEach((element) => {
-      const key = element.getAttribute('key');
-      if (key && selectedLangItem[key as keyof LanguageItem]) {
-        element.textContent = selectedLangItem[key as keyof LanguageItem];
-      }
-    });
-  }
+  if (!selectedLangItem) return;
+
+  const langElements = document.querySelectorAll('.lang');
+  langElements.forEach((element) => {
+    const key = element.getAttribute('key');
+    if (key && selectedLangItem[key as keyof LanguageItem]) {
+      element.textContent = selectedLangItem[key as keyof LanguageItem];
+    }
+    const titleKey = element.getAttribute('data-title-key');
+    if (titleKey && selectedLangItem[titleKey as keyof LanguageItem]) {
+      element.setAttribute('title', selectedLangItem[titleKey as keyof LanguageItem]);
+    }
+  });
+
+  const titledElements = document.querySelectorAll('[data-title-key]');
+  titledElements.forEach((element) => {
+    const titleKey = element.getAttribute('data-title-key');
+    if (titleKey && selectedLangItem[titleKey as keyof LanguageItem]) {
+      element.setAttribute('title', selectedLangItem[titleKey as keyof LanguageItem]);
+    }
+  });
 }
 
 /**

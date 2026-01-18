@@ -1,0 +1,14 @@
+export const MATH_BLOCK_TYPES = {
+  math_number: "__DYNAMIC__identifyNumber",
+  inout_angle_maths: "int",
+  math_arithmetic: "int",
+  math_interval: "int",
+  math_single: "float",
+  math_trig: "float",
+  math_constant: "float",
+  math_number_property: "bool",
+  math_round: "float",
+  math_modulo: "int",
+  math_random_int: "int",
+  math_random_float: "float",
+} as const;

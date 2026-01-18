@@ -1,0 +1,97 @@
+/**
+ * @license
+ * Copyright 2012 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import type { ArduinoGenerator } from "../arduino_generator";
+
+export function addTextInclude(generator: ArduinoGenerator): void {
+  generator.addInclude("ctype", "#include <ctype.h>");
+}
+
+export function addTextHelpers(generator: ArduinoGenerator): void {
+  addTextInclude(generator);
+  generator.addCodeFunction(
+    "text_helpers",
+    [
+      "char text_charAt(String text, long index) {",
+      "  if (index < 0 || index >= text.length()) return '\\0';",
+      "  return text.charAt(index);",
+      "}",
+      "",
+      "String text_substring(String text, long start, long end) {",
+      "  long length = text.length();",
+      "  if (start < 0) start = 0;",
+      "  if (end < 0) end = 0;",
+      "  if (start > length) start = length;",
+      "  if (end > length) end = length;",
+      "  if (start > end) {",
+      "    long tmp = start;",
+      "    start = end;",
+      "    end = tmp;",
+      "  }",
+      "  return text.substring(start, end);",
+      "}",
+      "",
+      "String text_toUpper(String text) {",
+      "  text.toUpperCase();",
+      "  return text;",
+      "}",
+      "",
+      "String text_toLower(String text) {",
+      "  text.toLowerCase();",
+      "  return text;",
+      "}",
+      "",
+      "String text_toTitleCase(String text) {",
+      "  bool newWord = true;",
+      "  for (unsigned int i = 0; i < text.length(); i++) {",
+      "    char c = text.charAt(i);",
+      "    if (isalpha(static_cast<unsigned char>(c))) {",
+      "      if (newWord) {",
+      "        text.setCharAt(i, static_cast<char>(toupper(c)));",
+      "        newWord = false;",
+      "      } else {",
+      "        text.setCharAt(i, static_cast<char>(tolower(c)));",
+      "      }",
+      "    } else {",
+      "      newWord = true;",
+      "    }",
+      "  }",
+      "  return text;",
+      "}",
+      "",
+      "String text_trim(String text) {",
+      "  text.trim();",
+      "  return text;",
+      "}",
+      "",
+      "long text_count(String text, String sub) {",
+      "  if (sub.length() == 0) return 0;",
+      "  long count = 0;",
+      "  int idx = 0;",
+      "  while (true) {",
+      "    idx = text.indexOf(sub, idx);",
+      "    if (idx == -1) break;",
+      "    count++;",
+      "    idx += sub.length();",
+      "  }",
+      "  return count;",
+      "}",
+      "",
+      "String text_replace(String text, String from, String to) {",
+      "  text.replace(from, to);",
+      "  return text;",
+      "}",
+      "",
+      "String text_reverse(String text) {",
+      "  String result = \"\";",
+      "  for (int i = text.length() - 1; i >= 0; i--) {",
+      "    result += text.charAt(i);",
+      "  }",
+      "  return result;",
+      "}",
+    ].join("\n"),
+  );
+}

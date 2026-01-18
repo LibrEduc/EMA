@@ -16,12 +16,9 @@ import * as logic from './arduino/blocks/logic';
 import * as loops from './arduino/blocks/loops';
 import * as math from './arduino/blocks/math';
 import * as procedures from './arduino/blocks/procedures';
+import * as text from './arduino/blocks/text';
 import * as variables from './arduino/blocks/variables';
 import * as variablesTyped from './arduino/variables_typed';
-/* import * as loops from './arduino/loops.js';
-import * as math from './arduino/math.js';
-import * as procedures from './arduino/procedures.js';
-import * as text from './arduino/text.js'; */
 
 export * from './arduino/arduino_generator';
 export * from './arduino/arduino_types';
@@ -46,6 +43,7 @@ const generators: typeof arduinoGenerator.forBlock = {
   ...loops,
   ...math,
   ...procedures,
+  ...text,
   ...variables,
   ...variablesTyped,
 };
