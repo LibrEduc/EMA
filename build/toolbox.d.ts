@@ -66,5 +66,4 @@ export type ToolboxConfiguration = {
     }>;
 };
 export declare const basic_toolbox: ToolboxConfiguration;
-export declare const basic_toolbox2: ToolboxConfiguration;
 //# sourceMappingURL=toolbox.d.ts.map

@@ -18,6 +18,10 @@
 flex>flex-resizer {
   background-color: rgb(255, 255, 255);
 }
+
+.divTableCell {
+  width: 100%;
+}
 .divTableCell div {
   width: 100px;
   display: inline-block;
@@ -25,4 +29,9 @@ flex>flex-resizer {
   text-align: center;
   color: #000000;
   font-family: arial, sans-serif;
+}
+
+.divTableCell a {
+  text-decoration: none;
+  color: inherit;
 }

@@ -33,7 +33,7 @@ export const TYPE_COMPATIBILITY: Record<string, string[]> = {
   'bool': ['bool'], // bool n'accepte que bool
   
   // Types texte
-  'string': ['string'], // string n'accepte que string
+  'string': ['string', 'char'], // string accepte string et char
   'char': ['char'], // char n'accepte que char
   
   // Types spéciaux

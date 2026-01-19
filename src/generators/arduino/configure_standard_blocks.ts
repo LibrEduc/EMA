@@ -7,6 +7,7 @@ import * as Blockly from "blockly";
 import { getVariableTypeOptions } from "./block_types";
 import { getCompatibleTypesForCheck } from "./block_types_registry";
 import { debugLog } from "./debug";
+import { setVariableType as setVariableTypeSafe } from "./variable_utils";
 
 /**
  * Configure standard Blockly blocks to work with our type system
@@ -56,19 +57,18 @@ export function configureStandardBlocks(): void {
     return msg || key;
   };
 
-  type VariableWithMutableType = Blockly.VariableModel & {
+  type VariableWithMutableType = Blockly.IVariableModel<Blockly.IVariableState> & {
     setType?: (type: string) => void;
     type_?: string;
     __ucbManualType?: boolean;
   };
 
-  const setVariableType = (variable: Blockly.VariableModel, type: string): void => {
+  const setVariableType = (
+    variable: Blockly.IVariableModel<Blockly.IVariableState>,
+    type: string,
+  ): void => {
     const typedVariable = variable as VariableWithMutableType;
-    if (typeof typedVariable.setType === "function") {
-      typedVariable.setType(type);
-    } else if ("type_" in typedVariable) {
-      typedVariable.type_ = type;
-    }
+    setVariableTypeSafe(variable, type);
     typedVariable.__ucbManualType = true;
   };
 
@@ -252,6 +252,44 @@ export function configureStandardBlocks(): void {
     };
   }
 
+  type TextAppendDef = Blockly.Block & {
+    onchange?: (this: Blockly.Block, event: Blockly.Events.Abstract) => void;
+    __typedConfigured?: boolean;
+  };
+  const textAppendDef = Blockly.Blocks["text_append"] as TextAppendDef | undefined;
+  if (textAppendDef && !textAppendDef.__typedConfigured) {
+    textAppendDef.__typedConfigured = true;
+    const originalOnchange = textAppendDef.onchange;
+    textAppendDef.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (originalOnchange) {
+        originalOnchange.call(this, event);
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+        event.type !== Blockly.Events.VAR_CREATE &&
+        event.type !== Blockly.Events.VAR_RENAME &&
+        event.type !== Blockly.Events.VAR_DELETE
+      ) {
+        return;
+      }
+      const variableId = this.getFieldValue("VAR");
+      if (!variableId) {
+        return;
+      }
+      const variable = this.workspace.getVariableMap().getVariableById(variableId);
+      if (!variable) {
+        return;
+      }
+      const varType = variable.getType();
+      if (!varType || varType === "__NO_TYPE__") {
+        setVariableType(variable, "string");
+      }
+    };
+  }
+
   const defNoReturn = Blockly.Blocks["procedures_defnoreturn"] as ProcedureBlockDef | undefined;
   if (defNoReturn && !defNoReturn.__typedConfigured) {
     defNoReturn.__typedConfigured = true;
@@ -321,9 +359,6 @@ export function configureStandardBlocks(): void {
   const callReturn = Blockly.Blocks["procedures_callreturn"] as ProcedureBlockDef | undefined;
   if (callReturn && !callReturn.__typedConfigured) {
     callReturn.__typedConfigured = true;
-    callReturn.getBlockType = function(this: Blockly.Block): string | null {
-      return getProcedureReturnType(this);
-    };
     const originalUpdateShape = callReturn.updateShape_;
     callReturn.updateShape_ = function(this: Blockly.Block) {
       if (originalUpdateShape) {

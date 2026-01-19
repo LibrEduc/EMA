@@ -33,16 +33,26 @@ export const BLOCK_TYPE_REGISTRY: Record<string, BlockTypeDefinition> = {};
  * @param numString - The number as a string
  * @returns 'int' or 'float'
  */
-function identifyNumber(numString: string): string {
-  if (!numString) return 'int';
+function identifyNumber(numString: string | number | null | undefined): string {
+  if (numString === null || numString === undefined) return 'int';
+  const text = String(numString);
+  const trimmed = text.trim().toLowerCase();
+  
+  // Handle explicit casts like int( ... ) or float( ... )
+  if (trimmed.startsWith('int(')) {
+    return 'int';
+  }
+  if (trimmed.startsWith('float(')) {
+    return 'float';
+  }
   
   // Check if it contains a decimal point or scientific notation
-  if (numString.includes('.') || numString.includes('e') || numString.includes('E')) {
+  if (text.includes('.') || text.includes(',') || text.includes('e') || text.includes('E')) {
     return 'float';
   }
   
   // Try to parse as number to check range
-  const num = Number.parseFloat(numString);
+  const num = Number.parseFloat(text);
   if (!Number.isNaN(num)) {
     // Integers are int, decimals are float
     if (num % 1 === 0) {
@@ -53,6 +63,19 @@ function identifyNumber(numString: string): string {
   
   return 'int';
 }
+
+const normalizeBlocklyType = (blocklyType: string | string[] | null): string | null => {
+  if (!blocklyType) {
+    return null;
+  }
+  if (Array.isArray(blocklyType)) {
+    return blocklyType.length > 0 ? normalizeBlocklyType(blocklyType[0]) : null;
+  }
+  if (blocklyType === "Boolean") return "bool";
+  if (blocklyType === "Number") return "int";
+  if (blocklyType === "String") return "string";
+  return blocklyType;
+};
 
 /**
  * Dynamic type functions map
@@ -79,6 +102,51 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
   'identifyNumber': (block: Blockly.Block): string => {
     const numString = block.getFieldValue('NUM');
     return identifyNumber(numString);
+  },
+  'variableLookup': (block: Blockly.Block): string => {
+    const variableId = block.getFieldValue('VAR');
+    if (!variableId) {
+      return '__NO_TYPE__';
+    }
+    try {
+      const variable = block.workspace.getVariableMap().getVariableById(variableId);
+      if (variable) {
+        const varType = variable.getType();
+        return varType || '__NO_TYPE__';
+      }
+    } catch (error) {
+      debugLog('Variable not found:', variableId, error);
+    }
+    return '__NO_TYPE__';
+  },
+  'procedureReturn': (block: Blockly.Block): string => {
+    if (block.type !== "procedures_callreturn" || !block.workspace) {
+      return 'int';
+    }
+    const name = block.getFieldValue?.("NAME");
+    if (!name) {
+      return 'int';
+    }
+    const defBlock = Blockly.Procedures.getDefinition(name, block.workspace);
+    const returnBlock = defBlock?.getInputTargetBlock?.("RETURN");
+    if (!returnBlock) {
+      return 'int';
+    }
+    const typedReturn = returnBlock as Blockly.Block & { getBlockType?: () => string | null };
+    const rawType = typedReturn.getBlockType ? typedReturn.getBlockType() : null;
+    const normalized = normalizeBlocklyType(rawType);
+    if (normalized) {
+      return normalized;
+    }
+    if (returnBlock.outputConnection) {
+      const check = normalizeBlocklyType(returnBlock.outputConnection.getCheck());
+      return check || 'int';
+    }
+    return 'int';
+  },
+  'textPromptType': (block: Blockly.Block): string => {
+    const type = block.getFieldValue("TYPE");
+    return type === "NUMBER" ? "int" : "string";
   },
 };
 
@@ -156,6 +224,19 @@ export function checkTypeCompatibility(
   if (
     (sourceType === "Boolean" || sourceType === "bool") &&
     (targetType === "Boolean" || targetType === "bool")
+  ) {
+    return true;
+  }
+
+  if (
+    (sourceType === "String" || sourceType === "string") &&
+    (targetType === "String" || targetType === "string")
+  ) {
+    return true;
+  }
+  if (
+    sourceType === "char" &&
+    (targetType === "String" || targetType === "string")
   ) {
     return true;
   }

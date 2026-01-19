@@ -2,6 +2,8 @@
  * @packageDocumentation Block definitions for typed variables
  * @author scanet\@libreduc.cc (Sébastien Canet)
  */
+export declare function defineControlsSwitchBlocks(): void;
+export declare function defineBlocklyArduinoCompatBlocks(): void;
 /**
  * Define the variables_get_dynamic block
  */

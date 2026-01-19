@@ -6,6 +6,9 @@
   <title>µcBlockly</title>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <% const faviconSvg = publicAsset("favicon.svg"); if (faviconSvg) { %>
+  <link rel="icon" type="image/svg+xml" href="<%= faviconSvg %>">
+  <% } %>
 </head>
 
 <body>
@@ -44,7 +47,7 @@
       <input type="checkbox" id="pluginContinuousToolbox" data-title-key="PLUGIN_CONTINUOUSTOOLBOX_TOOLTIP" />
       <div class="lang" key="ALWAYS_OPEN_FLYOUT" data-title-key="ALWAYS_OPEN_FLYOUT_TOOLTIP">toujours ouverte</div>
       <input type="checkbox" id="alwaysOpenedToolboxFlyout" data-title-key="ALWAYS_OPEN_FLYOUT_TOOLTIP" />
-      <div class="lang" key="codeEditorSwitch" data-title-key="CODE_EDITOR_TOOLTIP">editor</div>
+      <div class="lang" key="CODE_EDITOR" data-title-key="CODE_EDITOR_TOOLTIP">editor</div>
       <input type="checkbox" id="codeEditorSwitch" data-title-key="CODE_EDITOR_TOOLTIP" />
       <div class="lang" key="PLUGIN_DEBUG" data-title-key="PLUGIN_DEBUG_TOOLTIP">debug</div>
       <input type="checkbox" id="debugSwitch" data-title-key="PLUGIN_DEBUG_TOOLTIP" />

@@ -100,6 +100,15 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     workspaceReboot: () => void;
     workspaceSetupPlugins: (disposePlugin?: boolean) => void;
     /**
+     * Register callbacks for custom toolbox categories.
+     * This is required after any workspace re-injection.
+     */
+    private registerCustomToolboxCallbacks;
+    applyAlwaysOpenedToolboxFlyout(): void;
+    private closeFlyoutForReboot;
+    private isContinuousToolboxEnabled;
+    private getToolboxWithoutCustomCategories;
+    /**
      * The function `setParamsBlockly` sets parameters for a Blockly application based on URL query
      * parameters and updates the browser history.
      */

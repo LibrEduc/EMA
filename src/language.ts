@@ -32,6 +32,113 @@ import { addReplaceParamToUrl } from './tools';
 import { languagesMap, LanguageItem } from './languages/languageMap';
 import { ToolboxConfiguration } from "./toolbox";
 
+const toolboxTranslationCache = new WeakMap<
+  ToolboxConfiguration,
+  Map<string, string>
+>();
+
+const getToolboxCacheKey = (lang: string, toolbox: ToolboxConfiguration): string => {
+  const raw = JSON.stringify(toolbox);
+  let hash = 5381;
+  for (let i = 0; i < raw.length; i += 1) {
+    hash = (hash * 33) ^ raw.charCodeAt(i);
+  }
+  return `ucb.toolbox.${lang}.${(hash >>> 0).toString(16)}`;
+};
+
+const readToolboxFromLocalStorage = (key: string): string | null => {
+  try {
+    return window.localStorage?.getItem(key) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const clearToolboxLocalStorage = (keepKey: string): void => {
+  try {
+    const storage = window.localStorage;
+    if (!storage) {
+      return;
+    }
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
+      if (key && key.startsWith("ucb.toolbox.") && key !== keepKey) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => storage.removeItem(key));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
+const writeToolboxToLocalStorage = (key: string, value: string): void => {
+  try {
+    window.localStorage?.setItem(key, value);
+  } catch {
+    // Ignore storage errors (private mode, quota, etc.)
+  }
+};
+
+const getTranslatedToolboxJson = (
+  newLang: string,
+  toolbox: ToolboxConfiguration,
+): string => {
+  const storageKey = getToolboxCacheKey(newLang, toolbox);
+  clearToolboxLocalStorage(storageKey);
+  const localCached = readToolboxFromLocalStorage(storageKey);
+  if (localCached) {
+    return localCached;
+  }
+
+  let langCache = toolboxTranslationCache.get(toolbox);
+  if (!langCache) {
+    langCache = new Map<string, string>();
+    toolboxTranslationCache.set(toolbox, langCache);
+  }
+  const cached = langCache.get(newLang);
+  if (cached) {
+    return cached;
+  }
+
+  const basicToolboxCopy = JSON.parse(
+    JSON.stringify(toolbox.contents),
+  ) as ToolboxConfiguration["contents"];
+  const langMap: LanguageItem = languagesMap[newLang];
+  interface Category {
+    kind: string;
+    name?: string;
+    categoryStyle?: string;
+    contents?: Category[];
+  }
+  function replaceCategoryName(category: Category) {
+    if (
+      category.kind === "category" &&
+      category.name &&
+      langMap[category.name as keyof LanguageItem]
+    ) {
+      category.name = langMap[category.name as keyof LanguageItem];
+    }
+    if (category.contents) {
+      category.contents.forEach((content: Category) => {
+        replaceCategoryName(content);
+      });
+    }
+  }
+  (basicToolboxCopy as Category[]).forEach((category: Category) => {
+    replaceCategoryName(category);
+  });
+  const tempToolboxCopy: ToolboxConfiguration = JSON.parse(
+    JSON.stringify(toolbox),
+  );
+  tempToolboxCopy.contents = JSON.parse(JSON.stringify(basicToolboxCopy));
+  const serialized = JSON.stringify(tempToolboxCopy);
+  langCache.set(newLang, serialized);
+  writeToolboxToLocalStorage(storageKey, serialized);
+  return serialized;
+};
+
 
 /**
  * The function `getLangParamFromUrl` retrieves the language parameter from the URL and updates the
@@ -70,11 +177,34 @@ export const HTML_changeLanguage = (newLang: string): void => {
   const selectedLangItem = languagesMap[newLang];
   if (!selectedLangItem) return;
 
-  const langElements = document.querySelectorAll('.lang');
+  const normalizeLangValue = (rawValue: string | undefined): string => {
+    if (!rawValue) {
+      return "";
+    }
+    const trimmed = rawValue.replace(/_+$/g, "").trim();
+    return trimmed === "_" ? "" : trimmed;
+  };
+
+  const langElements = document.querySelectorAll<HTMLElement>('.lang');
   langElements.forEach((element) => {
     const key = element.getAttribute('key');
-    if (key && selectedLangItem[key as keyof LanguageItem]) {
-      element.textContent = selectedLangItem[key as keyof LanguageItem];
+    if (key && Object.prototype.hasOwnProperty.call(selectedLangItem, key)) {
+      const rawValue = selectedLangItem[key as keyof LanguageItem];
+      const value = normalizeLangValue(rawValue);
+      element.textContent = value;
+      if (value) {
+        element.style.removeProperty('display');
+        const parent = element.parentElement;
+        if (parent && parent.tagName === 'A') {
+          parent.style.removeProperty('display');
+        }
+      } else {
+        element.style.display = 'none';
+        const parent = element.parentElement;
+        if (parent && parent.tagName === 'A') {
+          parent.style.display = 'none';
+        }
+      }
     }
     const titleKey = element.getAttribute('data-title-key');
     if (titleKey && selectedLangItem[titleKey as keyof LanguageItem]) {
@@ -85,8 +215,14 @@ export const HTML_changeLanguage = (newLang: string): void => {
   const titledElements = document.querySelectorAll('[data-title-key]');
   titledElements.forEach((element) => {
     const titleKey = element.getAttribute('data-title-key');
-    if (titleKey && selectedLangItem[titleKey as keyof LanguageItem]) {
-      element.setAttribute('title', selectedLangItem[titleKey as keyof LanguageItem]);
+    if (titleKey && Object.prototype.hasOwnProperty.call(selectedLangItem, titleKey)) {
+      const rawValue = selectedLangItem[titleKey as keyof LanguageItem];
+      const value = normalizeLangValue(rawValue);
+      if (value) {
+        element.setAttribute('title', value);
+      } else {
+        element.removeAttribute('title');
+      }
     }
   });
 }
@@ -151,35 +287,10 @@ export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): v
  * categories' names replaced with their corresponding translations based on the provided `newLang`
  * language parameter.
  */
-export const changeLanguageToolbox = (newLang: string, toolbox: ToolboxConfiguration ): ToolboxConfiguration => {
- const basic_toolboxCopy = JSON.parse(JSON.stringify(toolbox.contents));
- const langMap: LanguageItem = languagesMap[newLang];
- interface Category {
-   kind: string;
-   name: string;
-   categoryStyle: string;
-   contents?: Category[];
- }
- /**
-  * The function replaces the name of a category with its corresponding translation if available in
-  * the language map.
-  * @param category - The parameter `category` is of type `Category`, which is an object
-  * that represents a category.
-  */
- function replaceCategoryName(category: Category) {
-   if (category.kind === 'category' && category.name && langMap[category.name as keyof LanguageItem]) {
-     category.name = langMap[category.name as keyof LanguageItem];
-   }
-   if (category.contents) {
-     category.contents.forEach((content: Category) => {
-       replaceCategoryName(content);
-     });
-   }
- }
- basic_toolboxCopy.forEach((category: Category) => {
-   replaceCategoryName(category);
- });
- const temp_toolboxCopy: ToolboxConfiguration = JSON.parse(JSON.stringify(toolbox));
- temp_toolboxCopy.contents = JSON.parse(JSON.stringify(basic_toolboxCopy));
- return(JSON.parse(JSON.stringify(temp_toolboxCopy)));
-}
+export const changeLanguageToolbox = (
+  newLang: string,
+  toolbox: ToolboxConfiguration,
+): ToolboxConfiguration => {
+  const toolboxJson = getTranslatedToolboxJson(newLang, toolbox);
+  return JSON.parse(toolboxJson) as ToolboxConfiguration;
+};

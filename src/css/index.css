@@ -61,3 +61,8 @@ flex.wrapper_global > flex-resizer {
 #div_content_monacoEditor {
   min-width: 1px;
 }
+
+#div_content_code {
+  overflow: auto;
+  height: 100%;
+}

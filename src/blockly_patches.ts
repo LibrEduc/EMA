@@ -26,6 +26,14 @@ export function patchVariableMapCreateVariable(
     ) => {
       const type = opt_type === null || opt_type === "null" ? "" : opt_type;
       const id = opt_id === null ? undefined : opt_id;
+      if (!id) {
+        const existing = variableMap
+          .getAllVariables()
+          .find((variable) => variable && variable.getName() === name);
+        if (existing) {
+          return existing;
+        }
+      }
       return originalCreateVariable(name, type, id);
     };
   } catch (e) {

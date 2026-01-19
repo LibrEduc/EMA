@@ -10,7 +10,7 @@
  */
 
 import * as Blockly from "blockly";
-import {ArduinoGenerator, Order} from './arduino_generator';
+import { ArduinoGenerator, Order } from '../arduino_generator';
 
 /**
  * Generator for variables_set_dynamic block.

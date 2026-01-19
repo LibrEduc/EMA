@@ -30,9 +30,20 @@ function toTextExpression(
   return "String(" + value + ")";
 }
 
+function quoteChar(value: string): string {
+  const escaped = value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  return "'" + escaped + "'";
+}
+
 export function text(block: Block): [string, Order] {
   const textValue = block.getFieldValue("TEXT") || "";
   const code = quoteString(textValue);
+  return [code, Order.ATOMIC];
+}
+
+export function text_char(block: Block): [string, Order] {
+  const value = block.getFieldValue("TEXT") || "";
+  const code = quoteChar(value.charAt(0) || "");
   return [code, Order.ATOMIC];
 }
 
@@ -229,4 +240,62 @@ export function text_reverse(
   const textValue = toTextExpression(generator, block, "TEXT");
   const code = "text_reverse(" + textValue + ")";
   return [code, Order.FUNCTION_CALL];
+}
+
+export function text_print(
+  block: Block,
+  generator: ArduinoGenerator,
+): string {
+  generator.addSetup("serial_begin", "Serial.begin(9600);");
+  const value = generator.valueToCode(block, "TEXT", Order.NONE) || '""';
+  const code = "Serial.print(String(" + value + "));\n";
+  return code;
+}
+
+export function text_prompt_ext(
+  block: Block,
+  generator: ArduinoGenerator,
+): [string, Order] {
+  generator.addSetup("serial_begin", "Serial.begin(9600);");
+  const returnType = block.getFieldValue("TYPE");
+  const msg = generator.valueToCode(block, "TEXT", Order.NONE) || '""';
+  if (returnType === "NUMBER") {
+    const functionName = "text_prompt_number";
+    generator.addCodeFunction(
+      functionName,
+      [
+        "int " + functionName + "(String msg) {",
+        "  Serial.println(msg);",
+        "  while (!Serial.available()) {",
+        "  }",
+        "  int content = Serial.parseInt();",
+        "  while (Serial.available()) { Serial.read(); }",
+        "  return content;",
+        "}",
+      ].join("\n"),
+    );
+    return [functionName + "(String(" + msg + "))", Order.FUNCTION_CALL];
+  }
+  const functionName = "text_prompt_string";
+  generator.addCodeFunction(
+    functionName,
+    [
+      "String " + functionName + "(String msg) {",
+      "  Serial.println(msg);",
+      "  String content = \"\";",
+      "  while (true) {",
+      "    if (Serial.available()) {",
+      "      char readChar = (char)Serial.read();",
+      "      if (readChar == '\\n' || readChar == '\\r') {",
+      "        break;",
+      "      }",
+      "      content += readChar;",
+      "    }",
+      "  }",
+      "  while (Serial.available()) { Serial.read(); }",
+      "  return content;",
+      "}",
+    ].join("\n"),
+  );
+  return [functionName + "(String(" + msg + "))", Order.FUNCTION_CALL];
 }

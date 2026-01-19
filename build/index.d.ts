@@ -6,12 +6,18 @@
  * @version 1.0.0
  * @since 1.0.0
  */
-import * as monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 import "./css/index.css";
 import "./css/µcBlockly.css";
-export declare const µcB_codeEditor: monaco.editor.IStandaloneCodeEditor;
+declare class LazyMonacoEditor {
+    private editor?;
+    private pendingValue;
+    private initializing;
+    ensureInitialized(container: HTMLElement): Promise<void>;
+    setValue(value: string): void;
+}
+export declare const µcB_codeEditor: LazyMonacoEditor;
 /**
  * Handles the resizing of the workspace.
  * This function calculates the offset position of the workspace content area,
@@ -30,4 +36,5 @@ export declare const µcB_workspaceOnResize: () => void;
 export declare const µcB_addFlexResizerEvents: () => void;
 export declare const registerContinuousToolboxComponents: () => void;
 export declare const unregisterContinuousToolboxComponents: () => void;
+export {};
 //# sourceMappingURL=index.d.ts.map

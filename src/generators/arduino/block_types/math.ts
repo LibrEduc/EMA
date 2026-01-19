@@ -2,7 +2,7 @@ export const MATH_BLOCK_TYPES = {
   math_number: "__DYNAMIC__identifyNumber",
   inout_angle_maths: "int",
   math_arithmetic: "int",
-  math_interval: "int",
+  math_interval: "bool",
   math_single: "float",
   math_trig: "float",
   math_constant: "float",

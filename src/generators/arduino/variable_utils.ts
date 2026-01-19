@@ -15,6 +15,16 @@ export function setVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
   type: string,
 ): boolean {
+  try {
+    const workspace = variable.getWorkspace?.();
+    const variableMap = workspace?.getVariableMap?.();
+    if (variableMap && typeof variableMap.changeVariableType === "function") {
+      variableMap.changeVariableType(variable, type);
+      return true;
+    }
+  } catch {
+    // Fall through to legacy mutation.
+  }
   const mutable = variable as MutableVariableModel;
   if (typeof mutable.setType === "function") {
     mutable.setType(type);
@@ -30,6 +40,16 @@ export function setVariableType(
 export function clearVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
 ): boolean {
+  try {
+    const workspace = variable.getWorkspace?.();
+    const variableMap = workspace?.getVariableMap?.();
+    if (variableMap && typeof variableMap.changeVariableType === "function") {
+      variableMap.changeVariableType(variable, "");
+      return true;
+    }
+  } catch {
+    // Fall through to legacy mutation.
+  }
   const mutable = variable as MutableVariableModel;
   if (typeof mutable.setType === "function") {
     mutable.setType("");

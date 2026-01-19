@@ -18,7 +18,7 @@ import * as math from './arduino/blocks/math';
 import * as procedures from './arduino/blocks/procedures';
 import * as text from './arduino/blocks/text';
 import * as variables from './arduino/blocks/variables';
-import * as variablesTyped from './arduino/variables_typed';
+import * as variablesTyped from './arduino/blocks/variables_typed';
 
 export * from './arduino/arduino_generator';
 export * from './arduino/arduino_types';

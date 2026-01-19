@@ -23,6 +23,11 @@ export function math_number(block: Block): [string, Order] {
   return [code, Order.ATOMIC];
 }
 
+export function inout_angle_maths(block: Block): [string, Order] {
+  const angle = block.getFieldValue("ANGLE") || "0";
+  return [angle, Order.ATOMIC];
+}
+
 export function math_arithmetic(
   block: Block,
   generator: ArduinoGenerator,
@@ -92,6 +97,41 @@ export function math_single(
     default:
       return ["0", Order.ATOMIC];
   }
+}
+
+export function math_interval(
+  block: Block,
+  generator: ArduinoGenerator,
+): [string, Order] {
+  const OPERATORS: Record<string, string> = {
+    LT: "<",
+    LTE: "<=",
+    GT: ">",
+    GTE: ">=",
+  };
+  const valueInf =
+    generator.valueToCode(block, "inf", Order.RELATIONAL) || "0";
+  const compInf = OPERATORS[block.getFieldValue("comp_inf")] || "<";
+  const valueVal =
+    generator.valueToCode(block, "valeur", Order.RELATIONAL) || "0";
+  const compSup = OPERATORS[block.getFieldValue("comp_sup")] || "<";
+  const valueSup =
+    generator.valueToCode(block, "sup", Order.RELATIONAL) || "0";
+  const code =
+    "((" +
+    valueInf +
+    " " +
+    compInf +
+    " " +
+    valueVal +
+    ") && (" +
+    valueVal +
+    " " +
+    compSup +
+    " " +
+    valueSup +
+    "))";
+  return [code, Order.LOGICAL_AND];
 }
 
 export function math_trig(

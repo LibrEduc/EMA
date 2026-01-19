@@ -28,7 +28,6 @@
  */
 
 import * as Blockly from "blockly";
-import { inferAndUpdateVariableTypes } from "./generators/arduino/variable_type_inference";
 import { registerStrictConnectionChecker } from "./generators/arduino/strict_connection_checker";
 import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
 import { normalizeVariableType } from "./generators/arduino/variable_utils";
@@ -39,8 +38,13 @@ import { ToolboxConfiguration } from "./toolbox";
 import { themeMappings } from "./options";
 import { addReplaceParamToUrl } from "./tools";
 import { arduinoGenerator } from "./generators/arduino";
-import { languagesMap, languagesMapBlockly, LanguageItem } from './languages/languageMap';
-import { getLangParamFromDropdown, getLangParamFromUrl, HTML_changeLanguage } from './language';
+import { languagesMap, languagesMapBlockly } from './languages/languageMap';
+import {
+  changeLanguageToolbox as translateToolbox,
+  getLangParamFromDropdown,
+  getLangParamFromUrl,
+  HTML_changeLanguage,
+} from './language';
 
 /* import {blocks, unregisterProcedureBlocks} from '@blockly/block-shareable-procedures';
 unregisterProcedureBlocks();
@@ -103,41 +107,50 @@ export class BlocklyApplication implements BlocklyApplicationType {
     Blockly.ContextMenuItems.registerCommentOptions();
     patchFieldVariableValidation();
     
-    // Remove the default 'item' variable if it exists
-    this.removeDefaultItemVariable();
     this.normalizeVariableTypes();
     patchVariableMapCreateVariable(this.workspace);
     
-    // Listen for variable creation events to prevent 'item' from being created
-    // Use setTimeout to ensure the deletion happens after Blockly has finished processing
+    // Listen for variable creation events to normalize variable types
     this.workspace.addChangeListener((e: Blockly.Events.Abstract) => {
       if (e.type === Blockly.Events.VAR_CREATE) {
         const varEvent = e as Blockly.Events.VarCreate;
         if (varEvent.varId) {
           this.normalizeVariableTypeById(varEvent.varId);
         }
-        if (varEvent.varName === 'item' && varEvent.varId) {
-          // Delete the 'item' variable after a short delay to avoid interfering with Blockly's internal processing
+        if (varEvent.varName && varEvent.varId) {
+          // De-duplicate variables created with the same name.
           setTimeout(() => {
             try {
-              const variable = this.workspace.getVariableMap().getVariableById(varEvent.varId!);
-              if (variable && variable.getName() === 'item') {
-                // Before deleting, update all blocks that reference this variable to use null
-                const allBlocks = this.workspace.getAllBlocks(false);
-                allBlocks.forEach(block => {
-                  const varField = block.getField('VAR') as Blockly.FieldVariable | null;
-                  if (varField && varField.getValue() === varEvent.varId) {
-                    // Clear the variable field
-                    varField.setValue(null);
-                  }
-                });
-                
-                // Now delete the variable
-                this.workspace.getVariableMap().deleteVariable(variable);
-                console.log('🗑️ Variable "item" supprimée automatiquement');
+              const variableMap = this.workspace.getVariableMap();
+              const existing = variableMap
+                .getAllVariables()
+                .find(
+                  (variable) =>
+                    variable &&
+                    variable.getName() === varEvent.varName &&
+                    variable.getId() !== varEvent.varId,
+                );
+              if (!existing) {
+                return;
+              }
+              const allBlocks = this.workspace.getAllBlocks(false);
+              const existingId = existing.getId();
+              const createdId = varEvent.varId;
+              if (!existingId || !createdId) {
+                return;
+              }
+              allBlocks.forEach((block) => {
+                const varField = block.getField("VAR") as Blockly.FieldVariable | null;
+                if (varField && varField.getValue() === createdId) {
+                  varField.setValue(existingId);
+                }
+              });
+              const created = variableMap.getVariableById(createdId);
+              if (created) {
+                variableMap.deleteVariable(created);
               }
             } catch (err) {
-              console.debug('Error deleting item variable:', err);
+              console.debug("Error deduplicating variable:", err);
             }
           }, 0);
         }
@@ -197,10 +210,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       ) {
         return;
       }
-      
-      // Infer and update variable types based on block connections
-      // This is similar to BlocklyArduino's approach
-      inferAndUpdateVariableTypes(this.workspace);
       
       µcB_codeEditor.setValue(arduinoGenerator.workspaceToCode(this.workspace));
       div_content_code.textContent = arduinoGenerator.workspaceToCode(this.workspace);
@@ -335,8 +344,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
         : "hidden";
     }
     this.workspaceLoadBlocks("mainWorkspace_blocks");
-    // Remove 'item' variable after reboot (it might be recreated)
-    this.removeDefaultItemVariable();
     (this.workspace as Blockly.WorkspaceSvg).scrollCenter();
     this.applyAlwaysOpenedToolboxFlyout();
   };
@@ -548,6 +555,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
       const codeEditorSwitchCheck: HTMLInputElement = document.getElementById("codeEditorSwitch") as HTMLInputElement;
       codeEditorSwitchCheck.checked = true;
       codeEditorSwitchCheck.dispatchEvent(new Event('change'));
+      const monacoContainer = document.getElementById("div_content_monacoEditor") as HTMLElement | null;
+      if (monacoContainer) {
+        void µcB_codeEditor.ensureInitialized(monacoContainer);
+      }
     }
     if (
       (window.sessionStorage.getItem('debugSwitch') == "true") ||
@@ -580,8 +591,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const data = window.sessionStorage?.getItem(storageKeyWorkspaceBlocks);
     if (!data) return;
     Blockly.serialization.workspaces.load(JSON.parse(data), this.workspace);
-    // Remove 'item' variable after loading blocks (it might be recreated during load)
-    this.removeDefaultItemVariable();
     this.normalizeVariableTypes();
   };
   /**
@@ -631,36 +640,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * which the toolbox should be changed.
    */
   private readonly changeLanguageToolbox = (newLang: string): void => {
-    const basic_toolboxCopy = JSON.parse(JSON.stringify(this.toolbox.contents));
-    const langMap: LanguageItem = languagesMap[newLang];
-    interface Category {
-      kind: string;
-      name: string;
-      categoryStyle: string;
-      contents?: Category[];
-    }
-    /**
-     * The function replaces the name of a category with its corresponding translation if available in
-     * the language map.
-     * @param category - The parameter `category` is of type `Category`, which is an object
-     * that represents a category.
-     */
-    function replaceCategoryName(category: Category) {
-      if (category.kind === 'category' && category.name && langMap[category.name as keyof LanguageItem]) {
-        category.name = langMap[category.name as keyof LanguageItem];
-      }
-      if (category.contents) {
-        category.contents.forEach((content: Category) => {
-          replaceCategoryName(content);
-        });
-      }
-    }
-    basic_toolboxCopy.forEach((category: Category) => {
-      replaceCategoryName(category);
-    });
-    const temp_toolboxCopy: ToolboxConfiguration = JSON.parse(JSON.stringify(this.toolbox));
-    temp_toolboxCopy.contents = JSON.parse(JSON.stringify(basic_toolboxCopy));
-    this.WORKSPACE_OPTIONS.toolbox = JSON.parse(JSON.stringify(temp_toolboxCopy));
+    this.WORKSPACE_OPTIONS.toolbox = translateToolbox(newLang, this.toolbox);
   }
 
   /**
@@ -701,6 +681,28 @@ export class BlocklyApplication implements BlocklyApplicationType {
       if (customMessages.TYPED_VAR_ARG_TYPE_LABEL) {
         msg["TYPED_VAR_ARG_TYPE_LABEL"] = customMessages.TYPED_VAR_ARG_TYPE_LABEL;
       }
+      const switchKeys = [
+        "CONTROLS_SWITCH_HELPURL",
+        "CONTROLS_SWITCH_VAR_TITLE",
+        "CONTROLS_SWITCH_VAR_TAIL",
+        "CONTROLS_SWITCH_MSG_CASEBREAK",
+        "CONTROLS_SWITCH_MSG_DO",
+        "CONTROLS_SWITCH_MSG_DEFAULT",
+        "CONTROLS_SWITCH_MSG_SWITCHVAR",
+        "CONTROLS_SWITCH_VAR_TOOLTIP",
+        "CONTROLS_SWITCH_CASEBREAK_TOOLTIP",
+        "CONTROLS_SWITCH_DEFAULT_TOOLTIP",
+        "CONTROLS_SWITCH_TOOLTIP_1",
+        "CONTROLS_SWITCH_TOOLTIP_2",
+        "CONTROLS_SWITCH_TOOLTIP_3",
+        "CONTROLS_SWITCH_TOOLTIP_4",
+      ] as const;
+      switchKeys.forEach((key) => {
+        const value = customMessages[key];
+        if (value) {
+          msg[key] = value;
+        }
+      });
     }
     this.changeLanguageToolbox(newLang);
     this.setParamsBlockly();

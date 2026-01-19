@@ -25,10 +25,12 @@ export interface LanguageItem {
     PLUGIN_MINIMAP_TOOLTIP: string;
     PLUGIN_HIGHLIGHT_TOOLTIP: string;
     PLUGIN_CONTINUOUSTOOLBOX_TOOLTIP: string;
+    ALWAYS_OPEN_FLYOUT: string;
     ALWAYS_OPEN_FLYOUT_TOOLTIP: string;
     LANGUAGE_MENU_TOOLTIP: string;
     THEME_MENU_TOOLTIP: string;
     RENDERER_MENU_TOOLTIP: string;
+    CODE_EDITOR: string;
     CODE_EDITOR_TOOLTIP: string;
     PLUGIN_DEBUG_TOOLTIP: string;
     CAT_LOGIC: string;
@@ -66,6 +68,20 @@ export interface LanguageItem {
     TYPED_VAR_TYPE_SET_LABEL: string;
     TYPED_VAR_TYPE_TO_LABEL: string;
     TYPED_VAR_ARG_TYPE_LABEL: string;
+    CONTROLS_SWITCH_HELPURL: string;
+    CONTROLS_SWITCH_VAR_TITLE: string;
+    CONTROLS_SWITCH_VAR_TAIL: string;
+    CONTROLS_SWITCH_MSG_CASEBREAK: string;
+    CONTROLS_SWITCH_MSG_DO: string;
+    CONTROLS_SWITCH_MSG_DEFAULT: string;
+    CONTROLS_SWITCH_MSG_SWITCHVAR: string;
+    CONTROLS_SWITCH_VAR_TOOLTIP: string;
+    CONTROLS_SWITCH_CASEBREAK_TOOLTIP: string;
+    CONTROLS_SWITCH_DEFAULT_TOOLTIP: string;
+    CONTROLS_SWITCH_TOOLTIP_1: string;
+    CONTROLS_SWITCH_TOOLTIP_2: string;
+    CONTROLS_SWITCH_TOOLTIP_3: string;
+    CONTROLS_SWITCH_TOOLTIP_4: string;
 }
 export {};
 //# sourceMappingURL=languageMap.d.ts.map

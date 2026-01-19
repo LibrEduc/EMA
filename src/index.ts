@@ -29,7 +29,7 @@
 
 import * as Blockly from "blockly";
 import { SeparatorAxis } from "blockly/core/flyout_separator";
-import * as monaco from "monaco-editor";
+import type * as Monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 
@@ -40,7 +40,6 @@ const globalWindow = window as Window & {
     getWorkerUrl: (moduleId: string, label: string) => string;
   };
   Blockly?: typeof Blockly;
-  arduinoGenerator?: typeof arduinoGenerator;
 };
 
 globalWindow.MonacoEnvironment = {
@@ -111,7 +110,9 @@ import {
 if (typeof window !== 'undefined') {
   // Exposer arduinoGenerator et ses propriétés principales
   const exposedArduinoGenerator = arduinoGenerator;
-  globalWindow.arduinoGenerator = exposedArduinoGenerator;
+  (globalWindow as typeof globalWindow & {
+    arduinoGenerator?: typeof arduinoGenerator;
+  }).arduinoGenerator = exposedArduinoGenerator;
   
   console.log('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
   console.log('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
@@ -182,24 +183,56 @@ requiredElements.forEach((id) => {
   }
 });
 
-// Initialize Monaco Editor
-export const µcB_codeEditor = monaco.editor.create(
-  elements.contentMonacoEditor,
-  {
-    automaticLayout: true,
-    formatOnPaste: true,
-    formatOnType: true,
-    language: "cpp",
-    lineNumbers: "on",
-    readOnly: false,
-    scrollBeyondLastLine: false,
-  },
-);
+class LazyMonacoEditor {
+  private editor?: Monaco.editor.IStandaloneCodeEditor;
+  private pendingValue: string | null = null;
+  private initializing: Promise<void> | null = null;
+
+  async ensureInitialized(container: HTMLElement): Promise<void> {
+    if (this.editor) {
+      return;
+    }
+    if (this.initializing) {
+      await this.initializing;
+      return;
+    }
+    this.initializing = (async () => {
+      const monaco = await import("monaco-editor");
+      this.editor = monaco.editor.create(container, {
+        automaticLayout: true,
+        formatOnPaste: true,
+        formatOnType: true,
+        language: "cpp",
+        lineNumbers: "on",
+        readOnly: false,
+        scrollBeyondLastLine: false,
+      });
+      if (this.pendingValue !== null) {
+        this.editor.setValue(this.pendingValue);
+        this.pendingValue = null;
+      }
+    })();
+    await this.initializing;
+  }
+
+  setValue(value: string): void {
+    if (this.editor) {
+      this.editor.setValue(value);
+      return;
+    }
+    this.pendingValue = value;
+  }
+}
+
+// Initialize Monaco Editor lazily
+export const µcB_codeEditor = new LazyMonacoEditor();
 if (elements.contentMonacoEditor) {
   elements.contentMonacoEditor.style.display = "none";
 }
 
 // Initialize Blockly Application
+// Ensure custom blocks are registered before toolbox injection.
+defineTypedVariableBlocks();
 const µcB: BlocklyApplication = new BlocklyApplication(
   basic_toolbox,
   {
@@ -287,6 +320,30 @@ export const µcB_workspaceOnResize = (): void => {
  * The function contains event listeners for mouse movement and mouse button release, but it does not
  * have a return statement that would return a specific value.
  */
+const saveLayoutToSessionStorage = (): void => {
+  const layoutElements = {
+    flexContainerUp: document.getElementById(
+      "flex_container_up",
+    ) as HTMLElement,
+    flexContainerUpLeft: document.getElementById(
+      "flex_container_up_left",
+    ) as HTMLElement,
+    flexContainerUpRight: document.getElementById(
+      "flex_container_up_right",
+    ) as HTMLElement,
+    flexContainerBottom: document.getElementById(
+      "flex_container_bottom",
+    ) as HTMLElement,
+  };
+
+  Object.entries(layoutElements).forEach(([key, element]) => {
+    if (element && window.sessionStorage) {
+      const flexGrowValue = element.style.flexGrow || "1";
+      window.sessionStorage.setItem(key, flexGrowValue);
+    }
+  });
+};
+
 const µcB_workspaceManageResize = (
   mouseDown: Event,
   sizeProp: string,
@@ -353,6 +410,7 @@ const µcB_workspaceManageResize = (
     }
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
+    saveLayoutToSessionStorage();
   };
 
   window.addEventListener("mousemove", onMouseMove);
@@ -606,6 +664,7 @@ const HTML_onChange = (): void => {
         elements.contentMonacoEditor.style.display = "block";
         elements.contentMonacoEditor.style.height = "100%";
         elements.contentMonacoEditor.style.width = "100%";
+        void µcB_codeEditor.ensureInitialized(elements.contentMonacoEditor);
       }
     } else {
       if (elements.contentCode) elements.contentCode.style.display = "block";
@@ -681,6 +740,14 @@ const DomIsLoaded = (callback: () => void): void => {
     document.addEventListener("DOMContentLoaded", callback);
   }
 };
+
+const scheduleNonCriticalDomInit = (callback: () => void): void => {
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(callback, { timeout: 1500 });
+    return;
+  }
+  setTimeout(callback, 0);
+};
 // The `DomIsLoaded` function prepares everything needed by structure of DOM.
 DomIsLoaded((): void => {
   // Définir les blocs de variables typées après que Blockly soit chargé
@@ -755,32 +822,6 @@ window.onload = (): void => {
 
   µcB.workspaceSetupPlugins(false);
 
-  // Initialize minimap
-  const minimap = document.getElementsByClassName(
-    "blockly-minimap",
-  )[0] as HTMLElement;
-  if (minimap) {
-    minimap.style.visibility = "hidden";
-    elements.pluginMinimap.checked = false;
-  }
-
-  // Initialize toolbox categories
-  const categories = Array.from(
-    document.getElementsByClassName(
-      "blocklyTreeRowContentContainer",
-    ) as HTMLCollectionOf<HTMLElement>,
-  );
-  categories.forEach((category) => {
-    category.style.flexDirection = "row";
-  });
-
-  const toolboxContents = document.getElementsByClassName(
-    "blocklyToolboxContents",
-  )[0] as HTMLElement;
-  if (toolboxContents) {
-    toolboxContents.style.alignItems = "start";
-  }
-
   // Attendre que le DOM soit complètement stabilisé avant d'appeler workspaceOnResize
   // Utiliser requestAnimationFrame pour s'assurer que le layout est calculé
   requestAnimationFrame(() => {
@@ -789,56 +830,70 @@ window.onload = (): void => {
     µcB.workspaceLoadBlocks("mainWorkspace_blocks");
     (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
     µcB.pluginsSetupWorkspace();
+    scheduleNonCriticalDomInit(() => {
+      // Initialize minimap
+      const minimap = document.getElementsByClassName(
+        "blockly-minimap",
+      )[0] as HTMLElement;
+      if (minimap) {
+        minimap.style.visibility = "hidden";
+        elements.pluginMinimap.checked = false;
+      }
+
+      const continuousEnabled =
+        window.sessionStorage.getItem("pluginContinuousToolbox") === "true" ||
+        new URLSearchParams(window.location.search)
+          .get("options")
+          ?.split(",")
+          .includes("ctoolbox");
+      if (!continuousEnabled) {
+        // Initialize toolbox categories for standard toolbox
+        const categories = Array.from(
+          document.getElementsByClassName(
+            "blocklyTreeRowContentContainer",
+          ) as HTMLCollectionOf<HTMLElement>,
+        );
+        categories.forEach((category) => {
+          category.style.flexDirection = "row";
+        });
+
+        const toolboxContents = document.getElementsByClassName(
+          "blocklyToolboxContents",
+        )[0] as HTMLElement;
+        if (toolboxContents) {
+          toolboxContents.style.alignItems = "start";
+        }
+      }
+
+      // Attacher l'événement de clic sur le titre pour réinitialiser tous les paramètres
+      const titleElement = document.getElementById("title");
+      if (titleElement) {
+        titleElement.addEventListener("click", resetAllParameters);
+        // Ajouter un style pour indiquer que c'est cliquable
+        titleElement.style.cursor = "pointer";
+
+        // Créer un span avec la classe lang pour la traduction automatique
+        const titleSpan = document.createElement("span");
+        titleSpan.className = "lang";
+        titleSpan.setAttribute("key", "RESET_TITLE");
+        titleSpan.textContent = "Click to reset all parameters";
+
+        // Appliquer la traduction selon la langue actuelle
+        const currentLang = getLangParamFromUrl();
+        HTML_changeLanguage(currentLang);
+
+        // Définir le tooltip avec le texte traduit
+        titleElement.title = titleSpan.textContent;
+      }
+    });
   });
 
-  // Attacher l'événement de clic sur le titre pour réinitialiser tous les paramètres
-  const titleElement = document.getElementById("title");
-  if (titleElement) {
-    titleElement.addEventListener("click", resetAllParameters);
-    // Ajouter un style pour indiquer que c'est cliquable
-    titleElement.style.cursor = "pointer";
-
-    // Créer un span avec la classe lang pour la traduction automatique
-    const titleSpan = document.createElement("span");
-    titleSpan.className = "lang";
-    titleSpan.setAttribute("key", "RESET_TITLE");
-    titleSpan.textContent = "Click to reset all parameters";
-
-    // Appliquer la traduction selon la langue actuelle
-    const currentLang = getLangParamFromUrl();
-    HTML_changeLanguage(currentLang);
-
-    // Définir le tooltip avec le texte traduit
-    titleElement.title = titleSpan.textContent;
-  }
 };
 
 /* The above code is a TypeScript code snippet that sets the `onbeforeunload` event handler for the
 window object. This event is triggered when the user is about to leave the current page, and save windows position in UI. */
 window.onbeforeunload = (): void => {
-  const layoutElements = {
-    flexContainerUp: document.getElementById(
-      "flex_container_up",
-    ) as HTMLElement,
-    flexContainerUpLeft: document.getElementById(
-      "flex_container_up_left",
-    ) as HTMLElement,
-    flexContainerUpRight: document.getElementById(
-      "flex_container_up_right",
-    ) as HTMLElement,
-    flexContainerBottom: document.getElementById(
-      "flex_container_bottom",
-    ) as HTMLElement,
-  };
-
-  Object.entries(layoutElements).forEach(([key, element]) => {
-    if (element && window.sessionStorage) {
-      // Sauvegarder la valeur flexGrow pour maintenir la compatibilité avec le système de resizers
-      const flexGrowValue = element.style.flexGrow || "1";
-      window.sessionStorage.setItem(key, flexGrowValue);
-    }
-  });
-
+  saveLayoutToSessionStorage();
   µcB.workspaceSaveBlocks("mainWorkspace_blocks");
   µcB.workspaceSetupPlugins(true);
 };

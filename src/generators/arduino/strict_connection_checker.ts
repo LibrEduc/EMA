@@ -167,6 +167,17 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return true;
     }
 
+    // Special case: String type matching
+    if ((sourceType === 'String' || sourceType === 'string') &&
+        (targetType === 'String' || targetType === 'string')) {
+      return true;
+    }
+    // Allow char to plug into string (but not the reverse).
+    if ((sourceType === 'char') &&
+        (targetType === 'string' || targetType === 'String')) {
+      return true;
+    }
+
     // Special case: null/undefined types
     if (sourceType === 'null' || sourceType === 'undefined' || 
         targetType === 'null' || targetType === 'undefined') {

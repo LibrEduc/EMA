@@ -13,11 +13,36 @@ import CopyPlugin from "copy-webpack-plugin";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const resolvePublicAsset = (compilation, assetName) => {
+  const normalized = assetName.replace(/^\/+/, "").replaceAll("\\", "/");
+  const extension = path.extname(normalized);
+  const baseName = normalized.slice(0, -extension.length);
+  const match = compilation
+    .getAssets()
+    .find(
+      (asset) =>
+        asset.name.startsWith(`assets/${baseName}.`) &&
+        asset.name.endsWith(extension)
+    );
+
+  if (!match) {
+    return "";
+  }
+
+  const publicPath = compilation.outputOptions.publicPath;
+  if (!publicPath || publicPath === "auto") {
+    return match.name;
+  }
+
+  return `${publicPath}${match.name}`.replace(/\/{2,}/g, "/");
+};
+
 // Configuration pour utilisation locale (file://)
 const config = {
   entry: "./src/index.ts",
   output: {
     filename: "bundle.js",
+    assetModuleFilename: "assets/[name].[contenthash][ext][query]",
     path: path.resolve(__dirname, "dist/bundle"),
     publicPath: "./",
     clean: true,
@@ -33,6 +58,15 @@ const config = {
         test: /\.css$/,
         use: ["style-loader", "css-loader"],
       },
+      {
+        test: /\.(png|jpe?g|gif|svg|webp|ico|woff2?|eot|ttf|otf)$/i,
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024,
+          },
+        },
+      },
     ],
   },
   resolve: {
@@ -41,6 +75,16 @@ const config = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "public/index.html",
+      templateParameters: (compilation, assets, assetTags, options) => ({
+        compilation,
+        webpackConfig: compilation.options,
+        htmlWebpackPlugin: {
+          tags: assetTags,
+          files: assets,
+          options,
+        },
+        publicAsset: (name) => resolvePublicAsset(compilation, name),
+      }),
     }),
     // Configuration Monaco pour utilisation locale avec publicPath relatif
     new MonacoWebpackPlugin({
@@ -51,11 +95,19 @@ const config = {
       patterns: [
         {
           from: path.resolve(__dirname, "./node_modules/blockly/media"),
-          to: path.resolve(__dirname, "docs/media"),
+          to: "media",
+        },
+        {
+          from: path.resolve(__dirname, "public/assets"),
+          to: "assets/[path][name].[contenthash][ext]",
+          noErrorOnMissing: true,
         },
         {
           from: path.resolve(__dirname, "public"),
-          to: path.resolve(__dirname, "docs"),
+          to: ".",
+          globOptions: {
+            ignore: ["**/index.html", "**/assets/**"],
+          },
         },
       ],
     }),

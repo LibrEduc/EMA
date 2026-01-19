@@ -129,7 +129,46 @@ export function logic_boolean(
 
 export function logic_null(): [string, Order] {
   // Null data type.
-  return ["null", Order.ATOMIC];
+  return ["NULL", Order.ATOMIC];
+}
+
+export function controls_switch(
+  block: Block,
+  generator: ArduinoGenerator,
+): string {
+  const switchVar = generator.getVariableName(block.getFieldValue("SWVAR"));
+  const caseZero =
+    generator.valueToCode(block, "CASE0", Order.NONE) || "false";
+  const branchZero = generator.statementToCode(block, "DO0");
+  let code =
+    "switch (" +
+    switchVar +
+    ") {\n" +
+    "case " +
+    caseZero +
+    ":\n" +
+    branchZero +
+    "  break;\n";
+
+  const switchBlock = block as Block & {
+    casebreakCount_?: number;
+    defaultCount_?: number;
+  };
+  const caseCount = switchBlock.casebreakCount_ ?? 0;
+  const hasDefault = (switchBlock.defaultCount_ ?? 0) > 0;
+
+  for (let n = 1; n <= caseCount; n += 1) {
+    const argument =
+      generator.valueToCode(block, "CASE" + n, Order.NONE) || "false";
+    const branch = generator.statementToCode(block, "DO" + n);
+    code += "case " + argument + ":\n" + branch + "  break;\n";
+  }
+  if (hasDefault) {
+    const branch = generator.statementToCode(block, "DEFAULT");
+    code += "default:\n" + branch;
+  }
+  code += "}\n";
+  return code;
 }
 
 export function logic_ternary(

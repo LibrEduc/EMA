@@ -95,7 +95,7 @@ export function registerTypedVariablesCategory(
         variablesWithHandler.createVariableButtonHandler(targetWorkspace);
         return;
       }
-      targetWorkspace.createVariable("");
+      targetWorkspace.getVariableMap().createVariable("");
     },
   );
 }

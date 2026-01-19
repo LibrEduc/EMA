@@ -107,8 +107,10 @@ export function controls_whileUntil(
     generator.statementToCode(block, "DO"),
     block,
   );
-  const conditionCode = until ? "!(" + condition + ")" : condition;
-  return "while (" + conditionCode + ") {\n" + branch + "}\n";
+  if (until) {
+    return "do {\n" + branch + "} while (!(" + condition + "));\n";
+  }
+  return "while (" + condition + ") {\n" + branch + "}\n";
 }
 
 export function controls_for(
@@ -148,7 +150,6 @@ export function controls_for(
       stepValue = Math.abs(stepValue);
     }
     const comparison = stepValue >= 0 ? "<=" : ">=";
-    const stepLiteral = String(stepValue);
     const increment =
       stepValue === 1
         ? "++"
@@ -261,9 +262,10 @@ export function controls_forEach(
 
 export function controls_flow_statements(
   block: Block,
-  generator: ArduinoGenerator,
+  _generator: ArduinoGenerator,
 ): string {
   // Flow statements (break/continue).
+  void _generator;
   const flow = block.getFieldValue("FLOW");
   if (flow === "BREAK") {
     return "break;\n";
