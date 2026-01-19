@@ -133,13 +133,16 @@ export class BlocklyApplication implements BlocklyApplicationType {
               if (!existing) {
                 return;
               }
-              const allBlocks = this.workspace.getAllBlocks(false);
               const existingId = existing.getId();
               const createdId = varEvent.varId;
               if (!existingId || !createdId) {
                 return;
               }
-              allBlocks.forEach((block) => {
+              const uses = Blockly.Variables.getVariableUsesById(
+                this.workspace,
+                createdId,
+              );
+              uses.forEach((block: Blockly.Block) => {
                 const varField = block.getField("VAR") as Blockly.FieldVariable | null;
                 if (varField && varField.getValue() === createdId) {
                   varField.setValue(existingId);
@@ -183,6 +186,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
   plugin_modal = new Modal();
   plugin_workspaceSearch = new WorkspaceSearch();
   plugin_zoomToFit = new ZoomToFitControl();
+  private saveBlocksTimer: number | null = null;
+  private codegenTimer: number | null = null;
   /**
    * The function `workspaceListeners` adds event listeners to a Blockly workspace to save changes to
    * storage and run code whenever the workspace changes meaningfully.
@@ -190,29 +195,37 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * Blockly workspace where the blocks are being used.
    */
   private readonly workspaceListeners = (): void => {
-    // Every time the workspace changes state, save the changes to storage.
-    this.workspace.addChangeListener((e: Blockly.Events.Abstract): void => {
-      // UI events are things like scrolling, zooming, etc.
-      // No need to save after one of these.
-      if (e.isUiEvent || (this.workspace as Blockly.WorkspaceSvg).isDragging()) return;
-      this.workspaceSaveBlocks("mainWorkspace_blocks");
-    });
+    const scheduleSave = (): void => {
+      if (this.saveBlocksTimer !== null) {
+        window.clearTimeout(this.saveBlocksTimer);
+      }
+      this.saveBlocksTimer = window.setTimeout(() => {
+        this.workspaceSaveBlocks("mainWorkspace_blocks");
+        this.saveBlocksTimer = null;
+      }, 250);
+    };
 
-    // Whenever the workspace changes meaningfully, run the code again.
+    const scheduleCodegen = (): void => {
+      if (this.codegenTimer !== null) {
+        window.clearTimeout(this.codegenTimer);
+      }
+      this.codegenTimer = window.setTimeout(() => {
+        const code = arduinoGenerator.workspaceToCode(this.workspace);
+        µcB_codeEditor.setValue(code);
+        div_content_code.textContent = code;
+        this.codegenTimer = null;
+      }, 150);
+    };
+
     this.workspace.addChangeListener((e: Blockly.Events.Abstract): void => {
-      // Don't run the code when the workspace finishes loading; we're
-      // already running it once when the application starts.
-      // Don't run the code during drags; we might have invalid state.
-      if (
-        e.isUiEvent ||
-        e.type == Blockly.Events.FINISHED_LOADING ||
-        (this.workspace as Blockly.WorkspaceSvg).isDragging()
-      ) {
+      if (e.isUiEvent || (this.workspace as Blockly.WorkspaceSvg).isDragging()) {
         return;
       }
-      
-      µcB_codeEditor.setValue(arduinoGenerator.workspaceToCode(this.workspace));
-      div_content_code.textContent = arduinoGenerator.workspaceToCode(this.workspace);
+      if (e.type === Blockly.Events.FINISHED_LOADING) {
+        return;
+      }
+      scheduleSave();
+      scheduleCodegen();
     });
   };
 

@@ -70,6 +70,34 @@ export function createTypedVariablesFlyout(
   }
   xmlList.push(typeBlock);
 
+  const constBlock = document.createElement("block");
+  constBlock.setAttribute("type", "variables_const");
+  const constVarField = document.createElement("field");
+  constVarField.setAttribute("name", "VAR");
+  constVarField.setAttribute("id", defaultVariable.getId());
+  if (defaultType) {
+    constVarField.setAttribute("variabletype", defaultType);
+  }
+  constVarField.textContent = defaultVariable.getName();
+  constBlock.appendChild(constVarField);
+  xmlList.push(constBlock);
+
+  const initBlock = document.createElement("block");
+  initBlock.setAttribute("type", "variables_set_init");
+  const initVarField = document.createElement("field");
+  initVarField.setAttribute("name", "VAR");
+  initVarField.setAttribute("id", defaultVariable.getId());
+  if (defaultType) {
+    initVarField.setAttribute("variabletype", defaultType);
+  }
+  initVarField.textContent = defaultVariable.getName();
+  initBlock.appendChild(initVarField);
+  const typeInitField = document.createElement("field");
+  typeInitField.setAttribute("name", "VARIABLE_SETTYPE_TYPE");
+  typeInitField.textContent = defaultType || "int";
+  initBlock.appendChild(typeInitField);
+  xmlList.push(initBlock);
+
   return xmlList;
 }
 

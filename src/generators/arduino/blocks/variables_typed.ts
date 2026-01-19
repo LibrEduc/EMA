@@ -10,7 +10,8 @@
  */
 
 import * as Blockly from "blockly";
-import { ArduinoGenerator, Order } from '../arduino_generator';
+import { ArduinoGenerator, Order } from "../arduino_generator";
+import { getArduinoType } from "../arduino_types";
 
 /**
  * Generator for variables_set_dynamic block.
@@ -68,4 +69,49 @@ export const variables_set_type = function(
   generator: ArduinoGenerator,
 ): string {
   return '';
+};
+
+const getDeclarationType = (
+  block: Blockly.Block,
+  fallback: string,
+): string => {
+  const variableId = block.getFieldValue("VAR");
+  const variable = variableId
+    ? block.workspace.getVariableMap().getVariableById(variableId)
+    : null;
+  const rawType =
+    variable?.getType() && variable.getType() !== "__NO_TYPE__"
+      ? variable.getType()
+      : fallback;
+  const arduinoType = getArduinoType(rawType);
+  return arduinoType?.cppName || rawType;
+};
+
+export const variables_const = function(
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  const value =
+    generator.valueToCode(block, "VAL_CONST", Order.ASSIGNMENT) || "0";
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  const typeName = getDeclarationType(block, "int");
+  const declaration = `const ${typeName} ${varName} = ${value};`;
+  generator.addDefinition(`var_const_${varName}`, declaration);
+  generator.addVariable(varName, declaration);
+  return "";
+};
+
+export const variables_set_init = function(
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  const value =
+    generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  const typeField = block.getFieldValue("VARIABLE_SETTYPE_TYPE") || "int";
+  const typeName = getDeclarationType(block, typeField);
+  const declaration = `${typeName} ${varName} = ${value};`;
+  generator.addDefinition(`var_init_${varName}`, declaration);
+  generator.addVariable(varName, declaration);
+  return "";
 };

@@ -34,6 +34,27 @@ const getTypeMismatchWarningText = (varType: string, connectedType: string): str
     .replace("%1", varType)
     .replace("%2", connectedType);
 
+const getConstWarningText = (): string =>
+  getBlocklyMsgOr("VARIABLES_CONST_WARNING", "const: cannot assign");
+const getBlocklyCompatibleChecks = (
+  type: string | null | undefined,
+): string[] | null => {
+  const compatibleTypes = getCompatibleTypesForCheck(type);
+  if (!compatibleTypes) {
+    return null;
+  }
+  const checks = new Set(compatibleTypes);
+  if (checks.has("bool")) {
+    checks.add("Boolean");
+  }
+  if (checks.has("int") || checks.has("float")) {
+    checks.add("Number");
+  }
+  if (checks.has("string")) {
+    checks.add("String");
+  }
+  return Array.from(checks);
+};
 const configureTypedVariableField = (field: Blockly.FieldVariable): void => {
   const fieldWithTypes = field as unknown as {
     variableTypes?: string[] | null;
@@ -48,6 +69,26 @@ const normalizeBlocklyTypeToVariableType = (type: string): string => {
   if (type === "Number") return "int";
   if (type === "String") return "string";
   return type;
+};
+
+const shouldSkipVariableChange = (
+  block: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): boolean => {
+  if (event.isUiEvent) {
+    return true;
+  }
+  const workspace = block.workspace as Blockly.WorkspaceSvg | null;
+  if (workspace?.isDragging && workspace.isDragging()) {
+    return true;
+  }
+  if (workspace?.isFlyout) {
+    return true;
+  }
+  if (block.isInsertionMarker?.()) {
+    return true;
+  }
+  return false;
 };
 
 const getFirstCheckType = (
@@ -149,8 +190,12 @@ const handleVariablesSetChange = (
     event.type !== Blockly.Events.BLOCK_CREATE &&
     event.type !== Blockly.Events.BLOCK_MOVE &&
     event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
-    event.type !== Blockly.Events.VAR_DELETE
+    event.type !== Blockly.Events.VAR_DELETE &&
+    event.type !== "var_type_change"
   ) {
+    return;
+  }
+  if (shouldSkipVariableChange(block, event)) {
     return;
   }
 
@@ -169,6 +214,15 @@ const handleVariablesSetChange = (
 
     const varType = variable.getType();
     const isNoType = !varType || varType === '__NO_TYPE__';
+    const typedVariable = variable as VariableWithMutableType;
+    if (typedVariable.__ucbConst) {
+      block.setWarningText(getConstWarningText());
+      const valueInput = block.getInput('VALUE');
+      if (valueInput?.connection?.targetBlock()) {
+        valueInput.connection.disconnect();
+      }
+      return;
+    }
     if (isNoType) {
       block.setWarningText(getUntypedWarningText());
     }
@@ -178,7 +232,7 @@ const handleVariablesSetChange = (
       if (!varType || isNoType) {
         valueInput.connection.setCheck(null);
       } else {
-        const compatibleTypes = getCompatibleTypesForCheck(varType);
+        const compatibleTypes = getBlocklyCompatibleChecks(varType);
         valueInput.connection.setCheck(compatibleTypes);
       }
 
@@ -190,7 +244,7 @@ const handleVariablesSetChange = (
           return;
         }
         setVariableType(variable, connectedType);
-        const compatibleTypes = getCompatibleTypesForCheck(connectedType);
+        const compatibleTypes = getBlocklyCompatibleChecks(connectedType);
         valueInput.connection.setCheck(compatibleTypes);
         block.setWarningText(null);
         return;
@@ -655,6 +709,7 @@ type VariableWithMutableType = Blockly.VariableModel & {
   setType?: (type: string) => void;
   type_?: string;
   __ucbManualType?: boolean;
+  __ucbConst?: boolean;
 };
 
 const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
@@ -688,6 +743,9 @@ export function defineVariablesGetDynamicBlock(): void {
      * Note: setCheck() on output connections doesn't work - we must use setOutput(true, type).
      */
     onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
       // Only process relevant events
       if (event.type !== Blockly.Events.BLOCK_CHANGE && 
           event.type !== Blockly.Events.BLOCK_CREATE &&
@@ -768,6 +826,9 @@ export function defineVariablesSetDynamicBlock(): void {
      * If incompatible, suggests changing the variable type or shows a warning.
      */
     onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
       handleVariablesSetChange(this, event, 'variables_set_dynamic');
     }
   };
@@ -802,6 +863,9 @@ export function defineVariablesSetTypeBlock(): void {
       this.setHelpUrl('');
     },
     onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
       if (event.type !== Blockly.Events.BLOCK_CHANGE && 
           event.type !== Blockly.Events.BLOCK_CREATE &&
           event.type !== Blockly.Events.BLOCK_MOVE &&
@@ -829,10 +893,20 @@ export function defineVariablesSetTypeBlock(): void {
       ) {
         try {
           const variable = this.workspace.getVariableMap().getVariableById(variableId);
-          if (variable && variable.getType() !== selectedType) {
+          if (variable) {
             const typedVariable = variable as VariableWithMutableType;
-            setVariableType(variable, selectedType);
-            typedVariable.__ucbManualType = true;
+            if (typedVariable.__ucbConst) {
+              this.setWarningText(getConstWarningText());
+              const currentType = variable.getType();
+              if (currentType && currentType !== selectedType) {
+                typeField.setValue(currentType);
+              }
+              return;
+            }
+            if (variable.getType() !== selectedType) {
+              setVariableType(variable, selectedType);
+              typedVariable.__ucbManualType = true;
+            }
           }
         } catch (error) {
           debugLog('Error setting variable type:', error);
@@ -845,6 +919,11 @@ export function defineVariablesSetTypeBlock(): void {
         if (!variable) {
           return;
         }
+        const typedVariable = variable as VariableWithMutableType;
+        if (typedVariable.__ucbConst) {
+          this.setWarningText(getConstWarningText());
+          return;
+        }
         const varType = variable.getType();
         if (varType && varType !== selectedType) {
           typeField.setValue(varType);
@@ -853,6 +932,146 @@ export function defineVariablesSetTypeBlock(): void {
         debugLog('Error syncing variable type:', error);
       }
     }
+  };
+}
+
+export function defineVariablesConstBlock(): void {
+  Blockly.Blocks["variables_const"] = {
+    init: function(this: Blockly.Block) {
+      this.appendValueInput("VAL_CONST")
+        .appendField(getBlocklyMsgOr("VARIABLES_SET_CONST", "set const"))
+        .appendField(
+          new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ''),
+          "VAR",
+        )
+        .appendField(getBlocklyMsgOr("VARIABLES_SET_CONST_AT", "at"));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureTypedVariableField(varField);
+      }
+      this.setStyle("variable_dynamic_blocks");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setTooltip(
+        getBlocklyMsgOr("VARIABLES_SET_CONST_TOOLTIP", "set constant"),
+      );
+      this.setHelpUrl(getBlocklyMsgOr("VARIABLES_SET_CONST_HELPURL", ""));
+    },
+    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+        event.type !== Blockly.Events.VAR_CREATE &&
+        event.type !== Blockly.Events.VAR_RENAME &&
+        event.type !== Blockly.Events.VAR_DELETE
+      ) {
+        return;
+      }
+      const variableId = this.getFieldValue("VAR");
+      if (!variableId) {
+        return;
+      }
+      const variable = this.workspace.getVariableMap().getVariableById(variableId);
+      if (!variable) {
+        return;
+      }
+      const typedVariable = variable as VariableWithMutableType;
+      typedVariable.__ucbConst = true;
+      const valueInput = this.getInput("VAL_CONST");
+      if (valueInput?.connection) {
+        // Allow any value to be connected so we can infer the type.
+        valueInput.connection.setCheck(null);
+      }
+      const connectedType = inferConnectedValueType(
+        this.getInputTargetBlock("VAL_CONST"),
+      );
+      if (connectedType) {
+        setVariableType(variable, connectedType);
+        if (valueInput?.connection) {
+          valueInput.connection.setCheck(getBlocklyCompatibleChecks(connectedType));
+        }
+        this.setWarningText(null);
+        return;
+      }
+      clearVariableType(variable);
+      this.setWarningText(getUntypedWarningText());
+    },
+    contextMenuType_: "variables_get_dynamic",
+  };
+}
+
+export function defineVariablesSetInitBlock(): void {
+  Blockly.Blocks["variables_set_init"] = {
+    init: function(this: Blockly.Block) {
+      this.appendValueInput("VALUE")
+        .appendField(getBlocklyMsgOr("VARIABLES_SET_INIT", "set"))
+        .appendField(
+          new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ''),
+          "VAR",
+        )
+        .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"))
+        .appendField(
+          new Blockly.FieldDropdown(getVariableTypeDropdownOptions),
+          "VARIABLE_SETTYPE_TYPE",
+        )
+        .appendField(getBlocklyMsgOr("_AT", "at"));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureTypedVariableField(varField);
+      }
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setStyle("variable_dynamic_blocks");
+      this.setTooltip(
+        getBlocklyMsgOr("VARIABLES_SET_INIT_TOOLTIP", "set and declare"),
+      );
+      this.setHelpUrl(getBlocklyMsgOr("VARIABLES_SET_INIT_HELPURL", ""));
+    },
+    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+        event.type !== Blockly.Events.VAR_CREATE &&
+        event.type !== Blockly.Events.VAR_RENAME &&
+        event.type !== Blockly.Events.VAR_DELETE
+      ) {
+        return;
+      }
+      const variableId = this.getFieldValue("VAR");
+      const typeField = this.getField("VARIABLE_SETTYPE_TYPE") as Blockly.FieldDropdown | null;
+      if (!variableId || !typeField) {
+        return;
+      }
+      const selectedType = typeField.getValue() || "int";
+      const variable = this.workspace.getVariableMap().getVariableById(variableId);
+      if (!variable) {
+        return;
+      }
+      const typedVariable = variable as VariableWithMutableType;
+      if (typedVariable.__ucbConst) {
+        this.setWarningText(getConstWarningText());
+        return;
+      }
+      if (variable.getType() !== selectedType) {
+        setVariableType(variable, selectedType);
+      }
+      const valueInput = this.getInput("VALUE");
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(getBlocklyCompatibleChecks(selectedType));
+      }
+    },
+    contextMenuType_: "variables_get_dynamic",
   };
 }
 
@@ -932,6 +1151,8 @@ export function defineAllTypedVariableBlocks(): void {
   defineVariablesGetDynamicBlock();
   defineVariablesSetDynamicBlock();
   defineVariablesSetTypeBlock();
+  defineVariablesConstBlock();
+  defineVariablesSetInitBlock();
   defineControlsSwitchBlocks();
   defineBlocklyArduinoCompatBlocks();
   

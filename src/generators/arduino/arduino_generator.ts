@@ -165,6 +165,19 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.nameDB_.populateVariables(workspace);
     this.nameDB_.populateProcedures(workspace);
 
+    const declaredVariableIds = new Set<string>();
+    for (const block of workspace.getAllBlocks(false)) {
+      if (
+        block.type === "variables_const" ||
+        block.type === "variables_set_init"
+      ) {
+        const varId = block.getFieldValue?.("VAR");
+        if (varId) {
+          declaredVariableIds.add(varId);
+        }
+      }
+    }
+
     // Map to store variable names with their types
     const variableNamesByType: Record<string, string[]> = {};
     
@@ -187,6 +200,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     const variables = Blockly.Variables.allUsedVarModels(workspace);
     for (const variable of variables) {
       if (!variable) {
+        continue;
+      }
+      if (declaredVariableIds.has(variable.getId())) {
         continue;
       }
       const varName = this.nameDB_!.getName(

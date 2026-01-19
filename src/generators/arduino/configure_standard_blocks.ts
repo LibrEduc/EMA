@@ -86,11 +86,15 @@ export function configureStandardBlocks(): void {
     if (rawType === "Boolean") return "bool";
     if (rawType === "Number") return "int";
     if (rawType === "String") return "string";
+    if (rawType === "char") return "char";
     return rawType;
   };
 
   const getBlockOutputType = (block: Blockly.Block | null): string | null => {
     if (!block) return null;
+    if (block.type === "logic_boolean") {
+      return "bool";
+    }
     if (block.type === "variables_get_dynamic" || block.type === "variables_get") {
       const variableId = block.getFieldValue?.("VAR");
       if (variableId && block.workspace) {
