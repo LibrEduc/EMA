@@ -716,6 +716,29 @@ export class BlocklyApplication implements BlocklyApplicationType {
           msg[key] = value;
         }
       });
+      const variableKeys = [
+        "VARIABLES_SET_CONST",
+        "VARIABLES_SET_CONST_AT",
+        "VARIABLES_SET_CONST_TOOLTIP",
+        "VARIABLES_SET_CONST_HELPURL",
+        "VARIABLES_SET_INIT",
+        "VARIABLES_AS",
+        "VARIABLES_SET_INIT_TOOLTIP",
+        "VARIABLES_SET_INIT_HELPURL",
+        "_AT",
+        "VARIABLES_CONST_WARNING",
+        "VAR_TYPE_INT",
+        "VAR_TYPE_FLOAT",
+        "VAR_TYPE_BOOL",
+        "VAR_TYPE_STRING",
+        "VAR_TYPE_CHAR",
+      ] as const;
+      variableKeys.forEach((key) => {
+        const value = customMessages[key];
+        if (value) {
+          msg[key] = value;
+        }
+      });
     }
     this.changeLanguageToolbox(newLang);
     this.setParamsBlockly();

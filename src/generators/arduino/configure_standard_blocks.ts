@@ -72,8 +72,19 @@ export function configureStandardBlocks(): void {
     typedVariable.__ucbManualType = true;
   };
 
+  const getBlocklyMsgOr = (key: string, fallback: string): string => {
+    const msg = getBlocklyMsg(key);
+    return msg === key ? fallback : msg;
+  };
+
+  const getVariableTypeLabel = (type: string): string =>
+    getBlocklyMsgOr(`VAR_TYPE_${type.toUpperCase()}`, type);
+
   const getTypeDropdownOptions = (): Blockly.MenuOption[] =>
-    getVariableTypeOptions().map((type) => [type, type] as Blockly.MenuOption);
+    getVariableTypeOptions().map((type) => [
+      getVariableTypeLabel(type),
+      type,
+    ] as Blockly.MenuOption);
 
   const toInternalType = (rawType: string | string[] | null | undefined): string | null => {
     if (!rawType) return null;

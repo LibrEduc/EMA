@@ -712,8 +712,14 @@ type VariableWithMutableType = Blockly.VariableModel & {
   __ucbConst?: boolean;
 };
 
+const getVariableTypeLabel = (type: string): string =>
+  getBlocklyMsgOr(`VAR_TYPE_${type.toUpperCase()}`, type);
+
 const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
-  getVariableTypeOptions().map((type) => [type, type] as Blockly.MenuOption);
+  getVariableTypeOptions().map((type) => [
+    getVariableTypeLabel(type),
+    type,
+  ] as Blockly.MenuOption);
 
 /**
  * Define the variables_get_dynamic block
