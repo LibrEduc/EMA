@@ -54,6 +54,7 @@ export declare class ArduinoGenerator extends Blockly.CodeGenerator {
     private defines_;
     private variables_;
     private variableTypes_;
+    private localVariables_;
     private codeFunctions_;
     private userFunctions_;
     protected functionNames_: any;
@@ -92,6 +93,8 @@ export declare class ArduinoGenerator extends Blockly.CodeGenerator {
     addInclude(tag: string, code: string): void;
     addDefinition(tag: string, code: string): void;
     addVariable(tag: string, code: string): void;
+    addLocalVariable(scopeId: string, tag: string, code: string): void;
+    getLocalVariables(scopeId: string): string[];
     /**
      * Set the type of a variable for proper declaration.
      * @param varName - Variable name.
@@ -241,6 +244,7 @@ export declare class ArduinoGenerator extends Blockly.CodeGenerator {
         loop: Record<string, string>;
         pins: Record<string, unknown>;
         variableTypes: Record<string, string>;
+        localVariables: Record<string, Record<string, string>>;
         registeredGenerators: string[];
     };
     /**

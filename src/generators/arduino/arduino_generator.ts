@@ -62,6 +62,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   private variables_ = Object.create(null);
   // Create a dictionary of variable types for proper declaration
   private variableTypes_ = Object.create(null);
+  // Local variables keyed by scope id
+  private localVariables_: Record<string, Record<string, string>> = Object.create(null);
   // Create a dictionary of functions from the code generator
   private codeFunctions_ = Object.create(null);
   // Create a dictionary of functions created by the user
@@ -148,6 +150,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.defines_ = Object.create(null);
     this.variables_ = Object.create(null);
     this.variableTypes_ = Object.create(null);
+    this.localVariables_ = Object.create(null);
     this.codeFunctions_ = Object.create(null);
     this.userFunctions_ = Object.create(null);
     this.functionNames_ = Object.create(null);
@@ -196,6 +199,25 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       variableNamesByType[varType].push(varName);
     }
 
+    const localVariableIds = new Set<string>();
+    const globalVariableIds = new Set<string>();
+    for (const block of workspace.getAllBlocks(false)) {
+      if (block.type !== "variables_set_dynamic") {
+        continue;
+      }
+      const blockVarId = block.getFieldValue?.("VAR");
+      if (!blockVarId) {
+        continue;
+      }
+      const valueBlock = block.getInputTargetBlock?.("VALUE");
+      const isLocal = valueBlock?.type === "variables_local";
+      if (isLocal) {
+        localVariableIds.add(blockVarId);
+      } else {
+        globalVariableIds.add(blockVarId);
+      }
+    }
+
     // Add user variables, but only ones that are being used.
     const variables = Blockly.Variables.allUsedVarModels(workspace);
     for (const variable of variables) {
@@ -203,6 +225,12 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         continue;
       }
       if (declaredVariableIds.has(variable.getId())) {
+        continue;
+      }
+      if (
+        localVariableIds.has(variable.getId()) &&
+        !globalVariableIds.has(variable.getId())
+      ) {
         continue;
       }
       const varName = this.nameDB_!.getName(
@@ -392,6 +420,19 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     if (this.variables_[tag] === undefined) {
       this.variables_[tag] = code;
     }
+  }
+
+  addLocalVariable(scopeId: string, tag: string, code: string): void {
+    if (!this.localVariables_[scopeId]) {
+      this.localVariables_[scopeId] = Object.create(null);
+    }
+    if (this.localVariables_[scopeId][tag] === undefined) {
+      this.localVariables_[scopeId][tag] = code;
+    }
+  }
+
+  getLocalVariables(scopeId: string): string[] {
+    return Object.values(this.localVariables_[scopeId] || {});
   }
 
   /**
@@ -796,6 +837,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     loop: Record<string, string>;
     pins: Record<string, unknown>;
     variableTypes: Record<string, string>;
+    localVariables: Record<string, Record<string, string>>;
     registeredGenerators: string[];
   } {
     return {
@@ -809,6 +851,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       loop: this.loop_,
       pins: this.pins_,
       variableTypes: this.variableTypes_,
+      localVariables: this.localVariables_,
       registeredGenerators: Object.keys(this.forBlock)
     };
   }
@@ -844,6 +887,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.setups_ = Object.create(null);
     this.loop_ = Object.create(null);
     this.pins_ = Object.create(null);
+    this.localVariables_ = Object.create(null);
     
     if (this.nameDB_) {
       this.nameDB_.reset();

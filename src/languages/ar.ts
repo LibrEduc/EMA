@@ -57,6 +57,8 @@ export const arLang: LanguageMap = {
     TYPED_VAR_TYPE_SET_LABEL: "عيّن نوع",
     TYPED_VAR_TYPE_TO_LABEL: "إلى",
     TYPED_VAR_ARG_TYPE_LABEL: "النوع",
+    VARIABLES_LOCAL: "محلي",
+    VARIABLES_LOCAL_TOOLTIP: "يُحدد القيمة على أنها محلية.",
     CONTROLS_SWITCH_HELPURL: "https://www.arduino.cc/reference/en/language/structure/control-structure/switchcase/",
     CONTROLS_SWITCH_VAR_TITLE: "بدّل",
     CONTROLS_SWITCH_VAR_TAIL: "على",

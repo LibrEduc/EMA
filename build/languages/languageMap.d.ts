@@ -68,6 +68,8 @@ export interface LanguageItem {
     TYPED_VAR_TYPE_SET_LABEL: string;
     TYPED_VAR_TYPE_TO_LABEL: string;
     TYPED_VAR_ARG_TYPE_LABEL: string;
+    VARIABLES_LOCAL: string;
+    VARIABLES_LOCAL_TOOLTIP: string;
     CONTROLS_SWITCH_HELPURL: string;
     CONTROLS_SWITCH_VAR_TITLE: string;
     CONTROLS_SWITCH_VAR_TAIL: string;
@@ -82,6 +84,21 @@ export interface LanguageItem {
     CONTROLS_SWITCH_TOOLTIP_2: string;
     CONTROLS_SWITCH_TOOLTIP_3: string;
     CONTROLS_SWITCH_TOOLTIP_4: string;
+    VARIABLES_SET_CONST: string;
+    VARIABLES_SET_CONST_AT: string;
+    VARIABLES_SET_CONST_TOOLTIP: string;
+    VARIABLES_SET_CONST_HELPURL: string;
+    VARIABLES_SET_INIT: string;
+    VARIABLES_AS: string;
+    VARIABLES_SET_INIT_TOOLTIP: string;
+    VARIABLES_SET_INIT_HELPURL: string;
+    _AT: string;
+    VARIABLES_CONST_WARNING: string;
+    VAR_TYPE_INT: string;
+    VAR_TYPE_FLOAT: string;
+    VAR_TYPE_BOOL: string;
+    VAR_TYPE_STRING: string;
+    VAR_TYPE_CHAR: string;
 }
 export {};
 //# sourceMappingURL=languageMap.d.ts.map

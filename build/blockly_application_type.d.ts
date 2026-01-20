@@ -64,6 +64,8 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     plugin_modal: any;
     plugin_workspaceSearch: any;
     plugin_zoomToFit: any;
+    private saveBlocksTimer;
+    private codegenTimer;
     /**
      * The function `workspaceListeners` adds event listeners to a Blockly workspace to save changes to
      * storage and run code whenever the workspace changes meaningfully.

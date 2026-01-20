@@ -40,6 +40,10 @@ export function createTypedVariablesFlyout(
   setBlock.appendChild(setField);
   xmlList.push(setBlock);
 
+  const localBlock = document.createElement("block");
+  localBlock.setAttribute("type", "variables_local");
+  xmlList.push(localBlock);
+
   const getBlock = document.createElement("block");
   getBlock.setAttribute("type", "variables_get_dynamic");
   const getField = document.createElement("field");

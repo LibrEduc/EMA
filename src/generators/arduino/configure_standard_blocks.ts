@@ -143,31 +143,6 @@ export function configureStandardBlocks(): void {
     return defBlock?.getProcedureModel?.() || null;
   };
 
-  const getProcedureReturnType = (block: Blockly.Block): string | null => {
-    const name = block.getFieldValue?.("NAME");
-    if (name && block.workspace) {
-      const defBlock = Blockly.Procedures.getDefinition(name, block.workspace);
-      const returnBlock = defBlock?.getInputTargetBlock?.("RETURN");
-      const inferred = getBlockOutputType(returnBlock || null);
-      if (inferred) {
-        return inferred;
-      }
-    }
-
-    const model = getProcedureModel(block);
-    const returnTypes: string[] | null | undefined = model?.getReturnTypes?.();
-    if (!returnTypes || returnTypes.length === 0) {
-      // Default to int to match generator fallback when no return type is set.
-      return "int";
-    }
-    if (returnTypes.includes("bool")) return "bool";
-    if (returnTypes.includes("float")) return "float";
-    if (returnTypes.includes("int")) return "int";
-    if (returnTypes.includes("string")) return "string";
-    if (returnTypes.includes("char")) return "char";
-    return toInternalType(returnTypes[0]) || "int";
-  };
-
   const defReturn = Blockly.Blocks["procedures_defreturn"] as ProcedureBlockDef | undefined;
   if (defReturn && !defReturn.__typedConfigured) {
     defReturn.__typedConfigured = true;

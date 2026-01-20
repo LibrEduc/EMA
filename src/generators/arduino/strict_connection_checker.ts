@@ -2,7 +2,7 @@
  * @fileoverview Custom ConnectionChecker that uses getBlockType() for type checking.
  * This provides more robust type checking than the default ConnectionChecker,
  * especially for blocks with dynamic types (like typed variables).
- * @author scanet@libreduc.cc (Sébastien Canet)
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  */
 
 import * as Blockly from 'blockly/core';

@@ -27,6 +27,8 @@ export const variables_set_dynamic = function(
   // Typed variable setter - use standard variable name resolution
   const varName = generator.getVariableName(block.getFieldValue('VAR'));
   const value = generator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
+  const localWrapper = block.getInputTargetBlock("VALUE");
+  const isLocal = localWrapper?.type === "variables_local";
   
   // Ensure we have a valid variable name
   if (!varName || varName === 'variable') {
@@ -34,7 +36,47 @@ export const variables_set_dynamic = function(
     return '// Error: Invalid variable name\n';
   }
   
+  if (isLocal) {
+    const typeName = getDeclarationType(block, "int");
+    const declaration = `${typeName} ${varName};`;
+    const root = block.getRootBlock();
+    const scopeId =
+      root &&
+      (root.type === "procedures_defnoreturn" ||
+        root.type === "procedures_defreturn")
+        ? root.id
+        : "loop";
+    const tag = `local_${scopeId}_${varName}`;
+    if (scopeId === "loop") {
+      generator.addLoop(tag, declaration);
+    } else {
+      generator.addLocalVariable(scopeId, tag, declaration);
+    }
+  }
+
   return varName + ' = ' + value + ';\n';
+};
+
+/**
+ * Generator for variables_local block.
+ * This block returns the wrapped value unchanged.
+ */
+export const variables_local = function(
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): [string, number] {
+  const target = block.getInputTargetBlock("VALUE");
+  if (target) {
+    const generated = generator.blockToCode(target);
+    if (Array.isArray(generated)) {
+      return generated;
+    }
+    if (typeof generated === "string") {
+      return [generated, Order.ATOMIC];
+    }
+  }
+  const value = generator.valueToCode(block, "VALUE", Order.NONE) || "0";
+  return [value, Order.ATOMIC];
 };
 
 /**

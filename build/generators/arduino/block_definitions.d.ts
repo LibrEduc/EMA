@@ -13,6 +13,10 @@ export declare function defineVariablesGetDynamicBlock(): void;
  */
 export declare function defineVariablesSetDynamicBlock(): void;
 /**
+ * Define the variables_local block
+ */
+export declare function defineVariablesLocalBlock(): void;
+/**
  * Define the variables_set_type block
  */
 export declare function defineVariablesSetTypeBlock(): void;

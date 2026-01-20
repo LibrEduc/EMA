@@ -140,6 +140,11 @@ export function procedures_defreturn(
   const returnType = getReturnType(block);
 
   let code = returnType + " " + funcName + "(" + args + ") {\n";
+  const localDeclarations = generator.getLocalVariables(block.id);
+  if (localDeclarations.length > 0) {
+    code += localDeclarations.map((decl) => generator.INDENT + decl).join("\n");
+    code += "\n";
+  }
   code += branch;
   code += generator.INDENT + "return " + returnValue + ";\n";
   code += "}\n";
@@ -158,6 +163,11 @@ export const procedures_defnoreturn = function(
   const branch = generator.statementToCode(block, "STACK");
 
   let code = "void " + funcName + "(" + args + ") {\n";
+  const localDeclarations = generator.getLocalVariables(block.id);
+  if (localDeclarations.length > 0) {
+    code += localDeclarations.map((decl) => generator.INDENT + decl).join("\n");
+    code += "\n";
+  }
   code += branch;
   code += "}\n";
   setProcedureDefinition(generator, funcName, code);

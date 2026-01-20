@@ -57,6 +57,8 @@ export const enLang: LanguageMap = {
     TYPED_VAR_TYPE_SET_LABEL: "set type of",
     TYPED_VAR_TYPE_TO_LABEL: "to",
     TYPED_VAR_ARG_TYPE_LABEL: "type",
+    VARIABLES_LOCAL: "local",
+    VARIABLES_LOCAL_TOOLTIP: "Marks the value as local.",
     CONTROLS_SWITCH_HELPURL: "https://www.arduino.cc/reference/en/language/structure/control-structure/switchcase/",
     CONTROLS_SWITCH_VAR_TITLE: "switch",
     CONTROLS_SWITCH_VAR_TAIL: "on",

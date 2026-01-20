@@ -727,6 +727,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
         "VARIABLES_SET_INIT_HELPURL",
         "_AT",
         "VARIABLES_CONST_WARNING",
+        "VARIABLES_LOCAL",
+        "VARIABLES_LOCAL_TOOLTIP",
         "VAR_TYPE_INT",
         "VAR_TYPE_FLOAT",
         "VAR_TYPE_BOOL",

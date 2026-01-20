@@ -108,6 +108,8 @@ export interface LanguageItem {
   TYPED_VAR_TYPE_SET_LABEL: string;
   TYPED_VAR_TYPE_TO_LABEL: string;
   TYPED_VAR_ARG_TYPE_LABEL: string;
+  VARIABLES_LOCAL: string;
+  VARIABLES_LOCAL_TOOLTIP: string;
   CONTROLS_SWITCH_HELPURL: string;
   CONTROLS_SWITCH_VAR_TITLE: string;
   CONTROLS_SWITCH_VAR_TAIL: string;
