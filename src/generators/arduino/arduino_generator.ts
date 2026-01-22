@@ -181,6 +181,60 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       }
     }
 
+    const procedureArgIds = new Set<string>();
+    const procedureArgNames = new Set<string>();
+    for (const block of workspace.getAllBlocks(false)) {
+      if (
+        block.type !== "procedures_defreturn" &&
+        block.type !== "procedures_defnoreturn"
+      ) {
+        continue;
+      }
+      const argModels = (block as Blockly.Block & {
+        argumentVarModels_?: Blockly.VariableModel[];
+        getProcedureModel?: () =>
+          | (Blockly.Procedures.IProcedureModel & {
+              getParameters?: () => { getId?: () => string }[];
+            })
+          | null;
+      }).argumentVarModels_;
+      if (argModels && argModels.length > 0) {
+        for (const model of argModels) {
+          if (model?.getId) {
+            procedureArgIds.add(model.getId());
+          }
+          const name = model?.getName?.();
+          if (name) {
+            procedureArgNames.add(name);
+          }
+        }
+      }
+      const procModel = (block as Blockly.Block & {
+        getProcedureModel?: () =>
+          | (Blockly.Procedures.IProcedureModel & {
+              getParameters?: () => { getId?: () => string; getName?: () => string }[];
+            })
+          | null;
+      }).getProcedureModel?.();
+      const procParams = procModel?.getParameters?.() || [];
+      for (const param of procParams) {
+        const paramId = param?.getId?.();
+        if (paramId) {
+          procedureArgIds.add(paramId);
+        }
+        const paramName = param?.getName?.();
+        if (paramName) {
+          procedureArgNames.add(paramName);
+        }
+      }
+    }
+    const normalizedProcedureArgNames = new Set<string>();
+    for (const name of procedureArgNames) {
+      normalizedProcedureArgNames.add(
+        this.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
+      );
+    }
+
     // Map to store variable names with their types
     const variableNamesByType: Record<string, string[]> = {};
     
@@ -217,11 +271,128 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         globalVariableIds.add(blockVarId);
       }
     }
+    
+    const normalizeBlocklyType = (rawType: string | null | undefined): string | null => {
+      if (!rawType) return null;
+      if (rawType === "__NO_TYPE__" || rawType === "null" || rawType === "undefined") {
+        return null;
+      }
+      if (rawType === "Boolean") return "bool";
+      if (rawType === "Number") return "int";
+      if (rawType === "String") return "string";
+      return rawType;
+    };
+
+    const getOutputBlockType = (valueBlock: Blockly.Block | null): string | null => {
+      if (!valueBlock) return null;
+      const typedBlock = valueBlock as Blockly.Block & { getBlockType?: () => string | null };
+      const rawType = typedBlock.getBlockType ? typedBlock.getBlockType() : null;
+      const normalized = normalizeBlocklyType(rawType || "");
+      if (normalized) return normalized;
+      const check = valueBlock.outputConnection?.getCheck();
+      if (Array.isArray(check)) {
+        return normalizeBlocklyType(check[0]);
+      }
+      return normalizeBlocklyType(check || null);
+    };
+
+    const inferredTypesByVarId = new Map<string, string>();
+    for (const block of workspace.getAllBlocks(false)) {
+      if (
+        block.type !== "variables_set_dynamic" &&
+        block.type !== "variables_set"
+      ) {
+        continue;
+      }
+      const varId = block.getFieldValue?.("VAR");
+      if (!varId) {
+        continue;
+      }
+      const valueBlock = block.getInputTargetBlock?.("VALUE");
+      const inferredType = getOutputBlockType(valueBlock);
+      if (inferredType) {
+        inferredTypesByVarId.set(varId, inferredType);
+      }
+    }
+
+    const getProcedureParamNames = (block: Blockly.Block): Set<string> => {
+      const names = new Set<string>();
+      const vars = (block as Blockly.Block & { getVars?: () => string[] | null }).getVars?.();
+      if (Array.isArray(vars)) {
+        for (const name of vars) {
+          if (name) {
+            names.add(name);
+            names.add(
+              this.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
+            );
+          }
+        }
+      }
+      const model = (block as Blockly.Block & {
+        getProcedureModel?: () =>
+          | (Blockly.Procedures.IProcedureModel & {
+              getParameters?: () => { getName?: () => string }[];
+            })
+          | null;
+      }).getProcedureModel?.();
+      const params = model?.getParameters?.() || [];
+      for (const param of params) {
+        const name = param?.getName?.();
+        if (name) {
+          names.add(name);
+          names.add(
+            this.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
+          );
+        }
+      }
+      return names;
+    };
+
+    const isUseWithinMatchingProcedure = (
+      block: Blockly.Block,
+      variableName: string,
+    ): boolean => {
+      if (
+        block.type === "procedures_defreturn" ||
+        block.type === "procedures_defnoreturn"
+      ) {
+        const paramNames = getProcedureParamNames(block);
+        return paramNames.has(variableName);
+      }
+      let parent = block.getSurroundParent?.() || null;
+      while (parent) {
+        if (
+          parent.type === "procedures_defreturn" ||
+          parent.type === "procedures_defnoreturn"
+        ) {
+          const paramNames = getProcedureParamNames(parent);
+          return paramNames.has(variableName);
+        }
+        parent = parent.getSurroundParent?.() || null;
+      }
+      return false;
+    };
 
     // Add user variables, but only ones that are being used.
     const variables = Blockly.Variables.allUsedVarModels(workspace);
     for (const variable of variables) {
       if (!variable) {
+        continue;
+      }
+      const variableUses = Blockly.Variables.getVariableUsesById(
+        workspace,
+        variable.getId(),
+      );
+      if (
+        variableUses &&
+        variableUses.length > 0 &&
+        variableUses.every((use) =>
+          isUseWithinMatchingProcedure(use, variable.getName()),
+        )
+      ) {
+        continue;
+      }
+      if (procedureArgIds.has(variable.getId())) {
         continue;
       }
       if (declaredVariableIds.has(variable.getId())) {
@@ -237,13 +408,14 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         variable.getId(),
         Blockly.Names.NameType.VARIABLE,
       );
+      if (normalizedProcedureArgNames.has(varName)) {
+        continue;
+      }
       
       // Normalize variable type to avoid emitting 'undefined' in declarations.
       const rawType = variable.getType();
-      const typeKey =
-        rawType && rawType !== "null" && rawType !== "undefined" && rawType !== "__NO_TYPE__"
-          ? rawType
-          : "__NO_TYPE__";
+      const inferredType = inferredTypesByVarId.get(variable.getId());
+      const typeKey = normalizeBlocklyType(rawType || "") || inferredType || "__NO_TYPE__";
       if (!variableNamesByType[typeKey]) {
         variableNamesByType[typeKey] = [];
       }

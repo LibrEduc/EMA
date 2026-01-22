@@ -8,6 +8,7 @@ export type VariableWithMutableType = Blockly.VariableModel & {
   type_?: string;
   __ucbManualType?: boolean;
   __ucbConst?: boolean;
+  __ucbConstBlockId?: string;
 };
 
 export const getBlocklyMsg = (key: string): string => {
@@ -210,21 +211,25 @@ export const handleVariablesSetChange = (
       return;
     }
     const typedVariable = variable as VariableWithMutableType;
+    const valueInput = block.getInput("VALUE");
     if (typedVariable.__ucbConst) {
       block.setWarningText(getConstWarningText());
+      if (valueInput?.connection?.targetBlock()) {
+        valueInput.connection.disconnect();
+      }
       return;
     }
 
-    const varType = variable.getType();
+    let varType = variable.getType();
     const isNoType = !varType || varType === "__NO_TYPE__";
-    const valueInput = block.getInput("VALUE");
     const connectedBlock = valueInput?.connection?.targetBlock() || null;
     const connectedType = inferConnectedValueType(connectedBlock);
 
     if (connectedType) {
-      if (!varType || varType === "__NO_TYPE__") {
+      if (isNoType || !typedVariable.__ucbManualType) {
         setVariableType(variable, connectedType);
         typedVariable.__ucbManualType = false;
+        varType = variable.getType();
       }
       if (valueInput?.connection) {
         valueInput.connection.setCheck(getBlocklyCompatibleChecks(variable.getType()));
@@ -234,11 +239,17 @@ export const handleVariablesSetChange = (
     }
 
     if (varType && connectedType && !checkTypeCompatibility(connectedType, varType)) {
-      block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
-      if (valueInput?.connection && valueInput.connection.targetBlock()) {
-        valueInput.connection.disconnect();
+      if (!typedVariable.__ucbManualType) {
+        setVariableType(variable, connectedType);
+        varType = variable.getType();
+        block.setWarningText(null);
+      } else {
+        block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
+        if (valueInput?.connection && valueInput.connection.targetBlock()) {
+          valueInput.connection.disconnect();
+        }
+        return;
       }
-      return;
     }
 
     if (!connectedType) {

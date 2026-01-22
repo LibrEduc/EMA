@@ -22,6 +22,7 @@ type ProcedureModelLike = {
 type ProcedureBlockLike = Block & {
   getProcedureModel?: () => ProcedureModelLike | null;
   getVars?: () => string[] | null;
+  getVarModels?: () => Blockly.VariableModel[] | null;
 };
 
 function getProcedureName(
@@ -39,24 +40,73 @@ function getProcedureName(
   return rawName;
 }
 
-function getProcedureParams(block: Block, generator: ArduinoGenerator): string[] {
-  let paramNames: string[] = [];
-  const vars = (block as ProcedureBlockLike).getVars?.();
-  if (Array.isArray(vars)) {
-    paramNames = vars.filter(Boolean);
+type ProcedureParamInfo = {
+  name: string;
+  type: string;
+};
+
+function getProcedureParams(block: Block, generator: ArduinoGenerator): ProcedureParamInfo[] {
+  const params: ProcedureParamInfo[] = [];
+  const procBlock = block as ProcedureBlockLike & {
+    argumentVarModels_?: Blockly.VariableModel[];
+  };
+  const model = procBlock.getProcedureModel?.();
+
+  const varModels = procBlock.getVarModels?.();
+  if (Array.isArray(varModels) && varModels.length > 0) {
+    for (const modelVar of varModels) {
+      const resolvedType = mapBlocklyTypeToArduino(modelVar.getType() || "int");
+      params.push({
+        name: modelVar.getName(),
+        type: resolvedType || "int",
+      });
+    }
+  } else if (model?.getParameters) {
+    for (const param of model.getParameters()) {
+      const rawName = param.getName();
+      const rawTypes = (param as unknown as { getTypes?: () => string[] }).getTypes?.() || [];
+      let resolvedType = rawTypes.length > 0 ? mapBlocklyTypeToArduino(rawTypes[0]) : "";
+      if (!resolvedType && procBlock.argumentVarModels_) {
+        const match = procBlock.argumentVarModels_.find(
+          (argModel) => argModel.getName() === rawName,
+        );
+        if (match) {
+          resolvedType = mapBlocklyTypeToArduino(match.getType());
+        }
+      }
+      params.push({
+        name: rawName,
+        type: resolvedType || "int",
+      });
+    }
   } else {
-    const model = (block as ProcedureBlockLike).getProcedureModel?.();
-    if (model?.getParameters) {
-      paramNames = model.getParameters().map((param) => param.getName());
+    const vars = procBlock.getVars?.();
+    if (Array.isArray(vars)) {
+      for (const rawName of vars.filter(Boolean)) {
+        let resolvedType = "";
+        if (procBlock.argumentVarModels_) {
+          const match = procBlock.argumentVarModels_.find(
+            (argModel) => argModel.getName() === rawName,
+          );
+          if (match) {
+            resolvedType = mapBlocklyTypeToArduino(match.getType());
+          }
+        }
+        params.push({
+          name: rawName,
+          type: resolvedType || "int",
+        });
+      }
     }
   }
 
   if (generator.nameDB_) {
-    return paramNames.map((name) =>
-      generator.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
-    );
+    return params.map((param) => ({
+      name: generator.nameDB_!.getName(param.name, Blockly.Names.NameType.VARIABLE),
+      type: param.type,
+    }));
   }
-  return paramNames;
+  return params;
 }
 
 function mapBlocklyTypeToArduino(type: string): string {
@@ -120,7 +170,7 @@ export function procedures_defreturn(
   // Define a procedure with return value.
   const funcName = getProcedureName(block, generator);
   const params = getProcedureParams(block, generator);
-  const args = params.map((name) => "int " + name).join(", ");
+  const args = params.map((param) => `${param.type} ${param.name}`).join(", ");
   const branch = generator.statementToCode(block, "STACK");
   let returnValue = generator.valueToCode(block, "RETURN", Order.NONE) || "";
   if (!returnValue) {
@@ -159,7 +209,7 @@ export const procedures_defnoreturn = function(
   // Define a procedure with no return value.
   const funcName = getProcedureName(block, generator);
   const params = getProcedureParams(block, generator);
-  const args = params.map((name) => "int " + name).join(", ");
+  const args = params.map((param) => `${param.type} ${param.name}`).join(", ");
   const branch = generator.statementToCode(block, "STACK");
 
   let code = "void " + funcName + "(" + args + ") {\n";

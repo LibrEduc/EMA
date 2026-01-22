@@ -129,6 +129,31 @@ const getDeclarationType = (
   return arduinoType?.cppName || rawType;
 };
 
+const normalizeValueType = (type: string | null | undefined): string | null => {
+  if (!type || type === "__NO_TYPE__" || type === "null" || type === "undefined") {
+    return null;
+  }
+  if (type === "Boolean") return "bool";
+  if (type === "Number") return "int";
+  if (type === "String") return "string";
+  return type;
+};
+
+const inferValueBlockType = (valueBlock: Blockly.Block | null): string | null => {
+  if (!valueBlock) {
+    return null;
+  }
+  const typed = valueBlock as Blockly.Block & { getBlockType?: () => string | null };
+  const rawType = typed.getBlockType ? typed.getBlockType() : null;
+  const normalized = normalizeValueType(rawType);
+  if (normalized) {
+    return normalized;
+  }
+  const check = valueBlock.outputConnection?.getCheck();
+  const checkType = Array.isArray(check) ? check[0] : check;
+  return normalizeValueType(checkType);
+};
+
 export const variables_const = function(
   block: Blockly.Block,
   generator: ArduinoGenerator,
@@ -136,7 +161,14 @@ export const variables_const = function(
   const value =
     generator.valueToCode(block, "VAL_CONST", Order.ASSIGNMENT) || "0";
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
-  const typeName = getDeclarationType(block, "int");
+  const valueBlock = block.getInputTargetBlock("VAL_CONST");
+  const inferredType = inferValueBlockType(valueBlock);
+  const typeName = inferredType
+    ? getDeclarationType(block, inferredType)
+    : getDeclarationType(block, "__NO_TYPE__");
+  if (!inferredType && typeName === "__NO_TYPE__") {
+    return "";
+  }
   const declaration = `const ${typeName} ${varName} = ${value};`;
   generator.addDefinition(`var_const_${varName}`, declaration);
   generator.addVariable(varName, declaration);

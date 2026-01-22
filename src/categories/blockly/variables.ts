@@ -340,22 +340,55 @@ export const defineVariablesConstBlock = (): void => {
         return;
       }
       const typedVariable = variable as VariableWithMutableType;
-      typedVariable.__ucbConst = true;
+      const constOwner = typedVariable.__ucbConstBlockId;
+      const alreadyInitialized = Boolean(
+        (this as Blockly.Block & { __ucbConstInitialized?: boolean })
+          .__ucbConstInitialized,
+      );
       const valueInput = this.getInput("VAL_CONST");
+      const targetBlock = valueInput?.connection?.targetBlock() || null;
+      const isShadow = Boolean(targetBlock?.isShadow?.());
+      const hasRealValue = Boolean(targetBlock && !isShadow);
+      if (
+        typedVariable.__ucbConst &&
+        ((constOwner && constOwner !== this.id) ||
+          (constOwner === this.id && alreadyInitialized && hasRealValue))
+      ) {
+        this.setWarningText(getConstWarningText());
+        if (valueInput?.connection?.targetBlock()) {
+          valueInput.connection.disconnect();
+        }
+        return;
+      }
+      typedVariable.__ucbConst = true;
+      if (!typedVariable.__ucbConstBlockId) {
+        typedVariable.__ucbConstBlockId = this.id;
+      }
       if (valueInput?.connection) {
         // Allow any value to be connected so we can infer the type.
         valueInput.connection.setCheck(null);
       }
-      const connectedType = inferConnectedValueType(
-        this.getInputTargetBlock("VAL_CONST"),
-      );
+      const connectedType = hasRealValue
+        ? inferConnectedValueType(targetBlock)
+        : null;
       if (connectedType) {
         setVariableType(variable, connectedType);
         if (valueInput?.connection) {
           valueInput.connection.setCheck(getBlocklyCompatibleChecks(connectedType));
         }
+        (this as Blockly.Block & { __ucbConstInitialized?: boolean })
+          .__ucbConstInitialized = true;
         this.setWarningText(null);
         return;
+      }
+      (this as Blockly.Block & { __ucbConstInitialized?: boolean })
+        .__ucbConstInitialized = false;
+      if (!hasRealValue) {
+        this.setWarningText(null);
+      }
+      if (valueInput?.connection) {
+        // Keep untyped until a real value is connected.
+        valueInput.connection.setCheck(null);
       }
       clearVariableType(variable);
       this.setWarningText(getUntypedWarningText());
@@ -420,6 +453,14 @@ export const defineVariablesSetInitBlock = (): void => {
       const typedVariable = variable as VariableWithMutableType;
       if (typedVariable.__ucbConst) {
         this.setWarningText(getConstWarningText());
+        const currentType = variable.getType();
+        if (currentType && currentType !== selectedType) {
+          typeField.setValue(currentType);
+        }
+        const valueInput = this.getInput("VALUE");
+        if (valueInput?.connection?.targetBlock()) {
+          valueInput.connection.disconnect();
+        }
         return;
       }
       if (variable.getType() !== selectedType) {

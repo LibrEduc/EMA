@@ -47,9 +47,14 @@ export function configureStandardBlocks(): void {
   };
   type ProcedureBlockWithArgs = ProcedureBlockDef & {
     __typedPatched?: boolean;
+    __typedPlusMinus?: boolean;
     argumentVarModels_?: Blockly.VariableModel[];
+    arguments_?: string[];
+    updateParams_?: () => void;
     getProcedureCall?: () => string;
     getProcedureModel?: () => Blockly.Procedures.IProcedureModel | null;
+    argData_?: { model: Blockly.VariableModel; argId: string }[];
+    addVarInput_?: (name: string, argId: string) => void;
   };
 
   const getBlocklyMsg = (key: string): string => {
@@ -85,6 +90,86 @@ export function configureStandardBlocks(): void {
       getVariableTypeLabel(type),
       type,
     ] as Blockly.MenuOption);
+
+  const patchProcedurePlusMinusTypes = function(this: Blockly.Block) {
+    const typed = this as ProcedureBlockWithArgs;
+    if (typed.__typedPlusMinus) {
+      return;
+    }
+    typed.__typedPlusMinus = true;
+
+    const originalAddVarInput = typed.addVarInput_;
+    if (typeof originalAddVarInput === "function") {
+      typed.addVarInput_ = function(name: string, argId: string) {
+        originalAddVarInput.call(this, name, argId);
+        const input = this.getInput(argId);
+        if (!input) {
+          return;
+        }
+        const typeFieldName = `${argId}_TYPE`;
+        if (input.fieldRow.some((field) => field.name === typeFieldName)) {
+          return;
+        }
+        const dropdown = new Blockly.FieldDropdown(
+          getTypeDropdownOptions,
+          (value) => {
+            const selectedType = value || "int";
+            const argDatum = (this as ProcedureBlockWithArgs).argData_?.find(
+              (elem) => elem.argId === argId,
+            );
+            if (argDatum?.model) {
+              setVariableType(argDatum.model, selectedType);
+              Blockly.Procedures.mutateCallers(this);
+            }
+            return selectedType;
+          },
+        );
+        const nameIndex = input.fieldRow.findIndex((field) => field.name === argId);
+        const insertIndex = nameIndex >= 0 ? nameIndex + 1 : input.fieldRow.length;
+        input.insertFieldAt(insertIndex, dropdown, typeFieldName);
+
+        const argDatum = (this as ProcedureBlockWithArgs).argData_?.find(
+          (elem) => elem.argId === argId,
+        );
+        const modelType = argDatum?.model?.getType?.() || "";
+        const currentType = modelType && modelType !== "__NO_TYPE__" ? modelType : "int";
+        dropdown.setValue(currentType);
+      };
+    }
+
+    if (typed.argData_ && typed.argData_.length > 0) {
+      for (const argDatum of typed.argData_) {
+        const argId = argDatum.argId;
+        const input = this.getInput(argId);
+        if (!input) {
+          continue;
+        }
+        const typeFieldName = `${argId}_TYPE`;
+        if (input.fieldRow.some((field) => field.name === typeFieldName)) {
+          continue;
+        }
+        const dropdown = new Blockly.FieldDropdown(
+          getTypeDropdownOptions,
+          (value) => {
+            const selectedType = value || "int";
+            if (argDatum.model) {
+              setVariableType(argDatum.model, selectedType);
+              Blockly.Procedures.mutateCallers(this);
+            }
+            return selectedType;
+          },
+        );
+        const nameIndex = input.fieldRow.findIndex((field) => field.name === argId);
+        const insertIndex = nameIndex >= 0 ? nameIndex + 1 : input.fieldRow.length;
+        input.insertFieldAt(insertIndex, dropdown, typeFieldName);
+        const modelType = argDatum.model?.getType?.() || "";
+        const currentType = modelType && modelType !== "__NO_TYPE__" ? modelType : "int";
+        dropdown.setValue(currentType);
+      }
+    }
+  };
+
+  // Procedure parameter dropdowns are managed inside the mutator blocks.
 
   const toInternalType = (rawType: string | string[] | null | undefined): string | null => {
     if (!rawType) return null;
@@ -159,6 +244,7 @@ export function configureStandardBlocks(): void {
       const originalDecompose = this.decompose;
       const originalCompose = this.compose;
       const originalOnchange = this.onchange;
+      patchProcedurePlusMinusTypes.call(this);
       this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
         const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
         if (container) {
@@ -170,8 +256,8 @@ export function configureStandardBlocks(): void {
               const name = argBlock.getFieldValue("NAME");
               const argType = typeByName.get(name);
               if (argType) {
-                try {
-                  argBlock.setFieldValue(argType, "TYPE");
+              try {
+                argBlock.setFieldValue(argType, "ARGTYPE");
                 } catch {
                   // Ignore if type is not available in dropdown.
                 }
@@ -193,8 +279,9 @@ export function configureStandardBlocks(): void {
         const typeByName = new Map<string, string>();
         let argBlock = container.getInputTargetBlock("STACK");
         while (argBlock && !argBlock.isInsertionMarker()) {
-          const name = argBlock.getFieldValue("NAME");
-          const argType = argBlock.getFieldValue("TYPE");
+            const name = argBlock.getFieldValue("NAME");
+            const argType =
+              argBlock.getFieldValue("ARGTYPE") || argBlock.getFieldValue("TYPE");
           if (name && argType) {
             typeByName.set(name, argType);
           }
@@ -238,6 +325,7 @@ export function configureStandardBlocks(): void {
           return;
         }
         model.setReturnTypes([inferredType]);
+        patchProcedurePlusMinusTypes.call(this);
       };
     };
   }
@@ -295,6 +383,8 @@ export function configureStandardBlocks(): void {
       typedBlock.__typedPatched = true;
       const originalDecompose = this.decompose;
       const originalCompose = this.compose;
+      const originalOnchange = this.onchange;
+      patchProcedurePlusMinusTypes.call(this);
       this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
         const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
         if (container) {
@@ -306,8 +396,8 @@ export function configureStandardBlocks(): void {
               const name = argBlock.getFieldValue("NAME");
               const argType = typeByName.get(name);
               if (argType) {
-                try {
-                  argBlock.setFieldValue(argType, "TYPE");
+              try {
+                argBlock.setFieldValue(argType, "ARGTYPE");
                 } catch {
                   // Ignore if type is not available in dropdown.
                 }
@@ -329,8 +419,9 @@ export function configureStandardBlocks(): void {
         const typeByName = new Map<string, string>();
         let argBlock = container.getInputTargetBlock("STACK");
         while (argBlock && !argBlock.isInsertionMarker()) {
-          const name = argBlock.getFieldValue("NAME");
-          const argType = argBlock.getFieldValue("TYPE");
+            const name = argBlock.getFieldValue("NAME");
+            const argType =
+              argBlock.getFieldValue("ARGTYPE") || argBlock.getFieldValue("TYPE");
           if (name && argType) {
             typeByName.set(name, argType);
           }
@@ -342,6 +433,18 @@ export function configureStandardBlocks(): void {
             setVariableType(model, argType);
           }
         }
+      };
+      this.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+        if (originalOnchange) {
+          originalOnchange.call(this, event);
+        }
+        if (event.type === Blockly.Events.UI || event.type === Blockly.Events.FINISHED_LOADING) {
+          return;
+        }
+        if (event.type === Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE) {
+          return;
+        }
+        patchProcedurePlusMinusTypes.call(this);
       };
     };
   }
@@ -359,7 +462,7 @@ export function configureStandardBlocks(): void {
         return;
       }
       const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as ProcedureBlockWithArgs | null;
-      const argModels = defBlock?.argumentVarModels_;
+      const argModels = defBlock?.getVarModels?.() || defBlock?.argumentVarModels_;
       if (!argModels || argModels.length === 0) {
         return;
       }
@@ -386,7 +489,7 @@ export function configureStandardBlocks(): void {
         return;
       }
       const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as ProcedureBlockWithArgs | null;
-      const argModels = defBlock?.argumentVarModels_;
+      const argModels = defBlock?.getVarModels?.() || defBlock?.argumentVarModels_;
       if (!argModels || argModels.length === 0) {
         return;
       }
@@ -400,23 +503,7 @@ export function configureStandardBlocks(): void {
     };
   }
 
-  const mutatorArg = Blockly.Blocks["procedures_mutatorarg"] as ProcedureBlockDef | undefined;
-  if (mutatorArg && !mutatorArg.__typedConfigured) {
-    mutatorArg.__typedConfigured = true;
-    const originalInit = mutatorArg.init;
-    mutatorArg.init = function(this: Blockly.Block) {
-      if (originalInit) {
-        originalInit.call(this);
-      }
-      const input = this.inputList[0];
-      if (!input || input.fieldRow.some((field) => field.name === "TYPE")) {
-        return;
-      }
-      input
-        .appendField(getBlocklyMsg("TYPED_VAR_ARG_TYPE_LABEL"))
-        .appendField(new Blockly.FieldDropdown(getTypeDropdownOptions), "TYPE");
-    };
-  }
+  // procedures_mutatorarg is not used with block-plus-minus procedure blocks.
 
   debugLog("✅ Blocs standards configurés (logic_compare restreint à int/float)");
 }
