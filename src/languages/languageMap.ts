@@ -56,8 +56,12 @@ export interface LanguageItem {
   HOME: string;
   ABOUT: string;
   CONTACT: string;
+  UNDO: string;
+  REDO: string;
   ABOUT_TOOLTIP: string;
   CONTACT_TOOLTIP: string;
+  UNDO_TOOLTIP: string;
+  REDO_TOOLTIP: string;
   PLUGIN_MINIMAP: string;
   PLUGIN_HIGHLIGHT: string;
   PLUGIN_CONTINUOUSTOOLBOX: string;

@@ -3,10 +3,14 @@ import { LanguageMap } from './languageMap';
 export const frLang: LanguageMap = {
   'fr': {
     HOME: "µcBlockly",
-    ABOUT: "A propos",
-    CONTACT: "Contacter",
+    ABOUT: "à propos",
+    CONTACT: "contacter",
+    UNDO: "annuler",
+    REDO: "refaire",
     ABOUT_TOOLTIP: "Page du projet",
     CONTACT_TOOLTIP: "Contacter l'auteur",
+    UNDO_TOOLTIP: "Annuler la dernière action",
+    REDO_TOOLTIP: "Refaire la dernière action",
     PLUGIN_MINIMAP: "Miniature",
     PLUGIN_HIGHLIGHT: "Surbrillance",
     PLUGIN_CONTINUOUSTOOLBOX: "Continu",

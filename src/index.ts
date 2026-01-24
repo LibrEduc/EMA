@@ -149,6 +149,8 @@ const elements = {
   pluginHighlight: document.getElementById(
     "pluginHighlight",
   ) as HTMLInputElement,
+  undoButton: document.getElementById("undoButton") as HTMLElement,
+  redoButton: document.getElementById("redoButton") as HTMLElement,
   pluginContinuousToolbox: document.getElementById(
     "pluginContinuousToolbox",
   ) as HTMLInputElement,
@@ -172,6 +174,8 @@ const requiredElements = [
   "rendererMenu",
   "pluginMinimap",
   "pluginHighlight",
+  "undoButton",
+  "redoButton",
   "pluginContinuousToolbox",
   "codeEditorSwitch",
   "debugSwitch",
@@ -634,6 +638,20 @@ const HTML_onChange = (): void => {
       µcB.plugin_contentHighlight.dispose();
     }
     setPluginsInURL("pluginHighlight", "highlight");
+  };
+
+  elements.undoButton.onclick = () => {
+    const workspace = µcB.workspace as Blockly.WorkspaceSvg | undefined;
+    if (workspace) {
+      workspace.undo(false);
+    }
+  };
+
+  elements.redoButton.onclick = () => {
+    const workspace = µcB.workspace as Blockly.WorkspaceSvg | undefined;
+    if (workspace) {
+      workspace.undo(true);
+    }
   };
 
   elements.pluginContinuousToolbox.onchange = () => {
