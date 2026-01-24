@@ -102,6 +102,18 @@ export function createTypedVariablesFlyout(
   initBlock.appendChild(typeInitField);
   xmlList.push(initBlock);
 
+  const defineBlock = document.createElement("block");
+  defineBlock.setAttribute("type", "variables_define");
+  const defineVarField = document.createElement("field");
+  defineVarField.setAttribute("name", "VAR");
+  defineVarField.setAttribute("id", defaultVariable.getId());
+  if (defaultType) {
+    defineVarField.setAttribute("variabletype", defaultType);
+  }
+  defineVarField.textContent = defaultVariable.getName();
+  defineBlock.appendChild(defineVarField);
+  xmlList.push(defineBlock);
+
   return xmlList;
 }
 
@@ -117,10 +129,10 @@ export function registerTypedVariablesCategory(
     TYPED_VARIABLES_BUTTON_ID,
     (button: Blockly.FlyoutButton) => {
       const targetWorkspace = button.getTargetWorkspace();
-    const variablesWithHandler = Blockly.Variables as typeof Blockly.Variables & {
-      createVariableButtonHandler?: (workspace: Blockly.Workspace) => void;
-    };
-    if (
+      const variablesWithHandler = Blockly.Variables as typeof Blockly.Variables & {
+        createVariableButtonHandler?: (workspace: Blockly.Workspace) => void;
+      };
+      if (
         variablesWithHandler &&
         typeof variablesWithHandler.createVariableButtonHandler === "function"
       ) {

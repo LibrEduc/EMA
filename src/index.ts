@@ -64,7 +64,7 @@ globalWindow.MonacoEnvironment = {
 if (typeof window !== 'undefined') {
   // Exposer Blockly et toutes ses propriétés
   globalWindow.Blockly = Blockly;
-  
+
   // Exposer également les propriétés principales individuellement
   globalWindow.Blockly = {
     ...Blockly,
@@ -80,7 +80,7 @@ if (typeof window !== 'undefined') {
     Variables: Blockly.Variables,
     utils: Blockly.utils
   };
-  
+
   console.log('✅ Blockly et toutes ses propriétés exposés globalement immédiatement');
   console.log('Propriétés disponibles:', Object.keys(globalWindow.Blockly));
 }
@@ -113,7 +113,7 @@ if (typeof window !== 'undefined') {
   (globalWindow as typeof globalWindow & {
     arduinoGenerator?: typeof arduinoGenerator;
   }).arduinoGenerator = exposedArduinoGenerator;
-  
+
   console.log('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
   console.log('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
 }
@@ -714,11 +714,14 @@ const resetAllParameters = (): void => {
   document.getElementById("flex_container_up")!.style.flexGrow = "1";
   document.getElementById("flex_container_up_left")!.style.flexGrow = "1";
 
+  const originalToolbox = µcB.stripCustomCategoriesForContinuousToolbox();
   µcB.workspace = Blockly.inject(
     document.getElementById("div_workspace_content_blockly")!,
     µcB.WORKSPACE_OPTIONS,
   );
+  µcB.restoreWorkspaceAfterInject();
   µcB.workspaceSetupPlugins(false);
+  µcB.restoreToolboxAfterInject(originalToolbox);
 
   // Recharger la page sur la racine
   window.location.href = "/";
@@ -764,14 +767,14 @@ DomIsLoaded((): void => {
       }
     }, 100);
   }
-  
+
   // Appliquer les types de blocs depuis le registre
   if (typeof Blockly !== 'undefined') {
     applyBlockTypesFromRegistry();
     // Configurer les blocs standards (controls_if, etc.)
     configureStandardBlocks();
   }
-  
+
   HTML_populateLanguages(µcB);
   µcB.changeLanguage(false);
   µcB.workspaceInit();
@@ -782,13 +785,13 @@ resources such as images and scripts. */
 window.onload = (): void => {
   // Blockly et arduinoGenerator sont déjà exposés globalement
   console.log('🔄 window.onload - Vérification des composants...');
-  
+
   // S'assurer que les blocs de variables typées sont définis
   if (!Blockly.Blocks['variables_get_dynamic'] || !Blockly.Blocks['variables_set_dynamic']) {
     console.log('🔄 Redéfinition des blocs de variables typées dans window.onload...');
     defineTypedVariableBlocks();
   }
-  
+
   HTML_onChange();
   const code = arduinoGenerator.workspaceToCode(µcB.workspace);
   µcB_codeEditor.setValue(code);
@@ -835,9 +838,21 @@ window.onload = (): void => {
       const minimap = document.getElementsByClassName(
         "blockly-minimap",
       )[0] as HTMLElement;
+      const searchParams = new URLSearchParams(window.location.search);
+      const paramsURL = searchParams.get("options")
+        ? searchParams.get("options")!.split(",").filter(Boolean)
+        : [];
+      const minimapParam = searchParams.get("minimap");
+      const minimapFromUrl = minimapParam !== null
+        && minimapParam !== "0"
+        && minimapParam !== "false";
+      const minimapEnabled =
+        window.sessionStorage.getItem("pluginMinimap") === "true" ||
+        paramsURL.includes("minimap") ||
+        minimapFromUrl;
       if (minimap) {
-        minimap.style.visibility = "hidden";
-        elements.pluginMinimap.checked = false;
+        minimap.style.visibility = minimapEnabled ? "visible" : "hidden";
+        elements.pluginMinimap.checked = minimapEnabled;
       }
 
       const continuousEnabled =

@@ -77,7 +77,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   private loop_ = Object.create(null);
   // Create a dictionary of pins to check if their use conflicts
   private pins_ = Object.create(null);
-  
+
   /**
    * List of outer-inner pairings that do NOT require parentheses.
    */
@@ -110,7 +110,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
 
   constructor(name = "Arduino") {
     super(name);
-    
+
     for (const key in Order) {
       // Must assign Order[key] to a temporary to get the type guard to work;
       // see https://github.com/microsoft/TypeScript/issues/10530.
@@ -126,15 +126,15 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
 
     this.addReservedWords(
       "setup,loop,if,else,for,switch,case,while,do,break,continue,return,goto," +
-        "define,include,HIGH,LOW,INPUT,OUTPUT,INPUT_PULLUP,true,false,integer," +
-        "constants,floating,point,void,boolean,char,unsigned,byte,int,word,long," +
-        "float,double,string,String,array,static,volatile,const,sizeof,pinMode," +
-        "digitalWrite,digitalRead,analogReference,analogRead,analogWrite,tone," +
-        "noTone,shiftOut,shitIn,pulseIn,millis,micros,delay,delayMicroseconds," +
-        "min,max,abs,constrain,map,pow,sqrt,sin,cos,tan,randomSeed,random," +
-        "lowByte,highByte,bitRead,bitWrite,bitSet,bitClear,bit,attachInterrupt," +
-        "detachInterrupt,interrupts,noInterrupts" +
-        Object.getOwnPropertyNames(globalThis).join(","),
+      "define,include,HIGH,LOW,INPUT,OUTPUT,INPUT_PULLUP,true,false,integer," +
+      "constants,floating,point,void,boolean,char,unsigned,byte,int,word,long," +
+      "float,double,string,String,array,static,volatile,const,sizeof,pinMode," +
+      "digitalWrite,digitalRead,analogReference,analogRead,analogWrite,tone," +
+      "noTone,shiftOut,shitIn,pulseIn,millis,micros,delay,delayMicroseconds," +
+      "min,max,abs,constrain,map,pow,sqrt,sin,cos,tan,randomSeed,random," +
+      "lowByte,highByte,bitRead,bitWrite,bitSet,bitClear,bit,attachInterrupt," +
+      "detachInterrupt,interrupts,noInterrupts" +
+      Object.getOwnPropertyNames(globalThis).join(","),
     );
   }
 
@@ -194,8 +194,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         argumentVarModels_?: Blockly.VariableModel[];
         getProcedureModel?: () =>
           | (Blockly.Procedures.IProcedureModel & {
-              getParameters?: () => { getId?: () => string }[];
-            })
+            getParameters?: () => { getId?: () => string }[];
+          })
           | null;
       }).argumentVarModels_;
       if (argModels && argModels.length > 0) {
@@ -212,8 +212,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       const procModel = (block as Blockly.Block & {
         getProcedureModel?: () =>
           | (Blockly.Procedures.IProcedureModel & {
-              getParameters?: () => { getId?: () => string; getName?: () => string }[];
-            })
+            getParameters?: () => { getId?: () => string; getName?: () => string }[];
+          })
           | null;
       }).getProcedureModel?.();
       const procParams = procModel?.getParameters?.() || [];
@@ -237,13 +237,13 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
 
     // Map to store variable names with their types
     const variableNamesByType: Record<string, string[]> = {};
-    
+
     // Add developer variables (not created or named by the user).
     const devVarList = Blockly.Variables.allDeveloperVariables(workspace);
     for (const devVar of devVarList) {
       const varName = this.nameDB_!.getName(
         devVar,
-          Blockly.Names.NameType.DEVELOPER_VARIABLE,
+        Blockly.Names.NameType.DEVELOPER_VARIABLE,
       );
       // Developer variables default to 'int'
       const varType = 'int';
@@ -271,7 +271,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         globalVariableIds.add(blockVarId);
       }
     }
-    
+
     const normalizeBlocklyType = (rawType: string | null | undefined): string | null => {
       if (!rawType) return null;
       if (rawType === "__NO_TYPE__" || rawType === "null" || rawType === "undefined") {
@@ -331,8 +331,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       const model = (block as Blockly.Block & {
         getProcedureModel?: () =>
           | (Blockly.Procedures.IProcedureModel & {
-              getParameters?: () => { getName?: () => string }[];
-            })
+            getParameters?: () => { getName?: () => string }[];
+          })
           | null;
       }).getProcedureModel?.();
       const params = model?.getParameters?.() || [];
@@ -411,7 +411,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       if (normalizedProcedureArgNames.has(varName)) {
         continue;
       }
-      
+
       // Normalize variable type to avoid emitting 'undefined' in declarations.
       const rawType = variable.getType();
       const inferredType = inferredTypesByVarId.get(variable.getId());
@@ -431,7 +431,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
           varDeclarations.push(`${varType} ${varNames.join(', ')};`);
         }
       }
-      
+
       if (varDeclarations.length > 0) {
         this.definitions_["variables"] = varDeclarations.join('\n');
       }
@@ -456,7 +456,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     const setups = Object.values(this.setups_);
     const loop = Object.values(this.loop_);
     // const pins = Object.values(this.pins_); // Utilisé dans validatePinUsage()
-    
+
     // Call Blockly.CodeGenerator's finish.
     super.finish(code);
 
@@ -464,7 +464,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
 
     // Validate pin usage and add warnings
     const pinWarnings = this.validatePinUsage();
-    
+
     // Format the code with proper spacing and organization
     const newcode = this.formatArduinoCode({
       includes,
@@ -478,7 +478,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       code,
       pinWarnings
     });
-    
+
     return newcode;
   }
 
@@ -489,7 +489,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   private validatePinUsage(): string[] {
     const warnings: string[] = [];
     const pinUsages = this.getPinUsages();
-    
+
     // Check for potential conflicts or issues
     for (const usage of Object.values(pinUsages)) {
       const pinNum = parseInt(usage.number);
@@ -497,7 +497,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         warnings.push(`Warning: Pin ${usage.number} may be invalid for Arduino`);
       }
     }
-    
+
     return warnings;
   }
 
@@ -519,45 +519,45 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     pinWarnings: string[]
   }): string {
     const { includes, defines, variables, codeFunctions, userFunctions, setups, loop, code, pinWarnings } = sections;
-    
+
     let arduinoCode = '';
-    
+
     // Add header comment
     arduinoCode += '// Generated by µcBlockly Arduino Generator\n';
     arduinoCode += '// ' + new Date().toISOString() + '\n\n';
-    
+
     // Add includes
     if (includes.length > 0) {
       arduinoCode += includes.join('\n') + '\n\n';
     }
-    
+
     // Add defines
     if (defines.length > 0) {
       arduinoCode += defines.join('\n') + '\n\n';
     }
-    
+
     // Add variables
     if (variables.length > 0) {
       arduinoCode += variables.join('\n') + '\n\n';
     }
-    
+
     // Add helper functions
     if (codeFunctions.length > 0) {
       arduinoCode += codeFunctions.join('\n\n') + '\n\n';
     }
-    
+
     // Add user functions
     if (userFunctions.length > 0) {
       arduinoCode += userFunctions.join('\n\n') + '\n\n';
     }
-    
+
     // Add setup function
     arduinoCode += 'void setup() {\n';
     if (setups.length > 0) {
       arduinoCode += '  ' + setups.join('\n  ') + '\n';
     }
     arduinoCode += '}\n\n';
-    
+
     // Add loop function
     arduinoCode += 'void loop() {\n';
     if (loop.length > 0) {
@@ -567,12 +567,12 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       arduinoCode += '  ' + code.trim().split('\n').join('\n  ') + '\n';
     }
     arduinoCode += '}\n';
-    
+
     // Add warnings if any
     if (pinWarnings.length > 0) {
       arduinoCode = '// WARNINGS:\n' + pinWarnings.map(w => '// ' + w).join('\n') + '\n\n' + arduinoCode;
     }
-    
+
     return arduinoCode;
   }
 
@@ -646,17 +646,17 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * @param blockId - ID of the block defining this function.
    */
   addUserFunctionDefinition(
-    functionName: string, 
-    parameters: string[], 
-    returnType: string, 
-    body: string, 
+    functionName: string,
+    parameters: string[],
+    returnType: string,
+    body: string,
     blockId: string
   ): void {
     const paramList = parameters.length > 0 ? parameters.join(', ') : '';
     const functionCode = `${returnType} ${functionName}(${paramList}) {\n${body}\n}`;
-    
+
     this.userFunctions_[`function_${functionName}_${blockId}`] = functionCode;
-    
+
     // Store function signature for validation
     if (!this.functionNames_[functionName]) {
       this.functionNames_[functionName] = {
@@ -687,7 +687,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   } {
     const warnings: string[] = [];
     const errors: string[] = [];
-    
+
     // Check for undefined variables
     const usedVariables = this.getUsedVariables();
     for (const varName of usedVariables) {
@@ -695,7 +695,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         warnings.push(`Variable '${varName}' is used but not declared`);
       }
     }
-    
+
     // Check for function calls to undefined functions
     const calledFunctions = this.getCalledFunctions();
     for (const funcName of calledFunctions) {
@@ -703,11 +703,11 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         warnings.push(`Function '${funcName}' is called but not defined`);
       }
     }
-    
+
     // Check pin usage conflicts
     const pinWarnings = this.validatePinUsage();
     warnings.push(...pinWarnings);
-    
+
     return {
       isValid: errors.length === 0,
       warnings,
@@ -785,7 +785,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    */
   addPinUsage(pinNumber: string, pinMode: string, blockId: string): boolean {
     const pinKey = `pin_${pinNumber}`;
-    
+
     if (this.pins_[pinKey]) {
       const existingUsage = this.pins_[pinKey];
       // Check if there's a conflict (different modes)
@@ -796,17 +796,17 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       // Pin already configured with same mode
       return true;
     }
-    
+
     // New pin usage
     this.pins_[pinKey] = {
       number: pinNumber,
       mode: pinMode,
       blockId: blockId
     };
-    
+
     // Add pinMode setup
     this.addSetup(`pin_${pinNumber}_mode`, `pinMode(${pinNumber}, ${pinMode});`);
-    
+
     return true;
   }
 
@@ -814,7 +814,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * Get all pin usages for validation.
    * @returns Object containing pin usage information.
    */
-  getPinUsages(): Record<string, {number: string, mode: string, blockId: string}> {
+  getPinUsages(): Record<string, { number: string, mode: string, blockId: string }> {
     return this.pins_;
   }
 
@@ -912,7 +912,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    */
   scrubArduino_(block: Blockly.Block, code: string, thisOnly = false): string {
     let commentCode = "";
-    
+
     // Only collect comments for blocks that aren't inline.
     if (!block.outputConnection?.targetConnection) {
       // Collect comment for this block with enhanced formatting.
@@ -922,13 +922,13 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         comment = this.formatArduinoComment(comment);
         commentCode += this.prefixLines(comment + "\n", "// ");
       }
-      
+
       // Add block type information for debugging
       const blockType = block.type;
       if (blockType && this.shouldAddBlockTypeComment(blockType)) {
         commentCode += this.prefixLines(`Block type: ${blockType}\n`, "// ");
       }
-      
+
       // Collect comments for all value arguments.
       for (let i = 0; i < block.inputList.length; i++) {
         if (block.inputList[i].type === Blockly.inputs.inputTypes.VALUE) {
@@ -942,10 +942,10 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         }
       }
     }
-    
+
     const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
     const nextCode = thisOnly ? "" : this.blockToCode(nextBlock);
-    
+
     return commentCode + code + nextCode;
   }
 
@@ -957,18 +957,18 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   private formatArduinoComment(comment: string): string {
     // Remove excessive whitespace and normalize line breaks
     comment = comment.trim().replace(/\s+/g, ' ');
-    
+
     // Wrap long comments at appropriate length for Arduino IDE
     const maxLineLength = 80;
     if (comment.length <= maxLineLength) {
       return comment;
     }
-    
+
     // Simple word wrapping
     const words = comment.split(' ');
     const lines: string[] = [];
     let currentLine = '';
-    
+
     for (const word of words) {
       if ((currentLine + ' ' + word).length <= maxLineLength) {
         currentLine += (currentLine ? ' ' : '') + word;
@@ -977,9 +977,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         currentLine = word;
       }
     }
-    
+
     if (currentLine) lines.push(currentLine);
-    
+
     return lines.join('\n');
   }
 
@@ -1060,7 +1060,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.loop_ = Object.create(null);
     this.pins_ = Object.create(null);
     this.localVariables_ = Object.create(null);
-    
+
     if (this.nameDB_) {
       this.nameDB_.reset();
     }

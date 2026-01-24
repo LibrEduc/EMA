@@ -18,7 +18,7 @@ import { ArduinoGenerator, Order } from "../arduino_generator";
  * @param generator - The Arduino generator instance.
  * @returns Generated Arduino code.
  */
-export const variables_set = function(
+export const variables_set = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
@@ -34,7 +34,7 @@ export const variables_set = function(
  * @param generator - The Arduino generator instance.
  * @returns Generated Arduino code.
  */
-export const variables_get = function(
+export const variables_get = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {

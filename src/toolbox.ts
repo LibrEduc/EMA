@@ -85,9 +85,9 @@ export const basic_toolbox: ToolboxConfiguration = {
       categorystyle: 'recently_used_category',
     },*/
     {
-    'kind': 'search',
-    'name': 'Search',
-    'contents': [],
+      'kind': 'search',
+      'name': 'Search',
+      'contents': [],
     },
     {
       'kind': 'category',
@@ -97,6 +97,10 @@ export const basic_toolbox: ToolboxConfiguration = {
         {
           'kind': 'block',
           'type': 'controls_if',
+        },
+        {
+          'kind': 'block',
+          'type': 'controls_ifelse',
         },
         {
           'kind': 'block',
@@ -201,6 +205,24 @@ export const basic_toolbox: ToolboxConfiguration = {
           'type': 'math_number',
           'fields': {
             'NUM': 123,
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'math_percent',
+        },
+        {
+          'kind': 'block',
+          'type': 'math_change',
+          'inputs': {
+            'DELTA': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 1,
+                },
+              },
+            },
           },
         },
         {
@@ -416,6 +438,18 @@ export const basic_toolbox: ToolboxConfiguration = {
         },
         {
           'kind': 'block',
+          'type': 'text_no_quote',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_multiline',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_date',
+        },
+        {
+          'kind': 'block',
           'type': 'text_char',
         },
         {
@@ -608,6 +642,57 @@ export const basic_toolbox: ToolboxConfiguration = {
             'TEXT': {
               'shadow': {
                 'type': 'text',
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      'kind': 'category',
+      'name': 'CAT_COLOR',
+      'categorystyle': 'colour_category',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'colour_picker',
+        },
+        {
+          'kind': 'block',
+          'type': 'color_picker_custom',
+        },
+        {
+          'kind': 'block',
+          'type': 'color_picker_hsv',
+        },
+        {
+          'kind': 'block',
+          'type': 'colour_random',
+        },
+        {
+          'kind': 'block',
+          'type': 'colour_rgb',
+        },
+        {
+          'kind': 'block',
+          'type': 'colour_blend',
+          'inputs': {
+            'COLOUR1': {
+              'shadow': {
+                'type': 'colour_picker',
+              },
+            },
+            'COLOUR2': {
+              'shadow': {
+                'type': 'colour_picker',
+              },
+            },
+            'RATIO': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': {
+                  'NUM': 0.5,
+                },
               },
             },
           },

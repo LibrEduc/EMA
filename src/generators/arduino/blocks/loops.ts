@@ -19,9 +19,9 @@ function getDistinctName(
 ): string {
   return generator.nameDB_
     ? generator.nameDB_.getDistinctName(
-        baseName,
-        Blockly.Names.NameType.DEVELOPER_VARIABLE,
-      )
+      baseName,
+      Blockly.Names.NameType.DEVELOPER_VARIABLE,
+    )
     : baseName;
 }
 

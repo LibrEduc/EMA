@@ -84,6 +84,11 @@ export interface LanguageItem {
     CONTROLS_SWITCH_TOOLTIP_2: string;
     CONTROLS_SWITCH_TOOLTIP_3: string;
     CONTROLS_SWITCH_TOOLTIP_4: string;
+    MATH_CHANGE_LABEL: string;
+    MATH_CHANGE_BY: string;
+    MATH_CHANGE_VAR_WARNING: string;
+    MATH_PERCENT_TOOLTIP: string;
+    MATH_PERCENT_HELPURL: string;
     VARIABLES_SET_CONST: string;
     VARIABLES_SET_CONST_AT: string;
     VARIABLES_SET_CONST_TOOLTIP: string;
@@ -99,6 +104,10 @@ export interface LanguageItem {
     VAR_TYPE_BOOL: string;
     VAR_TYPE_STRING: string;
     VAR_TYPE_CHAR: string;
+    COLOUR_HSV_HUE_LABEL: string;
+    COLOUR_HSV_SATURATION_LABEL: string;
+    COLOUR_HSV_BRIGHTNESS_LABEL: string;
+    COLOUR_HSV_EYEDROPPER_LABEL: string;
 }
 export {};
 //# sourceMappingURL=languageMap.d.ts.map

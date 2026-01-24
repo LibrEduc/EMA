@@ -25,7 +25,13 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
+import "@blockly/field-date";
+import "@blockly/field-colour";
+import "@blockly/field-colour-hsv-sliders";
+import "@blockly/field-multilineinput";
+import "@blockly/field-slider";
 import * as Blockly from "blockly";
+import "./categories/blockly/field_colour_picker";
 import { ToolboxConfiguration } from "./toolbox";
 export interface BlocklyApplicationType {
     workspace: Blockly.Workspace;

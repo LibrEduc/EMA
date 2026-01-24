@@ -202,7 +202,7 @@ export function procedures_defreturn(
   return null;
 }
 
-export const procedures_defnoreturn = function(
+export const procedures_defnoreturn = function (
   block: Block,
   generator: ArduinoGenerator,
 ): null {

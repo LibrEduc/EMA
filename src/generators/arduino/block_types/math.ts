@@ -1,5 +1,6 @@
 export const MATH_BLOCK_TYPES = {
   math_number: "__DYNAMIC__identifyNumber",
+  math_percent: "float",
   inout_angle_maths: "int",
   math_arithmetic: "int",
   math_interval: "bool",

@@ -9,12 +9,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import {ArduinoGenerator} from './arduino/arduino_generator';
+import { ArduinoGenerator } from './arduino/arduino_generator';
 /* import * as colour from './arduino/colour.js';
 import * as lists from './arduino/lists.js'; */
 import * as logic from './arduino/blocks/logic';
 import * as loops from './arduino/blocks/loops';
 import * as math from './arduino/blocks/math';
+import * as colour from './arduino/blocks/colour';
 import * as procedures from './arduino/blocks/procedures';
 import * as text from './arduino/blocks/text';
 import * as variables from './arduino/blocks/variables';
@@ -42,6 +43,7 @@ const generators: typeof arduinoGenerator.forBlock = {
   ...logic,
   ...loops,
   ...math,
+  ...colour,
   ...procedures,
   ...text,
   ...variables,

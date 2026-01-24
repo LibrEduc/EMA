@@ -41,6 +41,24 @@ export function text(block: Block): [string, Order] {
   return [code, Order.ATOMIC];
 }
 
+export function text_no_quote(block: Block): [string, Order] {
+  const textValue = block.getFieldValue("TEXT") || "";
+  const code = textValue.trim() === "" ? '""' : textValue;
+  return [code, Order.ATOMIC];
+}
+
+export function text_multiline(block: Block): [string, Order] {
+  const textValue = block.getFieldValue("TEXT") || "";
+  const code = quoteString(textValue);
+  return [code, Order.ATOMIC];
+}
+
+export function text_date(block: Block): [string, Order] {
+  const textValue = block.getFieldValue("DATE") || "";
+  const code = quoteString(textValue);
+  return [code, Order.ATOMIC];
+}
+
 export function text_char(block: Block): [string, Order] {
   const value = block.getFieldValue("TEXT") || "";
   const code = quoteChar(value.charAt(0) || "");

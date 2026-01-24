@@ -54,6 +54,7 @@ export const getBlocklyCompatibleChecks = (
   }
   if (checks.has("string")) {
     checks.add("String");
+    checks.add("Colour");
   }
   return Array.from(checks);
 };
@@ -71,6 +72,7 @@ export const normalizeBlocklyTypeToVariableType = (type: string): string => {
   if (type === "Boolean") return "bool";
   if (type === "Number") return "int";
   if (type === "String") return "string";
+  if (type === "Colour") return "string";
   return type;
 };
 

@@ -28,14 +28,14 @@ export const TYPE_COMPATIBILITY: Record<string, string[]> = {
   // Types numériques
   'int': ['int'], // int n'accepte que int (pas de perte de précision)
   'float': ['float', 'int'], // float accepte float et int (promotion implicite)
-  
+
   // Types booléens
   'bool': ['bool'], // bool n'accepte que bool
-  
+
   // Types texte
   'string': ['string', 'char'], // string accepte string et char
   'char': ['char'], // char n'accepte que char
-  
+
   // Types spéciaux
   'null': ['null'], // null n'accepte que null
   'array': ['array'], // array n'accepte que array
@@ -60,7 +60,7 @@ export function getCompatibleTypes(targetType: string | null | undefined): strin
   if (!targetType) {
     return []; // Pas de type, pas de compatibilité
   }
-  
+
   // Retourner les types compatibles depuis le mapping, ou juste le type lui-même par défaut
   return TYPE_COMPATIBILITY[targetType] || [targetType];
 }
@@ -75,12 +75,12 @@ export function isTypeCompatible(sourceType: string | null | undefined, targetTy
   if (!sourceType || !targetType) {
     return false;
   }
-  
+
   // Si les types sont identiques, ils sont compatibles
   if (sourceType === targetType) {
     return true;
   }
-  
+
   // Vérifier si sourceType est dans la liste des types compatibles de targetType
   const compatibleTypes = getCompatibleTypes(targetType);
   return compatibleTypes.includes(sourceType);

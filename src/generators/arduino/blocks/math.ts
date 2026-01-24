@@ -23,6 +23,28 @@ export function math_number(block: Block): [string, Order] {
   return [code, Order.ATOMIC];
 }
 
+export function math_percent(block: Block): [string, Order] {
+  const rawValue = Number(block.getFieldValue("PERCENT") || 0);
+  const code = (rawValue / 100).toString();
+  return [code, Order.ATOMIC];
+}
+
+export function math_change(
+  block: Block,
+  generator: ArduinoGenerator,
+): string {
+  const getValueIfInputExists = (inputName: string): string => {
+    if (!block.getInput(inputName)) {
+      return "";
+    }
+    return generator.valueToCode(block, inputName, Order.NONE) || "";
+  };
+  const target =
+    getValueIfInputExists("VAR") || getValueIfInputExists("NAME") || "0";
+  const delta = generator.valueToCode(block, "DELTA", Order.ADDITION) || "0";
+  return target + " += " + delta + ";\n";
+}
+
 export function inout_angle_maths(block: Block): [string, Order] {
   const angle = block.getFieldValue("ANGLE") || "0";
   return [angle, Order.ATOMIC];

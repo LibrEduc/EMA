@@ -17,25 +17,25 @@ import { debugLog } from "./debug";
  */
 export function testArduinoGenerator(): void {
   debugLog('Testing Arduino Generator...');
-  
+
   try {
     // Create a new generator instance
     const generator = new ArduinoGenerator();
     debugLog('✓ Generator instance created successfully');
-    
+
     // Test basic functionality
     debugLog('✓ Generator name:', (generator as unknown as { name_: string }).name_);
     debugLog('✓ Generator reserved words:', (generator as unknown as { RESERVED_WORDS_: string[] }).RESERVED_WORDS_);
-    
+
     // Test variable type management
     generator.setVariableType('testVar', 'int');
     const varType = generator.getVariableType('testVar');
     debugLog('✓ Variable type management:', varType === 'int' ? 'PASS' : 'FAIL');
-    
+
     // Test pin usage
     const pinSuccess = generator.addPinUsage('13', 'OUTPUT', 'testBlock');
     debugLog('✓ Pin usage management:', pinSuccess ? 'PASS' : 'FAIL');
-    
+
     // Test function definition
     generator.addUserFunctionDefinition(
       'testFunction',
@@ -45,16 +45,16 @@ export function testArduinoGenerator(): void {
       'testBlock'
     );
     debugLog('✓ Function definition:', generator.isFunctionDefined('testFunction') ? 'PASS' : 'FAIL');
-    
+
     // Test validation
     const validation = generator.validateGeneratedCode();
     debugLog('✓ Code validation:', validation.isValid ? 'PASS' : 'FAIL');
     if (validation.warnings.length > 0) {
       debugLog('  Warnings:', validation.warnings);
     }
-    
+
     debugLog('✓ All tests passed! Arduino generator is working correctly.');
-    
+
   } catch (error) {
     console.error('✗ Test failed:', error);
   }
@@ -65,26 +65,26 @@ export function testArduinoGenerator(): void {
  */
 export function testCodeGeneration(): void {
   debugLog('Testing Code Generation...');
-  
+
   try {
     const generator = new ArduinoGenerator();
-    
+
     // Simulate a simple workspace with basic blocks
     // This would normally come from Blockly workspace
     generator.addVariable('var1', 'int testVar;');
     generator.addSetup('setup1', 'Serial.begin(9600);');
     generator.addLoop('loop1', 'digitalWrite(13, HIGH);');
-    
+
     // Generate code
     const code = generator.finish('// Main loop code\n');
     debugLog('✓ Code generated successfully');
     debugLog('Generated code length:', code.length);
     debugLog('Code preview:', code.substring(0, 200) + '...');
-    
+
     // Validate generated code
     const validation = generator.validateGeneratedCode();
     debugLog('✓ Generated code validation:', validation.isValid ? 'PASS' : 'FAIL');
-    
+
   } catch (error) {
     console.error('✗ Code generation test failed:', error);
   }

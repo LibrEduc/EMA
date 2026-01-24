@@ -37,7 +37,7 @@ function identifyNumber(numString: string | number | null | undefined): string {
   if (numString === null || numString === undefined) return 'int';
   const text = String(numString);
   const trimmed = text.trim().toLowerCase();
-  
+
   // Handle explicit casts like int( ... ) or float( ... )
   if (trimmed.startsWith('int(')) {
     return 'int';
@@ -45,12 +45,12 @@ function identifyNumber(numString: string | number | null | undefined): string {
   if (trimmed.startsWith('float(')) {
     return 'float';
   }
-  
+
   // Check if it contains a decimal point or scientific notation
   if (text.includes('.') || text.includes(',') || text.includes('e') || text.includes('E')) {
     return 'float';
   }
-  
+
   // Try to parse as number to check range
   const num = Number.parseFloat(text);
   if (!Number.isNaN(num)) {
@@ -60,7 +60,7 @@ function identifyNumber(numString: string | number | null | undefined): string {
     }
     return 'float';
   }
-  
+
   return 'int';
 }
 
@@ -189,15 +189,15 @@ export function getCompatibleTypesForCheck(type: string | null | undefined): str
   if (!type) {
     return null; // No type restriction
   }
-  
+
   const compatibleTypes = getCompatibleTypes(type);
-  
+
   // If only one type (itself), return it as a string for Blockly
   // If multiple types, return as array
   if (compatibleTypes.length === 1) {
     return [compatibleTypes[0]];
   }
-  
+
   return compatibleTypes;
 }
 
@@ -235,6 +235,12 @@ export function checkTypeCompatibility(
     return true;
   }
   if (
+    (sourceType === "Colour" || sourceType === "color" || sourceType === "colour") &&
+    (targetType === "String" || targetType === "string")
+  ) {
+    return true;
+  }
+  if (
     sourceType === "char" &&
     (targetType === "String" || targetType === "string")
   ) {
@@ -255,28 +261,28 @@ export function applyBlockTypesFromRegistry(): void {
   }
 
   let appliedCount = 0;
-  
+
   for (const [blockType, typeDef] of Object.entries(BLOCK_TYPE_REGISTRY)) {
     const blockDef = Blockly.Blocks[blockType];
     if (blockDef !== undefined) {
       const blockDefinition = blockDef as Blockly.Block & { getBlockType?: BlockTypeFunction };
-      
+
       if (typeof typeDef === 'string') {
         // Simple type (string)
-        blockDefinition.getBlockType = function(this: Blockly.Block): string {
+        blockDefinition.getBlockType = function (this: Blockly.Block): string {
           return typeDef;
         };
         appliedCount++;
       } else if (typeof typeDef === 'function') {
         // Dynamic type (function) - bind to the block instance.
-        blockDefinition.getBlockType = function(this: Blockly.Block): string {
+        blockDefinition.getBlockType = function (this: Blockly.Block): string {
           return typeDef(this);
         };
         appliedCount++;
       }
     }
   }
-  
+
   debugLog(`✅ Types appliqués à ${appliedCount} blocs depuis le registre`);
 }
 

@@ -73,6 +73,11 @@ export const enLang: LanguageMap = {
     CONTROLS_SWITCH_TOOLTIP_2: "Switch with a default case.",
     CONTROLS_SWITCH_TOOLTIP_3: "Switch with cases.",
     CONTROLS_SWITCH_TOOLTIP_4: "Switch with cases and default.",
+    MATH_CHANGE_LABEL: "change",
+    MATH_CHANGE_BY: "by",
+    MATH_CHANGE_VAR_WARNING: "Connect a variable.",
+    MATH_PERCENT_TOOLTIP: "Select a percentage value.",
+    MATH_PERCENT_HELPURL: "",
     VARIABLES_SET_CONST: "const",
     VARIABLES_SET_CONST_AT: "=",
     VARIABLES_SET_CONST_TOOLTIP: "Declare a constant",
@@ -88,5 +93,9 @@ export const enLang: LanguageMap = {
     VAR_TYPE_BOOL: "bool",
     VAR_TYPE_STRING: "string",
     VAR_TYPE_CHAR: "char",
+    COLOUR_HSV_HUE_LABEL: "Hue",
+    COLOUR_HSV_SATURATION_LABEL: "Saturation",
+    COLOUR_HSV_BRIGHTNESS_LABEL: "Brightness",
+    COLOUR_HSV_EYEDROPPER_LABEL: "Eyedropper",
   }
 };

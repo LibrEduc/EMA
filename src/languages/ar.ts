@@ -73,6 +73,11 @@ export const arLang: LanguageMap = {
     CONTROLS_SWITCH_TOOLTIP_2: "تبديل مع حالة افتراضية.",
     CONTROLS_SWITCH_TOOLTIP_3: "تبديل مع حالات.",
     CONTROLS_SWITCH_TOOLTIP_4: "تبديل مع حالات وافتراضي.",
+    MATH_CHANGE_LABEL: "غيّر",
+    MATH_CHANGE_BY: "بمقدار",
+    MATH_CHANGE_VAR_WARNING: "صِل متغيرًا.",
+    MATH_PERCENT_TOOLTIP: "اختر قيمة بالنسبة المئوية.",
+    MATH_PERCENT_HELPURL: "",
     VARIABLES_SET_CONST: "ثابت",
     VARIABLES_SET_CONST_AT: "=",
     VARIABLES_SET_CONST_TOOLTIP: "تعريف ثابت",
@@ -88,5 +93,9 @@ export const arLang: LanguageMap = {
     VAR_TYPE_BOOL: "bool",
     VAR_TYPE_STRING: "string",
     VAR_TYPE_CHAR: "char",
+    COLOUR_HSV_HUE_LABEL: "درجة اللون",
+    COLOUR_HSV_SATURATION_LABEL: "التشبع",
+    COLOUR_HSV_BRIGHTNESS_LABEL: "السطوع",
+    COLOUR_HSV_EYEDROPPER_LABEL: "القطارة",
   }
 };

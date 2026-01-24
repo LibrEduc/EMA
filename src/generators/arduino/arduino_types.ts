@@ -171,11 +171,11 @@ export function getArduinoTypeNames(): string[] {
 export function isValueValidForType(typeName: string, value: number): boolean {
   const type = getArduinoType(typeName);
   if (!type) return false;
-  
+
   if (type.name === 'void') return false;
   if (type.name === 'boolean') return value === 0 || value === 1;
   if (type.name === 'string') return true; // String validation would be more complex
-  
+
   return value >= type.minValue && value <= type.maxValue;
 }
 

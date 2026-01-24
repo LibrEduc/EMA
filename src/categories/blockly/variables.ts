@@ -29,7 +29,7 @@ const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
  */
 export const defineVariablesGetDynamicBlock = (): void => {
   Blockly.Blocks["variables_get_dynamic"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       // Use Field.SKIP_SETUP to prevent automatic creation of default 'item' variable
       // This is the same approach used by Blockly's built-in variable blocks
       this.appendDummyInput()
@@ -51,7 +51,7 @@ export const defineVariablesGetDynamicBlock = (): void => {
      * Updates the output connection type using setOutput() so the ConnectionChecker can verify it.
      * Note: setCheck() on output connections doesn't work - we must use setOutput(true, type).
      */
-    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (shouldSkipVariableChange(this, event)) {
         return;
       }
@@ -109,7 +109,7 @@ export const defineVariablesGetDynamicBlock = (): void => {
  */
 export const defineVariablesSetDynamicBlock = (): void => {
   Blockly.Blocks["variables_set_dynamic"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       // Use Field.SKIP_SETUP to prevent automatic creation of default 'item' variable
       // This is the same approach used by Blockly's built-in variable blocks
       this.appendValueInput("VALUE")
@@ -136,7 +136,7 @@ export const defineVariablesSetDynamicBlock = (): void => {
      * Validates that the assigned value type matches the variable type.
      * If incompatible, suggests changing the variable type or shows a warning.
      */
-    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (shouldSkipVariableChange(this, event)) {
         return;
       }
@@ -150,7 +150,7 @@ export const defineVariablesSetDynamicBlock = (): void => {
  */
 export const defineVariablesLocalBlock = (): void => {
   Blockly.Blocks["variables_local"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.appendValueInput("VALUE")
         .appendField(getBlocklyMsgOr("VARIABLES_LOCAL", "local"));
       this.setOutput(true, null);
@@ -158,7 +158,7 @@ export const defineVariablesLocalBlock = (): void => {
       this.setHelpUrl("");
       this.setStyle("variable_dynamic_blocks");
     },
-    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (shouldSkipVariableChange(this, event)) {
         return;
       }
@@ -182,7 +182,7 @@ export const defineVariablesLocalBlock = (): void => {
         this.setOutput(true, null);
       }
     },
-    getBlockType: function(this: Blockly.Block): string | null {
+    getBlockType: function (this: Blockly.Block): string | null {
       const connectedType = inferConnectedValueType(
         this.getInputTargetBlock("VALUE"),
       );
@@ -196,7 +196,7 @@ export const defineVariablesLocalBlock = (): void => {
  */
 export const defineVariablesSetTypeBlock = (): void => {
   Blockly.Blocks["variables_set_type"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.appendDummyInput()
         .appendField(getBlocklyMsg("TYPED_VAR_TYPE_SET_LABEL"))
         .appendField(
@@ -219,7 +219,7 @@ export const defineVariablesSetTypeBlock = (): void => {
       this.setTooltip(getBlocklyMsg("VARIABLES_SET_TOOLTIP"));
       this.setHelpUrl("");
     },
-    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (shouldSkipVariableChange(this, event)) {
         return;
       }
@@ -296,7 +296,7 @@ export const defineVariablesSetTypeBlock = (): void => {
 
 export const defineVariablesConstBlock = (): void => {
   Blockly.Blocks["variables_const"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.appendValueInput("VAL_CONST")
         .appendField(getBlocklyMsgOr("VARIABLES_SET_CONST", "set const"))
         .appendField(
@@ -316,7 +316,7 @@ export const defineVariablesConstBlock = (): void => {
       );
       this.setHelpUrl(getBlocklyMsgOr("VARIABLES_SET_CONST_HELPURL", ""));
     },
-    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (shouldSkipVariableChange(this, event)) {
         return;
       }
@@ -399,7 +399,7 @@ export const defineVariablesConstBlock = (): void => {
 
 export const defineVariablesSetInitBlock = (): void => {
   Blockly.Blocks["variables_set_init"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.appendValueInput("VALUE")
         .appendField(getBlocklyMsgOr("VARIABLES_SET_INIT", "set"))
         .appendField(
@@ -425,7 +425,7 @@ export const defineVariablesSetInitBlock = (): void => {
       );
       this.setHelpUrl(getBlocklyMsgOr("VARIABLES_SET_INIT_HELPURL", ""));
     },
-    onchange: function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (shouldSkipVariableChange(this, event)) {
         return;
       }
@@ -475,6 +475,35 @@ export const defineVariablesSetInitBlock = (): void => {
   };
 };
 
+export const defineVariablesDefineBlock = (): void => {
+  const initDefineBlock = function (this: Blockly.Block) {
+    this.appendValueInput("VALUE")
+      .appendField(getBlocklyMsgOr("VARIABLES_DEFINE", "define variable"))
+      .appendField(
+        new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ""),
+        "VAR",
+      )
+      .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"));
+    const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+    if (varField) {
+      configureTypedVariableField(varField);
+    }
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setStyle("variable_dynamic_blocks");
+    this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_DEFINE_CONST_TOOLTIP", ""));
+    this.setHelpUrl(getBlocklyMsgOr("ARDUINO_BASE_DEFINE_CONST_HELPURL", ""));
+  };
+
+  Blockly.Blocks["variables_define"] = {
+    init: initDefineBlock,
+  };
+
+  Blockly.Blocks["variable_define"] = {
+    init: initDefineBlock,
+  };
+};
+
 /**
  * Extend the standard variables_get block to support type checking
  */
@@ -483,7 +512,7 @@ export const extendStandardVariablesGetBlock = (): void => {
   if (Blockly.Blocks["variables_get"]) {
     // Add onchange to update the output connection type
     const originalOnchange = Blockly.Blocks["variables_get"].onchange;
-    Blockly.Blocks["variables_get"].onchange = function(
+    Blockly.Blocks["variables_get"].onchange = function (
       this: Blockly.Block,
       event: Blockly.Events.Abstract,
     ) {
@@ -538,7 +567,7 @@ export const extendStandardVariablesGetBlock = (): void => {
 export const extendStandardVariablesSetBlock = (): void => {
   if (Blockly.Blocks["variables_set"]) {
     const originalOnchange = Blockly.Blocks["variables_set"].onchange;
-    Blockly.Blocks["variables_set"].onchange = function(
+    Blockly.Blocks["variables_set"].onchange = function (
       this: Blockly.Block,
       event: Blockly.Events.Abstract,
     ) {

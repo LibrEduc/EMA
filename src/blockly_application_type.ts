@@ -27,11 +27,21 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "@blockly/field-date";
+import "@blockly/field-colour";
+import "@blockly/field-colour-hsv-sliders";
+import "@blockly/field-multilineinput";
+import "@blockly/field-slider";
 import * as Blockly from "blockly";
+import "./categories/blockly/field_colour_picker";
 import { registerStrictConnectionChecker } from "./generators/arduino/strict_connection_checker";
 import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
 import { normalizeVariableType } from "./generators/arduino/variable_utils";
-import { patchFieldVariableValidation, patchVariableMapCreateVariable } from "./blockly_patches";
+import {
+  patchFieldVariableValidation,
+  patchVariableMapCreateVariable,
+  patchWorkspaceRemoveTopBlock,
+} from "./blockly_patches";
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -102,14 +112,15 @@ export class BlocklyApplication implements BlocklyApplicationType {
     // We use our own StrictConnectionChecker which allows typed blocks to connect to untyped inputs
     // (needed for type inference: a 'true' block (Boolean) should be able to connect to variables_set_dynamic (null) 
     // to infer the variable type)
-    
+
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
+    patchWorkspaceRemoveTopBlock();
     patchFieldVariableValidation();
-    
+
     this.normalizeVariableTypes();
     patchVariableMapCreateVariable(this.workspace);
-    
+
     // Listen for variable creation events to normalize variable types
     this.workspace.addChangeListener((e: Blockly.Events.Abstract) => {
       if (e.type === Blockly.Events.VAR_CREATE) {
@@ -159,7 +170,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         }
       }
     });
-    
+
     // Register our custom strict connection checker
     // This checker allows typed blocks to connect to untyped inputs (for type inference)
     // but blocks untyped blocks (__NO_TYPE__) from connecting to typed inputs
@@ -186,6 +197,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
   plugin_modal = new Modal();
   plugin_workspaceSearch = new WorkspaceSearch();
   plugin_zoomToFit = new ZoomToFitControl();
+  private pluginsInitialized = false;
   private saveBlocksTimer: number | null = null;
   private codegenTimer: number | null = null;
   /**
@@ -237,7 +249,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     try {
       const variableMap = this.workspace.getVariableMap();
       const allVariables = variableMap.getAllVariables();
-      
+
       // Find and delete the 'item' variable
       for (const variable of allVariables) {
         if (!variable) {
@@ -339,6 +351,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
     if (shouldStripCustom && originalToolbox) {
       (this.workspace as Blockly.WorkspaceSvg).updateToolbox(originalToolbox);
       this.WORKSPACE_OPTIONS.toolbox = originalToolbox;
+      this.registerCustomToolboxCallbacks();
+      const toolbox = (this.workspace as Blockly.WorkspaceSvg).getToolbox?.();
+      if (toolbox && typeof toolbox.refreshSelection === "function") {
+        toolbox.refreshSelection();
+      }
     }
     patchFieldVariableValidation();
     patchVariableMapCreateVariable(this.workspace);
@@ -363,6 +380,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
 
   // The function `workspaceSetupPlugins` sets up all plugins added in workspace
   public workspaceSetupPlugins = (disposePlugin: boolean = false): void => {
+    if (!disposePlugin && this.pluginsInitialized) {
+      return;
+    }
     this.plugin_backpack = new Backpack(
       this.workspace as Blockly.WorkspaceSvg,
       this.backpackOptions,
@@ -372,17 +392,18 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.plugin_zoomToFit = new ZoomToFitControl(this.workspace);
     const pluginHighlightCheck: HTMLInputElement = document.getElementById("pluginHighlight") as HTMLInputElement;
     if (disposePlugin) {
-      this.workspace.addChangeListener(shadowBlockConversionChangeListener);
+      this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
       this.plugin_backpack.dispose();
       this.plugin_contentHighlight.dispose();
       this.plugin_minimap.dispose();
       this.plugin_modal.dispose();
       this.plugin_workspaceSearch.dispose();
       this.plugin_zoomToFit.dispose();
+      this.pluginsInitialized = false;
       //this.plugin_keyboardNav.navigationController.removeWorkspace(this.workspace);
       //this.plugin_keyboardNav.navigationController.disable(this.workspace);
     } else {
-      this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
+      this.workspace.addChangeListener(shadowBlockConversionChangeListener);
       this.plugin_backpack.init();
       if (pluginHighlightCheck.checked) {
         this.plugin_contentHighlight = new ContentHighlight(this.workspace as Blockly.WorkspaceSvg);
@@ -394,6 +415,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       this.plugin_modal.init();
       this.plugin_workspaceSearch.init();
       this.plugin_zoomToFit.init();
+      this.pluginsInitialized = true;
       //this.plugin_keyboardNav.navigationController.addWorkspace(this.workspace);
       //this.plugin_keyboardNav.navigationController.enable(this.workspace);
     }
@@ -410,7 +432,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * Register callbacks for custom toolbox categories.
    * This is required after any workspace re-injection.
    */
-  private registerCustomToolboxCallbacks(): void {
+  public registerCustomToolboxCallbacks(): void {
     const svgWorkspace = this.workspace as Blockly.WorkspaceSvg;
     registerTypedVariablesCategory(svgWorkspace);
     if (Blockly.Procedures && typeof Blockly.Procedures.flyoutCategory === "function") {
@@ -418,6 +440,44 @@ export class BlocklyApplication implements BlocklyApplicationType {
         Blockly.Procedures.CATEGORY_NAME ?? "PROCEDURE",
         (workspace) => Blockly.Procedures.flyoutCategory(workspace, false),
       );
+    }
+  }
+
+  /**
+   * Reconnect hooks after workspace injection.
+   */
+  public restoreWorkspaceAfterInject(): void {
+    registerStrictConnectionChecker(this.workspace);
+    this.registerCustomToolboxCallbacks();
+    patchFieldVariableValidation();
+    patchVariableMapCreateVariable(this.workspace);
+    this.workspaceListeners();
+  }
+
+  public stripCustomCategoriesForContinuousToolbox(): ToolboxConfiguration | null {
+    const originalToolbox = this.WORKSPACE_OPTIONS.toolbox as
+      | ToolboxConfiguration
+      | undefined;
+    if (!this.isContinuousToolboxEnabled() || !originalToolbox) {
+      return null;
+    }
+    this.WORKSPACE_OPTIONS.toolbox =
+      this.getToolboxWithoutCustomCategories(originalToolbox);
+    return originalToolbox;
+  }
+
+  public restoreToolboxAfterInject(
+    originalToolbox: ToolboxConfiguration | null,
+  ): void {
+    if (!originalToolbox) {
+      return;
+    }
+    (this.workspace as Blockly.WorkspaceSvg).updateToolbox(originalToolbox);
+    this.WORKSPACE_OPTIONS.toolbox = originalToolbox;
+    this.registerCustomToolboxCallbacks();
+    const toolbox = (this.workspace as Blockly.WorkspaceSvg).getToolbox?.();
+    if (toolbox && typeof toolbox.refreshSelection === "function") {
+      toolbox.refreshSelection();
     }
   }
 
@@ -506,6 +566,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const searchParams = new URLSearchParams(window.location.search);
     let newParam: string | null;
     let dropdownMenu: HTMLSelectElement;
+    let rendererFromUrl = false;
     newParam = searchParams.get('lang');
     dropdownMenu = document.getElementById('languageMenu') as HTMLSelectElement;
     if (newParam == null || newParam == "null")
@@ -519,9 +580,14 @@ export class BlocklyApplication implements BlocklyApplicationType {
     dropdownMenu = document.getElementById('themeMenu') as HTMLSelectElement;
     if (newParam == null || newParam == "null")
       newParam = dropdownMenu.options[dropdownMenu.selectedIndex].value;
-    else
+    else {
       (document.getElementById('themeMenu')! as HTMLSelectElement).value = newParam;
-    this.WORKSPACE_OPTIONS['theme'] = newParam;
+    }
+    const mappedTheme = themeMappings[newParam] ?? themeMappings.classic;
+    this.WORKSPACE_OPTIONS['theme'] = mappedTheme;
+    if (this.workspace && themeMappings.hasOwnProperty(newParam)) {
+      (this.workspace as Blockly.WorkspaceSvg).setTheme(mappedTheme);
+    }
     window.sessionStorage?.setItem('paramTheme', newParam);
     window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "theme", newParam));
 
@@ -529,11 +595,16 @@ export class BlocklyApplication implements BlocklyApplicationType {
     dropdownMenu = document.getElementById('rendererMenu') as HTMLSelectElement;
     if (newParam == null || newParam == "null")
       newParam = dropdownMenu.options[dropdownMenu.selectedIndex].value;
-    else
+    else {
       (document.getElementById('rendererMenu')! as HTMLSelectElement).value = newParam;
+      rendererFromUrl = true;
+    }
     this.WORKSPACE_OPTIONS['renderer'] = newParam;
     window.sessionStorage?.setItem('paramRenderer', newParam);
     window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "renderer", newParam));
+    if (rendererFromUrl && this.workspace) {
+      this.changeRenderer(newParam);
+    }
   };
 
   public pluginsSetupWorkspace = (): void => {
@@ -544,7 +615,15 @@ export class BlocklyApplication implements BlocklyApplicationType {
       //clean array from all null or undefined entry
       paramsURL = paramsURL.filter(Boolean);
     }
-    if ((window.sessionStorage.getItem('pluginMinimap') == "true") || (paramsURL.includes('minimap'))) {
+    const minimapParam = searchParams.get('minimap');
+    const minimapFromUrl = minimapParam !== null
+      && minimapParam !== "0"
+      && minimapParam !== "false";
+    if (
+      (window.sessionStorage.getItem('pluginMinimap') == "true")
+      || (paramsURL.includes('minimap'))
+      || minimapFromUrl
+    ) {
       const pluginMinimapCheck: HTMLInputElement = document.getElementById("pluginMinimap") as HTMLInputElement;
       pluginMinimapCheck.checked = true;
       pluginMinimapCheck.dispatchEvent(new Event('change'));
@@ -734,6 +813,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
         "VAR_TYPE_BOOL",
         "VAR_TYPE_STRING",
         "VAR_TYPE_CHAR",
+        "COLOUR_HSV_HUE_LABEL",
+        "COLOUR_HSV_SATURATION_LABEL",
+        "COLOUR_HSV_BRIGHTNESS_LABEL",
+        "COLOUR_HSV_EYEDROPPER_LABEL",
       ] as const;
       variableKeys.forEach((key) => {
         const value = customMessages[key];

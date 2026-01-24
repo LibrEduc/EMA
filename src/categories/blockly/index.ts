@@ -2,6 +2,7 @@ import { debugLog } from "../../generators/arduino/debug";
 import { defineControlsSwitchBlocks } from "./logic";
 import { defineMathCompatBlocks } from "./math";
 import { defineTextCompatBlocks } from "./text";
+import { defineColourBlocks } from "./colour";
 import {
   defineVariablesConstBlock,
   defineVariablesGetDynamicBlock,
@@ -9,6 +10,7 @@ import {
   defineVariablesSetDynamicBlock,
   defineVariablesSetInitBlock,
   defineVariablesSetTypeBlock,
+  defineVariablesDefineBlock,
   extendStandardVariablesGetBlock,
   extendStandardVariablesSetBlock,
 } from "./variables";
@@ -16,6 +18,7 @@ import {
 export const defineBlocklyArduinoCompatBlocks = (): void => {
   defineMathCompatBlocks();
   defineTextCompatBlocks();
+  defineColourBlocks();
 };
 
 /**
@@ -28,6 +31,7 @@ export const defineAllTypedVariableBlocks = (): void => {
   defineVariablesSetTypeBlock();
   defineVariablesConstBlock();
   defineVariablesSetInitBlock();
+  defineVariablesDefineBlock();
   defineControlsSwitchBlocks();
   defineBlocklyArduinoCompatBlocks();
 
@@ -40,10 +44,12 @@ export const defineAllTypedVariableBlocks = (): void => {
 
 export {
   defineControlsSwitchBlocks,
+  defineColourBlocks,
   defineVariablesConstBlock,
   defineVariablesGetDynamicBlock,
   defineVariablesLocalBlock,
   defineVariablesSetDynamicBlock,
   defineVariablesSetInitBlock,
   defineVariablesSetTypeBlock,
+  defineVariablesDefineBlock,
 };

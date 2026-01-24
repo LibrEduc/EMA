@@ -53,7 +53,7 @@ export function patchFieldVariableValidation(): void {
     const proto = Blockly.FieldVariable.prototype as unknown as FieldVariableProto;
     if (!proto.__ucbPatchedVariableValidation) {
       const originalValidation = proto.doClassValidation_;
-      proto.doClassValidation_ = function(
+      proto.doClassValidation_ = function (
         this: Blockly.FieldVariable,
         newValue: string | null,
       ) {
@@ -80,7 +80,7 @@ export function patchFieldVariableValidation(): void {
 
     if (!proto.__ucbPatchedVariableInitModel) {
       const originalInitModel = proto.initModel;
-      proto.initModel = function(this: Blockly.FieldVariable) {
+      proto.initModel = function (this: Blockly.FieldVariable) {
         const field = this as Blockly.FieldVariable & {
           workspace_?: Blockly.WorkspaceSvg;
           value_?: string | null;
@@ -103,5 +103,29 @@ export function patchFieldVariableValidation(): void {
     }
   } catch (e) {
     console.debug("Error intercepting field variable validation:", e);
+  }
+}
+
+export function patchWorkspaceRemoveTopBlock(): void {
+  try {
+    const proto = Blockly.WorkspaceSvg.prototype as unknown as {
+      __ucbPatchedRemoveTopBlock?: boolean;
+      removeTopBlock: (block: Blockly.BlockSvg) => void;
+      getTopBlocks: (ordered: boolean) => Blockly.BlockSvg[];
+    };
+    if (proto.__ucbPatchedRemoveTopBlock) {
+      return;
+    }
+    const originalRemoveTopBlock = proto.removeTopBlock;
+    proto.removeTopBlock = function (this: Blockly.WorkspaceSvg, block: Blockly.BlockSvg) {
+      const topBlocks = this.getTopBlocks(false);
+      if (!topBlocks.includes(block)) {
+        return;
+      }
+      originalRemoveTopBlock.call(this, block);
+    };
+    proto.__ucbPatchedRemoveTopBlock = true;
+  } catch (e) {
+    console.debug("Error patching workspace removeTopBlock:", e);
   }
 }

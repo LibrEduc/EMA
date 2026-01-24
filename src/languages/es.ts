@@ -73,6 +73,11 @@ export const esLang: LanguageMap = {
     CONTROLS_SWITCH_TOOLTIP_2: "Switch con caso por defecto.",
     CONTROLS_SWITCH_TOOLTIP_3: "Switch con casos.",
     CONTROLS_SWITCH_TOOLTIP_4: "Switch con casos y por defecto.",
+    MATH_CHANGE_LABEL: "cambiar",
+    MATH_CHANGE_BY: "en",
+    MATH_CHANGE_VAR_WARNING: "Conecta una variable.",
+    MATH_PERCENT_TOOLTIP: "Selecciona un valor en porcentaje.",
+    MATH_PERCENT_HELPURL: "",
     VARIABLES_SET_CONST: "const",
     VARIABLES_SET_CONST_AT: "=",
     VARIABLES_SET_CONST_TOOLTIP: "Declarar una constante",
@@ -88,5 +93,9 @@ export const esLang: LanguageMap = {
     VAR_TYPE_BOOL: "bool",
     VAR_TYPE_STRING: "string",
     VAR_TYPE_CHAR: "char",
+    COLOUR_HSV_HUE_LABEL: "Tono",
+    COLOUR_HSV_SATURATION_LABEL: "Saturación",
+    COLOUR_HSV_BRIGHTNESS_LABEL: "Brillo",
+    COLOUR_HSV_EYEDROPPER_LABEL: "Cuentagotas",
   }
 };

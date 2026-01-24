@@ -20,7 +20,7 @@ import { getArduinoType } from "../arduino_types";
  * @param generator - The Arduino generator instance.
  * @returns Generated Arduino code.
  */
-export const variables_set_dynamic = function(
+export const variables_set_dynamic = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
@@ -29,21 +29,21 @@ export const variables_set_dynamic = function(
   const value = generator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
   const localWrapper = block.getInputTargetBlock("VALUE");
   const isLocal = localWrapper?.type === "variables_local";
-  
+
   // Ensure we have a valid variable name
   if (!varName || varName === 'variable') {
     console.warn('variables_set_dynamic: Invalid variable name');
     return '// Error: Invalid variable name\n';
   }
-  
+
   if (isLocal) {
     const typeName = getDeclarationType(block, "int");
     const declaration = `${typeName} ${varName};`;
     const root = block.getRootBlock();
     const scopeId =
       root &&
-      (root.type === "procedures_defnoreturn" ||
-        root.type === "procedures_defreturn")
+        (root.type === "procedures_defnoreturn" ||
+          root.type === "procedures_defreturn")
         ? root.id
         : "loop";
     const tag = `local_${scopeId}_${varName}`;
@@ -61,7 +61,7 @@ export const variables_set_dynamic = function(
  * Generator for variables_local block.
  * This block returns the wrapped value unchanged.
  */
-export const variables_local = function(
+export const variables_local = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): [string, number] {
@@ -86,19 +86,19 @@ export const variables_local = function(
  * @param generator - The Arduino generator instance.
  * @returns Generated Arduino code.
  */
-export const variables_get_dynamic = function(
+export const variables_get_dynamic = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
   // Typed variable getter - use standard variable name resolution
   const varName = generator.getVariableName(block.getFieldValue('VAR'));
-  
+
   // Ensure we have a valid variable name
   if (!varName || varName === 'variable') {
     console.warn('variables_get_dynamic: Invalid variable name');
     return ['0', Order.ATOMIC];
   }
-  
+
   return [varName, Order.ATOMIC];
 };
 
@@ -106,7 +106,7 @@ export const variables_get_dynamic = function(
  * Generator for variables_set_type block.
  * This block only changes the variable type in the workspace.
  */
-export const variables_set_type = function(
+export const variables_set_type = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
@@ -154,7 +154,7 @@ const inferValueBlockType = (valueBlock: Blockly.Block | null): string | null =>
   return normalizeValueType(checkType);
 };
 
-export const variables_const = function(
+export const variables_const = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
@@ -175,7 +175,7 @@ export const variables_const = function(
   return "";
 };
 
-export const variables_set_init = function(
+export const variables_set_init = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
@@ -189,3 +189,19 @@ export const variables_set_init = function(
   generator.addVariable(varName, declaration);
   return "";
 };
+
+export const variables_define = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  if (!varName) {
+    return "";
+  }
+  const value = generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
+  const declaration = `#define ${varName} ${value}`;
+  generator.addDefinition(`define_${varName}`, declaration);
+  return "";
+};
+
+export const variable_define = variables_define;

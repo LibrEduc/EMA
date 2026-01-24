@@ -41,3 +41,20 @@ declare module "@blockly/theme-modern";
 declare module "@blockly/theme-highcontrast";
 declare module "@blockly/theme-deuteranopia";
 declare module "@blockly/theme-tritanopia";
+declare module "@jaames/iro" {
+  export const ColorPicker: new (
+    selector: string,
+    options: { width: number; height: number; color: string },
+  ) => {
+    on: (eventName: string, handler: (color: { hexString: string }) => void) => void;
+  };
+  const iroDefault: {
+    ColorPicker: new (
+      selector: string,
+      options: { width: number; height: number; color: string },
+    ) => {
+      on: (eventName: string, handler: (color: { hexString: string }) => void) => void;
+    };
+  };
+  export default iroDefault;
+}

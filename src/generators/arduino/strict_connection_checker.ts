@@ -61,7 +61,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     // We check this FIRST to be stricter than the standard checker
     if (sourceConnection && targetConnection) {
       const sourceBlock = sourceConnection.getSourceBlock();
-      
+
       // First, try to get type from getBlockType() if available (this is the most reliable)
       let sourceType: string | null | undefined = null;
       const typedBlock = sourceBlock as Blockly.Block & {
@@ -71,7 +71,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
         sourceType = typedBlock.getBlockType();
         debugLog(`🔍 [StrictChecker] getBlockType() retourne: '${sourceType}' pour bloc ${sourceBlock.type}`);
       }
-      
+
       // If getBlockType() is not available, try to get from connection check
       if (sourceType === null || sourceType === undefined) {
         const sourceCheck = sourceConnection.getCheck();
@@ -85,7 +85,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
           }
         }
       }
-      
+
       // If sourceType is '__NO_TYPE__' or 'undefined', block all typed connections
       // This is our special type for untyped variables
       if (sourceType === '__NO_TYPE__' || sourceType === 'undefined') {
@@ -109,7 +109,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
 
       // Get the target connection's check
       const targetCheck = targetConnection.getCheck();
-      
+
       // If target has no check, allow connection (untyped input accepts all)
       if (!targetCheck || (Array.isArray(targetCheck) && targetCheck.length === 0)) {
         return true;
@@ -123,7 +123,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       // Check if sourceType matches any of the target checks
       // targetCheck can be a string or an array of strings
       const targetChecks = Array.isArray(targetCheck) ? targetCheck : [targetCheck];
-      
+
       // If sourceType matches any target check, allow connection
       for (const check of targetChecks) {
         if (check && this.checkTypeCompatibility(sourceType, check)) {
@@ -162,25 +162,39 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
 
     // Special case: Boolean type matching
     // Blockly uses 'Boolean' (capital B), we use 'bool'
-    if ((sourceType === 'Boolean' || sourceType === 'bool') && 
-        (targetType === 'Boolean' || targetType === 'bool')) {
+    if ((sourceType === 'Boolean' || sourceType === 'bool') &&
+      (targetType === 'Boolean' || targetType === 'bool')) {
       return true;
     }
 
     // Special case: String type matching
     if ((sourceType === 'String' || sourceType === 'string') &&
-        (targetType === 'String' || targetType === 'string')) {
+      (targetType === 'String' || targetType === 'string')) {
+      return true;
+    }
+    // Special case: Colour type compatibility with string.
+    if (
+      (sourceType === 'Colour' || sourceType === 'color' || sourceType === 'colour') &&
+      (targetType === 'String' || targetType === 'string' ||
+        targetType === 'Colour' || targetType === 'color' || targetType === 'colour')
+    ) {
+      return true;
+    }
+    if (
+      (sourceType === 'String' || sourceType === 'string') &&
+      (targetType === 'Colour' || targetType === 'color' || targetType === 'colour')
+    ) {
       return true;
     }
     // Allow char to plug into string (but not the reverse).
     if ((sourceType === 'char') &&
-        (targetType === 'string' || targetType === 'String')) {
+      (targetType === 'string' || targetType === 'String')) {
       return true;
     }
 
     // Special case: null/undefined types
-    if (sourceType === 'null' || sourceType === 'undefined' || 
-        targetType === 'null' || targetType === 'undefined') {
+    if (sourceType === 'null' || sourceType === 'undefined' ||
+      targetType === 'null' || targetType === 'undefined') {
       // null/undefined can only connect to null/undefined
       return sourceType === targetType;
     }
@@ -203,14 +217,14 @@ export function registerStrictConnectionChecker(workspace: Blockly.Workspace): v
 
   // Create a new instance of the strict checker
   const strictChecker = new StrictConnectionChecker();
-  
+
   // Set the connection checker on the workspace
   // Blockly uses connectionChecker property on the workspace
   const workspaceWithChecker = workspace as Blockly.Workspace & {
     connectionChecker?: Blockly.ConnectionChecker;
   };
   workspaceWithChecker.connectionChecker = strictChecker;
-  
+
   // Also try to set it via the workspace SVG if available
   const workspaceSvg = workspace as Blockly.WorkspaceSvg;
   const workspaceSvgWithChecker = workspaceSvg as Blockly.WorkspaceSvg & {
@@ -219,6 +233,6 @@ export function registerStrictConnectionChecker(workspace: Blockly.Workspace): v
   if (workspaceSvgWithChecker && typeof workspaceSvgWithChecker.setConnectionChecker === 'function') {
     workspaceSvgWithChecker.setConnectionChecker(strictChecker);
   }
-  
+
   debugLog('✅ StrictConnectionChecker registered and active');
 }

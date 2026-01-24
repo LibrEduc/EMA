@@ -174,8 +174,57 @@ const getSwitchTooltip = (block: SwitchBlock): string => {
 };
 
 export const defineControlsSwitchBlocks = (): void => {
+  if (!Blockly.Blocks["controls_if_if"]) {
+    Blockly.Blocks["controls_if_if"] = {
+      init: function (this: Blockly.Block) {
+        this.appendDummyInput()
+          .appendField(getBlocklyMsg("CONTROLS_IF_IF_TITLE_IF"));
+        this.setNextStatement(true);
+        this.setStyle("logic_blocks");
+        this.setTooltip(getBlocklyMsg("CONTROLS_IF_IF_TOOLTIP"));
+        this.contextMenu = false;
+      },
+    };
+  }
+  if (!Blockly.Blocks["controls_if_elseif"]) {
+    Blockly.Blocks["controls_if_elseif"] = {
+      init: function (this: Blockly.Block) {
+        this.appendDummyInput()
+          .appendField(getBlocklyMsg("CONTROLS_IF_ELSEIF_TITLE_ELSEIF"));
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setStyle("logic_blocks");
+        this.setTooltip(getBlocklyMsg("CONTROLS_IF_ELSEIF_TOOLTIP"));
+        this.contextMenu = false;
+      },
+    };
+  }
+  if (!Blockly.Blocks["controls_if_else"]) {
+    Blockly.Blocks["controls_if_else"] = {
+      init: function (this: Blockly.Block) {
+        this.appendDummyInput()
+          .appendField(getBlocklyMsg("CONTROLS_IF_ELSE_TITLE_ELSE"));
+        this.setPreviousStatement(true);
+        this.setStyle("logic_blocks");
+        this.setTooltip(getBlocklyMsg("CONTROLS_IF_ELSE_TOOLTIP"));
+        this.contextMenu = false;
+      },
+    };
+  }
+  Blockly.Blocks["controls_ifelse"] = {
+    init: function (this: Blockly.Block) {
+      const baseIf = Blockly.Blocks["controls_if"] as
+        | { init?: (this: Blockly.Block) => void }
+        | undefined;
+      baseIf?.init?.call(this);
+      const mutation = Blockly.utils.xml.createElement("mutation");
+      mutation.setAttribute("else", "1");
+      this.domToMutation?.(mutation);
+    },
+  };
+
   Blockly.Blocks["controls_switch"] = {
-    init: function(this: SwitchBlock) {
+    init: function (this: SwitchBlock) {
       this.setHelpUrl(getBlocklyMsg("CONTROLS_SWITCH_HELPURL"));
       this.setStyle("logic_blocks");
       this.appendDummyInput()
@@ -211,15 +260,15 @@ export const defineControlsSwitchBlocks = (): void => {
       this.casebreakCount_ = 0;
       this.defaultCount_ = 0;
     },
-    onchange: function(this: SwitchBlock, event: Blockly.Events.Abstract) {
+    onchange: function (this: SwitchBlock, event: Blockly.Events.Abstract) {
       updateSwitchCaseTyping(this, event);
     },
-    renameVar: function(this: Blockly.Block, oldName: string, newName: string) {
+    renameVar: function (this: Blockly.Block, oldName: string, newName: string) {
       if (Blockly.Names.equals(oldName, this.getFieldValue("SWVAR"))) {
         this.setFieldValue(newName, "SWVAR");
       }
     },
-    mutationToDom: function(this: SwitchBlock): Element | null {
+    mutationToDom: function (this: SwitchBlock): Element | null {
       if (!this.casebreakCount_ && !this.defaultCount_) {
         return null;
       }
@@ -232,7 +281,7 @@ export const defineControlsSwitchBlocks = (): void => {
       }
       return container;
     },
-    domToMutation: function(this: SwitchBlock, xmlElement: Element) {
+    domToMutation: function (this: SwitchBlock, xmlElement: Element) {
       this.casebreakCount_ = Number(xmlElement.getAttribute("casebreak") || 0);
       this.defaultCount_ = Number(xmlElement.getAttribute("default") || 0);
       for (let i = 1; i <= (this.casebreakCount_ || 0); i += 1) {
@@ -248,7 +297,7 @@ export const defineControlsSwitchBlocks = (): void => {
           .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
       }
     },
-    decompose: function(this: SwitchBlock, workspace: Blockly.Workspace): Blockly.Block {
+    decompose: function (this: SwitchBlock, workspace: Blockly.Workspace): Blockly.Block {
       const containerBlock = workspace.newBlock("controls_switch_var") as Blockly.BlockSvg;
       containerBlock.initSvg();
       let connection: Blockly.Connection | null =
@@ -270,7 +319,7 @@ export const defineControlsSwitchBlocks = (): void => {
       }
       return containerBlock;
     },
-    compose: function(this: SwitchBlock, containerBlock: Blockly.Block) {
+    compose: function (this: SwitchBlock, containerBlock: Blockly.Block) {
       if (this.defaultCount_) {
         this.removeInput("DEFAULT");
       }
@@ -314,7 +363,7 @@ export const defineControlsSwitchBlocks = (): void => {
         clauseBlock = clauseBlock.nextConnection?.targetBlock() || null;
       }
     },
-    saveConnections: function(this: SwitchBlock, containerBlock: Blockly.Block) {
+    saveConnections: function (this: SwitchBlock, containerBlock: Blockly.Block) {
       let clauseBlock = containerBlock.getInputTargetBlock("STACK");
       let i = 1;
       while (clauseBlock) {
@@ -344,7 +393,7 @@ export const defineControlsSwitchBlocks = (): void => {
   };
 
   Blockly.Blocks["controls_switch_var"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.setStyle("logic_blocks");
       this.appendDummyInput()
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_SWITCHVAR"));
@@ -355,7 +404,7 @@ export const defineControlsSwitchBlocks = (): void => {
   };
 
   Blockly.Blocks["controls_case_break"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.setStyle("logic_blocks");
       this.appendDummyInput()
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
@@ -367,7 +416,7 @@ export const defineControlsSwitchBlocks = (): void => {
   };
 
   Blockly.Blocks["controls_case_default"] = {
-    init: function(this: Blockly.Block) {
+    init: function (this: Blockly.Block) {
       this.setStyle("logic_blocks");
       this.appendDummyInput()
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));

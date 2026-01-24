@@ -27,7 +27,7 @@ export function configureStandardBlocks(): void {
   if (logicCompareDef && !logicCompareDef.__typedConfigured) {
     logicCompareDef.__typedConfigured = true;
     const originalInit = logicCompareDef.init;
-    logicCompareDef.init = function(this: Blockly.Block) {
+    logicCompareDef.init = function (this: Blockly.Block) {
       if (originalInit) {
         originalInit.call(this);
       }
@@ -91,7 +91,7 @@ export function configureStandardBlocks(): void {
       type,
     ] as Blockly.MenuOption);
 
-  const patchProcedurePlusMinusTypes = function(this: Blockly.Block) {
+  const patchProcedurePlusMinusTypes = function (this: Blockly.Block) {
     const typed = this as ProcedureBlockWithArgs;
     if (typed.__typedPlusMinus) {
       return;
@@ -100,7 +100,7 @@ export function configureStandardBlocks(): void {
 
     const originalAddVarInput = typed.addVarInput_;
     if (typeof originalAddVarInput === "function") {
-      typed.addVarInput_ = function(name: string, argId: string) {
+      typed.addVarInput_ = function (name: string, argId: string) {
         originalAddVarInput.call(this, name, argId);
         const input = this.getInput(argId);
         if (!input) {
@@ -232,7 +232,7 @@ export function configureStandardBlocks(): void {
   if (defReturn && !defReturn.__typedConfigured) {
     defReturn.__typedConfigured = true;
     const originalInit = defReturn.init;
-    defReturn.init = function(this: Blockly.Block) {
+    defReturn.init = function (this: Blockly.Block) {
       if (originalInit) {
         originalInit.call(this);
       }
@@ -245,7 +245,7 @@ export function configureStandardBlocks(): void {
       const originalCompose = this.compose;
       const originalOnchange = this.onchange;
       patchProcedurePlusMinusTypes.call(this);
-      this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
+      this.decompose = function (this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
         const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
         if (container) {
           const argModels = (this as ProcedureBlockWithArgs).argumentVarModels_;
@@ -256,8 +256,8 @@ export function configureStandardBlocks(): void {
               const name = argBlock.getFieldValue("NAME");
               const argType = typeByName.get(name);
               if (argType) {
-              try {
-                argBlock.setFieldValue(argType, "ARGTYPE");
+                try {
+                  argBlock.setFieldValue(argType, "ARGTYPE");
                 } catch {
                   // Ignore if type is not available in dropdown.
                 }
@@ -268,7 +268,7 @@ export function configureStandardBlocks(): void {
         }
         return container as Blockly.Block;
       };
-      this.compose = function(this: Blockly.Block, container: Blockly.Block) {
+      this.compose = function (this: Blockly.Block, container: Blockly.Block) {
         if (originalCompose) {
           originalCompose.call(this, container);
         }
@@ -279,9 +279,9 @@ export function configureStandardBlocks(): void {
         const typeByName = new Map<string, string>();
         let argBlock = container.getInputTargetBlock("STACK");
         while (argBlock && !argBlock.isInsertionMarker()) {
-            const name = argBlock.getFieldValue("NAME");
-            const argType =
-              argBlock.getFieldValue("ARGTYPE") || argBlock.getFieldValue("TYPE");
+          const name = argBlock.getFieldValue("NAME");
+          const argType =
+            argBlock.getFieldValue("ARGTYPE") || argBlock.getFieldValue("TYPE");
           if (name && argType) {
             typeByName.set(name, argType);
           }
@@ -294,7 +294,7 @@ export function configureStandardBlocks(): void {
           }
         }
       };
-      this.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      this.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
         if (originalOnchange) {
           originalOnchange.call(this, event);
         }
@@ -338,7 +338,7 @@ export function configureStandardBlocks(): void {
   if (textAppendDef && !textAppendDef.__typedConfigured) {
     textAppendDef.__typedConfigured = true;
     const originalOnchange = textAppendDef.onchange;
-    textAppendDef.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+    textAppendDef.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (originalOnchange) {
         originalOnchange.call(this, event);
       }
@@ -372,7 +372,7 @@ export function configureStandardBlocks(): void {
   if (defNoReturn && !defNoReturn.__typedConfigured) {
     defNoReturn.__typedConfigured = true;
     const originalInit = defNoReturn.init;
-    defNoReturn.init = function(this: Blockly.Block) {
+    defNoReturn.init = function (this: Blockly.Block) {
       if (originalInit) {
         originalInit.call(this);
       }
@@ -385,7 +385,7 @@ export function configureStandardBlocks(): void {
       const originalCompose = this.compose;
       const originalOnchange = this.onchange;
       patchProcedurePlusMinusTypes.call(this);
-      this.decompose = function(this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
+      this.decompose = function (this: Blockly.Block, workspace: Blockly.Workspace): Blockly.Block {
         const container = originalDecompose ? originalDecompose.call(this, workspace) : null;
         if (container) {
           const argModels = (this as ProcedureBlockWithArgs).argumentVarModels_;
@@ -396,8 +396,8 @@ export function configureStandardBlocks(): void {
               const name = argBlock.getFieldValue("NAME");
               const argType = typeByName.get(name);
               if (argType) {
-              try {
-                argBlock.setFieldValue(argType, "ARGTYPE");
+                try {
+                  argBlock.setFieldValue(argType, "ARGTYPE");
                 } catch {
                   // Ignore if type is not available in dropdown.
                 }
@@ -408,7 +408,7 @@ export function configureStandardBlocks(): void {
         }
         return container as Blockly.Block;
       };
-      this.compose = function(this: Blockly.Block, container: Blockly.Block) {
+      this.compose = function (this: Blockly.Block, container: Blockly.Block) {
         if (originalCompose) {
           originalCompose.call(this, container);
         }
@@ -419,9 +419,9 @@ export function configureStandardBlocks(): void {
         const typeByName = new Map<string, string>();
         let argBlock = container.getInputTargetBlock("STACK");
         while (argBlock && !argBlock.isInsertionMarker()) {
-            const name = argBlock.getFieldValue("NAME");
-            const argType =
-              argBlock.getFieldValue("ARGTYPE") || argBlock.getFieldValue("TYPE");
+          const name = argBlock.getFieldValue("NAME");
+          const argType =
+            argBlock.getFieldValue("ARGTYPE") || argBlock.getFieldValue("TYPE");
           if (name && argType) {
             typeByName.set(name, argType);
           }
@@ -434,7 +434,7 @@ export function configureStandardBlocks(): void {
           }
         }
       };
-      this.onchange = function(this: Blockly.Block, event: Blockly.Events.Abstract) {
+      this.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
         if (originalOnchange) {
           originalOnchange.call(this, event);
         }
@@ -453,7 +453,7 @@ export function configureStandardBlocks(): void {
   if (callReturn && !callReturn.__typedConfigured) {
     callReturn.__typedConfigured = true;
     const originalUpdateShape = callReturn.updateShape_;
-    callReturn.updateShape_ = function(this: Blockly.Block) {
+    callReturn.updateShape_ = function (this: Blockly.Block) {
       if (originalUpdateShape) {
         originalUpdateShape.call(this);
       }
@@ -480,7 +480,7 @@ export function configureStandardBlocks(): void {
   if (callNoReturn && !callNoReturn.__typedConfigured) {
     callNoReturn.__typedConfigured = true;
     const originalUpdateShape = callNoReturn.updateShape_;
-    callNoReturn.updateShape_ = function(this: Blockly.Block) {
+    callNoReturn.updateShape_ = function (this: Blockly.Block) {
       if (originalUpdateShape) {
         originalUpdateShape.call(this);
       }
