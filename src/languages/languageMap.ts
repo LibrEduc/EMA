@@ -98,6 +98,10 @@ export interface LanguageItem {
   RENDERER_ZELOS: string;
   RENDERER_MINI: string;
   EMPTY_BACKPACK: string;
+  REMOVE_FROM_BACKPACK: string;
+  COPY_TO_BACKPACK: string;
+  COPY_ALL_TO_BACKPACK: string;
+  PASTE_ALL_FROM_BACKPACK: string;
   RESET_TITLE: string;
   TYPED_VAR_MODAL_CONFIRM_BUTTON: string;
   TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: string;

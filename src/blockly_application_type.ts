@@ -796,6 +796,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
         }
       });
       const variableKeys = [
+        "EMPTY_BACKPACK",
+        "REMOVE_FROM_BACKPACK",
+        "COPY_TO_BACKPACK",
+        "COPY_ALL_TO_BACKPACK",
+        "PASTE_ALL_FROM_BACKPACK",
         "VARIABLES_SET_CONST",
         "VARIABLES_SET_CONST_AT",
         "VARIABLES_SET_CONST_TOOLTIP",
