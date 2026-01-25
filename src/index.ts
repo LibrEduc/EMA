@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module µcBlockly
  * @description Main entry point for µcBlockly application
+ * @remarks
+ * Bootstraps Blockly, registers blocks, and wires UI event handlers.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -85,8 +88,10 @@ if (typeof window !== 'undefined') {
   console.log('Propriétés disponibles:', Object.keys(globalWindow.Blockly));
 }
 
-// Fonction de compatibilité pour définir les blocs de variables typées
-// Utilise maintenant la fonction principale depuis block_definitions.ts
+/**
+ * Defines typed variable blocks once Blockly is available.
+ * @returns True when blocks were registered, false when Blockly is unavailable.
+ */
 function defineTypedVariableBlocks() {
   if (typeof Blockly !== 'undefined') {
     defineAllTypedVariableBlocks();
@@ -149,6 +154,9 @@ const elements = {
   pluginHighlight: document.getElementById(
     "pluginHighlight",
   ) as HTMLInputElement,
+  saveButton: document.getElementById("saveButton") as HTMLElement,
+  loadButton: document.getElementById("loadButton") as HTMLElement,
+  loadFileInput: document.getElementById("loadFileInput") as HTMLInputElement,
   undoButton: document.getElementById("undoButton") as HTMLElement,
   redoButton: document.getElementById("redoButton") as HTMLElement,
   pluginContinuousToolbox: document.getElementById(
@@ -174,6 +182,9 @@ const requiredElements = [
   "rendererMenu",
   "pluginMinimap",
   "pluginHighlight",
+  "saveButton",
+  "loadButton",
+  "loadFileInput",
   "undoButton",
   "redoButton",
   "pluginContinuousToolbox",
@@ -187,11 +198,19 @@ requiredElements.forEach((id) => {
   }
 });
 
-class LazyMonacoEditor {
+/**
+ * Lazily initializes Monaco Editor to avoid heavy startup cost.
+ */
+export class LazyMonacoEditor {
   private editor?: Monaco.editor.IStandaloneCodeEditor;
   private pendingValue: string | null = null;
   private initializing: Promise<void> | null = null;
 
+  /**
+   * Initializes the Monaco editor if it is not already created.
+   * @param container - DOM element that hosts the editor.
+   * @returns Resolves when the editor is ready.
+   */
   async ensureInitialized(container: HTMLElement): Promise<void> {
     if (this.editor) {
       return;
@@ -219,6 +238,10 @@ class LazyMonacoEditor {
     await this.initializing;
   }
 
+  /**
+   * Sets the editor content, deferring until initialization if needed.
+   * @param value - Full editor text content.
+   */
   setValue(value: string): void {
     if (this.editor) {
       this.editor.setValue(value);
@@ -278,10 +301,10 @@ const µcB: BlocklyApplication = new BlocklyApplication(
 µcB.LANGUAGE_RTL = ["ar", "fa", "he", "lki"];
 
 /**
- * Handles the resizing of the workspace.
- * This function calculates the offset position of the workspace content area,
- * and assigns these values, along with its width and height, to the workspace content blockly.
- * It then triggers a resize event on the Blockly workspace.
+ * Updates workspace SVG size and position to match layout.
+ * @remarks
+ * Computes offset and dimensions from the layout container and calls
+ * Blockly.svgResize to update rendering.
  */
 export const µcB_workspaceOnResize = (): void => {
   if (!elements.workspaceContentArea || !elements.workspaceContentBlockly) {
@@ -308,21 +331,7 @@ export const µcB_workspaceOnResize = (): void => {
 };
 
 /**
- * The function `µcB_workspaceManageResize` adjusts the flex grow values of two elements based on mouse
- * movement for workspace management.
- * @param mouseDown - The `mouseDown` parameter in the `µcB_workspaceManageResize` function
- * represents the mouse down event that triggers the resizing action. It contains information about the
- * initial mouse position and other related data when the mouse button is pressed down.
- * @param sizeProp - The `sizeProp` parameter in the `µcB_workspaceManageResize` function
- * represents the property that holds the size value of the elements being resized. It is used to
- * access the size value of the elements dynamically during the resizing operation.
- * @param posProp - The `posProp` parameter in the `µcB_workspaceManageResize` function
- * represents the property that stores the position information used for resizing elements. It could be
- * either "pageX" or "pageY" depending on whether the resizing is horizontal or vertical.
- * @returns In the provided code snippet, the `µcB_workspaceManageResize` function does not explicitly
- * return any value. It is a function that handles mouse events for resizing elements on a workspace.
- * The function contains event listeners for mouse movement and mouse button release, but it does not
- * have a return statement that would return a specific value.
+ * Persists layout flex grow values to session storage.
  */
 const saveLayoutToSessionStorage = (): void => {
   const layoutElements = {
@@ -348,6 +357,12 @@ const saveLayoutToSessionStorage = (): void => {
   });
 };
 
+/**
+ * Handles flex resizing via mouse drag.
+ * @param mouseDown - Initial mouse down event on the resizer.
+ * @param sizeProp - Size property to adjust ("offsetWidth" or "offsetHeight").
+ * @param posProp - Mouse position property ("pageX" or "pageY").
+ */
 const µcB_workspaceManageResize = (
   mouseDown: Event,
   sizeProp: string,
@@ -372,10 +387,8 @@ const µcB_workspaceManageResize = (
   let lastPos: number = Number((mouseDown as unknown as IElement)[posProp]);
 
   /**
-   * The function `onMouseMove` adjusts the flex grow values of two elements based on the mouse
-   * movement.
-   * @param mouseMove - The parameter "mouseMove" represents the mouse move event object. It contains
-   * information about the mouse position and other related data.
+   * Adjusts flex grow while dragging.
+   * @param mouseMove - Mouse move event during resize.
    */
   const onMouseMove = (mouseMove: Event): void => {
     let pos: number = Number((mouseMove as unknown as IElement)[posProp]);
@@ -401,8 +414,7 @@ const µcB_workspaceManageResize = (
   };
 
   /**
-   * The function `onMouseUp` sets the cursor style and removes event listeners when the mouse button
-   * is released.
+   * Cleans up listeners and persists layout after resize.
    */
   const onMouseUp = (): void => {
     const html = document.querySelector("html") as HTMLElement;
@@ -422,12 +434,10 @@ const µcB_workspaceManageResize = (
 };
 
 /**
- * The function `µcB_addFlexResizerEvents` adds event listeners for resizing elements horizontally or
- * vertically based on their parent's class.
- * @returns In the provided code snippet, the `µcB_addFlexResizerEvents` function is returning `void`,
- * which means it does not return any value. The function sets up event listeners for mouse events on
- * the document body, specifically for the "mousedown" event. When the mouse is clicked, it checks if
- * the target element is a "FLEX-RESIZER" element and then performs certain
+ * Attaches mouse handlers to flex resizer elements.
+ * @remarks
+ * Detects resizer orientation from parent classes and delegates to the
+ * resize handler.
  */
 export const µcB_addFlexResizerEvents = (): void => {
   document.body.addEventListener("mousedown", function (mouseDown: Event) {
@@ -456,7 +466,15 @@ export const µcB_addFlexResizerEvents = (): void => {
   });
 };
 
+/**
+ * Custom flyout inflater for category placeholders.
+ */
 class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
+  /**
+   * Creates a flyout item for category separators.
+   * @param _state - Unused state data.
+   * @param flyout - The flyout instance requesting items.
+   */
   load(_state: object, flyout: Blockly.IFlyout): Blockly.FlyoutItem {
     void _state;
     const axis = flyout.horizontalLayout ? SeparatorAxis.X : SeparatorAxis.Y;
@@ -464,22 +482,42 @@ class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
     return new Blockly.FlyoutItem(separator, this.getType());
   }
 
+  /**
+   * Returns the gap after this item.
+   * @param _state - Unused state data.
+   * @param _defaultGap - Default gap size.
+   */
   gapForItem(_state: object, _defaultGap: number): number {
     void _state;
     void _defaultGap;
     return 0;
   }
 
+  /**
+   * Disposes a flyout item.
+   * @param _item - Item to dispose.
+   */
   disposeItem(_item: Blockly.FlyoutItem): void {
     void _item;
     // No-op: empty placeholder item.
   }
 
+  /**
+   * Returns the registered type string.
+   */
   getType(): string {
     return "category";
   }
 }
 
+/**
+ * Registers components needed for the continuous toolbox.
+ * @public
+ * @remarks
+ * Registers ContinuousCategory, ContinuousMetrics, ContinuousFlyout,
+ * ContinuousToolbox, and custom flyout inflaters. Also injects CSS
+ * for the continuous toolbox appearance.
+ */
 export const registerContinuousToolboxComponents = (): void => {
   Blockly.registry.register(
     Blockly.registry.Type.TOOLBOX_ITEM,
@@ -550,6 +588,13 @@ export const registerContinuousToolboxComponents = (): void => {
   document.head.appendChild(style);
 };
 
+/**
+ * Unregisters continuous toolbox components and restores defaults.
+ * @public
+ * @remarks
+ * Removes custom CSS styles, restores standard Blockly categories
+ * and flyout inflaters, and unregisters the continuous toolbox components.
+ */
 export const unregisterContinuousToolboxComponents = (): void => {
   // Supprimer les styles CSS personnalisés pour revenir au style normal de Blockly
   const customStyles = document.querySelectorAll("style");
@@ -600,8 +645,7 @@ export const unregisterContinuousToolboxComponents = (): void => {
   document.head.appendChild(style);
 };
 /**
- * The function `HTML_onChange` sets up event listeners for the `onchange` event of HTML select
- * elements and calls corresponding functions based on the selected values.
+ * Wires UI controls (menus, toggles) to application behavior.
  */
 const HTML_onChange = (): void => {
   elements.languageMenu.onchange = () => {
@@ -639,6 +683,30 @@ const HTML_onChange = (): void => {
     }
     setPluginsInURL("pluginHighlight", "highlight");
   };
+
+  // Save/Load file handlers
+  if (elements.saveButton) {
+    elements.saveButton.onclick = () => {
+      const filename = `workspace_${new Date().toISOString().slice(0, 10)}.json`;
+      µcB.workspaceSaveToFile(filename);
+    };
+  }
+
+  if (elements.loadButton && elements.loadFileInput) {
+    elements.loadButton.onclick = () => {
+      elements.loadFileInput.click();
+    };
+
+    elements.loadFileInput.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (file) {
+        µcB.workspaceLoadFromFile(file);
+        // Reset input value to allow reloading the same file
+        target.value = '';
+      }
+    };
+  }
 
   elements.undoButton.onclick = () => {
     const workspace = µcB.workspace as Blockly.WorkspaceSvg | undefined;
@@ -710,8 +778,7 @@ const HTML_onChange = (): void => {
 };
 
 /**
- * Fonction de réinitialisation simplifiée qui efface toutes les données
- * enregistrées et recharge la page sur la racine
+ * Clears saved state and reloads the application to defaults.
  */
 const resetAllParameters = (): void => {
   µcB.workspaceSetupPlugins(true);
@@ -746,13 +813,8 @@ const resetAllParameters = (): void => {
 };
 
 /**
- * Collection of functions ordered by priority: 1.DOM - 2.inside DOM - 3.inside window
- */
-
-/**
- * The `DomIsLoaded` function waits for the DOM to be ready and then executes a callback function.
- * @param callback - The parameter "callback" is a callback function that will be executed when the DOM
- * is ready.
+ * Executes a callback when the DOM is ready.
+ * @param callback - Function to execute after DOM is loaded.
  */
 const DomIsLoaded = (callback: () => void): void => {
   if (document.readyState !== "loading") {
@@ -762,6 +824,10 @@ const DomIsLoaded = (callback: () => void): void => {
   }
 };
 
+/**
+ * Defers non-critical DOM initialization work.
+ * @param callback - Work to schedule when idle or after a short timeout.
+ */
 const scheduleNonCriticalDomInit = (callback: () => void): void => {
   if (typeof window.requestIdleCallback === "function") {
     window.requestIdleCallback(callback, { timeout: 1500 });

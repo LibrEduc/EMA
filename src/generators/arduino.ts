@@ -1,6 +1,13 @@
 /**
- * @packageDocumentation Complete helper functions for generating Arduino for blocks.
+ * @packageDocumentation
+ * @module Arduino
+ * @description Arduino generator helpers for µcBlockly blocks
+ * @remarks
+ * Exposes the generator instance and wiring helpers.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

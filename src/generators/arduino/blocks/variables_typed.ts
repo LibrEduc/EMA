@@ -1,6 +1,13 @@
 /**
- * @packageDocumentation Typed variable block generators for Arduino
+ * @packageDocumentation
+ * @module Arduino.Generators.VariablesTyped
+ * @description Typed variable block generators for Arduino.
+ * @remarks
+ * Implements generator functions for typed variable blocks.
+ * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -19,6 +26,12 @@ import { getArduinoType } from "../arduino_types";
  * @param block - The block to generate code for.
  * @param generator - The Arduino generator instance.
  * @returns Generated Arduino code.
+ */
+/**
+ * Generates Arduino code for variables_set_dynamic with typing.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
  */
 export const variables_set_dynamic = function (
   block: Blockly.Block,
@@ -61,6 +74,12 @@ export const variables_set_dynamic = function (
  * Generator for variables_local block.
  * This block returns the wrapped value unchanged.
  */
+/**
+ * Generates Arduino code for the local wrapper block.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code tuple.
+ */
 export const variables_local = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
@@ -86,6 +105,12 @@ export const variables_local = function (
  * @param generator - The Arduino generator instance.
  * @returns Generated Arduino code.
  */
+/**
+ * Generates Arduino code for variables_get_dynamic.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code tuple.
+ */
 export const variables_get_dynamic = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
@@ -105,6 +130,12 @@ export const variables_get_dynamic = function (
 /**
  * Generator for variables_set_type block.
  * This block only changes the variable type in the workspace.
+ */
+/**
+ * Generates Arduino code for variable type assignment blocks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
  */
 export const variables_set_type = function (
   block: Blockly.Block,
@@ -154,6 +185,12 @@ const inferValueBlockType = (valueBlock: Blockly.Block | null): string | null =>
   return normalizeValueType(checkType);
 };
 
+/**
+ * Generates Arduino code for const variable declaration.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export const variables_const = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
@@ -175,6 +212,12 @@ export const variables_const = function (
   return "";
 };
 
+/**
+ * Generates Arduino code for typed variable initialization.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export const variables_set_init = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
@@ -190,6 +233,12 @@ export const variables_set_init = function (
   return "";
 };
 
+/**
+ * Generates Arduino code for variable definition blocks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export const variables_define = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,

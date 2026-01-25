@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.Logic
+ * @description Arduino code generators for logic blocks.
+ * @remarks
+ * Implements generator functions for the logic category.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -14,6 +26,12 @@ import type { Block } from "blockly/core/block";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 
+/**
+ * Generates Arduino code for if/else control blocks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export function controls_if(block: Block, generator: ArduinoGenerator) {
   // If/elseif/else condition.
   let n = 0;
@@ -58,6 +76,12 @@ export function controls_if(block: Block, generator: ArduinoGenerator) {
 
 export const controls_ifelse = controls_if;
 
+/**
+ * Generates Arduino code for comparison operations.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code tuple.
+ */
 export function logic_compare(
   block: Block,
   generator: ArduinoGenerator,
@@ -81,6 +105,12 @@ export function logic_compare(
   return [code, order];
 }
 
+/**
+ * Generates Arduino code for boolean operations.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code tuple.
+ */
 export function logic_operation(
   block: Block,
   generator: ArduinoGenerator,
@@ -108,6 +138,12 @@ export function logic_operation(
   return [code, order];
 }
 
+/**
+ * Generates Arduino code for boolean negation.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code tuple.
+ */
 export function logic_negate(
   block: Block,
   generator: ArduinoGenerator,
@@ -119,6 +155,11 @@ export function logic_negate(
   return [code, order];
 }
 
+/**
+ * Generates Arduino code for boolean literals.
+ * @param block - Blockly block instance.
+ * @returns Generated code tuple.
+ */
 export function logic_boolean(
   block: Block
 ): [string, Order] {
@@ -127,11 +168,21 @@ export function logic_boolean(
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for null literal.
+ * @returns Generated code tuple.
+ */
 export function logic_null(): [string, Order] {
   // Null data type.
   return ["NULL", Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for switch/case blocks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export function controls_switch(
   block: Block,
   generator: ArduinoGenerator,
@@ -171,6 +222,12 @@ export function controls_switch(
   return code;
 }
 
+/**
+ * Generates Arduino code for ternary expressions.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code tuple.
+ */
 export function logic_ternary(
   block: Block,
   generator: ArduinoGenerator,

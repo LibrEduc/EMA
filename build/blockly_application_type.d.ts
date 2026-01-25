@@ -2,7 +2,11 @@
  * @packageDocumentation
  * @module BlocklyApplication
  * @description Core application type definitions and implementations for µcBlockly
+ * @remarks
+ * Defines the core application class, workspace lifecycle,
+ * and plugin initialization for µcBlockly.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -70,100 +74,169 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     plugin_modal: any;
     plugin_workspaceSearch: any;
     plugin_zoomToFit: any;
+    private pluginsInitialized;
     private saveBlocksTimer;
     private codegenTimer;
     /**
-     * The function `workspaceListeners` adds event listeners to a Blockly workspace to save changes to
-     * storage and run code whenever the workspace changes meaningfully.
-     * @param workspace - The parameter "workspace" is of type Blockly.WorkspaceSvg. It represents the
-     * Blockly workspace where the blocks are being used.
+     * Registers workspace change listeners and debounces persistence/codegen.
+     * @remarks
+     * Saves workspace state to session storage and regenerates code after
+     * meaningful changes, skipping UI-only and drag events.
      */
     private readonly workspaceListeners;
     /**
-     * Remove the default 'item' variable if it exists
-     * This should be called after workspace initialization and after loading blocks
+     * Removes the default "item" variable created by Blockly.
+     * @remarks
+     * Call this after workspace initialization and after loading blocks
+     * to avoid unwanted default variables in user workspaces.
      */
     removeDefaultItemVariable(): void;
     /**
-     * Initializes the workspace by setting up flexible views that can be adjusted in size and attaching necessary event listeners.
-     * Initially, an event listener is attached to the window to manage resizing events, using the µcB_workspaceOnResize function.
-     * Then, the µcB_addFlexResizerEvents function is invoked to attach event listeners to the flex resizer.
-     * Finally, various listeners related to the Blockly workspace are attached by calling the workspaceListeners function.
+     * Initializes workspace resize behavior and listeners.
+     * @remarks
+     * Attaches window resize handlers, flex resizer events, and workspace
+     * change listeners for code generation and persistence.
      */
     workspaceInit: () => void;
+    /**
+     * Applies a Blockly theme and reboots the workspace.
+     * @param themeChoice - Optional theme key; defaults to the theme menu selection.
+     * @returns The applied theme key.
+     * @remarks
+     * Updates workspace options, refreshes the workspace, and syncs the URL.
+     */
     changeTheme: (themeChoice?: string) => string;
     /**
-     * The function `changeRenderer` updates the renderer option in the `WORKSPACE_OPTIONS` object and
-     * then reboots the workspace.
-     * @param renderNew - The `renderNew` parameter is a string that represents the value of the
-     * selected option in the `rendererMenu` HTML select element.
+     * Applies a Blockly renderer and reboots the workspace.
+     * @param renderNew - Optional renderer key; defaults to the renderer menu selection.
+     * @returns The applied renderer key.
+     * @remarks
+     * Falls back to "geras" if the renderer is not registered and syncs the URL.
      */
     changeRenderer: (renderNew?: string) => string;
     /**
-     * The `workspaceReboot` function saves the current workspace, sets up workspace plugins, disposes the
-     * current workspace, changes the language based on the selected option in the dropdown menu, injects a
-     * new workspace, logs the main workspace blocks from the session storage, sets up workspace plugins
-     * again, and loads the saved blocks into the new workspace.
+     * Recreates the workspace while preserving user state.
+     * @remarks
+     * Saves blocks, disposes the current workspace, re-injects with updated
+     * options (theme/renderer/toolbox), restores plugins, and reloads blocks.
      */
     workspaceReboot: () => void;
+    /**
+     * Initializes or disposes workspace plugins.
+     * @param disposePlugin - When true, disposes plugins; otherwise initializes them.
+     * @remarks
+     * Prevents double initialization and wires change listeners as needed.
+     */
     workspaceSetupPlugins: (disposePlugin?: boolean) => void;
     /**
-     * Register callbacks for custom toolbox categories.
-     * This is required after any workspace re-injection.
+     * Registers callbacks for custom toolbox categories.
+     * @remarks
+     * Required after workspace re-injection to restore dynamic category content.
      */
-    private registerCustomToolboxCallbacks;
+    registerCustomToolboxCallbacks(): void;
+    /**
+     * Restores hooks and patches after workspace injection.
+     * @remarks
+     * Reattaches strict checker, variable validation patches, and listeners.
+     */
+    restoreWorkspaceAfterInject(): void;
+    /**
+     * Temporarily strips custom categories for the continuous toolbox.
+     * @returns The original toolbox configuration, or null if not applicable.
+     */
+    stripCustomCategoriesForContinuousToolbox(): ToolboxConfiguration | null;
+    /**
+     * Restores the original toolbox after workspace injection.
+     * @param originalToolbox - The toolbox configuration saved before injection.
+     */
+    restoreToolboxAfterInject(originalToolbox: ToolboxConfiguration | null): void;
+    /**
+     * Applies the "always opened flyout" setting to the toolbox flyout.
+     */
     applyAlwaysOpenedToolboxFlyout(): void;
+    /**
+     * Closes the toolbox flyout before workspace reboot.
+     */
     private closeFlyoutForReboot;
+    /**
+     * Checks whether the continuous toolbox plugin is enabled.
+     */
     private isContinuousToolboxEnabled;
+    /**
+     * Returns a toolbox configuration with custom categories removed.
+     * @param toolbox - Source toolbox configuration.
+     * @returns A deep-cloned toolbox without custom category callbacks.
+     */
     private getToolboxWithoutCustomCategories;
     /**
-     * The function `setParamsBlockly` sets parameters for a Blockly application based on URL query
-     * parameters and updates the browser history.
+     * Applies language, theme, and renderer based on URL/query or UI.
+     * @remarks
+     * Reads URL params, updates UI dropdowns, updates workspace options,
+     * and syncs values back into session storage and history.
      */
     setParamsBlockly: () => void;
+    /**
+     * Enables plugins based on URL options and stored preferences.
+     * @remarks
+     * Applies toggles for minimap, highlight, continuous toolbox, flyout,
+     * and code editor based on session storage and URL parameters.
+     */
     pluginsSetupWorkspace: () => void;
     /**
-     * The function `workspaceSaveBlocks` saves the blocks in a Blockly workspace to the local storage.
-     * @param workspace - The `workspace` parameter is an instance of the Blockly.Workspace class. It
-     * represents the Blockly workspace that contains all the blocks and their connections.
+     * Saves workspace blocks to session storage.
+     * @param storageKeyWorkspaceBlocks - Session storage key used to persist blocks.
      */
     workspaceSaveBlocks: (storageKeyWorkspaceBlocks: string) => void;
     /**
-     * The function loads blocks into a Blockly workspace from session storage.
-     * @param workspace - The `workspace` parameter is an instance of the `Blockly.Workspace` class. It
-     * represents the Blockly workspace where blocks are loaded.
-     * @returns If the `data` variable is falsy (null, undefined, empty string), then nothing is being
-     * returned.
+     * Loads workspace blocks from session storage.
+     * @param storageKeyWorkspaceBlocks - Session storage key used to load blocks.
+     * @returns Returns early if no saved data exists or if loading fails.
+     * @remarks
+     * Includes error handling for corrupted data and validates the structure
+     * before attempting to load into the workspace.
      */
     workspaceLoadBlocks: (storageKeyWorkspaceBlocks: string) => void;
     /**
-     * Ensure variables with null/'null' types are normalized to empty string.
-     * This prevents FieldVariable type mismatch warnings during validation.
+     * Saves workspace blocks to a downloadable file.
+     * @param filename - Optional filename for the saved file (default: 'workspace.json').
+     * @remarks
+     * Serializes the workspace state to JSON and triggers a browser download.
+     * Uses Blockly's recommended serialization API.
+     */
+    workspaceSaveToFile: (filename?: string) => void;
+    /**
+     * Loads workspace blocks from a file.
+     * @param file - File object to load from.
+     * @remarks
+     * Reads the file content, parses JSON, and loads it into the workspace.
+     * Includes error handling for corrupted or invalid files.
+     */
+    workspaceLoadFromFile: (file: File) => void;
+    /**
+     * Normalizes null/'null' variable types to empty string.
+     * @remarks
+     * Prevents FieldVariable type mismatch warnings during validation.
      */
     private normalizeVariableTypes;
+    /**
+     * Normalizes the variable type for a single variable ID.
+     * @param variableId - Target variable ID.
+     */
     private normalizeVariableTypeById;
     /**
-     * The function checks if the language of a Blockly object is right-to-left (RTL).
-     * @param blocklyObject - The `blocklyObject` parameter is an object that
-     * represents the Blockly application. It likely contains various properties and methods related to the
-     * Blockly functionality.
-     * @returns a boolean value.
+     * Determines whether the current language is RTL.
+     * @returns True when the active language is configured as RTL.
      */
     private readonly isLangRtl;
     /**
-     * The function `changeLanguageToolbox` changes the names of categories in a toolbox based on a
-     * language map.
-     * @param newLang - The `newLang` parameter is a string that represents the new language to
-     * which the toolbox should be changed.
+     * Updates toolbox categories for the specified language.
+     * @param newLang - Language code used to localize toolbox categories.
      */
     private readonly changeLanguageToolbox;
     /**
-     * The function `changeLanguage` changes the language and direction of the HTML based on a menu
-     * selection or URL parameter.
-     * @param menuOrUrl - `menuOrUrl` is a boolean parameter that determines whether to get the
-     * language parameter from a dropdown menu or from a URL.
-     * @returns The function `changeLanguage` is returning a boolean value, which is the result of the
-     * `isLangRtl(µcB)` function call.
+     * Applies language and RTL direction based on UI or URL.
+     * @param menuOrUrl - When true, reads language from the dropdown; otherwise uses URL.
+     * @returns True when the current language is RTL.
      */
     changeLanguage: (menuOrUrl: boolean) => boolean;
 }

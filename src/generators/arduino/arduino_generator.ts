@@ -1,6 +1,13 @@
 /**
- * @packageDocumentation Complete helper functions for generating Arduino for blocks.
+ * @packageDocumentation
+ * @module Arduino.Generator
+ * @description Complete helper functions for generating Arduino for blocks.
+ * @remarks
+ * Defines the Arduino generator and block-to-code mappings.
+ * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module Arduino.BlockTypes.Index
+ * @description Aggregates block type maps by category.
+ * @remarks
+ * Exports the combined block type registry entries.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import { LOGIC_BLOCK_TYPES } from "./logic";
 import { MATH_BLOCK_TYPES } from "./math";
 import { PROCEDURES_BLOCK_TYPES } from "./procedures";

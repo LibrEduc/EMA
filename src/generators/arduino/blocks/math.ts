@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.Math
+ * @description Arduino code generators for math blocks.
+ * @remarks
+ * Implements generator functions for the math category.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -17,18 +29,34 @@ import {
   addPrimeHelper,
 } from "./math_helpers";
 
+/**
+ * Generates Arduino code for a numeric literal.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function math_number(block: Block): [string, Order] {
   // Numeric literal.
   const code = block.getFieldValue("NUM") || "0";
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a percentage literal (0-100 mapped to 0-1).
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function math_percent(block: Block): [string, Order] {
   const rawValue = Number(block.getFieldValue("PERCENT") || 0);
   const code = (rawValue / 100).toString();
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a change-by statement.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Statement code string.
+ */
 export function math_change(
   block: Block,
   generator: ArduinoGenerator,
@@ -45,11 +73,22 @@ export function math_change(
   return target + " += " + delta + ";\n";
 }
 
+/**
+ * Generates Arduino code for an angle literal.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function inout_angle_maths(block: Block): [string, Order] {
   const angle = block.getFieldValue("ANGLE") || "0";
   return [angle, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for arithmetic expressions.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_arithmetic(
   block: Block,
   generator: ArduinoGenerator,
@@ -75,6 +114,12 @@ export function math_arithmetic(
   return [code, mapped.order];
 }
 
+/**
+ * Generates Arduino code for single-operand math operations.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_single(
   block: Block,
   generator: ArduinoGenerator,
@@ -121,6 +166,12 @@ export function math_single(
   }
 }
 
+/**
+ * Generates Arduino code for interval comparisons.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_interval(
   block: Block,
   generator: ArduinoGenerator,
@@ -156,6 +207,12 @@ export function math_interval(
   return [code, Order.LOGICAL_AND];
 }
 
+/**
+ * Generates Arduino code for trigonometric functions.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_trig(
   block: Block,
   generator: ArduinoGenerator,
@@ -176,6 +233,11 @@ export function math_trig(
   }
 }
 
+/**
+ * Generates Arduino code for math constants.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function math_constant(
   block: Block,
   generator: ArduinoGenerator,
@@ -200,6 +262,12 @@ export function math_constant(
   }
 }
 
+/**
+ * Generates Arduino code for numeric property checks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_number_property(
   block: Block,
   generator: ArduinoGenerator,
@@ -254,6 +322,12 @@ export function math_number_property(
   return [code, Order.LOGICAL_AND];
 }
 
+/**
+ * Generates Arduino code for rounding operations.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_round(
   block: Block,
   generator: ArduinoGenerator,
@@ -274,6 +348,12 @@ export function math_round(
   }
 }
 
+/**
+ * Generates Arduino code for list math operations.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_on_list(
   block: Block,
   generator: ArduinoGenerator,
@@ -304,6 +384,12 @@ export function math_on_list(
   }
 }
 
+/**
+ * Generates Arduino code for modulo operation.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_modulo(
   block: Block,
   generator: ArduinoGenerator,
@@ -317,6 +403,12 @@ export function math_modulo(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for constrain(min, max).
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_constrain(
   block: Block,
   generator: ArduinoGenerator,
@@ -328,6 +420,12 @@ export function math_constrain(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for a random integer in a range.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_random_int(
   block: Block,
   generator: ArduinoGenerator,
@@ -338,11 +436,21 @@ export function math_random_int(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for a random float between 0 and 1.
+ * @returns Code string with order.
+ */
 export function math_random_float(): [string, Order] {
   const code = "((double)random(0, 1000) / 1000.0)";
   return [code, Order.DIVISION];
 }
 
+/**
+ * Generates Arduino code for atan2.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function math_atan2(
   block: Block,
   generator: ArduinoGenerator,

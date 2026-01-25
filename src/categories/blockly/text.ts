@@ -1,8 +1,23 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories.Text
+ * @description Text block definitions for the Blockly toolbox.
+ * @remarks
+ * Defines text blocks and field configurations used by µcBlockly.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { FieldDate } from "@blockly/field-date";
 import { FieldMultilineInput } from "@blockly/field-multilineinput";
 import { getBlocklyMsgOr, validateSingleChar } from "./shared";
 
+/**
+ * Registers text compatibility blocks for µcBlockly.
+ */
 export const defineTextCompatBlocks = (): void => {
   if (!Blockly.Blocks["text_no_quote"]) {
     Blockly.Blocks["text_no_quote"] = {

@@ -1,8 +1,11 @@
 /**
  * @packageDocumentation
- * @module Theme
- * @description Black and white theme implementation for µcBlockly
+ * @module Theme.BlackAndWhite
+ * @description Black and white theme implementation for µcBlockly.
+ * @remarks
+ * Defines a minimal monochrome theme for Blockly.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */

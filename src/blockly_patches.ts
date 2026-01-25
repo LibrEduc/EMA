@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module BlocklyPatches
+ * @description Runtime patches and overrides for Blockly behaviors.
+ * @remarks
+ * Applies compatibility tweaks and µcBlockly-specific adjustments.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -6,6 +18,10 @@
 
 import * as Blockly from "blockly";
 
+/**
+ * Patches VariableMap.createVariable to normalize types and avoid duplicates.
+ * @param workspace - Workspace whose variable map will be patched.
+ */
 export function patchVariableMapCreateVariable(
   workspace: Blockly.Workspace,
 ): void {
@@ -41,6 +57,9 @@ export function patchVariableMapCreateVariable(
   }
 }
 
+/**
+ * Patches FieldVariable validation to handle normalized types safely.
+ */
 export function patchFieldVariableValidation(): void {
   try {
     if (!Blockly.FieldVariable) return;
@@ -106,6 +125,9 @@ export function patchFieldVariableValidation(): void {
   }
 }
 
+/**
+ * Patches WorkspaceSvg.removeTopBlock to tolerate missing blocks.
+ */
 export function patchWorkspaceRemoveTopBlock(): void {
   try {
     const proto = Blockly.WorkspaceSvg.prototype as unknown as {

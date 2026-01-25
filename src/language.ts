@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module Language
  * @description Internationalization and localization support for µcBlockly
+ * @remarks
+ * Handles language switching and translation lookup.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -37,6 +40,12 @@ const toolboxTranslationCache = new WeakMap<
   Map<string, string>
 >();
 
+/**
+ * Builds a stable cache key for a toolbox translation.
+ * @param lang - Language code.
+ * @param toolbox - Toolbox configuration to hash.
+ * @returns Cache key used for storage.
+ */
 const getToolboxCacheKey = (lang: string, toolbox: ToolboxConfiguration): string => {
   const raw = JSON.stringify(toolbox);
   let hash = 5381;
@@ -46,6 +55,11 @@ const getToolboxCacheKey = (lang: string, toolbox: ToolboxConfiguration): string
   return `ucb.toolbox.${lang}.${(hash >>> 0).toString(16)}`;
 };
 
+/**
+ * Reads a cached toolbox translation from local storage.
+ * @param key - Cache key to read.
+ * @returns Cached JSON string or null.
+ */
 const readToolboxFromLocalStorage = (key: string): string | null => {
   try {
     return window.localStorage?.getItem(key) ?? null;
@@ -54,6 +68,10 @@ const readToolboxFromLocalStorage = (key: string): string | null => {
   }
 };
 
+/**
+ * Clears cached toolbox entries, keeping the current key.
+ * @param keepKey - Cache key to preserve.
+ */
 const clearToolboxLocalStorage = (keepKey: string): void => {
   try {
     const storage = window.localStorage;
@@ -73,6 +91,11 @@ const clearToolboxLocalStorage = (keepKey: string): void => {
   }
 };
 
+/**
+ * Persists a toolbox translation JSON string to local storage.
+ * @param key - Cache key to write.
+ * @param value - Serialized toolbox JSON.
+ */
 const writeToolboxToLocalStorage = (key: string, value: string): void => {
   try {
     window.localStorage?.setItem(key, value);
@@ -81,6 +104,12 @@ const writeToolboxToLocalStorage = (key: string, value: string): void => {
   }
 };
 
+/**
+ * Returns a translated toolbox JSON string with caching.
+ * @param newLang - Target language code.
+ * @param toolbox - Base toolbox configuration.
+ * @returns Serialized toolbox JSON for the target language.
+ */
 const getTranslatedToolboxJson = (
   newLang: string,
   toolbox: ToolboxConfiguration,
@@ -112,6 +141,10 @@ const getTranslatedToolboxJson = (
     categoryStyle?: string;
     contents?: Category[];
   }
+  /**
+   * Replaces category labels with localized values in place.
+   * @param category - Toolbox category to localize.
+   */
   function replaceCategoryName(category: Category) {
     if (
       category.kind === "category" &&
@@ -141,12 +174,8 @@ const getTranslatedToolboxJson = (
 
 
 /**
- * The function `getLangParamFromUrl` retrieves the language parameter from the URL and updates the
- * language menu if the parameter is valid.
- * @returns The function `getLangParamFromUrl` returns the language parameter (`lang`) extracted from
- * the URL query string. If the `lang` parameter is not found in the URL, it defaults to `'en'`. The
- * function also updates the value of the `languageMenu` select element if it exists and the `lang`
- * parameter is found in the `LANGUAGE_NAME` object.
+ * Gets the language code from the URL query string.
+ * @returns Language code, defaulting to "en".
  */
 export const getLangParamFromUrl = (): string => {
   const lang = new URLSearchParams(window.location.search).get('lang') ?? 'en';
@@ -155,10 +184,8 @@ export const getLangParamFromUrl = (): string => {
 }
 
 /**
- * The function `getLangParamFromDropdown` retrieves the selected language value from a dropdown menu
- * and updates the URL with the new language parameter.
- * @returns The function `getLangParamFromDropdown` returns the selected value from a dropdown menu
- * with the id 'languageMenu'.
+ * Gets the selected language from the dropdown and syncs the URL.
+ * @returns Selected language code.
  */
 export const getLangParamFromDropdown = (): string => {
   const dropdownMenu: HTMLSelectElement = document.getElementById('languageMenu') as HTMLSelectElement;
@@ -168,10 +195,8 @@ export const getLangParamFromDropdown = (): string => {
 };
 
 /**
- * The function `HTML_changeLanguage` updates the text content of elements with the class "lang"
- * based on the selected language.
- * @param newLang - The `newLang` parameter is a string that represents the new language that
- * the user wants to change to.
+ * Applies translations to DOM elements with language keys.
+ * @param newLang - Target language code.
  */
 export const HTML_changeLanguage = (newLang: string): void => {
   const selectedLangItem = languagesMap[newLang];
@@ -228,22 +253,15 @@ export const HTML_changeLanguage = (newLang: string): void => {
 }
 
 /**
- * The `HTML_populateLanguages` function is responsible for populating the language selection menu on a webpage
- * with options sorted alphabetically.
- * @param blocklyObject - The `blocklyObject` parameter is an object that
- * contains information about the Blockly application. It likely includes properties such as
- * `LANGUAGE_NAME`, which is an object that maps language codes to their corresponding names.
+ * Populates the language dropdown from the application language map.
+ * @param blocklyObject - Blockly application instance with language metadata.
  */
 export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): void => {
   /**
-   * The function sorts an array of language names based on their first argument.
-   * @param a - a is an array of strings representing languages. Each element in the array
-   * is an array itself, with the first element being the name of the language (e.g. 'English',
-   * 'Русский', '简体字', etc) and the remaining elements being additional information about the language.
-   * @param b - The parameter `b` is an array of strings.
-   * @returns The `comp` function is being used as a comparator function to sort the `languages` array.
-   * The `comp` function compares two elements `a` and `b` based on their first element (`a[0]` and
-   * `b[0]`).
+   * Sorts language tuples by display name.
+   * @param a - [label, code] tuple.
+   * @param b - [label, code] tuple.
+   * @returns Sort order indicator.
    */
   const comp = (a: string[], b: string[]) => {
     // Sort based on first argument ('English', 'Русский', '简体字', etc).
@@ -274,18 +292,10 @@ export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): v
 }
 
 /**
- * The function `changeLanguageToolbox` takes a new language and a toolbox configuration, replaces
- * category names with translations if available, and returns the updated toolbox configuration.
- * @param newLang - `newLang` is a string parameter representing the new language code that
- * you want to change the toolbox to. It is used to determine the language translation for the toolbox
- * categories.
- * @param toolbox - The `toolbox` parameter in the `changeLanguageToolbox`
- * function is of type `ToolboxConfiguration`. It represents a configuration object that contains the
- * contents of a toolbox, which is a collection of categories and blocks used in a programming
- * environment. The function is designed to change the language of the toolbox
- * @returns The function `changeLanguageToolbox` returns a new `ToolboxConfiguration` object with the
- * categories' names replaced with their corresponding translations based on the provided `newLang`
- * language parameter.
+ * Returns a toolbox configuration with translated category labels.
+ * @param newLang - Target language code.
+ * @param toolbox - Source toolbox configuration.
+ * @returns Translated toolbox configuration.
  */
 export const changeLanguageToolbox = (
   newLang: string,

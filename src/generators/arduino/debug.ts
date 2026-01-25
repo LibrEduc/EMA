@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Debug
+ * @description Debug logging utilities for the Arduino generator.
+ * @remarks
+ * Lightweight logging helpers toggled via the debug flag.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -20,6 +32,10 @@ function isDebugEnabled(): boolean {
   }
 }
 
+/**
+ * Logs debug output when the debug flag is enabled.
+ * @param args - Values to log.
+ */
 export function debugLog(...args: unknown[]): void {
   if (isDebugEnabled()) {
     console.log(...args);

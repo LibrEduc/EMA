@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module Language.Fr
+ * @description French translations for µcBlockly.
+ * @remarks
+ * Locale strings used by the language map.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import { LanguageMap } from './languageMap';
 
 export const frLang: LanguageMap = {
@@ -7,10 +19,14 @@ export const frLang: LanguageMap = {
     CONTACT: "contacter",
     UNDO: "annuler",
     REDO: "refaire",
+    SAVE: "enregistrer",
+    LOAD: "ouvrir",
     ABOUT_TOOLTIP: "Page du projet",
     CONTACT_TOOLTIP: "Contacter l'auteur",
     UNDO_TOOLTIP: "Annuler la dernière action",
     REDO_TOOLTIP: "Refaire la dernière action",
+    SAVE_TOOLTIP: "Enregistrer les blocs dans un fichier",
+    LOAD_TOOLTIP: "Ouvrir un fichier pour charger les blocs",
     PLUGIN_MINIMAP: "Miniature",
     PLUGIN_HIGHLIGHT: "Surbrillance",
     PLUGIN_CONTINUOUSTOOLBOX: "Continu",

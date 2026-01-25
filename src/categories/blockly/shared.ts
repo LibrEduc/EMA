@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories.Shared
+ * @description Shared helpers for Blockly category blocks.
+ * @remarks
+ * Utilities used by logic, math, text, and variables blocks.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
 import { getCompatibleTypesForCheck, checkTypeCompatibility } from "../../generators/arduino/block_types_registry";
@@ -11,16 +23,32 @@ export type VariableWithMutableType = Blockly.VariableModel & {
   __ucbConstBlockId?: string;
 };
 
+/**
+ * Retrieves a Blockly message by key.
+ * @param key - Message key to look up.
+ * @returns The localized message or the key if missing.
+ */
 export const getBlocklyMsg = (key: string): string => {
   const msg = (Blockly.Msg as Record<string, string> | undefined)?.[key];
   return msg || key;
 };
 
+/**
+ * Retrieves a Blockly message or returns a fallback.
+ * @param key - Message key to look up.
+ * @param fallback - Fallback text when the key is missing.
+ * @returns The localized message or the fallback value.
+ */
 export const getBlocklyMsgOr = (key: string, fallback: string): string => {
   const msg = getBlocklyMsg(key);
   return msg === key ? fallback : msg;
 };
 
+/**
+ * Normalizes a string to a single character.
+ * @param value - Input string value.
+ * @returns First character or empty string for falsy input.
+ */
 export const validateSingleChar = (value: string): string => {
   if (!value) {
     return "";
@@ -28,16 +56,33 @@ export const validateSingleChar = (value: string): string => {
   return value.charAt(0);
 };
 
+/**
+ * Returns the warning text for untyped variables.
+ */
 export const getUntypedWarningText = (): string => getBlocklyMsg("TYPED_VAR_UNTYPED_WARNING");
 
+/**
+ * Builds the warning text for type mismatches.
+ * @param varType - Variable's declared type.
+ * @param connectedType - Type inferred from the connected block.
+ * @returns Localized mismatch warning message.
+ */
 export const getTypeMismatchWarningText = (varType: string, connectedType: string): string =>
   getBlocklyMsg("TYPED_VAR_TYPE_MISMATCH")
     .replace("%1", varType)
     .replace("%2", connectedType);
 
+/**
+ * Returns the warning text for const assignments.
+ */
 export const getConstWarningText = (): string =>
   getBlocklyMsgOr("VARIABLES_CONST_WARNING", "const: cannot assign");
 
+/**
+ * Converts a variable type into Blockly connection checks.
+ * @param type - Variable or inferred type.
+ * @returns Array of compatible checks or null when not applicable.
+ */
 export const getBlocklyCompatibleChecks = (
   type: string | null | undefined,
 ): string[] | null => {
@@ -59,6 +104,10 @@ export const getBlocklyCompatibleChecks = (
   return Array.from(checks);
 };
 
+/**
+ * Configures a FieldVariable to accept any type.
+ * @param field - FieldVariable instance to configure.
+ */
 export const configureTypedVariableField = (field: Blockly.FieldVariable): void => {
   const fieldWithTypes = field as unknown as {
     variableTypes?: string[] | null;
@@ -68,6 +117,11 @@ export const configureTypedVariableField = (field: Blockly.FieldVariable): void 
   fieldWithTypes.defaultType = "";
 };
 
+/**
+ * Normalizes Blockly check types to µcBlockly variable types.
+ * @param type - Blockly check type string.
+ * @returns Normalized µcBlockly variable type.
+ */
 export const normalizeBlocklyTypeToVariableType = (type: string): string => {
   if (type === "Boolean") return "bool";
   if (type === "Number") return "int";
@@ -76,6 +130,12 @@ export const normalizeBlocklyTypeToVariableType = (type: string): string => {
   return type;
 };
 
+/**
+ * Determines whether a variable change event should be ignored.
+ * @param block - Block receiving the event.
+ * @param event - Blockly change event.
+ * @returns True when the event should be skipped.
+ */
 export const shouldSkipVariableChange = (
   block: Blockly.Block,
   event: Blockly.Events.Abstract,
@@ -96,6 +156,11 @@ export const shouldSkipVariableChange = (
   return false;
 };
 
+/**
+ * Retrieves the first check type from a check list.
+ * @param check - Check string or list.
+ * @returns First check type or null.
+ */
 const getFirstCheckType = (
   check: string | string[] | null,
 ): string | null => {
@@ -108,6 +173,11 @@ const getFirstCheckType = (
   return check;
 };
 
+/**
+ * Infers a procedure call return type from its definition.
+ * @param block - Procedure call block.
+ * @returns Normalized return type or null.
+ */
 const inferProcedureCallReturnType = (block: Blockly.Block): string | null => {
   if (block.type !== "procedures_callreturn" || !block.workspace) {
     return null;
@@ -134,6 +204,11 @@ const inferProcedureCallReturnType = (block: Blockly.Block): string | null => {
   return "int";
 };
 
+/**
+ * Infers a block's output type from its definition or connection.
+ * @param block - Connected block or null.
+ * @returns Normalized type or null when unknown.
+ */
 export const inferConnectedValueType = (block: Blockly.Block | null): string | null => {
   if (!block) {
     return null;
@@ -162,6 +237,12 @@ export const inferConnectedValueType = (block: Blockly.Block | null): string | n
   return null;
 };
 
+/**
+ * Checks whether a variable has any connected assignment blocks.
+ * @param workspace - Workspace to search.
+ * @param variableId - Target variable ID.
+ * @returns True when at least one assignment has a connected value.
+ */
 const hasConnectedAssignmentForVariable = (
   workspace: Blockly.Workspace,
   variableId: string,
@@ -185,6 +266,12 @@ const hasConnectedAssignmentForVariable = (
   return false;
 };
 
+/**
+ * Handles variable assignment changes to enforce typing rules.
+ * @param block - Variable set block.
+ * @param event - Blockly change event.
+ * @param label - Block label for warnings.
+ */
 export const handleVariablesSetChange = (
   block: Blockly.Block,
   event: Blockly.Events.Abstract,

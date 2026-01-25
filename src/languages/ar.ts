@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module Language.Ar
+ * @description Arabic translations for µcBlockly.
+ * @remarks
+ * Locale strings used by the language map.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import { LanguageMap } from './languageMap';
 
 export const arLang: LanguageMap = {
@@ -7,10 +19,14 @@ export const arLang: LanguageMap = {
     CONTACT: "اتصال",
     UNDO: "تراجع",
     REDO: "إعادة",
+    SAVE: "حفظ",
+    LOAD: "فتح",
     ABOUT_TOOLTIP: "صفحة المشروع",
     CONTACT_TOOLTIP: "الاتصال بالمؤلف",
     UNDO_TOOLTIP: "تراجع عن آخر إجراء",
     REDO_TOOLTIP: "إعادة آخر إجراء",
+    SAVE_TOOLTIP: "حفظ الكتل في ملف",
+    LOAD_TOOLTIP: "فتح ملف لتحميل الكتل",
     PLUGIN_MINIMAP: "مصغّر",
     PLUGIN_HIGHLIGHT: "تمييز",
     PLUGIN_CONTINUOUSTOOLBOX: "صندوق الأدوات",

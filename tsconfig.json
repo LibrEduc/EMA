@@ -17,7 +17,8 @@
     ]
   },
   "typedocOptions": {
-      "entryPoints": ["src/index.ts"],
-      "out": "./docs"
+      "entryPoints": ["src"],
+      "entryPointStrategy": "expand",
+      "out": "./docs/api"
   }
 }

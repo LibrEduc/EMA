@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module Options
  * @description Configuration options and theme mappings for µcBlockly
+ * @remarks
+ * Defines supported themes, renderers, and option defaults.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -37,10 +40,7 @@ import TritanopiaTheme from '@blockly/theme-tritanopia';
 import BandWTheme from './theme_black_and_white';
 
 /**
- * The function `changeTheme` allows the user to change the theme of a Blockly workspace based on a
- * given theme choice.
- * @param themeChoice - The `themeChoice` parameter is a string that represents the
- * chosen theme. It is optional and has a default value of `'classic'`.
+ * Maps theme keys to Blockly theme instances.
  */
 export const themeMappings: { [key: string]: Blockly.Theme } = {
   classic: Blockly.Themes.Classic,

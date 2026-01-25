@@ -2,7 +2,11 @@
  * @packageDocumentation
  * @module BlocklyApplication
  * @description Core application type definitions and implementations for µcBlockly
+ * @remarks
+ * Defines the core application class, workspace lifecycle,
+ * and plugin initialization for µcBlockly.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -201,10 +205,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
   private saveBlocksTimer: number | null = null;
   private codegenTimer: number | null = null;
   /**
-   * The function `workspaceListeners` adds event listeners to a Blockly workspace to save changes to
-   * storage and run code whenever the workspace changes meaningfully.
-   * @param workspace - The parameter "workspace" is of type Blockly.WorkspaceSvg. It represents the
-   * Blockly workspace where the blocks are being used.
+   * Registers workspace change listeners and debounces persistence/codegen.
+   * @remarks
+   * Saves workspace state to session storage and regenerates code after
+   * meaningful changes, skipping UI-only and drag events.
    */
   private readonly workspaceListeners = (): void => {
     const scheduleSave = (): void => {
@@ -242,8 +246,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
   };
 
   /**
-   * Remove the default 'item' variable if it exists
-   * This should be called after workspace initialization and after loading blocks
+   * Removes the default "item" variable created by Blockly.
+   * @remarks
+   * Call this after workspace initialization and after loading blocks
+   * to avoid unwanted default variables in user workspaces.
    */
   public removeDefaultItemVariable(): void {
     try {
@@ -267,10 +273,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
   }
 
   /**
-   * Initializes the workspace by setting up flexible views that can be adjusted in size and attaching necessary event listeners.
-   * Initially, an event listener is attached to the window to manage resizing events, using the µcB_workspaceOnResize function. 
-   * Then, the µcB_addFlexResizerEvents function is invoked to attach event listeners to the flex resizer.
-   * Finally, various listeners related to the Blockly workspace are attached by calling the workspaceListeners function.
+   * Initializes workspace resize behavior and listeners.
+   * @remarks
+   * Attaches window resize handlers, flex resizer events, and workspace
+   * change listeners for code generation and persistence.
    */
   public workspaceInit = (): void => {
     window.addEventListener("resize", µcB_workspaceOnResize, false);
@@ -278,13 +284,13 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.workspaceListeners();
   };
 
-  /* The above TypeScript code defines a function `changeTheme` that takes an optional parameter
-  `themeChoice` which represents the selected theme. If `themeChoice` is not provided, it retrieves
-  the selected theme from an HTML select element with the id 'themeMenu'. It then updates the theme
-  in the `WORKSPACE_OPTIONS` object using a mapping from `themeMappings`. If the selected theme
-  exists in the `themeMappings`, it sets the theme for a Blockly workspace and performs a workspace
-  reboot. Finally, it updates the URL with the selected theme parameter and returns the chosen
-  theme. */
+  /**
+   * Applies a Blockly theme and reboots the workspace.
+   * @param themeChoice - Optional theme key; defaults to the theme menu selection.
+   * @returns The applied theme key.
+   * @remarks
+   * Updates workspace options, refreshes the workspace, and syncs the URL.
+   */
   public changeTheme = (themeChoice?: string): string => {
     if (!themeChoice)
       themeChoice = (document.getElementById('themeMenu') as HTMLSelectElement).value;
@@ -298,10 +304,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
   }
 
   /**
-   * The function `changeRenderer` updates the renderer option in the `WORKSPACE_OPTIONS` object and
-   * then reboots the workspace.
-   * @param renderNew - The `renderNew` parameter is a string that represents the value of the
-   * selected option in the `rendererMenu` HTML select element.
+   * Applies a Blockly renderer and reboots the workspace.
+   * @param renderNew - Optional renderer key; defaults to the renderer menu selection.
+   * @returns The applied renderer key.
+   * @remarks
+   * Falls back to "geras" if the renderer is not registered and syncs the URL.
    */
   public changeRenderer = (renderNew: string = (document.getElementById('rendererMenu') as HTMLSelectElement).value): string => {
     if (!Blockly.registry.hasItem(Blockly.registry.Type.RENDERER, renderNew)) {
@@ -318,10 +325,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
   }
 
   /**
-   * The `workspaceReboot` function saves the current workspace, sets up workspace plugins, disposes the
-   * current workspace, changes the language based on the selected option in the dropdown menu, injects a
-   * new workspace, logs the main workspace blocks from the session storage, sets up workspace plugins
-   * again, and loads the saved blocks into the new workspace.
+   * Recreates the workspace while preserving user state.
+   * @remarks
+   * Saves blocks, disposes the current workspace, re-injects with updated
+   * options (theme/renderer/toolbox), restores plugins, and reloads blocks.
    */
   public workspaceReboot = (): void => {
     this.closeFlyoutForReboot();
@@ -378,7 +385,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.applyAlwaysOpenedToolboxFlyout();
   };
 
-  // The function `workspaceSetupPlugins` sets up all plugins added in workspace
+  /**
+   * Initializes or disposes workspace plugins.
+   * @param disposePlugin - When true, disposes plugins; otherwise initializes them.
+   * @remarks
+   * Prevents double initialization and wires change listeners as needed.
+   */
   public workspaceSetupPlugins = (disposePlugin: boolean = false): void => {
     if (!disposePlugin && this.pluginsInitialized) {
       return;
@@ -429,8 +441,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
   };
 
   /**
-   * Register callbacks for custom toolbox categories.
-   * This is required after any workspace re-injection.
+   * Registers callbacks for custom toolbox categories.
+   * @remarks
+   * Required after workspace re-injection to restore dynamic category content.
    */
   public registerCustomToolboxCallbacks(): void {
     const svgWorkspace = this.workspace as Blockly.WorkspaceSvg;
@@ -444,7 +457,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
   }
 
   /**
-   * Reconnect hooks after workspace injection.
+   * Restores hooks and patches after workspace injection.
+   * @remarks
+   * Reattaches strict checker, variable validation patches, and listeners.
    */
   public restoreWorkspaceAfterInject(): void {
     registerStrictConnectionChecker(this.workspace);
@@ -454,6 +469,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.workspaceListeners();
   }
 
+  /**
+   * Temporarily strips custom categories for the continuous toolbox.
+   * @returns The original toolbox configuration, or null if not applicable.
+   */
   public stripCustomCategoriesForContinuousToolbox(): ToolboxConfiguration | null {
     const originalToolbox = this.WORKSPACE_OPTIONS.toolbox as
       | ToolboxConfiguration
@@ -466,6 +485,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
     return originalToolbox;
   }
 
+  /**
+   * Restores the original toolbox after workspace injection.
+   * @param originalToolbox - The toolbox configuration saved before injection.
+   */
   public restoreToolboxAfterInject(
     originalToolbox: ToolboxConfiguration | null,
   ): void {
@@ -481,6 +504,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
   }
 
+  /**
+   * Applies the "always opened flyout" setting to the toolbox flyout.
+   */
   public applyAlwaysOpenedToolboxFlyout(): void {
     const checkbox = document.getElementById(
       "alwaysOpenedToolboxFlyout",
@@ -506,6 +532,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
   }
 
+  /**
+   * Closes the toolbox flyout before workspace reboot.
+   */
   private closeFlyoutForReboot(): void {
     const flyout = (this.workspace as Blockly.WorkspaceSvg)
       .getToolbox()
@@ -521,6 +550,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
   }
 
+  /**
+   * Checks whether the continuous toolbox plugin is enabled.
+   */
   private isContinuousToolboxEnabled(): boolean {
     const plugins = this.WORKSPACE_OPTIONS["plugins"] as
       | Record<string, unknown>
@@ -528,6 +560,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
     return plugins?.["toolbox"] === "ContinuousToolbox";
   }
 
+  /**
+   * Returns a toolbox configuration with custom categories removed.
+   * @param toolbox - Source toolbox configuration.
+   * @returns A deep-cloned toolbox without custom category callbacks.
+   */
   private getToolboxWithoutCustomCategories(
     toolbox: ToolboxConfiguration,
   ): ToolboxConfiguration {
@@ -558,10 +595,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
 
 
   /**
-   * The function `setParamsBlockly` sets parameters for a Blockly application based on URL query
-   * parameters and updates the browser history.
+   * Applies language, theme, and renderer based on URL/query or UI.
+   * @remarks
+   * Reads URL params, updates UI dropdowns, updates workspace options,
+   * and syncs values back into session storage and history.
    */
-
   public setParamsBlockly = (): void => {
     const searchParams = new URLSearchParams(window.location.search);
     let newParam: string | null;
@@ -607,6 +645,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
   };
 
+  /**
+   * Enables plugins based on URL options and stored preferences.
+   * @remarks
+   * Applies toggles for minimap, highlight, continuous toolbox, flyout,
+   * and code editor based on session storage and URL parameters.
+   */
   public pluginsSetupWorkspace = (): void => {
     const searchParams = new URLSearchParams(window.location.search);
     let paramsURL: string[] = [""];
@@ -663,9 +707,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
   };
   /**
-   * The function `workspaceSaveBlocks` saves the blocks in a Blockly workspace to the local storage.
-   * @param workspace - The `workspace` parameter is an instance of the Blockly.Workspace class. It
-   * represents the Blockly workspace that contains all the blocks and their connections.
+   * Saves workspace blocks to session storage.
+   * @param storageKeyWorkspaceBlocks - Session storage key used to persist blocks.
    */
   public workspaceSaveBlocks = (storageKeyWorkspaceBlocks: string): void => {
     const data = Blockly.serialization.workspaces.save(this.workspace);
@@ -673,21 +716,100 @@ export class BlocklyApplication implements BlocklyApplicationType {
   };
 
   /**
-   * The function loads blocks into a Blockly workspace from session storage.
-   * @param workspace - The `workspace` parameter is an instance of the `Blockly.Workspace` class. It
-   * represents the Blockly workspace where blocks are loaded.
-   * @returns If the `data` variable is falsy (null, undefined, empty string), then nothing is being
-   * returned.
+   * Loads workspace blocks from session storage.
+   * @param storageKeyWorkspaceBlocks - Session storage key used to load blocks.
+   * @returns Returns early if no saved data exists or if loading fails.
+   * @remarks
+   * Includes error handling for corrupted data and validates the structure
+   * before attempting to load into the workspace.
    */
   public workspaceLoadBlocks = (storageKeyWorkspaceBlocks: string): void => {
     const data = window.sessionStorage?.getItem(storageKeyWorkspaceBlocks);
     if (!data) return;
-    Blockly.serialization.workspaces.load(JSON.parse(data), this.workspace);
-    this.normalizeVariableTypes();
+    
+    try {
+      const parsed = JSON.parse(data);
+      // Basic validation: ensure it's an object
+      if (typeof parsed !== 'object' || parsed === null) {
+        console.warn('Invalid workspace data format, skipping load');
+        return;
+      }
+      Blockly.serialization.workspaces.load(parsed, this.workspace);
+      this.normalizeVariableTypes();
+    } catch (error) {
+      console.error('Failed to load workspace blocks:', error);
+      // Remove corrupted data to prevent repeated failures
+      window.sessionStorage?.removeItem(storageKeyWorkspaceBlocks);
+    }
   };
+
   /**
-   * Ensure variables with null/'null' types are normalized to empty string.
-   * This prevents FieldVariable type mismatch warnings during validation.
+   * Saves workspace blocks to a downloadable file.
+   * @param filename - Optional filename for the saved file (default: 'workspace.json').
+   * @remarks
+   * Serializes the workspace state to JSON and triggers a browser download.
+   * Uses Blockly's recommended serialization API.
+   */
+  public workspaceSaveToFile = (filename: string = 'workspace.json'): void => {
+    try {
+      const data = Blockly.serialization.workspaces.save(this.workspace);
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to save workspace to file:', error);
+      alert('Erreur lors de la sauvegarde du fichier');
+    }
+  };
+
+  /**
+   * Loads workspace blocks from a file.
+   * @param file - File object to load from.
+   * @remarks
+   * Reads the file content, parses JSON, and loads it into the workspace.
+   * Includes error handling for corrupted or invalid files.
+   */
+  public workspaceLoadFromFile = (file: File): void => {
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>): void => {
+      try {
+        const text = e.target?.result as string;
+        if (!text) {
+          console.warn('Empty file content');
+          return;
+        }
+        const parsed = JSON.parse(text);
+        // Basic validation: ensure it's an object
+        if (typeof parsed !== 'object' || parsed === null) {
+          console.warn('Invalid workspace data format');
+          alert('Format de fichier invalide');
+          return;
+        }
+        Blockly.serialization.workspaces.load(parsed, this.workspace);
+        this.normalizeVariableTypes();
+      } catch (error) {
+        console.error('Failed to load workspace from file:', error);
+        alert('Erreur lors du chargement du fichier');
+      }
+    };
+    reader.onerror = (): void => {
+      console.error('File reading error');
+      alert('Erreur lors de la lecture du fichier');
+    };
+    reader.readAsText(file);
+  };
+
+  /**
+   * Normalizes null/'null' variable types to empty string.
+   * @remarks
+   * Prevents FieldVariable type mismatch warnings during validation.
    */
   private normalizeVariableTypes(): void {
     try {
@@ -704,6 +826,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
   }
 
+  /**
+   * Normalizes the variable type for a single variable ID.
+   * @param variableId - Target variable ID.
+   */
   private normalizeVariableTypeById(variableId: string): void {
     try {
       const variable = this.workspace.getVariableMap().getVariableById(variableId);
@@ -715,33 +841,25 @@ export class BlocklyApplication implements BlocklyApplicationType {
   }
 
   /**
-   * The function checks if the language of a Blockly object is right-to-left (RTL).
-   * @param blocklyObject - The `blocklyObject` parameter is an object that
-   * represents the Blockly application. It likely contains various properties and methods related to the
-   * Blockly functionality.
-   * @returns a boolean value.
+   * Determines whether the current language is RTL.
+   * @returns True when the active language is configured as RTL.
    */
   private readonly isLangRtl = (): boolean => {
     return this.LANGUAGE_RTL.indexOf(getLangParamFromUrl()) !== -1;
   };
 
   /**
-   * The function `changeLanguageToolbox` changes the names of categories in a toolbox based on a
-   * language map.
-   * @param newLang - The `newLang` parameter is a string that represents the new language to
-   * which the toolbox should be changed.
+   * Updates toolbox categories for the specified language.
+   * @param newLang - Language code used to localize toolbox categories.
    */
   private readonly changeLanguageToolbox = (newLang: string): void => {
     this.WORKSPACE_OPTIONS.toolbox = translateToolbox(newLang, this.toolbox);
   }
 
   /**
-   * The function `changeLanguage` changes the language and direction of the HTML based on a menu
-   * selection or URL parameter.
-   * @param menuOrUrl - `menuOrUrl` is a boolean parameter that determines whether to get the
-   * language parameter from a dropdown menu or from a URL.
-   * @returns The function `changeLanguage` is returning a boolean value, which is the result of the
-   * `isLangRtl(µcB)` function call.
+   * Applies language and RTL direction based on UI or URL.
+   * @param menuOrUrl - When true, reads language from the dropdown; otherwise uses URL.
+   * @returns True when the current language is RTL.
    */
   public changeLanguage = (menuOrUrl: boolean): boolean => {
     const newLang: string = menuOrUrl ? getLangParamFromDropdown() : getLangParamFromUrl();

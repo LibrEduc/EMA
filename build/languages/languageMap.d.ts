@@ -1,12 +1,20 @@
 /**
- * @packageDocumentation Define type and table of translated definition
+ * @packageDocumentation
+ * @module LanguageMap
+ * @description Language map definitions for µcBlockly
+ * @remarks
+ * Centralizes the main application types and wiring logic for Blockly,
+ * used by the runtime initialization and toolbox integration.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 export interface LanguageMap {
     [key: string]: LanguageItem;
 }
 export declare const languagesMap: LanguageMap;
-type LanguageMapBlockly = {
+export type LanguageMapBlockly = {
     [key: string]: {
         [key: string]: string;
     };
@@ -16,8 +24,16 @@ export interface LanguageItem {
     HOME: string;
     ABOUT: string;
     CONTACT: string;
+    UNDO: string;
+    REDO: string;
+    SAVE: string;
+    LOAD: string;
     ABOUT_TOOLTIP: string;
     CONTACT_TOOLTIP: string;
+    UNDO_TOOLTIP: string;
+    REDO_TOOLTIP: string;
+    SAVE_TOOLTIP: string;
+    LOAD_TOOLTIP: string;
     PLUGIN_MINIMAP: string;
     PLUGIN_HIGHLIGHT: string;
     PLUGIN_CONTINUOUSTOOLBOX: string;
@@ -54,6 +70,10 @@ export interface LanguageItem {
     RENDERER_ZELOS: string;
     RENDERER_MINI: string;
     EMPTY_BACKPACK: string;
+    REMOVE_FROM_BACKPACK: string;
+    COPY_TO_BACKPACK: string;
+    COPY_ALL_TO_BACKPACK: string;
+    PASTE_ALL_FROM_BACKPACK: string;
     RESET_TITLE: string;
     TYPED_VAR_MODAL_CONFIRM_BUTTON: string;
     TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: string;
@@ -109,5 +129,4 @@ export interface LanguageItem {
     COLOUR_HSV_BRIGHTNESS_LABEL: string;
     COLOUR_HSV_EYEDROPPER_LABEL: string;
 }
-export {};
 //# sourceMappingURL=languageMap.d.ts.map

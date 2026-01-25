@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.StrictConnectionChecker
+ * @description Custom connection checker for typed Blockly blocks.
+ * @remarks
+ * Enforces type compatibility beyond default Blockly checks.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @fileoverview Custom ConnectionChecker that uses getBlockType() for type checking.
  * This provides more robust type checking than the default ConnectionChecker,
  * especially for blocks with dynamic types (like typed variables).
@@ -146,7 +158,6 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
    * @param sourceType The type from the source block (from getBlockType()).
    * @param targetType The type expected by the target connection.
    * @returns True if types are compatible, false otherwise.
-   * @private
    */
   private checkTypeCompatibility(sourceType: string, targetType: string): boolean {
     // Exact match
@@ -208,6 +219,10 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
  * Registers the StrictConnectionChecker as the default ConnectionChecker for a workspace.
  * 
  * @param workspace The Blockly workspace to configure.
+ */
+/**
+ * Installs the strict connection checker on a workspace.
+ * @param workspace - Target workspace.
  */
 export function registerStrictConnectionChecker(workspace: Blockly.Workspace): void {
   if (!workspace) {

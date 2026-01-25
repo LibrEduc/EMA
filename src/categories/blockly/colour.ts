@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories.Colour
+ * @description Colour block definitions and custom color fields.
+ * @remarks
+ * Defines colour blocks and color picker integrations.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { FieldColour } from "@blockly/field-colour";
 import { FieldColorPicker } from "./field_colour_picker";
@@ -34,6 +46,9 @@ const HSV_SLIDER_ICON =
   + "<circle cx='18' cy='11' r='4' fill='%23ff0000' stroke='%23000' stroke-width='0.8'/>"
   + "</svg>";
 
+/**
+ * Registers colour blocks and custom color picker fields.
+ */
 export const defineColourBlocks = (): void => {
   if (!Blockly.Blocks["colour_picker"]) {
     Blockly.Blocks["colour_picker"] = {

@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.VariableUtils
+ * @description Utilities for typed variable tracking and updates.
+ * @remarks
+ * Helpers to read, persist, and update variable type metadata.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -11,6 +23,11 @@ export type MutableVariableModel = Blockly.IVariableModel<Blockly.IVariableState
   type_?: string | null;
 };
 
+/**
+ * Sets a variable's type metadata and updates the model.
+ * @param variable - Variable model to update.
+ * @param type - New type string.
+ */
 export function setVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
   type: string,
@@ -37,6 +54,10 @@ export function setVariableType(
   return false;
 }
 
+/**
+ * Clears a variable's type metadata.
+ * @param variable - Variable model to update.
+ */
 export function clearVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
 ): boolean {
@@ -65,6 +86,10 @@ export function clearVariableType(
   return false;
 }
 
+/**
+ * Normalizes null/"null" types to empty string.
+ * @param variable - Variable model to normalize.
+ */
 export function normalizeVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
 ): void {

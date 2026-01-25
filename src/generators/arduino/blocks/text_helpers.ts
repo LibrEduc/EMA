@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.TextHelpers
+ * @description Helper functions for text block generators.
+ * @remarks
+ * Shared helpers for the text generator implementation.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -6,10 +18,18 @@
 
 import type { ArduinoGenerator } from "../arduino_generator";
 
+/**
+ * Adds text-related includes to the generator.
+ * @param generator - Arduino generator instance.
+ */
 export function addTextInclude(generator: ArduinoGenerator): void {
   generator.addInclude("ctype", "#include <ctype.h>");
 }
 
+/**
+ * Adds helper functions for text operations to the generator.
+ * @param generator - Arduino generator instance.
+ */
 export function addTextHelpers(generator: ArduinoGenerator): void {
   addTextInclude(generator);
   generator.addCodeFunction(

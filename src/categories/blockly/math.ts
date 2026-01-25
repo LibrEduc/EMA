@@ -1,8 +1,23 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories.Math
+ * @description Math block definitions for the Blockly toolbox.
+ * @remarks
+ * Defines math blocks, fields, and typed behaviors.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { FieldAngle } from "@blockly/field-angle";
 import { FieldSlider } from "@blockly/field-slider";
 import { getBlocklyMsgOr } from "./shared";
 
+/**
+ * Registers math compatibility blocks for µcBlockly.
+ */
 export const defineMathCompatBlocks = (): void => {
   if (!Blockly.Blocks["math_percent"]) {
     Blockly.Blocks["math_percent"] = {

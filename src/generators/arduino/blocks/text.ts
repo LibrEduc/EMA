@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.Text
+ * @description Arduino code generators for text blocks.
+ * @remarks
+ * Implements generator functions for the text category.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -35,36 +47,67 @@ function quoteChar(value: string): string {
   return "'" + escaped + "'";
 }
 
+/**
+ * Generates Arduino code for a quoted text literal.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function text(block: Block): [string, Order] {
   const textValue = block.getFieldValue("TEXT") || "";
   const code = quoteString(textValue);
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a raw text literal without quotes.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function text_no_quote(block: Block): [string, Order] {
   const textValue = block.getFieldValue("TEXT") || "";
   const code = textValue.trim() === "" ? '""' : textValue;
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a multiline text literal.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function text_multiline(block: Block): [string, Order] {
   const textValue = block.getFieldValue("TEXT") || "";
   const code = quoteString(textValue);
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a date literal.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function text_date(block: Block): [string, Order] {
   const textValue = block.getFieldValue("DATE") || "";
   const code = quoteString(textValue);
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a single character literal.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function text_char(block: Block): [string, Order] {
   const value = block.getFieldValue("TEXT") || "";
   const code = quoteChar(value.charAt(0) || "");
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code to concatenate text parts.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_join(
   block: Block,
   generator: ArduinoGenerator,
@@ -88,6 +131,12 @@ export function text_join(
   return [items.join(" + "), Order.ADDITION];
 }
 
+/**
+ * Generates Arduino code to append text to a variable.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Statement code string.
+ */
 export function text_append(
   block: Block,
   generator: ArduinoGenerator,
@@ -99,6 +148,12 @@ export function text_append(
   return code;
 }
 
+/**
+ * Generates Arduino code for text length.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_length(
   block: Block,
   generator: ArduinoGenerator,
@@ -108,6 +163,12 @@ export function text_length(
   return [code, Order.MEMBER];
 }
 
+/**
+ * Generates Arduino code for is-empty checks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_isEmpty(
   block: Block,
   generator: ArduinoGenerator,
@@ -117,6 +178,12 @@ export function text_isEmpty(
   return [code, Order.EQUALITY];
 }
 
+/**
+ * Generates Arduino code for substring index lookup.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_indexOf(
   block: Block,
   generator: ArduinoGenerator,
@@ -129,6 +196,12 @@ export function text_indexOf(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code to access a character at position.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_charAt(
   block: Block,
   generator: ArduinoGenerator,
@@ -164,6 +237,12 @@ export function text_charAt(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for substring extraction.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_getSubstring(
   block: Block,
   generator: ArduinoGenerator,
@@ -200,6 +279,12 @@ export function text_getSubstring(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for text case changes.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_changeCase(
   block: Block,
   generator: ArduinoGenerator,
@@ -216,6 +301,12 @@ export function text_changeCase(
   return ["text_toTitleCase(" + value + ")", Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for trimming text.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_trim(
   block: Block,
   generator: ArduinoGenerator,
@@ -226,6 +317,12 @@ export function text_trim(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for counting substrings.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_count(
   block: Block,
   generator: ArduinoGenerator,
@@ -237,6 +334,12 @@ export function text_count(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for replacing substrings.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_replace(
   block: Block,
   generator: ArduinoGenerator,
@@ -250,6 +353,12 @@ export function text_replace(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for reversing text.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_reverse(
   block: Block,
   generator: ArduinoGenerator,
@@ -260,6 +369,12 @@ export function text_reverse(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for printing text.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Statement code string.
+ */
 export function text_print(
   block: Block,
   generator: ArduinoGenerator,
@@ -270,6 +385,12 @@ export function text_print(
   return code;
 }
 
+/**
+ * Generates Arduino code for prompt text (input).
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function text_prompt_ext(
   block: Block,
   generator: ArduinoGenerator,

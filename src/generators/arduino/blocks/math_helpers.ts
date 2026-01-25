@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.MathHelpers
+ * @description Helper functions for math block generators.
+ * @remarks
+ * Shared helpers for the math generator implementation.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -6,10 +18,18 @@
 
 import type { ArduinoGenerator } from "../arduino_generator";
 
+/**
+ * Adds math include headers to the generator.
+ * @param generator - Arduino generator instance.
+ */
 export function addMathInclude(generator: ArduinoGenerator): void {
   generator.addInclude("math", "#include <math.h>");
 }
 
+/**
+ * Injects a prime-check helper into the generator.
+ * @param generator - Arduino generator instance.
+ */
 export function addPrimeHelper(generator: ArduinoGenerator): void {
   generator.addCodeFunction(
     "math_isPrime",
@@ -27,6 +47,10 @@ export function addPrimeHelper(generator: ArduinoGenerator): void {
   );
 }
 
+/**
+ * Injects list helper functions into the generator.
+ * @param generator - Arduino generator instance.
+ */
 export function addListHelpers(generator: ArduinoGenerator): void {
   addMathInclude(generator);
   generator.addCodeFunction(

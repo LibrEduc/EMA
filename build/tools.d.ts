@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module Tools
  * @description Utility functions and tools for µcBlockly
+ * @remarks
+ * Small helpers for URL params and UI toggles.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -26,25 +29,17 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 /**
- * The function adds or replaces a parameter and its value in a given URL.
- * @param url - The `url` parameter is a string representing the URL to which the parameter
- * needs to be added or replaced.
- * @param param - The `param` parameter is a string that represents the name of the query
- * parameter that you want to add or replace in the URL.
- * @param value - The `value` parameter is a string representing the value that you want to
- * add or replace for the specified parameter in the URL.
- * @returns The function `addReplaceParamToUrl` returns a modified version of the input `url` string
- * with the specified `param` and `value` added or replaced.
+ * Adds or replaces a query parameter in a URL string.
+ * @param url - Input URL string.
+ * @param param - Query parameter name.
+ * @param value - Query parameter value.
+ * @returns Updated URL with the parameter applied.
  */
 export declare const addReplaceParamToUrl: (url: string, param: string, value: string) => string;
 /**
- * The function `setPluginsInURL` updates the URL parameters based on the state of a checkbox for a
- * specific plugin.
- * @param pluginName - The `pluginName` parameter in the `setPluginsInURL` function is a
- * string that represents the name of a plugin.
- * @param pluginKey - The `pluginKey` parameter in the `setPluginsInURL` function is a string
- * that represents the key associated with a specific plugin. This key is used to identify the plugin
- * in the URL parameters when setting or updating the plugins in the URL.
+ * Updates plugin flags in the URL based on a checkbox state.
+ * @param pluginName - DOM checkbox element id.
+ * @param pluginKey - URL key representing the plugin.
  */
 export declare const setPluginsInURL: (pluginName: string, pluginKey: string) => void;
 //# sourceMappingURL=tools.d.ts.map

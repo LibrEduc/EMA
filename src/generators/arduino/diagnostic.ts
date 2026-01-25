@@ -1,6 +1,13 @@
 /**
- * @packageDocumentation Diagnostic tools for Arduino generator issues
+ * @packageDocumentation
+ * @module Arduino.Diagnostic
+ * @description Diagnostic tools for Arduino generator issues.
+ * @remarks
+ * Diagnostic helpers for generator output and typed variables.
+ * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -14,6 +21,10 @@ import { debugLog } from "./debug";
 
 /**
  * Diagnostic function to identify why code generation is not working
+ */
+/**
+ * Runs diagnostics to validate generator wiring and block coverage.
+ * @param generator - Arduino generator instance.
  */
 export function diagnoseGeneratorIssues(generator: ArduinoGenerator): void {
   debugLog('🔍 Diagnosing Arduino Generator Issues...');
@@ -83,6 +94,10 @@ export function diagnoseGeneratorIssues(generator: ArduinoGenerator): void {
 /**
  * Test function to verify basic generator functionality
  */
+/**
+ * Runs a minimal generation pass to validate output.
+ * @param generator - Arduino generator instance.
+ */
 export function testBasicGeneration(generator: ArduinoGenerator): void {
   debugLog('🧪 Testing Basic Code Generation...');
 
@@ -127,6 +142,10 @@ export function testBasicGeneration(generator: ArduinoGenerator): void {
 
 /**
  * Function to reset and reinitialize the generator
+ */
+/**
+ * Resets generator state and reinitializes configuration.
+ * @param generator - Arduino generator instance.
  */
 export function resetAndReinitializeGenerator(generator: ArduinoGenerator): void {
   debugLog('🔄 Resetting and reinitializing generator...');

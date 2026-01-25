@@ -1,6 +1,13 @@
 /**
- * @packageDocumentation Test file for Arduino generator
+ * @packageDocumentation
+ * @module Arduino.TestGenerator
+ * @description Test file for Arduino generator.
+ * @remarks
+ * Test helpers and fixtures for generator output.
+ * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -14,6 +21,9 @@ import { debugLog } from "./debug";
 
 /**
  * Test function to verify Arduino generator is working correctly
+ */
+/**
+ * Runs a quick sanity check against the Arduino generator.
  */
 export function testArduinoGenerator(): void {
   debugLog('Testing Arduino Generator...');
@@ -62,6 +72,9 @@ export function testArduinoGenerator(): void {
 
 /**
  * Test function to verify code generation from a simple workspace
+ */
+/**
+ * Runs a sample code generation path for diagnostics.
  */
 export function testCodeGeneration(): void {
   debugLog('Testing Code Generation...');

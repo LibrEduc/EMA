@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories
+ * @description Registers and initializes Blockly category blocks.
+ * @remarks
+ * Entry point that wires up category block definitions.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import { debugLog } from "../../generators/arduino/debug";
 import { defineControlsSwitchBlocks } from "./logic";
 import { defineMathCompatBlocks } from "./math";
@@ -15,6 +27,9 @@ import {
   extendStandardVariablesSetBlock,
 } from "./variables";
 
+/**
+ * Registers BlocklyArduino compatibility blocks.
+ */
 export const defineBlocklyArduinoCompatBlocks = (): void => {
   defineMathCompatBlocks();
   defineTextCompatBlocks();
@@ -23,6 +38,9 @@ export const defineBlocklyArduinoCompatBlocks = (): void => {
 
 /**
  * Define all typed variable blocks
+ */
+/**
+ * Registers all typed variable blocks and extensions.
  */
 export const defineAllTypedVariableBlocks = (): void => {
   defineVariablesGetDynamicBlock();

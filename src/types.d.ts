@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module Types
  * @description TypeScript type definitions and declarations for µcBlockly
+ * @remarks
+ * Provides ambient type declarations for workspace usage.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */

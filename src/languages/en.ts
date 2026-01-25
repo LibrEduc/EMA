@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module Language.En
+ * @description English translations for µcBlockly.
+ * @remarks
+ * Locale strings used by the language map.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import { LanguageMap } from './languageMap';
 
 export const enLang: LanguageMap = {
@@ -7,10 +19,14 @@ export const enLang: LanguageMap = {
     CONTACT: "Contact",
     UNDO: "undo",
     REDO: "redo",
+    SAVE: "save",
+    LOAD: "load",
     ABOUT_TOOLTIP: "Project page",
     CONTACT_TOOLTIP: "Contact the author",
     UNDO_TOOLTIP: "Undo last action",
     REDO_TOOLTIP: "Redo last action",
+    SAVE_TOOLTIP: "Save blocks to a file",
+    LOAD_TOOLTIP: "Open a file to load blocks",
     PLUGIN_MINIMAP: "minimap",
     PLUGIN_HIGHLIGHT: "highlight",
     PLUGIN_CONTINUOUSTOOLBOX: "toolbox",

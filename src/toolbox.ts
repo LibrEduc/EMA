@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module Toolbox
  * @description Toolbox configuration and block definitions for µcBlockly
+ * @remarks
+ * Defines toolbox categories, labels, and block lists.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */

@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyFields.ColourPicker
+ * @description Custom iro.js-based color picker field for Blockly.
+ * @remarks
+ * Provides dropdown UI and value handling for color selection.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import * as iro from "@jaames/iro";
 
@@ -10,6 +22,9 @@ let isTargetInputPatched = false;
 let isHideChaffPatched = false;
 let ignoreHideChaffUntil = 0;
 
+/**
+ * Patches Blockly.browserEvents.isTargetInput for custom picker elements.
+ */
 const ensureIsTargetInputPatch = (): void => {
   if (isTargetInputPatched) {
     return;
@@ -39,6 +54,9 @@ const ensureIsTargetInputPatch = (): void => {
   isTargetInputPatched = true;
 };
 
+/**
+ * Patches WorkspaceSvg.hideChaff to keep the picker open during drag.
+ */
 const ensureHideChaffPatch = (): void => {
   if (isHideChaffPatched) {
     return;
@@ -56,6 +74,10 @@ const ensureHideChaffPatch = (): void => {
   isHideChaffPatched = true;
 };
 
+/**
+ * Marks picker DOM nodes as valid input targets.
+ * @param root - Root picker element to tag.
+ */
 const markInputTargets = (root: HTMLElement): void => {
   root.setAttribute("data-is-text-input", "true");
   const descendants = root.querySelectorAll<HTMLElement>("*");
@@ -64,6 +86,10 @@ const markInputTargets = (root: HTMLElement): void => {
   }
 };
 
+/**
+ * Resolves the iro.js ColorPicker constructor.
+ * @returns Constructor function or null if not available.
+ */
 const getIroPicker = (): (new (
   selector: string,
   options: { width: number; height: number; color: string },
@@ -82,11 +108,19 @@ const getIroPicker = (): (new (
   ) => IroColorPicker;
 };
 
+/**
+ * Custom Blockly field that renders an iro.js color picker.
+ */
 export class FieldColorPicker extends Blockly.FieldTextInput {
   static readonly DEFAULT_VALUE = "#FF00FF";
 
   protected textEditEnabled_ = false;
 
+  /**
+   * Creates the field with a default value and optional validator.
+   * @param opt_value - Optional initial color value.
+   * @param opt_validator - Optional validator callback.
+   */
   constructor(
     opt_value?: string,
     opt_validator?: Blockly.FieldValidator,
@@ -94,6 +128,9 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     super(opt_value ?? FieldColorPicker.DEFAULT_VALUE, opt_validator);
   }
 
+  /**
+   * Initializes the field view and click target.
+   */
   public override initView(): void {
     const constants = this.getConstants();
     if (!constants) {
@@ -120,6 +157,9 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     }
   }
 
+  /**
+   * Shows the dropdown color picker editor.
+   */
   protected override showEditor_(): void {
     const Picker = getIroPicker();
     if (!Picker) {
@@ -189,6 +229,10 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     });
   }
 
+  /**
+   * Applies the new color to the field UI.
+   * @param newValue - New color value.
+   */
   protected override doValueUpdate_(newValue: string): void {
     const self = this as unknown as {
       value_?: string;

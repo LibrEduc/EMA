@@ -1,7 +1,7 @@
 /**
  * @file µcBlockl.css
  * @description µcBlockly specific CSS for index file.
- * @author scanet@libreduc.cc (Sébastien Canet)
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
  * @since 1.0.0
  * @license GPL-3.0-or-later
@@ -32,6 +32,8 @@ flex>flex-resizer {
   font-family: arial, sans-serif;
 }
 
+#saveButton,
+#loadButton,
 #undoButton,
 #redoButton {
   cursor: pointer;

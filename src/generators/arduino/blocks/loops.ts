@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.Loops
+ * @description Arduino code generators for loop blocks.
+ * @remarks
+ * Implements generator functions for the loops category.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -66,6 +78,12 @@ function trySetCounterType(
   }
 }
 
+/**
+ * Generates Arduino code for repeat loops with a count.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export function controls_repeat_ext(
   block: Block,
   generator: ArduinoGenerator,
@@ -95,6 +113,12 @@ export function controls_repeat_ext(
 
 export const controls_repeat = controls_repeat_ext;
 
+/**
+ * Generates Arduino code for while/until loops.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export function controls_whileUntil(
   block: Block,
   generator: ArduinoGenerator,
@@ -113,6 +137,12 @@ export function controls_whileUntil(
   return "while (" + condition + ") {\n" + branch + "}\n";
 }
 
+/**
+ * Generates Arduino code for numeric for-loops.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export function controls_for(
   block: Block,
   generator: ArduinoGenerator,
@@ -224,6 +254,12 @@ export function controls_for(
   return code;
 }
 
+/**
+ * Generates Arduino code for foreach loops.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Generated code string.
+ */
 export function controls_forEach(
   block: Block,
   generator: ArduinoGenerator,
@@ -260,6 +296,11 @@ export function controls_forEach(
   return code;
 }
 
+/**
+ * Generates Arduino code for flow statements (break/continue).
+ * @param block - Blockly block instance.
+ * @returns Generated code string.
+ */
 export function controls_flow_statements(
   block: Block,
   _generator: ArduinoGenerator,

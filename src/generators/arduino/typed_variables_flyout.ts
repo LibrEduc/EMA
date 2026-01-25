@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module Arduino.TypedVariablesFlyout
+ * @description Typed variables flyout category and creation button.
+ * @remarks
+ * Builds the toolbox flyout UI for typed variables.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 
 export const TYPED_VARIABLES_CATEGORY_ID = "TYPED_VARIABLES";
@@ -8,6 +20,11 @@ const getBlocklyMsg = (key: string): string => {
   return msg || key;
 };
 
+/**
+ * Builds the typed variables flyout contents.
+ * @param workspace - Workspace used to resolve variables.
+ * @returns Array of flyout items.
+ */
 export function createTypedVariablesFlyout(
   workspace: Blockly.WorkspaceSvg,
 ): Element[] {
@@ -117,6 +134,10 @@ export function createTypedVariablesFlyout(
   return xmlList;
 }
 
+/**
+ * Registers the typed variables toolbox category callback.
+ * @param workspace - Workspace whose toolbox is being configured.
+ */
 export function registerTypedVariablesCategory(
   workspace: Blockly.WorkspaceSvg,
 ): void {

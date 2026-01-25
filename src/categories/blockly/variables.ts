@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories.Variables
+ * @description Variable block definitions for the Blockly toolbox.
+ * @remarks
+ * Defines typed variable blocks and validation helpers.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
 import { getVariableTypeOptions } from "../../generators/arduino/block_types";
@@ -26,6 +38,9 @@ const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
 
 /**
  * Define the variables_get_dynamic block
+ */
+/**
+ * Registers the dynamic variables_get block with typing support.
  */
 export const defineVariablesGetDynamicBlock = (): void => {
   Blockly.Blocks["variables_get_dynamic"] = {
@@ -107,6 +122,9 @@ export const defineVariablesGetDynamicBlock = (): void => {
 /**
  * Define the variables_set_dynamic block
  */
+/**
+ * Registers the dynamic variables_set block with typing support.
+ */
 export const defineVariablesSetDynamicBlock = (): void => {
   Blockly.Blocks["variables_set_dynamic"] = {
     init: function (this: Blockly.Block) {
@@ -147,6 +165,9 @@ export const defineVariablesSetDynamicBlock = (): void => {
 
 /**
  * Define the variables_local block
+ */
+/**
+ * Registers the "local" wrapper block for scoped variables.
  */
 export const defineVariablesLocalBlock = (): void => {
   Blockly.Blocks["variables_local"] = {
@@ -193,6 +214,9 @@ export const defineVariablesLocalBlock = (): void => {
 
 /**
  * Define the variables_set_type block
+ */
+/**
+ * Registers the block that forces a variable type.
  */
 export const defineVariablesSetTypeBlock = (): void => {
   Blockly.Blocks["variables_set_type"] = {
@@ -294,6 +318,9 @@ export const defineVariablesSetTypeBlock = (): void => {
   };
 };
 
+/**
+ * Registers the const declaration block.
+ */
 export const defineVariablesConstBlock = (): void => {
   Blockly.Blocks["variables_const"] = {
     init: function (this: Blockly.Block) {
@@ -397,6 +424,9 @@ export const defineVariablesConstBlock = (): void => {
   };
 };
 
+/**
+ * Registers the typed variable initialization block.
+ */
 export const defineVariablesSetInitBlock = (): void => {
   Blockly.Blocks["variables_set_init"] = {
     init: function (this: Blockly.Block) {
@@ -475,6 +505,9 @@ export const defineVariablesSetInitBlock = (): void => {
   };
 };
 
+/**
+ * Registers the variable definition block used by s4e compatibility.
+ */
 export const defineVariablesDefineBlock = (): void => {
   const initDefineBlock = function (this: Blockly.Block) {
     this.appendValueInput("VALUE")
@@ -506,6 +539,9 @@ export const defineVariablesDefineBlock = (): void => {
 
 /**
  * Extend the standard variables_get block to support type checking
+ */
+/**
+ * Extends the standard variables_get block with typed behavior.
  */
 export const extendStandardVariablesGetBlock = (): void => {
   // Add getBlockType to the standard variables_get block
@@ -563,6 +599,9 @@ export const extendStandardVariablesGetBlock = (): void => {
 
 /**
  * Extend the standard variables_set block to support type checking
+ */
+/**
+ * Extends the standard variables_set block with typed behavior.
  */
 export const extendStandardVariablesSetBlock = (): void => {
   if (Blockly.Blocks["variables_set"]) {

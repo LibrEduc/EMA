@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.Procedures
+ * @description Arduino code generators for procedure blocks.
+ * @remarks
+ * Implements generator functions for the procedures category.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -163,6 +175,12 @@ function setProcedureDefinition(
   generator.addUserFunction("function_" + funcName, code);
 }
 
+/**
+ * Generates Arduino code for a procedure with return value.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Function definition code.
+ */
 export function procedures_defreturn(
   block: Block,
   generator: ArduinoGenerator,
@@ -202,6 +220,12 @@ export function procedures_defreturn(
   return null;
 }
 
+/**
+ * Generates Arduino code for a procedure without return value.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Function definition code.
+ */
 export const procedures_defnoreturn = function (
   block: Block,
   generator: ArduinoGenerator,
@@ -224,6 +248,12 @@ export const procedures_defnoreturn = function (
   return null;
 };
 
+/**
+ * Generates Arduino code for calling a procedure with return value.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function procedures_callreturn(
   block: Block,
   generator: ArduinoGenerator,
@@ -240,6 +270,12 @@ export function procedures_callreturn(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for calling a procedure without return value.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Statement code string.
+ */
 export function procedures_callnoreturn(
   block: Block,
   generator: ArduinoGenerator,
@@ -255,6 +291,12 @@ export function procedures_callnoreturn(
   return funcName + "(" + args.join(", ") + ");\n";
 }
 
+/**
+ * Generates Arduino code for if-return blocks.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Statement code string.
+ */
 export function procedures_ifreturn(
   block: Block,
   generator: ArduinoGenerator,

@@ -1,9 +1,24 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyFields.ColourHsvSliders
+ * @description Localized HSV slider field wrapper.
+ * @remarks
+ * Adds translation support and CSS setup for HSV sliders.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { FieldColourHsvSliders } from "@blockly/field-colour-hsv-sliders";
 import { getBlocklyMsgOr } from "./blockly/shared";
 
 const HSV_CSS_ID = "ucb-hsv-eyedropper-css";
 
+/**
+ * Injects CSS needed for localized HSV labels once.
+ */
 const ensureHsvCss = (): void => {
   if (typeof document === "undefined") {
     return;
@@ -21,6 +36,9 @@ const ensureHsvCss = (): void => {
   document.head.appendChild(style);
 };
 
+/**
+ * Applies localized labels to the HSV dropdown UI.
+ */
 const localizeHsvDropdown = (): void => {
   const contentDiv = Blockly.DropDownDiv.getContentDiv();
   const labelNodes = contentDiv.querySelectorAll(".fieldColourSliderLabel");
@@ -47,7 +65,13 @@ const localizeHsvDropdown = (): void => {
   }
 };
 
+/**
+ * HSV sliders field with localized labels.
+ */
 export class LocalizedFieldColourHsvSliders extends FieldColourHsvSliders {
+  /**
+   * Shows the editor and applies localization after render.
+   */
   protected override showEditor_(): void {
     ensureHsvCss();
     super.showEditor_();

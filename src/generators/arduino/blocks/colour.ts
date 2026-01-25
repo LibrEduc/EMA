@@ -1,4 +1,16 @@
 /**
+ * @packageDocumentation
+ * @module Arduino.Generators.Colour
+ * @description Arduino code generators for colour blocks.
+ * @remarks
+ * Implements generator functions for the colour category.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -12,11 +24,21 @@ import type { Block } from "blockly/core/block";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 
+/**
+ * Generates Arduino code for a colour picker value.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function colour_picker(block: Block): [string, Order] {
   const code = '"' + (block.getFieldValue("COLOUR") || "#000000") + '"';
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for the custom colour picker value.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function color_picker_custom(block: Block): [string, Order] {
   const code =
     '"' +
@@ -25,11 +47,21 @@ export function color_picker_custom(block: Block): [string, Order] {
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for the HSV picker value.
+ * @param block - Blockly block instance.
+ * @returns Code string with order.
+ */
 export function color_picker_hsv(block: Block): [string, Order] {
   const code = '"' + (block.getFieldValue("COLOUR") || "#000000") + '"';
   return [code, Order.ATOMIC];
 }
 
+/**
+ * Generates Arduino code for a random colour.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function colour_random(
   _block: Block,
   generator: ArduinoGenerator,
@@ -51,6 +83,12 @@ export function colour_random(
   return [functionName + "()", Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for RGB colour composition.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function colour_rgb(
   block: Block,
   generator: ArduinoGenerator,
@@ -74,6 +112,12 @@ export function colour_rgb(
   return [code, Order.FUNCTION_CALL];
 }
 
+/**
+ * Generates Arduino code for blending two colours.
+ * @param block - Blockly block instance.
+ * @param generator - Arduino generator instance.
+ * @returns Code string with order.
+ */
 export function colour_blend(
   block: Block,
   generator: ArduinoGenerator,

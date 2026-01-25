@@ -1,3 +1,15 @@
+/**
+ * @packageDocumentation
+ * @module BlocklyCategories.Logic
+ * @description Logic block definitions for the Blockly toolbox.
+ * @remarks
+ * Defines logic blocks and typing behaviors used in µcBlockly.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
 import * as Blockly from "blockly";
 import { checkTypeCompatibility, getCompatibleTypesForCheck } from "../../generators/arduino/block_types_registry";
 import { setVariableType } from "../../generators/arduino/variable_utils";
@@ -173,6 +185,9 @@ const getSwitchTooltip = (block: SwitchBlock): string => {
   return "";
 };
 
+/**
+ * Registers the controls_switch block definitions and typing.
+ */
 export const defineControlsSwitchBlocks = (): void => {
   if (!Blockly.Blocks["controls_if_if"]) {
     Blockly.Blocks["controls_if_if"] = {

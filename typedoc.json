@@ -1,4 +1,17 @@
 {
-  "entryPoints": ["src/index.ts"],
-  "out": "./docs"
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "./docs/api",
+  "excludeNotDocumented": false,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "includeVersion": true,
+  "readme": "none",
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  }
 }

@@ -1,6 +1,14 @@
 /**
- * @packageDocumentation Define type and table of translated definition
+ * @packageDocumentation
+ * @module LanguageMap
+ * @description Language map definitions for µcBlockly
+ * @remarks
+ * Centralizes the main application types and wiring logic for Blockly,
+ * used by the runtime initialization and toolbox integration.
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -37,7 +45,7 @@ import * as es from 'blockly/msg/es';
 import * as fr from 'blockly/msg/fr';
 
 // Create a type for the Blockly workspace language map
-type LanguageMapBlockly = {
+export type LanguageMapBlockly = {
   [key: string]: { [key: string]: string };
 }
 
@@ -58,10 +66,14 @@ export interface LanguageItem {
   CONTACT: string;
   UNDO: string;
   REDO: string;
+  SAVE: string;
+  LOAD: string;
   ABOUT_TOOLTIP: string;
   CONTACT_TOOLTIP: string;
   UNDO_TOOLTIP: string;
   REDO_TOOLTIP: string;
+  SAVE_TOOLTIP: string;
+  LOAD_TOOLTIP: string;
   PLUGIN_MINIMAP: string;
   PLUGIN_HIGHLIGHT: string;
   PLUGIN_CONTINUOUSTOOLBOX: string;
