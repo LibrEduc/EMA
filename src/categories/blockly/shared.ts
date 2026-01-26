@@ -239,24 +239,21 @@ export const inferConnectedValueType = (block: Blockly.Block | null): string | n
 
 /**
  * Checks whether a variable has any connected assignment blocks.
+ * Uses getVariableUsesById to avoid iterating all blocks.
  * @param workspace - Workspace to search.
  * @param variableId - Target variable ID.
  * @returns True when at least one assignment has a connected value.
  */
-const hasConnectedAssignmentForVariable = (
+export const hasConnectedAssignmentForVariable = (
   workspace: Blockly.Workspace,
   variableId: string,
 ): boolean => {
-  const blocks = workspace.getAllBlocks(false);
-  for (const block of blocks) {
+  const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
+  for (const block of uses) {
     if (
       block.type === "variables_set_dynamic" ||
       block.type === "variables_set"
     ) {
-      const blockVarId = block.getFieldValue("VAR");
-      if (blockVarId !== variableId) {
-        continue;
-      }
       const valueInput = block.getInput("VALUE");
       if (valueInput?.connection?.targetBlock()) {
         return true;
@@ -290,6 +287,14 @@ export const handleVariablesSetChange = (
   if (shouldSkipVariableChange(block, event)) {
     return;
   }
+  const blockEvent = event as Blockly.Events.Abstract & { blockId?: string };
+  if (
+    event.type === Blockly.Events.BLOCK_CREATE &&
+    blockEvent.blockId != null &&
+    blockEvent.blockId !== block.id
+  ) {
+    return;
+  }
   try {
     const variableId = block.getFieldValue("VAR");
     if (!variableId || !block.workspace) {
@@ -314,8 +319,16 @@ export const handleVariablesSetChange = (
     const connectedBlock = valueInput?.connection?.targetBlock() || null;
     const connectedType = inferConnectedValueType(connectedBlock);
 
+    if (varType && connectedType && !checkTypeCompatibility(connectedType, varType)) {
+      block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
+      if (valueInput?.connection?.targetBlock()) {
+        valueInput.connection.disconnect();
+      }
+      return;
+    }
+
     if (connectedType) {
-      if (isNoType || !typedVariable.__ucbManualType) {
+      if (isNoType) {
         setVariableType(variable, connectedType);
         typedVariable.__ucbManualType = false;
         varType = variable.getType();
@@ -327,22 +340,13 @@ export const handleVariablesSetChange = (
       valueInput.connection.setCheck(getBlocklyCompatibleChecks(varType));
     }
 
-    if (varType && connectedType && !checkTypeCompatibility(connectedType, varType)) {
-      if (!typedVariable.__ucbManualType) {
-        setVariableType(variable, connectedType);
-        varType = variable.getType();
-        block.setWarningText(null);
-      } else {
-        block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
-        if (valueInput?.connection && valueInput.connection.targetBlock()) {
-          valueInput.connection.disconnect();
-        }
-        return;
-      }
-    }
-
     if (!connectedType) {
-      if (!typedVariable.__ucbManualType && varType) {
+      if (
+        !typedVariable.__ucbManualType &&
+        varType &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== "var_type_change"
+      ) {
         const hasAssignments = hasConnectedAssignmentForVariable(
           block.workspace,
           variableId,

@@ -110,6 +110,11 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
     const numString = block.getFieldValue('NUM');
     return identifyNumber(numString);
   },
+  'mathRoundType': (block: Blockly.Block): string => {
+    const op = block.getFieldValue('OP');
+    if (op === 'ROUNDUP' || op === 'ROUNDDOWN') return 'int';
+    return 'float'; // ROUND or default
+  },
   'variableLookup': (block: Blockly.Block): string => {
     const variableId = block.getFieldValue('VAR');
     if (!variableId) {
@@ -233,12 +238,6 @@ export function checkTypeCompatibility(
     return false;
   }
 
-  // Treat Blockly types as compatible with internal types.
-  const numericTypes = new Set(["Number", "number", "int", "float"]);
-  if (numericTypes.has(sourceType) && numericTypes.has(targetType)) {
-    return true;
-  }
-
   if (
     (sourceType === "Boolean" || sourceType === "bool") &&
     (targetType === "Boolean" || targetType === "bool")
@@ -261,6 +260,20 @@ export function checkTypeCompatibility(
   if (
     sourceType === "char" &&
     (targetType === "String" || targetType === "string")
+  ) {
+    return true;
+  }
+
+  if (
+    (sourceType === "Number" || sourceType === "number") &&
+    (targetType === "int" || targetType === "float")
+  ) {
+    return true;
+  }
+
+  if (
+    (sourceType === "int" || sourceType === "float") &&
+    (targetType === "Number" || targetType === "number")
   ) {
     return true;
   }

@@ -207,11 +207,27 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     /**
      * Loads workspace blocks from a file.
      * @param file - File object to load from.
+     * @param merge - If true, merges with existing blocks; if false, replaces them.
      * @remarks
      * Reads the file content, parses JSON, and loads it into the workspace.
      * Includes error handling for corrupted or invalid files.
+     * If merge is true and workspace has existing blocks, appends top-level blocks.
+     * If merge is false or workspace is empty, replaces all blocks.
+     * Uses Blockly.Events.disable() during load to avoid change listeners firing
+     * on every block add (see Blockly load performance issue #7395). Saves and
+     * regenerates code once after load.
      */
-    workspaceLoadFromFile: (file: File) => void;
+    workspaceLoadFromFile: (file: File, merge?: boolean) => void;
+    /**
+     * Merges blocks from a serialized state into the current workspace.
+     * @param state - Serialized workspace state containing blocks to merge.
+     * @remarks
+     * Extracts blocks directly from the state and appends them using
+     * Blockly.serialization.blocks.append(). This avoids creating a temporary
+     * workspace and prevents plugin conflicts. Only top-level blocks are appended
+     * (children are included automatically).
+     */
+    private mergeBlocksFromState;
     /**
      * Normalizes null/'null' variable types to empty string.
      * @remarks

@@ -772,11 +772,17 @@ export class BlocklyApplication implements BlocklyApplicationType {
   /**
    * Loads workspace blocks from a file.
    * @param file - File object to load from.
+   * @param merge - If true, merges with existing blocks; if false, replaces them.
    * @remarks
    * Reads the file content, parses JSON, and loads it into the workspace.
    * Includes error handling for corrupted or invalid files.
+   * If merge is true and workspace has existing blocks, appends top-level blocks.
+   * If merge is false or workspace is empty, replaces all blocks.
+   * Uses Blockly.Events.disable() during load to avoid change listeners firing
+   * on every block add (see Blockly load performance issue #7395). Saves and
+   * regenerates code once after load.
    */
-  public workspaceLoadFromFile = (file: File): void => {
+  public workspaceLoadFromFile = (file: File, merge: boolean = false): void => {
     const reader = new FileReader();
     reader.onload = (e: ProgressEvent<FileReader>): void => {
       try {
@@ -786,14 +792,33 @@ export class BlocklyApplication implements BlocklyApplicationType {
           return;
         }
         const parsed = JSON.parse(text);
-        // Basic validation: ensure it's an object
         if (typeof parsed !== 'object' || parsed === null) {
           console.warn('Invalid workspace data format');
           alert('Format de fichier invalide');
           return;
         }
-        Blockly.serialization.workspaces.load(parsed, this.workspace);
+
+        Blockly.Events.disable();
+        try {
+          if (merge) {
+            const hasExistingBlocks = this.workspace.getTopBlocks(false).length > 0;
+            if (hasExistingBlocks) {
+              this.mergeBlocksFromState(parsed);
+            } else {
+              Blockly.serialization.workspaces.load(parsed, this.workspace);
+            }
+          } else {
+            Blockly.serialization.workspaces.load(parsed, this.workspace);
+          }
+        } finally {
+          Blockly.Events.enable();
+        }
+
         this.normalizeVariableTypes();
+        this.workspaceSaveBlocks("mainWorkspace_blocks");
+        const code = arduinoGenerator.workspaceToCode(this.workspace);
+        µcB_codeEditor.setValue(code);
+        if (div_content_code) div_content_code.textContent = code;
       } catch (error) {
         console.error('Failed to load workspace from file:', error);
         alert('Erreur lors du chargement du fichier');
@@ -804,6 +829,141 @@ export class BlocklyApplication implements BlocklyApplicationType {
       alert('Erreur lors de la lecture du fichier');
     };
     reader.readAsText(file);
+  };
+
+  /**
+   * Merges blocks from a serialized state into the current workspace.
+   * @param state - Serialized workspace state containing blocks to merge.
+   * @remarks
+   * Extracts blocks directly from the state and appends them using
+   * Blockly.serialization.blocks.append(). This avoids creating a temporary
+   * workspace and prevents plugin conflicts. Only top-level blocks are appended
+   * (children are included automatically).
+   */
+  private mergeBlocksFromState = (state: Record<string, unknown>): void => {
+    try {
+      // Extract blocks array from state
+      // Blockly workspace state structure: { blocks: { blocks: [...] }, variables: [...] }
+      // or sometimes: { blocks: [...] } (direct array)
+      let blocksArray: Array<Record<string, unknown>> | undefined;
+      
+      if (Array.isArray(state.blocks)) {
+        // Direct array format: { blocks: [...] }
+        blocksArray = state.blocks as Array<Record<string, unknown>>;
+      } else if (state.blocks && typeof state.blocks === 'object') {
+        // Nested format: { blocks: { blocks: [...] } }
+        const blocksObj = state.blocks as Record<string, unknown>;
+        if (Array.isArray(blocksObj.blocks)) {
+          blocksArray = blocksObj.blocks as Array<Record<string, unknown>>;
+        }
+      }
+      
+      if (!blocksArray) {
+        console.warn('[Merge] No blocks found in state to merge');
+        return;
+      }
+      if (blocksArray.length === 0) {
+        return;
+      }
+
+      // Filter top-level blocks (those without a parent or with parent === null)
+      const topLevelBlocks = blocksArray.filter((block) => {
+        // Top-level blocks have no 'parent' field or parent is null/undefined
+        return !block.parent || block.parent === null;
+      });
+
+      if (topLevelBlocks.length === 0) {
+        console.warn('[Merge] No top-level blocks to merge');
+        return;
+      }
+
+      // Calculate the bounding box of blocks to merge (using their original positions)
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      
+      topLevelBlocks.forEach((block) => {
+        const x = typeof block.x === 'number' ? block.x : 0;
+        const y = typeof block.y === 'number' ? block.y : 0;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      });
+
+      // Check for existing blocks BEFORE calculating offset
+      // Optimize: only check top-level blocks (much faster than getAllBlocks)
+      const existingTopBlocks = this.workspace.getTopBlocks(false);
+      const hasExistingBlocks = existingTopBlocks.length > 0;
+      
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (hasExistingBlocks) {
+        // Bounding box of existing top-level blocks
+        let existingMinX = Infinity;
+        let existingMinY = Infinity;
+        for (let i = 0; i < existingTopBlocks.length; i++) {
+          const block = existingTopBlocks[i] as Blockly.BlockSvg;
+          if (block.getRelativeToSurfaceXY) {
+            const xy = block.getRelativeToSurfaceXY();
+            existingMinX = Math.min(existingMinX, xy.x);
+            existingMinY = Math.min(existingMinY, xy.y);
+          }
+        }
+        
+        // Superimpose with a few pixels offset: same zone as existing blocks
+        const pixelOffset = 6;
+        const targetX = existingMinX + pixelOffset;
+        const targetY = existingMinY + pixelOffset;
+        
+        // Offset so leftmost/topmost new block lands at (targetX, targetY)
+        offsetX = targetX - minX;
+        offsetY = targetY - minY;
+      } else {
+        // No existing blocks: center the new blocks at origin
+        const newBlocksCenterX = (minX + maxX) / 2;
+        const newBlocksCenterY = (minY + maxY) / 2;
+        offsetX = 0 - newBlocksCenterX;
+        offsetY = 0 - newBlocksCenterY;
+      }
+
+      // Append each top-level block with the calculated offset
+      topLevelBlocks.forEach((blockState) => {
+        try {
+          // Create a copy to avoid modifying the original
+          const blockToAppend: Record<string, unknown> = { ...blockState };
+          
+          // Remove the ID to force Blockly to generate a new one (avoid conflicts)
+          delete blockToAppend.id;
+          
+          // Apply offset to original position
+          const originalX = typeof blockToAppend.x === 'number' ? blockToAppend.x : 0;
+          const originalY = typeof blockToAppend.y === 'number' ? blockToAppend.y : 0;
+          
+          // Apply the calculated offset (calculated once, prevents accumulation)
+          blockToAppend.x = originalX + offsetX;
+          blockToAppend.y = originalY + offsetY;
+          
+          // Append the block (children will be included automatically)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Blockly.serialization.blocks.append(blockToAppend as any, this.workspace);
+        } catch (error) {
+          console.error('[Merge] Failed to append block:', error);
+        }
+      });
+
+      // Only center workspace if there were no existing blocks (first load)
+      if (!hasExistingBlocks) {
+        const workspaceSvg = this.workspace as Blockly.WorkspaceSvg;
+        if (workspaceSvg.scrollCenter) {
+          workspaceSvg.scrollCenter();
+        }
+      }
+    } catch (error) {
+      console.error('[Merge] Failed to merge blocks:', error);
+    }
   };
 
   /**

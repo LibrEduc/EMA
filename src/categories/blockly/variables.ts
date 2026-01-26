@@ -308,6 +308,12 @@ export const defineVariablesSetTypeBlock = (): void => {
           return;
         }
         const varType = variable.getType();
+        const isNoType = !varType || varType === "__NO_TYPE__";
+        if (isNoType && selectedType) {
+          setVariableType(variable, selectedType);
+          typedVariable.__ucbManualType = true;
+          return;
+        }
         if (varType && varType !== selectedType) {
           typeField.setValue(varType);
         }

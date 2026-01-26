@@ -4,7 +4,7 @@
  * @description Type compatibility and dropdown options for typed blocks.
  * @remarks
  * Defines type compatibility rules for block connections.
- * @author scanet@libreduc.cc (Sébastien Canet)
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0

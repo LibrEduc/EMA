@@ -12,11 +12,12 @@
 
 import * as Blockly from "blockly";
 import { checkTypeCompatibility, getCompatibleTypesForCheck } from "../../generators/arduino/block_types_registry";
-import { setVariableType } from "../../generators/arduino/variable_utils";
+import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
   configureTypedVariableField,
   getBlocklyMsg,
   getTypeMismatchWarningText,
+  hasConnectedAssignmentForVariable,
   inferConnectedValueType,
   VariableWithMutableType,
 } from "./shared";
@@ -117,18 +118,29 @@ const applySwitchCaseTyping = (block: SwitchBlock): void => {
   const varType = variable.getType();
   const isNoType = !varType || varType === "__NO_TYPE__";
   const caseConnections = getCaseConnections(block);
+  const typedVariable = variable as VariableWithMutableType;
 
   if (isNoType) {
     applyCaseInputChecks(block, null);
     const inferredType = inferTypeFromCases(caseConnections);
     if (inferredType) {
-      const typedVariable = variable as VariableWithMutableType;
       if (!typedVariable.__ucbManualType) {
         setVariableType(variable, inferredType);
         applyCaseInputChecks(block, getSwitchCaseChecks(inferredType));
         block.setWarningText(null);
       }
     }
+    return;
+  }
+
+  if (
+    caseConnections.length === 0 &&
+    !typedVariable.__ucbManualType &&
+    !hasConnectedAssignmentForVariable(block.workspace, variableId)
+  ) {
+    clearVariableType(variable);
+    applyCaseInputChecks(block, null);
+    block.setWarningText(null);
     return;
   }
 

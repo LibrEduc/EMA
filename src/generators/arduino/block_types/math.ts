@@ -20,7 +20,7 @@ export const MATH_BLOCK_TYPES = {
   math_trig: "float",
   math_constant: "float",
   math_number_property: "bool",
-  math_round: "float",
+  math_round: "__DYNAMIC__mathRoundType",
   math_modulo: "int",
   math_random_int: "int",
   math_random_float: "float",

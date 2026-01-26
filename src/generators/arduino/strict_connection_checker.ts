@@ -18,6 +18,7 @@
  */
 
 import * as Blockly from 'blockly/core';
+import { checkTypeCompatibility as sharedCheckTypeCompatibility } from "./block_types_registry";
 import { debugLog } from "./debug";
 
 /**
@@ -160,58 +161,14 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
    * @returns True if types are compatible, false otherwise.
    */
   private checkTypeCompatibility(sourceType: string, targetType: string): boolean {
-    // Exact match
     if (sourceType === targetType) {
       return true;
     }
-
-    // Special case: Blockly uses "Number" while Arduino types are "int"/"float".
-    const numericTypes = new Set(['Number', 'number', 'int', 'float']);
-    if (numericTypes.has(sourceType) && numericTypes.has(targetType)) {
-      return true;
-    }
-
-    // Special case: Boolean type matching
-    // Blockly uses 'Boolean' (capital B), we use 'bool'
-    if ((sourceType === 'Boolean' || sourceType === 'bool') &&
-      (targetType === 'Boolean' || targetType === 'bool')) {
-      return true;
-    }
-
-    // Special case: String type matching
-    if ((sourceType === 'String' || sourceType === 'string') &&
-      (targetType === 'String' || targetType === 'string')) {
-      return true;
-    }
-    // Special case: Colour type compatibility with string.
-    if (
-      (sourceType === 'Colour' || sourceType === 'color' || sourceType === 'colour') &&
-      (targetType === 'String' || targetType === 'string' ||
-        targetType === 'Colour' || targetType === 'color' || targetType === 'colour')
-    ) {
-      return true;
-    }
-    if (
-      (sourceType === 'String' || sourceType === 'string') &&
-      (targetType === 'Colour' || targetType === 'color' || targetType === 'colour')
-    ) {
-      return true;
-    }
-    // Allow char to plug into string (but not the reverse).
-    if ((sourceType === 'char') &&
-      (targetType === 'string' || targetType === 'String')) {
-      return true;
-    }
-
-    // Special case: null/undefined types
     if (sourceType === 'null' || sourceType === 'undefined' ||
       targetType === 'null' || targetType === 'undefined') {
-      // null/undefined can only connect to null/undefined
       return sourceType === targetType;
     }
-
-    // Default: strict equality
-    return sourceType === targetType;
+    return sharedCheckTypeCompatibility(sourceType, targetType);
   }
 }
 
