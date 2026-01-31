@@ -11,14 +11,10 @@
  */
 
 import * as Blockly from "blockly";
+import { getBlocklyMsg } from "../../categories/blockly/shared";
 
 export const TYPED_VARIABLES_CATEGORY_ID = "TYPED_VARIABLES";
 const TYPED_VARIABLES_BUTTON_ID = "CREATE_TYPED_VARIABLE";
-
-const getBlocklyMsg = (key: string): string => {
-  const msg = (Blockly.Msg as Record<string, string> | undefined)?.[key];
-  return msg || key;
-};
 
 /**
  * Builds the typed variables flyout contents.

@@ -179,7 +179,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     for (const block of workspace.getAllBlocks(false)) {
       if (
         block.type === "variables_const" ||
-        block.type === "variables_set_init"
+        block.type === "variables_set_init" ||
+        block.type === "variables_define" ||
+        block.type === "variable_define"
       ) {
         const varId = block.getFieldValue?.("VAR");
         if (varId) {

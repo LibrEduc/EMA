@@ -12,7 +12,7 @@
 
 import * as Blockly from "blockly";
 import { FieldColourHsvSliders } from "@blockly/field-colour-hsv-sliders";
-import { getBlocklyMsgOr } from "./blockly/shared";
+import { getBlocklyMsgOr } from "./shared";
 
 const HSV_CSS_ID = "ucb-hsv-eyedropper-css";
 

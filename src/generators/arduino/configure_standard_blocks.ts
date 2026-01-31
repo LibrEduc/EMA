@@ -11,10 +11,12 @@
  */
 
 import * as Blockly from "blockly";
-import { getVariableTypeOptions } from "./block_types";
+import {
+  setVariableTypeAndMarkManual,
+} from "../../categories/blockly/shared";
+import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
 import { getCompatibleTypesForCheck } from "./block_types_registry";
 import { debugLog } from "./debug";
-import { setVariableType as setVariableTypeSafe } from "./variable_utils";
 
 /**
  * Configure standard Blockly blocks to work with our type system
@@ -67,40 +69,6 @@ export function configureStandardBlocks(): void {
     addVarInput_?: (name: string, argId: string) => void;
   };
 
-  const getBlocklyMsg = (key: string): string => {
-    const msg = (Blockly.Msg as Record<string, string> | undefined)?.[key];
-    return msg || key;
-  };
-
-  type VariableWithMutableType = Blockly.IVariableModel<Blockly.IVariableState> & {
-    setType?: (type: string) => void;
-    type_?: string;
-    __ucbManualType?: boolean;
-  };
-
-  const setVariableType = (
-    variable: Blockly.IVariableModel<Blockly.IVariableState>,
-    type: string,
-  ): void => {
-    const typedVariable = variable as VariableWithMutableType;
-    setVariableTypeSafe(variable, type);
-    typedVariable.__ucbManualType = true;
-  };
-
-  const getBlocklyMsgOr = (key: string, fallback: string): string => {
-    const msg = getBlocklyMsg(key);
-    return msg === key ? fallback : msg;
-  };
-
-  const getVariableTypeLabel = (type: string): string =>
-    getBlocklyMsgOr(`VAR_TYPE_${type.toUpperCase()}`, type);
-
-  const getTypeDropdownOptions = (): Blockly.MenuOption[] =>
-    getVariableTypeOptions().map((type) => [
-      getVariableTypeLabel(type),
-      type,
-    ] as Blockly.MenuOption);
-
   const patchProcedurePlusMinusTypes = function (this: Blockly.Block) {
     const typed = this as ProcedureBlockWithArgs;
     if (typed.__typedPlusMinus) {
@@ -121,14 +89,14 @@ export function configureStandardBlocks(): void {
           return;
         }
         const dropdown = new Blockly.FieldDropdown(
-          getTypeDropdownOptions,
+          getVariableTypeDropdownOptions,
           (value) => {
             const selectedType = value || "int";
             const argDatum = (this as ProcedureBlockWithArgs).argData_?.find(
               (elem) => elem.argId === argId,
             );
             if (argDatum?.model) {
-              setVariableType(argDatum.model, selectedType);
+              setVariableTypeAndMarkManual(argDatum.model, selectedType);
               Blockly.Procedures.mutateCallers(this);
             }
             return selectedType;
@@ -159,11 +127,11 @@ export function configureStandardBlocks(): void {
           continue;
         }
         const dropdown = new Blockly.FieldDropdown(
-          getTypeDropdownOptions,
+          getVariableTypeDropdownOptions,
           (value) => {
             const selectedType = value || "int";
             if (argDatum.model) {
-              setVariableType(argDatum.model, selectedType);
+              setVariableTypeAndMarkManual(argDatum.model, selectedType);
               Blockly.Procedures.mutateCallers(this);
             }
             return selectedType;
@@ -300,7 +268,7 @@ export function configureStandardBlocks(): void {
         for (const model of argModels) {
           const argType = typeByName.get(model.getName());
           if (argType && model.getType() !== argType) {
-            setVariableType(model, argType);
+            setVariableTypeAndMarkManual(model, argType);
           }
         }
       };
@@ -373,7 +341,7 @@ export function configureStandardBlocks(): void {
       }
       const varType = variable.getType();
       if (!varType || varType === "__NO_TYPE__") {
-        setVariableType(variable, "string");
+        setVariableTypeAndMarkManual(variable, "string");
       }
     };
   }
@@ -440,7 +408,7 @@ export function configureStandardBlocks(): void {
         for (const model of argModels) {
           const argType = typeByName.get(model.getName());
           if (argType && model.getType() !== argType) {
-            setVariableType(model, argType);
+            setVariableTypeAndMarkManual(model, argType);
           }
         }
       };

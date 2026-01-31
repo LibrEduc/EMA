@@ -101,7 +101,7 @@ function defineTypedVariableBlocks() {
 }
 
 import { arduinoGenerator } from "./generators/arduino";
-import { defineAllTypedVariableBlocks } from "./generators/arduino/block_definitions";
+import { defineAllTypedVariableBlocks } from "./categories/blockly";
 import { applyBlockTypesFromRegistry } from "./generators/arduino/block_types_registry";
 import { configureStandardBlocks } from "./generators/arduino/configure_standard_blocks";
 import {

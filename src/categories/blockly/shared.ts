@@ -79,6 +79,20 @@ export const getConstWarningText = (): string =>
   getBlocklyMsgOr("VARIABLES_CONST_WARNING", "const: cannot assign");
 
 /**
+ * Sets a variable's type and marks it as manually chosen (e.g. via dropdown).
+ * @param variable - Variable model to update.
+ * @param type - New type string.
+ */
+export const setVariableTypeAndMarkManual = (
+  variable: Blockly.IVariableModel<Blockly.IVariableState>,
+  type: string,
+): void => {
+  setVariableType(variable, type);
+  const typed = variable as VariableWithMutableType;
+  typed.__ucbManualType = true;
+};
+
+/**
  * Converts a variable type into Blockly connection checks.
  * @param type - Variable or inferred type.
  * @returns Array of compatible checks or null when not applicable.

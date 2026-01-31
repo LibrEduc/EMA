@@ -15,7 +15,6 @@ import { debugLog } from "../../generators/arduino/debug";
 import { getVariableTypeOptions } from "../../generators/arduino/block_types";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
-  VariableWithMutableType,
   configureTypedVariableField,
   getBlocklyCompatibleChecks,
   getBlocklyMsg,
@@ -24,13 +23,21 @@ import {
   getUntypedWarningText,
   handleVariablesSetChange,
   inferConnectedValueType,
+  setVariableTypeAndMarkManual,
   shouldSkipVariableChange,
+  VariableWithMutableType,
 } from "./shared";
 
-const getVariableTypeLabel = (type: string): string =>
+/**
+ * Returns the display label for a variable type (e.g. VAR_TYPE_INT → "int").
+ */
+export const getVariableTypeLabel = (type: string): string =>
   getBlocklyMsgOr(`VAR_TYPE_${type.toUpperCase()}`, type);
 
-const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
+/**
+ * Returns Blockly menu options for the variable type dropdown.
+ */
+export const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
   getVariableTypeOptions().map((type) => [
     getVariableTypeLabel(type),
     type,
@@ -287,8 +294,7 @@ export const defineVariablesSetTypeBlock = (): void => {
               return;
             }
             if (variable.getType() !== selectedType) {
-              setVariableType(variable, selectedType);
-              typedVariable.__ucbManualType = true;
+              setVariableTypeAndMarkManual(variable, selectedType);
             }
           }
         } catch (error) {
@@ -310,8 +316,7 @@ export const defineVariablesSetTypeBlock = (): void => {
         const varType = variable.getType();
         const isNoType = !varType || varType === "__NO_TYPE__";
         if (isNoType && selectedType) {
-          setVariableType(variable, selectedType);
-          typedVariable.__ucbManualType = true;
+          setVariableTypeAndMarkManual(variable, selectedType);
           return;
         }
         if (varType && varType !== selectedType) {
@@ -331,6 +336,7 @@ export const defineVariablesConstBlock = (): void => {
   Blockly.Blocks["variables_const"] = {
     init: function (this: Blockly.Block) {
       this.appendValueInput("VAL_CONST")
+        .setCheck(null)
         .appendField(getBlocklyMsgOr("VARIABLES_SET_CONST", "set const"))
         .appendField(
           new Blockly.FieldVariable(Blockly.Field.SKIP_SETUP, undefined, null, ""),
@@ -382,11 +388,10 @@ export const defineVariablesConstBlock = (): void => {
       const targetBlock = valueInput?.connection?.targetBlock() || null;
       const isShadow = Boolean(targetBlock?.isShadow?.());
       const hasRealValue = Boolean(targetBlock && !isShadow);
-      if (
-        typedVariable.__ucbConst &&
-        ((constOwner && constOwner !== this.id) ||
-          (constOwner === this.id && alreadyInitialized && hasRealValue))
-      ) {
+      // Only disconnect when ANOTHER block owns this const variable.
+      // Removed: (constOwner === this.id && alreadyInitialized && hasRealValue) - it was
+      // disconnecting on every event after first connection, preventing any value from staying.
+      if (typedVariable.__ucbConst && constOwner && constOwner !== this.id) {
         this.setWarningText(getConstWarningText());
         if (valueInput?.connection?.targetBlock()) {
           valueInput.connection.disconnect();
@@ -398,7 +403,6 @@ export const defineVariablesConstBlock = (): void => {
         typedVariable.__ucbConstBlockId = this.id;
       }
       if (valueInput?.connection) {
-        // Allow any value to be connected so we can infer the type.
         valueInput.connection.setCheck(null);
       }
       const connectedType = hasRealValue
@@ -406,9 +410,6 @@ export const defineVariablesConstBlock = (): void => {
         : null;
       if (connectedType) {
         setVariableType(variable, connectedType);
-        if (valueInput?.connection) {
-          valueInput.connection.setCheck(getBlocklyCompatibleChecks(connectedType));
-        }
         (this as Blockly.Block & { __ucbConstInitialized?: boolean })
           .__ucbConstInitialized = true;
         this.setWarningText(null);
@@ -418,10 +419,6 @@ export const defineVariablesConstBlock = (): void => {
         .__ucbConstInitialized = false;
       if (!hasRealValue) {
         this.setWarningText(null);
-      }
-      if (valueInput?.connection) {
-        // Keep untyped until a real value is connected.
-        valueInput.connection.setCheck(null);
       }
       clearVariableType(variable);
       this.setWarningText(getUntypedWarningText());
@@ -534,13 +531,67 @@ export const defineVariablesDefineBlock = (): void => {
     this.setHelpUrl(getBlocklyMsgOr("ARDUINO_BASE_DEFINE_CONST_HELPURL", ""));
   };
 
-  Blockly.Blocks["variables_define"] = {
-    init: initDefineBlock,
+  const onchangeDefine = function (this: Blockly.Block, event: Blockly.Events.Abstract): void {
+    if (shouldSkipVariableChange(this, event)) {
+      return;
+    }
+    if (
+      event.type !== Blockly.Events.BLOCK_CHANGE &&
+      event.type !== Blockly.Events.BLOCK_CREATE &&
+      event.type !== Blockly.Events.BLOCK_MOVE &&
+      event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+      event.type !== Blockly.Events.VAR_CREATE &&
+      event.type !== Blockly.Events.VAR_RENAME &&
+      event.type !== Blockly.Events.VAR_DELETE
+    ) {
+      return;
+    }
+    const variableId = this.getFieldValue("VAR");
+    if (!variableId || !this.workspace) {
+      return;
+    }
+    const variable = this.workspace.getVariableMap().getVariableById(variableId);
+    if (!variable) {
+      return;
+    }
+    const valueInput = this.getInput("VALUE");
+    const targetBlock = valueInput?.connection?.targetBlock() || null;
+    const isShadow = Boolean(targetBlock?.isShadow?.());
+    const hasRealValue = Boolean(targetBlock && !isShadow);
+    if (!hasRealValue) {
+      clearVariableType(variable);
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(null);
+      }
+      this.setWarningText(getUntypedWarningText());
+      return;
+    }
+    const connectedType = inferConnectedValueType(targetBlock);
+    if (connectedType) {
+      setVariableType(variable, connectedType);
+      const typedVariable = variable as VariableWithMutableType;
+      typedVariable.__ucbManualType = false;
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(getBlocklyCompatibleChecks(connectedType));
+      }
+      this.setWarningText(null);
+    } else {
+      clearVariableType(variable);
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(null);
+      }
+      this.setWarningText(getUntypedWarningText());
+    }
   };
 
-  Blockly.Blocks["variable_define"] = {
+  const defineBlockDef = {
     init: initDefineBlock,
+    onchange: onchangeDefine,
   };
+
+  Blockly.Blocks["variables_define"] = defineBlockDef;
+
+  Blockly.Blocks["variable_define"] = defineBlockDef;
 };
 
 /**

@@ -13,7 +13,7 @@
 import * as Blockly from "blockly";
 import { FieldColour } from "@blockly/field-colour";
 import { FieldColorPicker } from "./field_colour_picker";
-import { LocalizedFieldColourHsvSliders } from "../field_colour_hsv_sliders";
+import { LocalizedFieldColourHsvSliders } from "./field_colour_hsv_sliders";
 import { getBlocklyMsg, getBlocklyMsgOr } from "./shared";
 
 const COLOUR_CHECKER_ICON =

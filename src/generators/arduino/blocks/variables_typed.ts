@@ -187,6 +187,8 @@ const inferValueBlockType = (valueBlock: Blockly.Block | null): string | null =>
 
 /**
  * Generates Arduino code for const variable declaration.
+ * Always emits a declaration when the block has a variable name; type is inferred
+ * from the connected block when present, otherwise from the variable model or default "int".
  * @param block - Blockly block instance.
  * @param generator - Arduino generator instance.
  * @returns Generated code string.
@@ -195,17 +197,17 @@ export const variables_const = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  if (!varName) {
+    return "";
+  }
   const value =
     generator.valueToCode(block, "VAL_CONST", Order.ASSIGNMENT) || "0";
-  const varName = generator.getVariableName(block.getFieldValue("VAR"));
   const valueBlock = block.getInputTargetBlock("VAL_CONST");
   const inferredType = inferValueBlockType(valueBlock);
   const typeName = inferredType
     ? getDeclarationType(block, inferredType)
-    : getDeclarationType(block, "__NO_TYPE__");
-  if (!inferredType && typeName === "__NO_TYPE__") {
-    return "";
-  }
+    : getDeclarationType(block, "int");
   const declaration = `const ${typeName} ${varName} = ${value};`;
   generator.addDefinition(`var_const_${varName}`, declaration);
   generator.addVariable(varName, declaration);
@@ -235,6 +237,7 @@ export const variables_set_init = function (
 
 /**
  * Generates Arduino code for variable definition blocks.
+ * Emits a preprocessor macro: #define varName value (e.g. #define toto true).
  * @param block - Blockly block instance.
  * @param generator - Arduino generator instance.
  * @returns Generated code string.

@@ -38,14 +38,24 @@ import "@blockly/field-multilineinput";
 import "@blockly/field-slider";
 import * as Blockly from "blockly";
 import "./categories/blockly/field_colour_picker";
-import { registerStrictConnectionChecker } from "./generators/arduino/strict_connection_checker";
+import {
+  registerStrictConnectionChecker,
+  registerStrictConnectionCheckerInRegistry,
+  StrictConnectionChecker,
+} from "./generators/arduino/strict_connection_checker";
 import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
 import { normalizeVariableType } from "./generators/arduino/variable_utils";
 import {
+  patchConnectionCheckerForConstBlock,
   patchFieldVariableValidation,
   patchVariableMapCreateVariable,
   patchWorkspaceRemoveTopBlock,
 } from "./blockly_patches";
+
+// Register our checker BEFORE any workspace is created so ConnectionDB gets it at init.
+registerStrictConnectionCheckerInRegistry();
+// Patch the base ConnectionChecker too (StrictConnectionChecker extends it) as fallback.
+patchConnectionCheckerForConstBlock();
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -112,11 +122,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.PLUGINS = [];
     this.WORKSPACE_OPTIONS = WORKSPACE_OPTIONS;
 
-    // Don't use the official plugin - it's too strict and blocks typed blocks from connecting to untyped inputs
-    // We use our own StrictConnectionChecker which allows typed blocks to connect to untyped inputs
-    // (needed for type inference: a 'true' block (Boolean) should be able to connect to variables_set_dynamic (null) 
-    // to infer the variable type)
-
+    // Force our checker via plugins so main workspace AND flyouts use it (copyOptionsForFlyout copies plugins).
+    const plugins = (WORKSPACE_OPTIONS.plugins as Record<string, unknown>) || {};
+    if (!plugins.connectionChecker) {
+      WORKSPACE_OPTIONS.plugins = { ...plugins, connectionChecker: StrictConnectionChecker };
+    }
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
     patchWorkspaceRemoveTopBlock();
@@ -175,10 +185,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       }
     });
 
-    // Register our custom strict connection checker
-    // This checker allows typed blocks to connect to untyped inputs (for type inference)
-    // but blocks untyped blocks (__NO_TYPE__) from connecting to typed inputs
-    registerStrictConnectionChecker(this.workspace);
+    // Checker already set via registry before inject; no need to replace (ConnectionDB would keep old one).
     this.registerCustomToolboxCallbacks();
   }
   backpackOptions = {

@@ -25,10 +25,28 @@ import { debugLog } from "./debug";
  * Custom ConnectionChecker that extends Blockly's default ConnectionChecker
  * to use getBlockType() for source blocks, providing stricter type checking.
  */
+// Blockly connection type constants (INPUT_VALUE=1, OUTPUT_VALUE=2) for robust checks
+const INPUT_VALUE_TYPE = 1;
+const OUTPUT_VALUE_TYPE = 2;
+
 export class StrictConnectionChecker extends Blockly.ConnectionChecker {
   /**
-   * Override canConnect to add logging and ensure our custom logic is called.
-   * This is the main entry point for connection checking in Blockly.
+   * Entry point when Blockly needs a reason code. Must allow const block before parent.
+   */
+  canConnectWithReason(
+    a: Blockly.Connection | null,
+    b: Blockly.Connection | null,
+    isDragging: boolean,
+    opt_distance?: number
+  ): number {
+    if (a && b && this.allowValueToUncheckedInput_(a, b)) {
+      return Blockly.Connection.CAN_CONNECT;
+    }
+    return super.canConnectWithReason(a, b, isDragging, opt_distance);
+  }
+
+  /**
+   * Main entry point for connection checking. Allow const block before parent.
    */
   canConnect(
     a: Blockly.Connection | null,
@@ -36,14 +54,42 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     isDragging: boolean,
     opt_distance?: number
   ): boolean {
-    // First, do the standard checks (connection types, etc.)
+    if (a && b && this.allowValueToUncheckedInput_(a, b)) {
+      return true;
+    }
     const standardResult = super.canConnect(a, b, isDragging, opt_distance);
     if (!standardResult || !a || !b) {
       return standardResult;
     }
-
-    // Then do our custom type checks
     return this.doTypeChecks(a, b);
+  }
+
+  /**
+   * Override doSafetyChecks to allow value→const even across workspaces (flyout→main).
+   */
+  doSafetyChecks(a: Blockly.Connection | null, b: Blockly.Connection | null): number {
+    if (a && b && this.allowValueToUncheckedInput_(a, b)) {
+      return Blockly.Connection.CAN_CONNECT;
+    }
+    return super.doSafetyChecks(a, b);
+  }
+
+  /**
+   * Allow connecting a value output to an input that accepts any type.
+   * (1) Target block is variables_const (VAL_CONST input), or
+   * (2) Target connection has no type check (setCheck(null)).
+   * Uses numeric type (1/2) so it works regardless of ConnectionType enum binding.
+   */
+  private allowValueToUncheckedInput_(a: Blockly.Connection, b: Blockly.Connection): boolean {
+    const aType = (a as { type: number }).type;
+    const bType = (b as { type: number }).type;
+    const out = aType === OUTPUT_VALUE_TYPE ? a : bType === OUTPUT_VALUE_TYPE ? b : null;
+    const inp = aType === INPUT_VALUE_TYPE ? a : bType === INPUT_VALUE_TYPE ? b : null;
+    if (!out || !inp) return false;
+    const targetBlock = inp.getSourceBlock();
+    if (targetBlock && (targetBlock as Blockly.Block & { type: string }).type === "variables_const") return true;
+    const targetCheck = inp.getCheck();
+    return !targetCheck || (Array.isArray(targetCheck) && targetCheck.length === 0);
   }
 
   /**
@@ -70,9 +116,14 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return super.doTypeChecks(a, b);
     }
 
-    // If we have a source connection, check if the block has getBlockType()
-    // We check this FIRST to be stricter than the standard checker
     if (sourceConnection && targetConnection) {
+      const targetBlock = targetConnection.getSourceBlock();
+      if (
+        targetBlock?.type === 'variables_const' &&
+        targetConnection.type === Blockly.ConnectionType.INPUT_VALUE
+      ) {
+        return true;
+      }
       const sourceBlock = sourceConnection.getSourceBlock();
 
       // First, try to get type from getBlockType() if available (this is the most reliable)
@@ -173,12 +224,24 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
 }
 
 /**
- * Registers the StrictConnectionChecker as the default ConnectionChecker for a workspace.
- * 
- * @param workspace The Blockly workspace to configure.
+ * Registers the StrictConnectionChecker in Blockly's registry as the default checker.
+ * MUST be called BEFORE Blockly.inject() so the workspace uses our checker from the start.
  */
+export function registerStrictConnectionCheckerInRegistry(): void {
+  // Override the default connection checker so all workspaces (main + flyouts) use ours.
+  // Do not unregister first: register with allowOverrides so Blockly always has a checker.
+  Blockly.registry.register(
+    Blockly.registry.Type.CONNECTION_CHECKER,
+    "default",
+    StrictConnectionChecker,
+    true, // allowOverrides
+  );
+  debugLog("✅ StrictConnectionChecker registered in Blockly registry");
+}
+
 /**
- * Installs the strict connection checker on a workspace.
+ * Installs the strict connection checker on an existing workspace.
+ * Use registerStrictConnectionCheckerInRegistry() BEFORE Blockly.inject() instead for best results.
  * @param workspace - Target workspace.
  */
 export function registerStrictConnectionChecker(workspace: Blockly.Workspace): void {
@@ -191,7 +254,6 @@ export function registerStrictConnectionChecker(workspace: Blockly.Workspace): v
   const strictChecker = new StrictConnectionChecker();
 
   // Set the connection checker on the workspace
-  // Blockly uses connectionChecker property on the workspace
   const workspaceWithChecker = workspace as Blockly.Workspace & {
     connectionChecker?: Blockly.ConnectionChecker;
   };
@@ -206,5 +268,5 @@ export function registerStrictConnectionChecker(workspace: Blockly.Workspace): v
     workspaceSvgWithChecker.setConnectionChecker(strictChecker);
   }
 
-  debugLog('✅ StrictConnectionChecker registered and active');
+  debugLog('✅ StrictConnectionChecker set on workspace');
 }
