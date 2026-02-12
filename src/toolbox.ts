@@ -87,11 +87,11 @@ export const basic_toolbox: ToolboxConfiguration = {
       custom: 'RECENTLY_USED',
       categorystyle: 'recently_used_category',
     },*/
-    {
-      'kind': 'search',
-      'name': 'Search',
-      'contents': [],
-    },
+    // {
+    //   'kind': 'search',
+    //   'name': 'Search',
+    //   'contents': [],
+    // },
     {
       'kind': 'category',
       'name': 'CAT_LOGIC',

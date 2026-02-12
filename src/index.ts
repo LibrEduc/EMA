@@ -34,7 +34,7 @@ import * as Blockly from "blockly";
 import { SeparatorAxis } from "blockly/core/flyout_separator";
 import type * as Monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
-import "@blockly/toolbox-search";
+// import "@blockly/toolbox-search";
 
 // Configuration de Monaco Editor pour utilisation locale (chemins relatifs)
 // Force la définition de MonacoEnvironment pour s'assurer que les chemins sont corrects
@@ -179,6 +179,71 @@ const elements = {
   debugSwitch: document.getElementById("debugSwitch") as HTMLInputElement,
 };
 
+/**
+ * Restores panel layout from session storage.
+ * Falls back to sane defaults when nothing is stored yet.
+ */
+const restoreLayoutFromSessionStorage = (): void => {
+  const layoutElements = {
+    flexContainerUp: document.getElementById(
+      "flex_container_up",
+    ) as HTMLElement,
+    flexContainerUpLeft: document.getElementById(
+      "flex_container_up_left",
+    ) as HTMLElement,
+    flexContainerUpRight: document.getElementById(
+      "flex_container_up_right",
+    ) as HTMLElement,
+    flexContainerBottom: document.getElementById(
+      "flex_container_bottom",
+    ) as HTMLElement,
+  };
+
+  const defaults: Record<string, string> = {
+    flexContainerUp: "1",
+    flexContainerUpLeft: "1",
+    flexContainerUpRight: "0",
+    flexContainerBottom: "0",
+  };
+
+  Object.entries(layoutElements).forEach(([key, element]) => {
+    if (!element) return;
+    const savedValue = window.sessionStorage.getItem(key);
+    const parsed = savedValue !== null ? Number(savedValue) : NaN;
+    const safeValue = Number.isFinite(parsed) && parsed >= 0
+      ? String(parsed)
+      : defaults[key];
+    element.style.flexGrow = safeValue;
+  });
+};
+
+/**
+ * Ensures Blockly host div has valid dimensions before first inject.
+ */
+const primeWorkspaceContainerDimensions = (): void => {
+  if (!elements.workspaceContentArea || !elements.workspaceContentBlockly) {
+    return;
+  }
+  let x = Number(elements.workspaceContentArea.offsetLeft) || 0;
+  let y = Number(elements.workspaceContentArea.offsetTop) || 0;
+  let element: HTMLElement = elements.workspaceContentArea;
+  while (element.offsetParent) {
+    element = element.offsetParent as HTMLElement;
+    x += Number(element.offsetLeft) || 0;
+    y += Number(element.offsetTop) || 0;
+  }
+  const rawWidth = Number(elements.workspaceContentArea.offsetWidth);
+  const rawHeight = Number(elements.workspaceContentArea.offsetHeight);
+  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : 1;
+  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : 1;
+  Object.assign(elements.workspaceContentBlockly.style, {
+    width: `${width}px`,
+    height: `${height}px`,
+    left: `${Number.isFinite(x) ? x : 0}px`,
+    top: `${Number.isFinite(y) ? y : 0}px`,
+  });
+};
+
 // Verify all required elements exist
 const requiredElements = [
   "div_workspace_content_area",
@@ -267,7 +332,9 @@ if (elements.contentMonacoEditor) {
 
 // Initialize Blockly Application
 // Ensure custom blocks are registered before toolbox injection.
+restoreLayoutFromSessionStorage();
 defineTypedVariableBlocks();
+primeWorkspaceContainerDimensions();
 const µcB: BlocklyApplication = new BlocklyApplication(
   basic_toolbox,
   {
@@ -320,20 +387,23 @@ export const µcB_workspaceOnResize = (): void => {
     return;
   }
 
-  let { offsetLeft: x, offsetTop: y } = elements.workspaceContentArea;
+  let x = Number(elements.workspaceContentArea.offsetLeft) || 0;
+  let y = Number(elements.workspaceContentArea.offsetTop) || 0;
   let element: HTMLElement = elements.workspaceContentArea;
   while (element.offsetParent) {
     element = element.offsetParent as HTMLElement;
-    x += element.offsetLeft;
-    y += element.offsetTop;
+    x += Number(element.offsetLeft) || 0;
+    y += Number(element.offsetTop) || 0;
   }
-  const { offsetWidth: width, offsetHeight: height } =
-    elements.workspaceContentArea;
+  const rawWidth = Number(elements.workspaceContentArea.offsetWidth);
+  const rawHeight = Number(elements.workspaceContentArea.offsetHeight);
+  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : 1;
+  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : 1;
   Object.assign(elements.workspaceContentBlockly.style, {
     width: `${width}px`,
     height: `${height}px`,
-    left: `${x}px`,
-    top: `${y}px`,
+    left: `${Number.isFinite(x) ? x : 0}px`,
+    top: `${Number.isFinite(y) ? y : 0}px`,
   });
   Blockly.svgResize(µcB.workspace as Blockly.WorkspaceSvg);
 };
@@ -389,9 +459,18 @@ const µcB_workspaceManageResize = (
   let prevSize: number = Number((prev as unknown as IElement)[sizeProp]);
   let nextSize: number = Number((next as unknown as IElement)[sizeProp]);
   const sumSize: number = prevSize + nextSize;
-  const prevGrow: number = Number(prev.style.flexGrow);
-  const nextGrow: number = Number(next.style.flexGrow);
+  const prevGrowParsed: number = Number(prev.style.flexGrow);
+  const nextGrowParsed: number = Number(next.style.flexGrow);
+  const prevGrow: number = Number.isFinite(prevGrowParsed) && prevGrowParsed > 0
+    ? prevGrowParsed
+    : 1;
+  const nextGrow: number = Number.isFinite(nextGrowParsed) && nextGrowParsed > 0
+    ? nextGrowParsed
+    : 1;
   const sumGrow: number = prevGrow + nextGrow;
+  if (!Number.isFinite(sumSize) || sumSize <= 0) {
+    return;
+  }
   let lastPos: number = Number((mouseDown as unknown as IElement)[posProp]);
 
   /**
@@ -415,6 +494,9 @@ const µcB_workspaceManageResize = (
     }
     const prevGrowNew: number = sumGrow * (prevSize / sumSize);
     const nextGrowNew: number = sumGrow * (nextSize / sumSize);
+    if (!Number.isFinite(prevGrowNew) || !Number.isFinite(nextGrowNew)) {
+      return;
+    }
     prev.style.flexGrow = String(prevGrowNew);
     next.style.flexGrow = String(nextGrowNew);
     lastPos = pos;
@@ -920,29 +1002,8 @@ window.onload = (): void => {
     elements.contentCode.textContent = code;
   }
 
-  // Restore saved layout
-  const layoutElements = {
-    flexContainerUp: document.getElementById(
-      "flex_container_up",
-    ) as HTMLElement,
-    flexContainerUpLeft: document.getElementById(
-      "flex_container_up_left",
-    ) as HTMLElement,
-    flexContainerUpRight: document.getElementById(
-      "flex_container_up_right",
-    ) as HTMLElement,
-    flexContainerBottom: document.getElementById(
-      "flex_container_bottom",
-    ) as HTMLElement,
-  };
-
-  Object.entries(layoutElements).forEach(([key, element]) => {
-    const savedValue = window.sessionStorage.getItem(key);
-    if (savedValue && element) {
-      // Restaurer la valeur flexGrow pour maintenir la compatibilité avec le système de resizers
-      element.style.flexGrow = savedValue;
-    }
-  });
+  // Ensure layout is restored before startup sizing/reflow.
+  restoreLayoutFromSessionStorage();
 
   // Attendre que le DOM soit complètement stabilisé avant d'appeler workspaceOnResize
   // Utiliser requestAnimationFrame pour s'assurer que le layout est calculé

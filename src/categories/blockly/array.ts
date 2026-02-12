@@ -16,11 +16,17 @@ import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { getBlocklyMsgOr } from "./shared";
 import { getVariableTypeDropdownOptions } from "./variables";
 
+let arrayBlocksRegistered = false;
+
 /**
  * Registers S4e-style array blocks (Array_create_with, Array_declare, Array_create,
  * Array_getIndex_in_list, Array_getIndex_in_array, Array_modify, Array_fix).
  */
 export const defineArrayBlocks = (): void => {
+  if (arrayBlocksRegistered) {
+    return;
+  }
+  arrayBlocksRegistered = true;
   const typeOptions = getVariableTypeDropdownOptions();
 
   Blockly.defineBlocksWithJsonArray([
@@ -117,11 +123,6 @@ export const defineArrayBlocks = (): void => {
     this.updateShape_(2);
   };
 
-  try {
-    Blockly.Extensions.unregister("array_with_plus_minus_mutator");
-  } catch {
-    // no-op if not registered yet
-  }
   Blockly.Extensions.registerMutator(
     "array_with_plus_minus_mutator",
     arrayWithMutator,

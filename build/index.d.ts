@@ -10,7 +10,6 @@
  * @since 1.0.0
  */
 import "@blockly/block-plus-minus";
-import "@blockly/toolbox-search";
 import "./css/index.css";
 import "./css/µcBlockly.css";
 /**

@@ -28,6 +28,8 @@ import {
   extendStandardVariablesSetBlock,
 } from "./variables";
 
+let typedVariableBlocksRegistered = false;
+
 /**
  * Registers BlocklyArduino compatibility blocks.
  */
@@ -45,6 +47,10 @@ export const defineBlocklyArduinoCompatBlocks = (): void => {
  * Registers all typed variable blocks and extensions.
  */
 export const defineAllTypedVariableBlocks = (): void => {
+  if (typedVariableBlocksRegistered) {
+    return;
+  }
+  typedVariableBlocksRegistered = true;
   defineVariablesGetDynamicBlock();
   defineVariablesSetDynamicBlock();
   defineVariablesLocalBlock();

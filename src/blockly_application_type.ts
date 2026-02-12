@@ -64,6 +64,7 @@ import {
 // 4) strict connection checker (this file)
 const ENABLE_STRICT_CONNECTION_CHECKER = false;
 const ENABLE_STRICT_TYPE_ENFORCER = true;
+const ENABLE_WORKSPACE_SEARCH_PLUGIN = true;
 
 // Register our checker BEFORE any workspace is created so ConnectionDB gets it at init.
 if (ENABLE_STRICT_CONNECTION_CHECKER) {
@@ -230,7 +231,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
   //plugin_keyboardNav = new KeyboardNavigation();
   plugin_minimap = new PositionedMinimap();
   plugin_modal = new Modal();
-  plugin_workspaceSearch = new WorkspaceSearch();
+  plugin_workspaceSearch: { init: () => void; dispose: () => void } | null = null;
   plugin_zoomToFit = new ZoomToFitControl();
   private pluginsInitialized = false;
   private pluginsWorkspace: Blockly.Workspace | null = null;
@@ -479,7 +480,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         // no-op if already disposed
       }
       try {
-        this.plugin_workspaceSearch.dispose();
+        this.plugin_workspaceSearch?.dispose();
       } catch {
         // no-op if already disposed
       }
@@ -506,7 +507,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.backpackOptions,
       );
       this.plugin_modal = new Modal(this.workspace);
-      this.plugin_workspaceSearch = new WorkspaceSearch(this.workspace);
+      this.plugin_workspaceSearch = new WorkspaceSearch(
+        this.workspace as Blockly.WorkspaceSvg,
+      );
       this.plugin_zoomToFit = new ZoomToFitControl(this.workspace);
       // shadow-block-converter disabled: causes array blocks to disappear / not stay clipped
       // this.workspace.addChangeListener(shadowBlockConversionChangeListener);
@@ -515,9 +518,14 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.plugin_contentHighlight = new ContentHighlight(this.workspace as Blockly.WorkspaceSvg);
         this.plugin_contentHighlight.init();
       }
-      // Keep minimap always initialized so it stays in sync with workspace events.
-      // The checkbox only controls visibility.
+      this.plugin_modal.init();
+      if (ENABLE_WORKSPACE_SEARCH_PLUGIN) {
+        this.plugin_workspaceSearch?.init();
+      }
+      this.plugin_zoomToFit.init();
+      // Initialize minimap last, once workspace/toolbox metrics are stable.
       this.plugin_minimap = new PositionedMinimap(this.workspace);
+      Blockly.svgResize(this.workspace as Blockly.WorkspaceSvg);
       this.plugin_minimap.init();
       const pluginMinimapCheck: HTMLInputElement | null =
         document.getElementById("pluginMinimap") as HTMLInputElement | null;
@@ -529,9 +537,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
           ? "visible"
           : "hidden";
       }
-      this.plugin_modal.init();
-      this.plugin_workspaceSearch.init();
-      this.plugin_zoomToFit.init();
       this.pluginsInitialized = true;
       this.pluginsWorkspace = this.workspace;
       //this.plugin_keyboardNav.navigationController.addWorkspace(this.workspace);
@@ -743,6 +748,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     window.sessionStorage?.setItem('paramTheme', newParam);
     window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "theme", newParam));
 
+    const previousRenderer = String(this.WORKSPACE_OPTIONS['renderer'] ?? "");
     newParam = searchParams.get('renderer');
     dropdownMenu = document.getElementById('rendererMenu') as HTMLSelectElement;
     if (newParam == null || newParam == "null")
@@ -754,7 +760,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.WORKSPACE_OPTIONS['renderer'] = newParam;
     window.sessionStorage?.setItem('paramRenderer', newParam);
     window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "renderer", newParam));
-    if (rendererFromUrl && this.workspace) {
+    // Reboot only when URL requests a different renderer than current state.
+    if (rendererFromUrl && this.workspace && previousRenderer !== newParam) {
       this.changeRenderer(newParam);
     }
   };
@@ -1268,7 +1275,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
       });
     }
     this.changeLanguageToolbox(newLang);
-    this.setParamsBlockly();
     return rtl;
   };
 }

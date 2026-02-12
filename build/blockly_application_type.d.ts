@@ -72,7 +72,10 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     plugin_contentHighlight: any;
     plugin_minimap: any;
     plugin_modal: any;
-    plugin_workspaceSearch: any;
+    plugin_workspaceSearch: {
+        init: () => void;
+        dispose: () => void;
+    } | null;
     plugin_zoomToFit: any;
     private pluginsInitialized;
     private pluginsWorkspace;
