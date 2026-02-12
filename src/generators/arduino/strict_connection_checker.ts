@@ -61,6 +61,11 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     if (!standardResult || !a || !b) {
       return standardResult;
     }
+    // During drag preview, Blockly probes many nearby connections.
+    // Keep default behavior there to avoid noisy logs and preview side effects.
+    if (isDragging) {
+      return standardResult;
+    }
     return this.doTypeChecks(a, b);
   }
 
@@ -101,6 +106,12 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
    * @returns True if the connections share a type.
    */
   doTypeChecks(a: Blockly.Connection, b: Blockly.Connection): boolean {
+    const wsA = a.getSourceBlock()?.workspace as Blockly.WorkspaceSvg | null;
+    const wsB = b.getSourceBlock()?.workspace as Blockly.WorkspaceSvg | null;
+    if ((wsA?.isDragging && wsA.isDragging()) || (wsB?.isDragging && wsB.isDragging())) {
+      return super.doTypeChecks(a, b);
+    }
+
     // Determine which connection is the source (output) and which is the target (input)
     let sourceConnection: Blockly.Connection | null = null;
     let targetConnection: Blockly.Connection | null = null;
@@ -126,6 +137,11 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       }
       const sourceBlock = sourceConnection.getSourceBlock();
 
+      // Skip strict checks for blocks that trigger Blockly edge cases (e.g. value block drag from flyout)
+      if (sourceBlock?.type === 'Array_list_3') {
+        return super.doTypeChecks(a, b);
+      }
+
       // First, try to get type from getBlockType() if available (this is the most reliable)
       let sourceType: string | null | undefined = null;
       const typedBlock = sourceBlock as Blockly.Block & {
@@ -133,7 +149,6 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       };
       if (typedBlock && typeof typedBlock.getBlockType === 'function') {
         sourceType = typedBlock.getBlockType();
-        debugLog(`🔍 [StrictChecker] getBlockType() retourne: '${sourceType}' pour bloc ${sourceBlock.type}`);
       }
 
       // If getBlockType() is not available, try to get from connection check

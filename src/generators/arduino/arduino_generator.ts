@@ -84,6 +84,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   private loop_ = Object.create(null);
   // Create a dictionary of pins to check if their use conflicts
   private pins_ = Object.create(null);
+  /** Array declarations from Array_declare and Array_create blocks. */
+  private arrayDeclarations_: string[] = [];
 
   /**
    * List of outer-inner pairings that do NOT require parentheses.
@@ -157,6 +159,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.defines_ = Object.create(null);
     this.variables_ = Object.create(null);
     this.variableTypes_ = Object.create(null);
+    this.arrayDeclarations_ = [];
     this.localVariables_ = Object.create(null);
     this.codeFunctions_ = Object.create(null);
     this.userFunctions_ = Object.create(null);
@@ -456,9 +459,12 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   finish(code: string): string {
     const includes = Object.values(this.includes_);
     const defines = Object.values(this.defines_);
-    // Get variables from definitions_ (set in init()) instead of variables_
+    // Get variables from definitions_ (set in init()) and arrayDeclarations_
     const variablesDeclaration = this.definitions_["variables"] || '';
-    const variables = variablesDeclaration ? [variablesDeclaration] : [];
+    const variables = [
+      ...this.arrayDeclarations_,
+      ...(variablesDeclaration ? [variablesDeclaration] : []),
+    ];
     const codeFunctions = Object.values(this.codeFunctions_);
     const userFunctions = Object.values(this.userFunctions_);
     const functionNames = Object.values(this.functionNames_);
@@ -601,6 +607,14 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     if (this.variables_[tag] === undefined) {
       this.variables_[tag] = code;
     }
+  }
+
+  /**
+   * Add an array declaration (from Array_declare or Array_create).
+   * Merged into the variables section in finish().
+   */
+  addArrayDeclaration(declaration: string): void {
+    this.arrayDeclarations_.push(declaration);
   }
 
   addLocalVariable(scopeId: string, tag: string, code: string): void {
@@ -1062,6 +1076,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.defines_ = Object.create(null);
     this.variables_ = Object.create(null);
     this.variableTypes_ = Object.create(null);
+    this.arrayDeclarations_ = [];
     this.codeFunctions_ = Object.create(null);
     this.userFunctions_ = Object.create(null);
     this.functionNames_ = Object.create(null);

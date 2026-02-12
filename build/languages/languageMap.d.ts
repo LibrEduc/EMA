@@ -128,5 +128,15 @@ export interface LanguageItem {
     COLOUR_HSV_SATURATION_LABEL: string;
     COLOUR_HSV_BRIGHTNESS_LABEL: string;
     COLOUR_HSV_EYEDROPPER_LABEL: string;
+    VARIABLES_GET_ITEM: string;
+    VARIABLES_DEFINE: string;
+    ARRAY_UNE_LISTE: string;
+    ARRAY_WITH_TOOLTIP: string;
+    ARRAY_WITH_HELPURL: string;
+    MATH_ANGLE: string;
+    INOUT_ANGLE_MATHS_TOOLTIP: string;
+    MATH_INTERVAL_TOOLTIP: string;
+    ARDUINO_BASE_DEFINE_CONST_TOOLTIP: string;
+    ARDUINO_BASE_DEFINE_CONST_HELPURL: string;
 }
 //# sourceMappingURL=languageMap.d.ts.map

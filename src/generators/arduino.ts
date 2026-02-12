@@ -21,6 +21,7 @@ import { ArduinoGenerator } from './arduino/arduino_generator';
 import * as lists from './arduino/lists.js'; */
 import * as logic from './arduino/blocks/logic';
 import * as loops from './arduino/blocks/loops';
+import * as array from './arduino/blocks/array';
 import * as math from './arduino/blocks/math';
 import * as colour from './arduino/blocks/colour';
 import * as procedures from './arduino/blocks/procedures';
@@ -45,6 +46,7 @@ arduinoGenerator.addReservedWords('math,random,Number');
 const generators: typeof arduinoGenerator.forBlock = {
   ...logic,
   ...loops,
+  ...array,
   ...math,
   ...colour,
   ...procedures,

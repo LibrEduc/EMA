@@ -43,19 +43,34 @@ import {
   registerStrictConnectionCheckerInRegistry,
   StrictConnectionChecker,
 } from "./generators/arduino/strict_connection_checker";
+import {
+  installStrictTypeEnforcer,
+  uninstallStrictTypeEnforcer,
+} from "./generators/arduino/strict_type_enforcer";
 import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
+import { debugLog } from "./generators/arduino/debug";
 import { normalizeVariableType } from "./generators/arduino/variable_utils";
 import {
+  patchBlocklyDefensive,
   patchConnectionCheckerForConstBlock,
   patchFieldVariableValidation,
   patchVariableMapCreateVariable,
-  patchWorkspaceRemoveTopBlock,
 } from "./blockly_patches";
 
+// Diagnostic switch (stepwise re-enable):
+// 1) configureStandardBlocks only (in index.ts)
+// 2) block types registry
+// 3) typed variable blocks
+// 4) strict connection checker (this file)
+const ENABLE_STRICT_CONNECTION_CHECKER = false;
+const ENABLE_STRICT_TYPE_ENFORCER = true;
+
 // Register our checker BEFORE any workspace is created so ConnectionDB gets it at init.
-registerStrictConnectionCheckerInRegistry();
-// Patch the base ConnectionChecker too (StrictConnectionChecker extends it) as fallback.
+if (ENABLE_STRICT_CONNECTION_CHECKER) {
+  registerStrictConnectionCheckerInRegistry();
+}
 patchConnectionCheckerForConstBlock();
+patchBlocklyDefensive();
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
 import { ToolboxConfiguration } from "./toolbox";
@@ -69,6 +84,7 @@ import {
   getLangParamFromUrl,
   HTML_changeLanguage,
 } from './language';
+import { mergeArrayMessages } from './languages/array_messages';
 
 /* import {blocks, unregisterProcedureBlocks} from '@blockly/block-shareable-procedures';
 unregisterProcedureBlocks();
@@ -78,7 +94,7 @@ import { ContentHighlight } from "@blockly/workspace-content-highlight";
 //import { KeyboardNavigation } from '@blockly/keyboard-navigation';
 import { Modal } from "@blockly/plugin-modal";
 import { PositionedMinimap } from "@blockly/workspace-minimap";
-import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
+//import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
 
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ZoomToFitControl } from "@blockly/zoom-to-fit";
@@ -122,18 +138,26 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.PLUGINS = [];
     this.WORKSPACE_OPTIONS = WORKSPACE_OPTIONS;
 
-    // Force our checker via plugins so main workspace AND flyouts use it (copyOptionsForFlyout copies plugins).
+    // Force checker via plugins only when strict typing overlay is enabled.
     const plugins = (WORKSPACE_OPTIONS.plugins as Record<string, unknown>) || {};
-    if (!plugins.connectionChecker) {
-      WORKSPACE_OPTIONS.plugins = { ...plugins, connectionChecker: StrictConnectionChecker };
+    if (ENABLE_STRICT_CONNECTION_CHECKER && !plugins.connectionChecker) {
+      WORKSPACE_OPTIONS.plugins = {
+        ...plugins,
+        connectionChecker: StrictConnectionChecker,
+      };
     }
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
     Blockly.ContextMenuItems.registerCommentOptions();
-    patchWorkspaceRemoveTopBlock();
     patchFieldVariableValidation();
 
     this.normalizeVariableTypes();
     patchVariableMapCreateVariable(this.workspace);
+    if (ENABLE_STRICT_TYPE_ENFORCER) {
+      installStrictTypeEnforcer(this.workspace, {
+        mode: "disconnect",
+        scope: "variables-only",
+      });
+    }
 
     // Listen for variable creation events to normalize variable types
     this.workspace.addChangeListener((e: Blockly.Events.Abstract) => {
@@ -209,8 +233,18 @@ export class BlocklyApplication implements BlocklyApplicationType {
   plugin_workspaceSearch = new WorkspaceSearch();
   plugin_zoomToFit = new ZoomToFitControl();
   private pluginsInitialized = false;
+  private pluginsWorkspace: Blockly.Workspace | null = null;
   private saveBlocksTimer: number | null = null;
   private codegenTimer: number | null = null;
+  private autoSaveEnabled = false;
+
+  /**
+   * Enables or disables automatic workspace persistence from change listeners.
+   * @param enabled - True to enable auto-save, false to suspend it.
+   */
+  public setAutoSaveEnabled = (enabled: boolean): void => {
+    this.autoSaveEnabled = enabled;
+  };
   /**
    * Registers workspace change listeners and debounces persistence/codegen.
    * @remarks
@@ -247,7 +281,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       if (e.type === Blockly.Events.FINISHED_LOADING) {
         return;
       }
-      scheduleSave();
+      if (this.autoSaveEnabled) {
+        scheduleSave();
+      }
       scheduleCodegen();
     });
   };
@@ -270,7 +306,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         }
         if (variable.getName() === 'item') {
           variableMap.deleteVariable(variable);
-          console.log('🗑️ Variable "item" supprimée');
+          debugLog('🗑️ Variable "item" supprimée');
           break;
         }
       }
@@ -339,13 +375,19 @@ export class BlocklyApplication implements BlocklyApplicationType {
    */
   public workspaceReboot = (): void => {
     this.closeFlyoutForReboot();
-    this.workspaceSaveBlocks("mainWorkspace_blocks");
+    if (this.autoSaveEnabled) {
+      this.workspaceSaveBlocks("mainWorkspace_blocks");
+    }
     this.workspaceSetupPlugins(true);
+    if (ENABLE_STRICT_TYPE_ENFORCER) {
+      uninstallStrictTypeEnforcer(this.workspace);
+    }
     this.workspace.dispose();
     // S'assurer que la langue actuelle est appliquée à la toolbox ET à Blockly
     const currentLang = getLangParamFromUrl();
     this.changeLanguageToolbox(currentLang);
     Blockly.setLocale(languagesMapBlockly[currentLang]);
+    mergeArrayMessages(currentLang);
     const originalToolbox = this.WORKSPACE_OPTIONS.toolbox as
       | ToolboxConfiguration
       | undefined;
@@ -360,7 +402,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       this.WORKSPACE_OPTIONS,
     );
     // Reconnecter les mécanismes requis après réinjection
-    registerStrictConnectionChecker(this.workspace);
+    if (ENABLE_STRICT_CONNECTION_CHECKER) {
+      registerStrictConnectionChecker(this.workspace);
+    }
     this.registerCustomToolboxCallbacks();
     if (shouldStripCustom && originalToolbox) {
       (this.workspace as Blockly.WorkspaceSvg).updateToolbox(originalToolbox);
@@ -373,9 +417,16 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
     patchFieldVariableValidation();
     patchVariableMapCreateVariable(this.workspace);
+    if (ENABLE_STRICT_TYPE_ENFORCER) {
+      installStrictTypeEnforcer(this.workspace, {
+        mode: "disconnect",
+        scope: "variables-only",
+      });
+    }
     this.workspaceListeners();
+    // Initialize plugins first so minimap receives restore events during load.
     this.workspaceSetupPlugins(false);
-    //specific to this plugin
+    // specific to this plugin
     const isThereMinimap: HTMLElement = document.getElementsByClassName(
       "blockly-minimap",
     )[0] as HTMLElement;
@@ -399,42 +450,90 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * Prevents double initialization and wires change listeners as needed.
    */
   public workspaceSetupPlugins = (disposePlugin: boolean = false): void => {
-    if (!disposePlugin && this.pluginsInitialized) {
-      return;
-    }
-    this.plugin_backpack = new Backpack(
-      this.workspace as Blockly.WorkspaceSvg,
-      this.backpackOptions,
-    );
-    this.plugin_modal = new Modal(this.workspace);
-    this.plugin_workspaceSearch = new WorkspaceSearch(this.workspace);
-    this.plugin_zoomToFit = new ZoomToFitControl(this.workspace);
     const pluginHighlightCheck: HTMLInputElement = document.getElementById("pluginHighlight") as HTMLInputElement;
     if (disposePlugin) {
-      this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
-      this.plugin_backpack.dispose();
-      this.plugin_contentHighlight.dispose();
-      this.plugin_minimap.dispose();
-      this.plugin_modal.dispose();
-      this.plugin_workspaceSearch.dispose();
-      this.plugin_zoomToFit.dispose();
+      if (!this.pluginsInitialized) {
+        this.pluginsWorkspace = null;
+        return;
+      }
+      // shadow-block-converter disabled: causes array blocks to disappear / not stay clipped
+      // this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
+      try {
+        this.plugin_backpack.dispose();
+      } catch {
+        // no-op if already disposed
+      }
+      try {
+        this.plugin_contentHighlight.dispose();
+      } catch {
+        // no-op if never initialized
+      }
+      try {
+        this.plugin_minimap.dispose();
+      } catch {
+        // no-op if already disposed
+      }
+      try {
+        this.plugin_modal.dispose();
+      } catch {
+        // no-op if already disposed
+      }
+      try {
+        this.plugin_workspaceSearch.dispose();
+      } catch {
+        // no-op if already disposed
+      }
+      try {
+        this.plugin_zoomToFit.dispose();
+      } catch {
+        // no-op if already disposed
+      }
       this.pluginsInitialized = false;
+      this.pluginsWorkspace = null;
       //this.plugin_keyboardNav.navigationController.removeWorkspace(this.workspace);
       //this.plugin_keyboardNav.navigationController.disable(this.workspace);
     } else {
-      this.workspace.addChangeListener(shadowBlockConversionChangeListener);
+      // Idempotent init: avoid duplicate component registration on same workspace.
+      if (this.pluginsInitialized && this.pluginsWorkspace === this.workspace) {
+        return;
+      }
+      // Workspace changed without explicit dispose; clean previous plugin instances first.
+      if (this.pluginsInitialized && this.pluginsWorkspace !== this.workspace) {
+        this.workspaceSetupPlugins(true);
+      }
+      this.plugin_backpack = new Backpack(
+        this.workspace as Blockly.WorkspaceSvg,
+        this.backpackOptions,
+      );
+      this.plugin_modal = new Modal(this.workspace);
+      this.plugin_workspaceSearch = new WorkspaceSearch(this.workspace);
+      this.plugin_zoomToFit = new ZoomToFitControl(this.workspace);
+      // shadow-block-converter disabled: causes array blocks to disappear / not stay clipped
+      // this.workspace.addChangeListener(shadowBlockConversionChangeListener);
       this.plugin_backpack.init();
       if (pluginHighlightCheck.checked) {
         this.plugin_contentHighlight = new ContentHighlight(this.workspace as Blockly.WorkspaceSvg);
         this.plugin_contentHighlight.init();
       }
-      //particular to this plugin
+      // Keep minimap always initialized so it stays in sync with workspace events.
+      // The checkbox only controls visibility.
       this.plugin_minimap = new PositionedMinimap(this.workspace);
       this.plugin_minimap.init();
+      const pluginMinimapCheck: HTMLInputElement | null =
+        document.getElementById("pluginMinimap") as HTMLInputElement | null;
+      const minimapEl = document.getElementsByClassName(
+        "blockly-minimap",
+      )[0] as HTMLElement | undefined;
+      if (minimapEl) {
+        minimapEl.style.visibility = pluginMinimapCheck?.checked
+          ? "visible"
+          : "hidden";
+      }
       this.plugin_modal.init();
       this.plugin_workspaceSearch.init();
       this.plugin_zoomToFit.init();
       this.pluginsInitialized = true;
+      this.pluginsWorkspace = this.workspace;
       //this.plugin_keyboardNav.navigationController.addWorkspace(this.workspace);
       //this.plugin_keyboardNav.navigationController.enable(this.workspace);
     }
@@ -469,10 +568,18 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * Reattaches strict checker, variable validation patches, and listeners.
    */
   public restoreWorkspaceAfterInject(): void {
-    registerStrictConnectionChecker(this.workspace);
+    if (ENABLE_STRICT_CONNECTION_CHECKER) {
+      registerStrictConnectionChecker(this.workspace);
+    }
     this.registerCustomToolboxCallbacks();
     patchFieldVariableValidation();
     patchVariableMapCreateVariable(this.workspace);
+    if (ENABLE_STRICT_TYPE_ENFORCER) {
+      installStrictTypeEnforcer(this.workspace, {
+        mode: "disconnect",
+        scope: "variables-only",
+      });
+    }
     this.workspaceListeners();
   }
 
@@ -715,16 +822,17 @@ export class BlocklyApplication implements BlocklyApplicationType {
   };
   /**
    * Saves workspace blocks to session storage.
-   * @param storageKeyWorkspaceBlocks - Session storage key used to persist blocks.
+   * @param storageKeyWorkspaceBlocks - Storage key used to persist blocks.
    */
   public workspaceSaveBlocks = (storageKeyWorkspaceBlocks: string): void => {
     const data = Blockly.serialization.workspaces.save(this.workspace);
+    this.sanitizeSerializedWorkspaceState(data);
     window.sessionStorage?.setItem(storageKeyWorkspaceBlocks, JSON.stringify(data));
   };
 
   /**
    * Loads workspace blocks from session storage.
-   * @param storageKeyWorkspaceBlocks - Session storage key used to load blocks.
+   * @param storageKeyWorkspaceBlocks - Storage key used to load blocks.
    * @returns Returns early if no saved data exists or if loading fails.
    * @remarks
    * Includes error handling for corrupted data and validates the structure
@@ -741,6 +849,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
         console.warn('Invalid workspace data format, skipping load');
         return;
       }
+      this.sanitizeSerializedWorkspaceState(parsed);
+      // Keep Blockly events active so plugins (minimap) stay synchronized on restore.
+      this.workspace.clear();
       Blockly.serialization.workspaces.load(parsed, this.workspace);
       this.normalizeVariableTypes();
     } catch (error) {
@@ -804,21 +915,19 @@ export class BlocklyApplication implements BlocklyApplicationType {
           alert('Format de fichier invalide');
           return;
         }
+        this.sanitizeSerializedWorkspaceState(parsed);
 
-        Blockly.Events.disable();
-        try {
-          if (merge) {
-            const hasExistingBlocks = this.workspace.getTopBlocks(false).length > 0;
-            if (hasExistingBlocks) {
-              this.mergeBlocksFromState(parsed);
-            } else {
-              Blockly.serialization.workspaces.load(parsed, this.workspace);
-            }
+        if (merge) {
+          const hasExistingBlocks = this.workspace.getTopBlocks(false).length > 0;
+          if (hasExistingBlocks) {
+            this.mergeBlocksFromState(parsed);
           } else {
+            this.workspace.clear();
             Blockly.serialization.workspaces.load(parsed, this.workspace);
           }
-        } finally {
-          Blockly.Events.enable();
+        } else {
+          this.workspace.clear();
+          Blockly.serialization.workspaces.load(parsed, this.workspace);
         }
 
         this.normalizeVariableTypes();
@@ -849,6 +958,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    */
   private mergeBlocksFromState = (state: Record<string, unknown>): void => {
     try {
+      this.sanitizeSerializedWorkspaceState(state);
       // Extract blocks array from state
       // Blockly workspace state structure: { blocks: { blocks: [...] }, variables: [...] }
       // or sometimes: { blocks: [...] } (direct array)
@@ -891,8 +1001,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
       let maxY = -Infinity;
       
       topLevelBlocks.forEach((block) => {
-        const x = typeof block.x === 'number' ? block.x : 0;
-        const y = typeof block.y === 'number' ? block.y : 0;
+        const xRaw = typeof block.x === 'number' ? block.x : Number(block.x);
+        const yRaw = typeof block.y === 'number' ? block.y : Number(block.y);
+        const x = Number.isFinite(xRaw) ? xRaw : 0;
+        const y = Number.isFinite(yRaw) ? yRaw : 0;
         minX = Math.min(minX, x);
         minY = Math.min(minY, y);
         maxX = Math.max(maxX, x);
@@ -915,9 +1027,15 @@ export class BlocklyApplication implements BlocklyApplicationType {
           const block = existingTopBlocks[i] as Blockly.BlockSvg;
           if (block.getRelativeToSurfaceXY) {
             const xy = block.getRelativeToSurfaceXY();
-            existingMinX = Math.min(existingMinX, xy.x);
-            existingMinY = Math.min(existingMinY, xy.y);
+            const x = Number.isFinite(xy.x) ? xy.x : 0;
+            const y = Number.isFinite(xy.y) ? xy.y : 0;
+            existingMinX = Math.min(existingMinX, x);
+            existingMinY = Math.min(existingMinY, y);
           }
+        }
+        if (!Number.isFinite(existingMinX) || !Number.isFinite(existingMinY)) {
+          existingMinX = 0;
+          existingMinY = 0;
         }
         
         // Superimpose with a few pixels offset: same zone as existing blocks
@@ -946,8 +1064,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
           delete blockToAppend.id;
           
           // Apply offset to original position
-          const originalX = typeof blockToAppend.x === 'number' ? blockToAppend.x : 0;
-          const originalY = typeof blockToAppend.y === 'number' ? blockToAppend.y : 0;
+          const originalXRaw = typeof blockToAppend.x === 'number' ? blockToAppend.x : Number(blockToAppend.x);
+          const originalYRaw = typeof blockToAppend.y === 'number' ? blockToAppend.y : Number(blockToAppend.y);
+          const originalX = Number.isFinite(originalXRaw) ? originalXRaw : 0;
+          const originalY = Number.isFinite(originalYRaw) ? originalYRaw : 0;
           
           // Apply the calculated offset (calculated once, prevents accumulation)
           blockToAppend.x = originalX + offsetX;
@@ -1008,6 +1128,37 @@ export class BlocklyApplication implements BlocklyApplicationType {
   }
 
   /**
+   * Sanitizes serialized workspace coordinates to avoid NaN transforms at render time.
+   * @param state - Serialized workspace state object to sanitize in-place.
+   */
+  private sanitizeSerializedWorkspaceState(state: unknown): void {
+    const walk = (node: unknown): void => {
+      if (Array.isArray(node)) {
+        for (const item of node) {
+          walk(item);
+        }
+        return;
+      }
+      if (!node || typeof node !== "object") {
+        return;
+      }
+      const rec = node as Record<string, unknown>;
+      if ("x" in rec) {
+        const x = Number(rec.x);
+        rec.x = Number.isFinite(x) ? x : 0;
+      }
+      if ("y" in rec) {
+        const y = Number(rec.y);
+        rec.y = Number.isFinite(y) ? y : 0;
+      }
+      for (const value of Object.values(rec)) {
+        walk(value);
+      }
+    };
+    walk(state);
+  }
+
+  /**
    * Determines whether the current language is RTL.
    * @returns True when the active language is configured as RTL.
    */
@@ -1034,6 +1185,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const rtl: boolean = this.isLangRtl();
     HTML_changeLanguage(newLang);
     Blockly.setLocale(languagesMapBlockly[newLang]);
+    mergeArrayMessages(newLang);
     const customMessages = languagesMap[newLang];
     if (customMessages) {
       const msg = Blockly.Msg as Record<string, string>;

@@ -11,6 +11,7 @@
  */
 
 import { LOGIC_BLOCK_TYPES } from "./logic";
+import { ARRAY_BLOCK_TYPES } from "./array";
 import { MATH_BLOCK_TYPES } from "./math";
 import { PROCEDURES_BLOCK_TYPES } from "./procedures";
 import { TEXT_BLOCK_TYPES } from "./text";
@@ -20,6 +21,7 @@ import { COLOUR_BLOCK_TYPES } from "./colour";
 
 export const BLOCK_TYPES = {
   ...LOGIC_BLOCK_TYPES,
+  ...ARRAY_BLOCK_TYPES,
   ...MATH_BLOCK_TYPES,
   ...LOOPS_BLOCK_TYPES,
   ...COLOUR_BLOCK_TYPES,

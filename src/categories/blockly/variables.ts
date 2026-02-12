@@ -89,6 +89,9 @@ export const defineVariablesGetDynamicBlock = (): void => {
       ) {
         return;
       }
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
 
       const variableId = this.getFieldValue("VAR");
       if (!variableId) {

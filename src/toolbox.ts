@@ -476,16 +476,6 @@ export const basic_toolbox: ToolboxConfiguration = {
         {
           'kind': 'block',
           'type': 'text_length',
-          'inputs': {
-            'VALUE': {
-              'shadow': {
-                'type': 'text',
-                'fields': {
-                  'TEXT': 'abc',
-                },
-              },
-            },
-          },
         },
         {
           'kind': 'block',
@@ -641,13 +631,41 @@ export const basic_toolbox: ToolboxConfiguration = {
         {
           'kind': 'block',
           'type': 'text_reverse',
-          'inputs': {
-            'TEXT': {
-              'shadow': {
-                'type': 'text',
-              },
-            },
-          },
+        },
+      ],
+    },
+    {
+      'kind': 'category',
+      'name': 'CAT_LISTS',
+      'categorystyle': 'list_category',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'Array_with',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_declare',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_create',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_getIndex_in_list',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_modify',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_fix',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_getIndex_in_array',
         },
       ],
     },

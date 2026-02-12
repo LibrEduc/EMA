@@ -121,5 +121,15 @@ export const esLang: LanguageMap = {
     COLOUR_HSV_SATURATION_LABEL: "Saturación",
     COLOUR_HSV_BRIGHTNESS_LABEL: "Brillo",
     COLOUR_HSV_EYEDROPPER_LABEL: "Cuentagotas",
+    VARIABLES_GET_ITEM: "elemento",
+    VARIABLES_DEFINE: "definir variable",
+    ARRAY_UNE_LISTE: "una lista constituida de",
+    ARRAY_WITH_TOOLTIP: "Crear una lista con elementos",
+    ARRAY_WITH_HELPURL: "",
+    MATH_ANGLE: "ángulo",
+    INOUT_ANGLE_MATHS_TOOLTIP: "ángulo en grados",
+    MATH_INTERVAL_TOOLTIP: "Comparar si un valor está dentro de un intervalo",
+    ARDUINO_BASE_DEFINE_CONST_TOOLTIP: "Definir una constante",
+    ARDUINO_BASE_DEFINE_CONST_HELPURL: "",
   }
 };

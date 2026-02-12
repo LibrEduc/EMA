@@ -35,13 +35,14 @@ export const defineMathCompatBlocks = (): void => {
 
   Blockly.Blocks["math_change"] = {
     init: function (this: Blockly.Block) {
-      const numberChecks = ["Number", "int", "float"];
+      const intChecks = ["int"];
+      const numericDeltaChecks = ["Number", "int"];
       this.appendValueInput("VAR")
         .setAlign(Blockly.inputs.Align.CENTRE)
-        .setCheck(numberChecks)
+        .setCheck(intChecks)
         .appendField(getBlocklyMsgOr("MATH_CHANGE_LABEL", "change"));
       this.appendValueInput("DELTA")
-        .setCheck(numberChecks)
+        .setCheck(numericDeltaChecks)
         .appendField(getBlocklyMsgOr("MATH_CHANGE_BY", "by"));
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -65,6 +66,15 @@ export const defineMathCompatBlocks = (): void => {
         targetBlock.type === "variables_get_dynamic";
       if (!isVariable) {
         this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
+        return;
+      }
+      const variableId = targetBlock.getFieldValue("VAR");
+      const variableType = variableId
+        ? targetBlock.workspace?.getVariableMap().getVariableById(variableId)?.getType()
+        : null;
+      if (variableType !== "int") {
+        this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
+        this.getInput("VAR")?.connection?.disconnect();
         return;
       }
       this.setWarningText(null);

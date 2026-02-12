@@ -75,8 +75,15 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     plugin_workspaceSearch: any;
     plugin_zoomToFit: any;
     private pluginsInitialized;
+    private pluginsWorkspace;
     private saveBlocksTimer;
     private codegenTimer;
+    private autoSaveEnabled;
+    /**
+     * Enables or disables automatic workspace persistence from change listeners.
+     * @param enabled - True to enable auto-save, false to suspend it.
+     */
+    setAutoSaveEnabled: (enabled: boolean) => void;
     /**
      * Registers workspace change listeners and debounces persistence/codegen.
      * @remarks
@@ -184,12 +191,12 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     pluginsSetupWorkspace: () => void;
     /**
      * Saves workspace blocks to session storage.
-     * @param storageKeyWorkspaceBlocks - Session storage key used to persist blocks.
+     * @param storageKeyWorkspaceBlocks - Storage key used to persist blocks.
      */
     workspaceSaveBlocks: (storageKeyWorkspaceBlocks: string) => void;
     /**
      * Loads workspace blocks from session storage.
-     * @param storageKeyWorkspaceBlocks - Session storage key used to load blocks.
+     * @param storageKeyWorkspaceBlocks - Storage key used to load blocks.
      * @returns Returns early if no saved data exists or if loading fails.
      * @remarks
      * Includes error handling for corrupted data and validates the structure
@@ -239,6 +246,11 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      * @param variableId - Target variable ID.
      */
     private normalizeVariableTypeById;
+    /**
+     * Sanitizes serialized workspace coordinates to avoid NaN transforms at render time.
+     * @param state - Serialized workspace state object to sanitize in-place.
+     */
+    private sanitizeSerializedWorkspaceState;
     /**
      * Determines whether the current language is RTL.
      * @returns True when the active language is configured as RTL.

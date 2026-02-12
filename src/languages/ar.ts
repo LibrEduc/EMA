@@ -121,5 +121,15 @@ export const arLang: LanguageMap = {
     COLOUR_HSV_SATURATION_LABEL: "التشبع",
     COLOUR_HSV_BRIGHTNESS_LABEL: "السطوع",
     COLOUR_HSV_EYEDROPPER_LABEL: "القطارة",
+    VARIABLES_GET_ITEM: "عنصر",
+    VARIABLES_DEFINE: "تعريف متغير",
+    ARRAY_UNE_LISTE: "قائمة تتكون من",
+    ARRAY_WITH_TOOLTIP: "إنشاء قائمة بعناصر",
+    ARRAY_WITH_HELPURL: "",
+    MATH_ANGLE: "زاوية",
+    INOUT_ANGLE_MATHS_TOOLTIP: "زاوية بالدرجات",
+    MATH_INTERVAL_TOOLTIP: "مقارنة ما إذا كانت القيمة ضمن نطاق",
+    ARDUINO_BASE_DEFINE_CONST_TOOLTIP: "تعريف ثابت",
+    ARDUINO_BASE_DEFINE_CONST_HELPURL: "",
   }
 };

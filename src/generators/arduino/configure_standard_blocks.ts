@@ -51,6 +51,81 @@ export function configureStandardBlocks(): void {
     };
   }
 
+  type RepeatExtDef = Blockly.Block & {
+    init?: (this: Blockly.Block) => void;
+    onchange?: (this: Blockly.Block, event: Blockly.Events.Abstract) => void;
+    __typedConfiguredRepeatExt?: boolean;
+  };
+  const repeatExtDef = Blockly.Blocks["controls_repeat_ext"] as RepeatExtDef | undefined;
+  if (repeatExtDef && !repeatExtDef.__typedConfiguredRepeatExt) {
+    repeatExtDef.__typedConfiguredRepeatExt = true;
+    const originalInit = repeatExtDef.init;
+    const originalOnchange = repeatExtDef.onchange;
+    repeatExtDef.init = function (this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
+      }
+      // Allow standard numeric blocks ("Number") and typed integer variables ("int"),
+      // but reject typed float variable getters.
+      this.getInput("TIMES")?.connection?.setCheck(["Number", "int"]);
+    };
+    repeatExtDef.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (originalOnchange) {
+        originalOnchange.call(this, event);
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+        event.type !== Blockly.Events.VAR_CREATE &&
+        event.type !== Blockly.Events.VAR_RENAME &&
+        event.type !== Blockly.Events.VAR_DELETE
+      ) {
+        return;
+      }
+      const timesBlock = this.getInputTargetBlock("TIMES");
+      if (!timesBlock) {
+        this.setWarningText(null);
+        return;
+      }
+      let inferredType: string | null = null;
+      if (
+        timesBlock.type === "variables_get" ||
+        timesBlock.type === "variables_get_dynamic"
+      ) {
+        const variableId = timesBlock.getFieldValue("VAR");
+        inferredType = variableId
+          ? timesBlock.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
+          : null;
+      } else {
+        const typedTimes = timesBlock as Blockly.Block & { getBlockType?: () => string | null };
+        inferredType = typedTimes.getBlockType?.() || null;
+        if (!inferredType && timesBlock.type === "math_number") {
+          const rawNum = timesBlock.getFieldValue("NUM");
+          const numericValue = rawNum !== null && rawNum !== undefined ? Number(rawNum) : NaN;
+          if (!Number.isNaN(numericValue)) {
+            inferredType = Number.isInteger(numericValue) ? "int" : "float";
+          }
+        }
+        if (!inferredType) {
+          const outputCheck = timesBlock.outputConnection?.getCheck();
+          if (Array.isArray(outputCheck)) {
+            inferredType = outputCheck.length > 0 ? outputCheck[0] : null;
+          } else {
+            inferredType = outputCheck || null;
+          }
+        }
+      }
+      if (inferredType !== "int") {
+        this.setWarningText(Blockly.Msg.MATH_CHANGE_VAR_WARNING || "Connect a variable.");
+        this.getInput("TIMES")?.connection?.disconnect();
+        return;
+      }
+      this.setWarningText(null);
+    };
+  }
+
   type ProcedureBlockDef = Blockly.Block & {
     onchange?: (this: Blockly.Block, event: Blockly.Events.Abstract) => void;
     getBlockType?: (this: Blockly.Block) => string | null;

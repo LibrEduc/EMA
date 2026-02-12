@@ -68,6 +68,8 @@ export declare class ArduinoGenerator extends Blockly.CodeGenerator {
     private setups_;
     private loop_;
     private pins_;
+    /** Array declarations from Array_declare and Array_create blocks. */
+    private arrayDeclarations_;
     /**
      * List of outer-inner pairings that do NOT require parentheses.
      */
@@ -100,6 +102,11 @@ export declare class ArduinoGenerator extends Blockly.CodeGenerator {
     addInclude(tag: string, code: string): void;
     addDefinition(tag: string, code: string): void;
     addVariable(tag: string, code: string): void;
+    /**
+     * Add an array declaration (from Array_declare or Array_create).
+     * Merged into the variables section in finish().
+     */
+    addArrayDeclaration(declaration: string): void;
     addLocalVariable(scopeId: string, tag: string, code: string): void;
     getLocalVariables(scopeId: string): string[];
     /**

@@ -10,11 +10,16 @@
  * @since 1.0.0
  */
 
+/**
+ * Use "Colour" (not "string") so Blockly connection checks succeed.
+ * colour_picker etc. use setCheck("Colour"); getBlockType must match.
+ * The Arduino generator still emits string literals.
+ */
 export const COLOUR_BLOCK_TYPES = {
-  colour_picker: "string",
-  color_picker_custom: "string",
-  color_picker_hsv: "string",
-  colour_random: "string",
-  colour_rgb: "string",
-  colour_blend: "string",
+  colour_picker: "Colour",
+  color_picker_custom: "Colour",
+  color_picker_hsv: "Colour",
+  colour_random: "Colour",
+  colour_rgb: "Colour",
+  colour_blend: "Colour",
 } as const;

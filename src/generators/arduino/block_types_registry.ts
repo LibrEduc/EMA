@@ -251,9 +251,17 @@ export function checkTypeCompatibility(
   ) {
     return true;
   }
+  // Colour blocks: allow Colour to connect to Colour or String
   if (
     (sourceType === "Colour" || sourceType === "color" || sourceType === "colour") &&
-    (targetType === "String" || targetType === "string")
+    (targetType === "Colour" || targetType === "color" || targetType === "colour" ||
+     targetType === "String" || targetType === "string")
+  ) {
+    return true;
+  }
+  if (
+    (sourceType === "String" || sourceType === "string") &&
+    (targetType === "Colour" || targetType === "color" || targetType === "colour")
   ) {
     return true;
   }

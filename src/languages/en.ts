@@ -15,8 +15,8 @@ import { LanguageMap } from './languageMap';
 export const enLang: LanguageMap = {
   'en': {
     HOME: "µcBlockly",
-    ABOUT: "About",
-    CONTACT: "Contact",
+    ABOUT: "about",
+    CONTACT: "contact",
     UNDO: "undo",
     REDO: "redo",
     SAVE: "save",
@@ -121,5 +121,15 @@ export const enLang: LanguageMap = {
     COLOUR_HSV_SATURATION_LABEL: "Saturation",
     COLOUR_HSV_BRIGHTNESS_LABEL: "Brightness",
     COLOUR_HSV_EYEDROPPER_LABEL: "Eyedropper",
+    VARIABLES_GET_ITEM: "item",
+    VARIABLES_DEFINE: "define variable",
+    ARRAY_UNE_LISTE: "a list consisting of",
+    ARRAY_WITH_TOOLTIP: "Create a list with elements",
+    ARRAY_WITH_HELPURL: "",
+    MATH_ANGLE: "angle",
+    INOUT_ANGLE_MATHS_TOOLTIP: "angle in degrees",
+    MATH_INTERVAL_TOOLTIP: "Compare if a value is within an interval",
+    ARDUINO_BASE_DEFINE_CONST_TOOLTIP: "Define a constant",
+    ARDUINO_BASE_DEFINE_CONST_HELPURL: "",
   }
 };

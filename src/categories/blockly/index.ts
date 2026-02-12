@@ -14,6 +14,7 @@ import { debugLog } from "../../generators/arduino/debug";
 import { defineControlsSwitchBlocks } from "./logic";
 import { defineMathCompatBlocks } from "./math";
 import { defineTextCompatBlocks } from "./text";
+import { defineArrayBlocks } from "./array";
 import { defineColourBlocks } from "./colour";
 import {
   defineVariablesConstBlock,
@@ -33,6 +34,7 @@ import {
 export const defineBlocklyArduinoCompatBlocks = (): void => {
   defineMathCompatBlocks();
   defineTextCompatBlocks();
+  defineArrayBlocks();
   defineColourBlocks();
 };
 
@@ -61,6 +63,7 @@ export const defineAllTypedVariableBlocks = (): void => {
 };
 
 export {
+  defineArrayBlocks,
   defineControlsSwitchBlocks,
   defineColourBlocks,
   defineVariablesConstBlock,

@@ -84,8 +84,8 @@ if (typeof window !== 'undefined') {
     utils: Blockly.utils
   };
 
-  console.log('✅ Blockly et toutes ses propriétés exposés globalement immédiatement');
-  console.log('Propriétés disponibles:', Object.keys(globalWindow.Blockly));
+  debugLog('✅ Blockly et toutes ses propriétés exposés globalement immédiatement');
+  debugLog('Propriétés disponibles:', Object.keys(globalWindow.Blockly));
 }
 
 /**
@@ -104,6 +104,7 @@ import { arduinoGenerator } from "./generators/arduino";
 import { defineAllTypedVariableBlocks } from "./categories/blockly";
 import { applyBlockTypesFromRegistry } from "./generators/arduino/block_types_registry";
 import { configureStandardBlocks } from "./generators/arduino/configure_standard_blocks";
+import { debugLog } from "./generators/arduino/debug";
 import {
   HTML_populateLanguages,
   changeLanguageToolbox,
@@ -120,8 +121,8 @@ if (typeof window !== 'undefined') {
     arduinoGenerator?: typeof arduinoGenerator;
   }).arduinoGenerator = exposedArduinoGenerator;
 
-  console.log('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
-  console.log('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
+  debugLog('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
+  debugLog('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
 }
 import { setPluginsInURL } from "./tools";
 import { basic_toolbox } from "./toolbox";
@@ -139,6 +140,12 @@ import { ContentHighlight } from "@blockly/workspace-content-highlight";
 //KeyboardNavigation.registerKeyboardNavigationStyles();
 import "./css/index.css";
 import "./css/µcBlockly.css";
+
+// Diagnostic switches for stepwise re-enable of typing overlay.
+// Current step (requested): only configureStandardBlocks enabled.
+const ENABLE_TYPED_VARIABLE_BLOCKS = true;
+const ENABLE_BLOCK_TYPES_REGISTRY = true;
+const ENABLE_CONFIGURE_STANDARD_BLOCKS = true;
 
 // Cache DOM elements
 const elements = {
@@ -666,7 +673,7 @@ const HTML_onChange = (): void => {
   elements.pluginMinimap.onchange = () => {
     const minimap = document.getElementsByClassName(
       "blockly-minimap",
-    )[0] as HTMLElement;
+    )[0] as HTMLElement | undefined;
     if (minimap) {
       minimap.style.visibility = elements.pluginMinimap.checked
         ? "visible"
@@ -859,25 +866,31 @@ const scheduleNonCriticalDomInit = (callback: () => void): void => {
 // The `DomIsLoaded` function prepares everything needed by structure of DOM.
 DomIsLoaded((): void => {
   // Définir les blocs de variables typées après que Blockly soit chargé
-  if (defineTypedVariableBlocks()) {
-    console.log('✅ Blocs de variables typées définis au bon moment');
-  } else {
-    console.log('⚠️ Blockly pas encore disponible, retry dans 100ms...');
-    // Retry après un délai
-    setTimeout(() => {
-      if (defineTypedVariableBlocks()) {
-        console.log('✅ Blocs de variables typées définis après retry');
-      } else {
-        console.error('❌ Impossible de définir les blocs de variables typées');
-      }
-    }, 100);
+  if (ENABLE_TYPED_VARIABLE_BLOCKS) {
+    if (defineTypedVariableBlocks()) {
+      debugLog('✅ Blocs de variables typées définis au bon moment');
+    } else {
+      debugLog('⚠️ Blockly pas encore disponible, retry dans 100ms...');
+      // Retry après un délai
+      setTimeout(() => {
+        if (defineTypedVariableBlocks()) {
+          debugLog('✅ Blocs de variables typées définis après retry');
+        } else {
+          console.error('❌ Impossible de définir les blocs de variables typées');
+        }
+      }, 100);
+    }
   }
 
   // Appliquer les types de blocs depuis le registre
   if (typeof Blockly !== 'undefined') {
-    applyBlockTypesFromRegistry();
-    // Configurer les blocs standards (controls_if, etc.)
-    configureStandardBlocks();
+    if (ENABLE_BLOCK_TYPES_REGISTRY) {
+      applyBlockTypesFromRegistry();
+    }
+    if (ENABLE_CONFIGURE_STANDARD_BLOCKS) {
+      // Configurer les blocs standards (controls_if, procédures, etc.)
+      configureStandardBlocks();
+    }
   }
 
   HTML_populateLanguages(µcB);
@@ -889,11 +902,14 @@ DomIsLoaded((): void => {
 resources such as images and scripts. */
 window.onload = (): void => {
   // Blockly et arduinoGenerator sont déjà exposés globalement
-  console.log('🔄 window.onload - Vérification des composants...');
+  debugLog('🔄 window.onload - Vérification des composants...');
 
   // S'assurer que les blocs de variables typées sont définis
-  if (!Blockly.Blocks['variables_get_dynamic'] || !Blockly.Blocks['variables_set_dynamic']) {
-    console.log('🔄 Redéfinition des blocs de variables typées dans window.onload...');
+  if (
+    ENABLE_TYPED_VARIABLE_BLOCKS &&
+    (!Blockly.Blocks['variables_get_dynamic'] || !Blockly.Blocks['variables_set_dynamic'])
+  ) {
+    debugLog('🔄 Redéfinition des blocs de variables typées dans window.onload...');
     defineTypedVariableBlocks();
   }
 
@@ -928,16 +944,20 @@ window.onload = (): void => {
     }
   });
 
-  µcB.workspaceSetupPlugins(false);
-
   // Attendre que le DOM soit complètement stabilisé avant d'appeler workspaceOnResize
   // Utiliser requestAnimationFrame pour s'assurer que le layout est calculé
   requestAnimationFrame(() => {
     µcB_workspaceOnResize();
+    // Prevent startup events/reboots from overwriting saved blocks with an empty workspace.
+    µcB.setAutoSaveEnabled(false);
     µcB.setParamsBlockly();
+    µcB.pluginsSetupWorkspace();
+    // Initialize plugins first so minimap observes restore events, like historical behavior.
+    µcB.workspaceSetupPlugins(false);
+    // Restore only after startup params/plugins are applied (they may reboot workspace).
     µcB.workspaceLoadBlocks("mainWorkspace_blocks");
     (µcB.workspace as Blockly.WorkspaceSvg).scrollCenter();
-    µcB.pluginsSetupWorkspace();
+    µcB.setAutoSaveEnabled(true);
     scheduleNonCriticalDomInit(() => {
       // Initialize minimap
       const minimap = document.getElementsByClassName(
@@ -1015,5 +1035,4 @@ window object. This event is triggered when the user is about to leave the curre
 window.onbeforeunload = (): void => {
   saveLayoutToSessionStorage();
   µcB.workspaceSaveBlocks("mainWorkspace_blocks");
-  µcB.workspaceSetupPlugins(true);
 };
