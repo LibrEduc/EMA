@@ -82,6 +82,7 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     private saveBlocksTimer;
     private codegenTimer;
     private autoSaveEnabled;
+    private isBulkLoading;
     /**
      * Enables or disables automatic workspace persistence from change listeners.
      * @param enabled - True to enable auto-save, false to suspend it.

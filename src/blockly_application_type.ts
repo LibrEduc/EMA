@@ -238,6 +238,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
   private saveBlocksTimer: number | null = null;
   private codegenTimer: number | null = null;
   private autoSaveEnabled = false;
+  private isBulkLoading = false;
 
   /**
    * Enables or disables automatic workspace persistence from change listeners.
@@ -277,6 +278,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
 
     this.workspace.addChangeListener((e: Blockly.Events.Abstract): void => {
       if (e.isUiEvent || (this.workspace as Blockly.WorkspaceSvg).isDragging()) {
+        return;
+      }
+      if (this.isBulkLoading) {
         return;
       }
       if (e.type === Blockly.Events.FINISHED_LOADING) {
@@ -858,8 +862,13 @@ export class BlocklyApplication implements BlocklyApplicationType {
       }
       this.sanitizeSerializedWorkspaceState(parsed);
       // Keep Blockly events active so plugins (minimap) stay synchronized on restore.
-      this.workspace.clear();
-      Blockly.serialization.workspaces.load(parsed, this.workspace);
+      this.isBulkLoading = true;
+      try {
+        this.workspace.clear();
+        Blockly.serialization.workspaces.load(parsed, this.workspace);
+      } finally {
+        this.isBulkLoading = false;
+      }
       this.normalizeVariableTypes();
     } catch (error) {
       console.error('Failed to load workspace blocks:', error);
@@ -924,17 +933,22 @@ export class BlocklyApplication implements BlocklyApplicationType {
         }
         this.sanitizeSerializedWorkspaceState(parsed);
 
-        if (merge) {
-          const hasExistingBlocks = this.workspace.getTopBlocks(false).length > 0;
-          if (hasExistingBlocks) {
-            this.mergeBlocksFromState(parsed);
+        this.isBulkLoading = true;
+        try {
+          if (merge) {
+            const hasExistingBlocks = this.workspace.getTopBlocks(false).length > 0;
+            if (hasExistingBlocks) {
+              this.mergeBlocksFromState(parsed);
+            } else {
+              this.workspace.clear();
+              Blockly.serialization.workspaces.load(parsed, this.workspace);
+            }
           } else {
             this.workspace.clear();
             Blockly.serialization.workspaces.load(parsed, this.workspace);
           }
-        } else {
-          this.workspace.clear();
-          Blockly.serialization.workspaces.load(parsed, this.workspace);
+        } finally {
+          this.isBulkLoading = false;
         }
 
         this.normalizeVariableTypes();

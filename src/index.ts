@@ -792,7 +792,7 @@ const HTML_onChange = (): void => {
       const file = target.files?.[0];
       if (file) {
         // Check if workspace has existing blocks
-        const hasExistingBlocks = µcB.workspace.getAllBlocks(false).length > 0;
+        const hasExistingBlocks = µcB.workspace.getTopBlocks(false).length > 0;
         
         if (hasExistingBlocks) {
           // Ask user: merge or replace
