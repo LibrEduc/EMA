@@ -16,5 +16,5 @@ export const LOGIC_BLOCK_TYPES = {
   logic_negate: "bool",
   logic_boolean: "bool",
   logic_null: "null",
-  logic_ternary: "bool",
+  logic_ternary: "__DYNAMIC__ternary",
 } as const;

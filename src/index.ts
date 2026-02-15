@@ -111,7 +111,6 @@ import {
   getLangParamFromUrl,
   HTML_changeLanguage,
 } from "./language";
-import { languagesMap } from "./languages/languageMap";
 
 // Exposer arduinoGenerator globalement IMMÉDIATEMENT après l'import
 if (typeof window !== 'undefined') {
@@ -791,27 +790,17 @@ const HTML_onChange = (): void => {
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
       if (file) {
-        // Check if workspace has existing blocks
-        const hasExistingBlocks = µcB.workspace.getTopBlocks(false).length > 0;
-        
-        if (hasExistingBlocks) {
-          // Ask user: merge or replace
-          // Get current language for translation
-          const currentLang = getLangParamFromUrl();
-          const langMap = languagesMap[currentLang] || languagesMap['en'];
-          const mergeMessage = currentLang === 'fr' 
-            ? 'Le workspace contient déjà des blocs.\n\nCliquez sur "OK" pour fusionner avec les blocs existants.\nCliquez sur "Annuler" pour remplacer tous les blocs.'
-            : currentLang === 'es'
-            ? 'El workspace ya contiene bloques.\n\nHaga clic en "OK" para fusionar con los bloques existentes.\nHaga clic en "Cancelar" para reemplazar todos los bloques.'
-            : currentLang === 'ar'
-            ? 'يحتوي مساحة العمل بالفعل على كتل.\n\nانقر فوق "موافق" للدمج مع الكتل الموجودة.\nانقر فوق "إلغاء" لاستبدال جميع الكتل.'
-            : 'The workspace already contains blocks.\n\nClick "OK" to merge with existing blocks.\nClick "Cancel" to replace all blocks.';
-          const merge = confirm(mergeMessage);
-          µcB.workspaceLoadFromFile(file, merge);
-        } else {
-          // No existing blocks, just load
-          µcB.workspaceLoadFromFile(file, false);
-        }
+        const hasExistingBlocks = µcB.workspaceHasAnyBlocks();
+        const currentLang = getLangParamFromUrl();
+        const mergeMessage = currentLang === 'fr'
+          ? 'Le workspace contient déjà des blocs.\n\nCliquez sur "OK" pour fusionner avec les blocs existants.\nCliquez sur "Annuler" pour remplacer tous les blocs.'
+          : currentLang === 'es'
+          ? 'El workspace ya contiene bloques.\n\nHaga clic en "OK" para fusionar con los bloques existentes.\nHaga clic en "Cancelar" para reemplazar todos los bloques.'
+          : currentLang === 'ar'
+          ? 'يحتوي مساحة العمل بالفعل على كتل.\n\nانقر فوق "موافق" للدمج مع الكتل الموجودة.\nانقر فوق "إلغاء" لاستبدال جميع الكتل.'
+          : 'The workspace already contains blocks.\n\nClick "OK" to merge with existing blocks.\nClick "Cancel" to replace all blocks.';
+        const merge = hasExistingBlocks ? confirm(mergeMessage) : false;
+        µcB.workspaceLoadFromFile(file, merge);
         // Reset input value to allow reloading the same file
         target.value = '';
       }

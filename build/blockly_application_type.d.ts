@@ -83,6 +83,8 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
     private codegenTimer;
     private autoSaveEnabled;
     private isBulkLoading;
+    private hasBlocks;
+    private hasBlocksRefreshPending;
     /**
      * Enables or disables automatic workspace persistence from change listeners.
      * @param enabled - True to enable auto-save, false to suspend it.
@@ -95,6 +97,11 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      * meaningful changes, skipping UI-only and drag events.
      */
     private readonly workspaceListeners;
+    /**
+     * Returns whether workspace currently contains top-level blocks.
+     */
+    workspaceHasAnyBlocks: () => boolean;
+    private scheduleHasBlocksRefresh;
     /**
      * Removes the default "item" variable created by Blockly.
      * @remarks

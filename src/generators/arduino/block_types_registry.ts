@@ -89,22 +89,70 @@ const normalizeBlocklyType = (blocklyType: string | string[] | null): string | n
  */
 const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
   'ternary': (block: Blockly.Block): string => {
-    // Ternary returns the type of the THEN or ELSE branch
+    // Infer from both branches without forcing input checks.
     const thenBlock = block.getInputTargetBlock('THEN');
     const elseBlock = block.getInputTargetBlock('ELSE');
-    if (thenBlock) {
-      const blockDef = thenBlock as Blockly.Block & { getBlockType?: () => string };
-      if (blockDef.getBlockType) {
-        return blockDef.getBlockType() || 'int';
+
+    const inferBranchType = (candidate: Blockly.Block | null): string | null => {
+      if (!candidate) {
+        return null;
       }
-    }
-    if (elseBlock) {
-      const blockDef = elseBlock as Blockly.Block & { getBlockType?: () => string };
-      if (blockDef.getBlockType) {
-        return blockDef.getBlockType() || 'int';
+      const typedCandidate = candidate as Blockly.Block & {
+        getBlockType?: () => string | null;
+      };
+      const rawType = typedCandidate.getBlockType?.() || null;
+      const normalized = normalizeBlocklyType(rawType);
+      if (normalized && normalized !== "__NO_TYPE__") {
+        return normalized;
       }
+      const outputCheck = candidate.outputConnection?.getCheck() || null;
+      const normalizedCheck = normalizeBlocklyType(outputCheck);
+      if (normalizedCheck && normalizedCheck !== "__NO_TYPE__") {
+        return normalizedCheck;
+      }
+      return null;
+    };
+
+    const thenType = inferBranchType(thenBlock);
+    const elseType = inferBranchType(elseBlock);
+    // If only one branch is connected, keep that branch type.
+    // This avoids requiring both branches to clip into typed contexts.
+    if (thenType && !elseType) {
+      return thenType;
     }
-    return 'int';
+    if (!thenType && elseType) {
+      return elseType;
+    }
+    if (!thenType || !elseType) {
+      return "__NO_TYPE__";
+    }
+    if (thenType === elseType) {
+      return thenType;
+    }
+    // Numeric convergence rules:
+    // - int/float => float
+    // - bool/int => int (C/Arduino promotion)
+    // - bool/float => float
+    const toNumericKind = (value: string): "bool" | "int" | "float" | null => {
+      if (value === "float") return "float";
+      if (value === "int" || value === "Number" || value === "number") return "int";
+      if (value === "bool" || value === "Boolean") return "bool";
+      return null;
+    };
+    const leftNumeric = toNumericKind(thenType);
+    const rightNumeric = toNumericKind(elseType);
+    if (leftNumeric && rightNumeric) {
+      if (leftNumeric === "float" || rightNumeric === "float") {
+        return "float";
+      }
+      return "int";
+    }
+    // Char and string can converge to string.
+    const stringLike = new Set(["string", "String", "char"]);
+    if (stringLike.has(thenType) && stringLike.has(elseType)) {
+      return "string";
+    }
+    return "__NO_TYPE__";
   },
   'identifyNumber': (block: Blockly.Block): string => {
     const numString = block.getFieldValue('NUM');

@@ -13,9 +13,10 @@
 import * as Blockly from "blockly";
 import {
   setVariableTypeAndMarkManual,
+  normalizeBlocklyTypeToVariableType,
 } from "../../categories/blockly/shared";
 import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
-import { getCompatibleTypesForCheck } from "./block_types_registry";
+import { checkTypeCompatibility, getCompatibleTypesForCheck } from "./block_types_registry";
 import { debugLog } from "./debug";
 
 /**
@@ -48,6 +49,95 @@ export function configureStandardBlocks(): void {
       const inputB = this.getInput("B");
       inputA?.connection?.setCheck(numberChecks);
       inputB?.connection?.setCheck(numberChecks);
+    };
+  }
+
+  type LogicTernaryDef = Blockly.Block & {
+    init?: (this: Blockly.Block) => void;
+    __typedConfiguredTernary?: boolean;
+  };
+  const logicTernaryDef = Blockly.Blocks["logic_ternary"] as LogicTernaryDef | undefined;
+  if (logicTernaryDef && !logicTernaryDef.__typedConfiguredTernary) {
+    logicTernaryDef.__typedConfiguredTernary = true;
+    const originalInit = logicTernaryDef.init;
+    const inferOutputType = (candidate: Blockly.Block | null): string | null => {
+      if (!candidate) {
+        return null;
+      }
+      if (
+        candidate.type === "variables_get" ||
+        candidate.type === "variables_get_dynamic"
+      ) {
+        const variableId = candidate.getFieldValue("VAR");
+        return variableId
+          ? candidate.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
+          : null;
+      }
+      const typed = candidate as Blockly.Block & { getBlockType?: () => string | null };
+      const typedType = typed.getBlockType?.() || null;
+      if (typedType) {
+        return typedType;
+      }
+      if (candidate.type === "math_number") {
+        const raw = candidate.getFieldValue("NUM");
+        const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
+        if (!Number.isNaN(numeric)) {
+          return Number.isInteger(numeric) ? "int" : "float";
+        }
+      }
+      const check = candidate.outputConnection?.getCheck();
+      if (Array.isArray(check)) {
+        return check[0] || null;
+      }
+      return check || null;
+    };
+    const getStrictChecksForType = (type: string | null): string[] | null => {
+      if (!type) return null;
+      const checks = new Set(getCompatibleTypesForCheck(type) || [type]);
+      if (checks.has("bool")) checks.add("Boolean");
+      if (checks.has("Boolean")) checks.add("bool");
+      if (checks.has("int") || checks.has("float")) checks.add("Number");
+      if (checks.has("string")) checks.add("String");
+      if (checks.has("String")) checks.add("string");
+      return Array.from(checks);
+    };
+    logicTernaryDef.init = function (this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
+      }
+      // THEN decides admissible type for ELSE.
+      this.getInput("THEN")?.connection?.setCheck(null);
+      this.getInput("ELSE")?.connection?.setCheck(null);
+      this.outputConnection?.setCheck(null);
+      const originalOnchange = this.onchange;
+      this.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+        if (originalOnchange) {
+          originalOnchange.call(this, event);
+        }
+        if (event.isUiEvent) {
+          return;
+        }
+        this.getInput("THEN")?.connection?.setCheck(null);
+        const thenBlock = this.getInputTargetBlock("THEN");
+        const inferredThenType = inferOutputType(thenBlock);
+        const elseInput = this.getInput("ELSE");
+        elseInput?.connection?.setCheck(getStrictChecksForType(inferredThenType));
+        const elseBlock = this.getInputTargetBlock("ELSE");
+        if (elseBlock && inferredThenType) {
+          const elseType = inferOutputType(elseBlock);
+          const normalizedThen = normalizeBlocklyTypeToVariableType(inferredThenType);
+          const normalizedElse = elseType
+            ? normalizeBlocklyTypeToVariableType(elseType)
+            : null;
+          const isAccepted = Boolean(
+            normalizedElse && checkTypeCompatibility(normalizedElse, normalizedThen),
+          );
+          if (!isAccepted) {
+            elseInput?.connection?.disconnect();
+          }
+        }
+        this.outputConnection?.setCheck(null);
+      };
     };
   }
 
@@ -121,6 +211,106 @@ export function configureStandardBlocks(): void {
         this.setWarningText(Blockly.Msg.MATH_CHANGE_VAR_WARNING || "Connect a variable.");
         this.getInput("TIMES")?.connection?.disconnect();
         return;
+      }
+      this.setWarningText(null);
+    };
+  }
+
+  type ControlsForDef = Blockly.Block & {
+    init?: (this: Blockly.Block) => void;
+    onchange?: (this: Blockly.Block, event: Blockly.Events.Abstract) => void;
+    __typedConfiguredControlsFor?: boolean;
+  };
+  const controlsForDef = Blockly.Blocks["controls_for"] as ControlsForDef | undefined;
+  if (controlsForDef && !controlsForDef.__typedConfiguredControlsFor) {
+    controlsForDef.__typedConfiguredControlsFor = true;
+    const originalInit = controlsForDef.init;
+    const originalOnchange = controlsForDef.onchange;
+    const inferInputType = (block: Blockly.Block | null): string | null => {
+      if (!block) return null;
+      if (block.type === "variables_get" || block.type === "variables_get_dynamic") {
+        const variableId = block.getFieldValue("VAR");
+        return variableId
+          ? block.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
+          : null;
+      }
+      const typed = block as Blockly.Block & { getBlockType?: () => string | null };
+      const typedType = typed.getBlockType?.() || null;
+      if (typedType) return typedType;
+      if (block.type === "math_number") {
+        const raw = block.getFieldValue("NUM");
+        const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
+        if (!Number.isNaN(numeric)) {
+          return Number.isInteger(numeric) ? "int" : "float";
+        }
+      }
+      const check = block.outputConnection?.getCheck();
+      if (Array.isArray(check)) return check[0] || null;
+      return check || null;
+    };
+    const normalizeType = (raw: string | null): string | null => {
+      if (!raw) return null;
+      return normalizeBlocklyTypeToVariableType(raw);
+    };
+    const isNumeric = (raw: string | null): boolean => {
+      const t = normalizeType(raw);
+      return t === "int" || t === "float" || t === "number";
+    };
+    controlsForDef.init = function (this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
+      }
+      const acceptedChecks = ["Number", "int", "float"];
+      this.getInput("FROM")?.connection?.setCheck(acceptedChecks);
+      this.getInput("TO")?.connection?.setCheck(acceptedChecks);
+      this.getInput("BY")?.connection?.setCheck(acceptedChecks);
+    };
+    controlsForDef.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (originalOnchange) {
+        originalOnchange.call(this, event);
+      }
+      if (
+        event.isUiEvent ||
+        (
+          event.type !== Blockly.Events.BLOCK_CHANGE &&
+          event.type !== Blockly.Events.BLOCK_CREATE &&
+          event.type !== Blockly.Events.BLOCK_MOVE &&
+          event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+          event.type !== Blockly.Events.VAR_CREATE &&
+          event.type !== Blockly.Events.VAR_RENAME &&
+          event.type !== Blockly.Events.VAR_DELETE
+        )
+      ) {
+        return;
+      }
+      const inputNames = ["FROM", "TO", "BY"] as const;
+      const connected = inputNames
+        .map((name) => ({ name, block: this.getInputTargetBlock(name) }))
+        .filter((entry) => Boolean(entry.block)) as Array<{ name: "FROM" | "TO" | "BY"; block: Blockly.Block }>;
+      if (connected.length === 0) {
+        this.setWarningText(null);
+        return;
+      }
+      for (const entry of connected) {
+        const rawType = inferInputType(entry.block);
+        if (!isNumeric(rawType)) {
+          this.setWarningText(Blockly.Msg.MATH_CHANGE_VAR_WARNING || "Connect a variable.");
+          this.getInput(entry.name)?.connection?.disconnect();
+          return;
+        }
+      }
+      const anchorType = normalizeType(inferInputType(connected[0].block));
+      if (!anchorType) {
+        this.setWarningText(null);
+        return;
+      }
+      for (let i = 1; i < connected.length; i += 1) {
+        const type = normalizeType(inferInputType(connected[i].block));
+        if (!type || !checkTypeCompatibility(type, anchorType)) {
+          this.setWarningText(Blockly.Msg.MATH_CHANGE_VAR_WARNING || "Connect a variable.");
+          this.getInput(connected[i].name)?.connection?.disconnect();
+          return;
+        }
       }
       this.setWarningText(null);
     };

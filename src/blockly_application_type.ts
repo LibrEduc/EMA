@@ -148,6 +148,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       };
     }
     this.workspace = Blockly.inject(injection_div, WORKSPACE_OPTIONS);
+    this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
     Blockly.ContextMenuItems.registerCommentOptions();
     patchFieldVariableValidation();
 
@@ -239,6 +240,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
   private codegenTimer: number | null = null;
   private autoSaveEnabled = false;
   private isBulkLoading = false;
+  private hasBlocks = false;
+  private hasBlocksRefreshPending = false;
 
   /**
    * Enables or disables automatic workspace persistence from change listeners.
@@ -280,6 +283,14 @@ export class BlocklyApplication implements BlocklyApplicationType {
       if (e.isUiEvent || (this.workspace as Blockly.WorkspaceSvg).isDragging()) {
         return;
       }
+      if (e.type === Blockly.Events.BLOCK_CREATE) {
+        this.hasBlocks = true;
+      } else if (
+        e.type === Blockly.Events.BLOCK_DELETE ||
+        e.type === Blockly.Events.FINISHED_LOADING
+      ) {
+        this.scheduleHasBlocksRefresh();
+      }
       if (this.isBulkLoading) {
         return;
       }
@@ -292,6 +303,24 @@ export class BlocklyApplication implements BlocklyApplicationType {
       scheduleCodegen();
     });
   };
+
+  /**
+   * Returns whether workspace currently contains top-level blocks.
+   */
+  public workspaceHasAnyBlocks = (): boolean => {
+    return this.hasBlocks;
+  };
+
+  private scheduleHasBlocksRefresh(): void {
+    if (this.hasBlocksRefreshPending) {
+      return;
+    }
+    this.hasBlocksRefreshPending = true;
+    requestAnimationFrame(() => {
+      this.hasBlocksRefreshPending = false;
+      this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
+    });
+  }
 
   /**
    * Removes the default "item" variable created by Blockly.
@@ -865,7 +894,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       this.isBulkLoading = true;
       try {
         this.workspace.clear();
+        this.hasBlocks = false;
         Blockly.serialization.workspaces.load(parsed, this.workspace);
+        this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
       } finally {
         this.isBulkLoading = false;
       }
@@ -941,17 +972,22 @@ export class BlocklyApplication implements BlocklyApplicationType {
               this.mergeBlocksFromState(parsed);
             } else {
               this.workspace.clear();
+              this.hasBlocks = false;
               Blockly.serialization.workspaces.load(parsed, this.workspace);
+              this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
             }
           } else {
             this.workspace.clear();
+            this.hasBlocks = false;
             Blockly.serialization.workspaces.load(parsed, this.workspace);
+            this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
           }
         } finally {
           this.isBulkLoading = false;
         }
 
         this.normalizeVariableTypes();
+        this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
         this.workspaceSaveBlocks("mainWorkspace_blocks");
         const code = arduinoGenerator.workspaceToCode(this.workspace);
         µcB_codeEditor.setValue(code);

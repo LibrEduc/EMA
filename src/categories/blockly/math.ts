@@ -19,6 +19,38 @@ import { getBlocklyMsgOr } from "./shared";
  * Registers math compatibility blocks for µcBlockly.
  */
 export const defineMathCompatBlocks = (): void => {
+  const inferBlockType = (block: Blockly.Block | null): string | null => {
+    if (!block) {
+      return null;
+    }
+    if (
+      block.type === "variables_get" ||
+      block.type === "variables_get_dynamic"
+    ) {
+      const variableId = block.getFieldValue("VAR");
+      return variableId
+        ? block.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
+        : null;
+    }
+    const typed = block as Blockly.Block & { getBlockType?: () => string | null };
+    const typedType = typed.getBlockType?.() || null;
+    if (typedType) {
+      return typedType;
+    }
+    if (block.type === "math_number") {
+      const raw = block.getFieldValue("NUM");
+      const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
+      if (!Number.isNaN(numeric)) {
+        return Number.isInteger(numeric) ? "int" : "float";
+      }
+    }
+    const outputCheck = block.outputConnection?.getCheck();
+    if (Array.isArray(outputCheck)) {
+      return outputCheck[0] || null;
+    }
+    return outputCheck || null;
+  };
+
   if (!Blockly.Blocks["math_percent"]) {
     Blockly.Blocks["math_percent"] = {
       init: function (this: Blockly.Block) {
@@ -35,11 +67,10 @@ export const defineMathCompatBlocks = (): void => {
 
   Blockly.Blocks["math_change"] = {
     init: function (this: Blockly.Block) {
-      const intChecks = ["int"];
       const numericDeltaChecks = ["Number", "int"];
       this.appendValueInput("VAR")
         .setAlign(Blockly.inputs.Align.CENTRE)
-        .setCheck(intChecks)
+        .setCheck(null)
         .appendField(getBlocklyMsgOr("MATH_CHANGE_LABEL", "change"));
       this.appendValueInput("DELTA")
         .setCheck(numericDeltaChecks)
@@ -53,6 +84,17 @@ export const defineMathCompatBlocks = (): void => {
     },
     onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       if (event.isUiEvent) {
+        return;
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
+        event.type !== Blockly.Events.VAR_CREATE &&
+        event.type !== Blockly.Events.VAR_RENAME &&
+        event.type !== Blockly.Events.VAR_DELETE
+      ) {
         return;
       }
       const targetBlock =
@@ -76,6 +118,20 @@ export const defineMathCompatBlocks = (): void => {
         this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
         this.getInput("VAR")?.connection?.disconnect();
         return;
+      }
+      const deltaBlock = this.getInputTargetBlock("DELTA");
+      if (deltaBlock) {
+        const deltaType = inferBlockType(deltaBlock);
+        const isNumeric =
+          deltaType === "int" ||
+          deltaType === "float" ||
+          deltaType === "Number" ||
+          deltaType === "number";
+        if (!isNumeric) {
+          this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
+          this.getInput("DELTA")?.connection?.disconnect();
+          return;
+        }
       }
       this.setWarningText(null);
     },

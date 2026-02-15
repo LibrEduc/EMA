@@ -329,23 +329,25 @@ export const handleVariablesSetChange = (
     }
 
     let varType = variable.getType();
-    const isNoType = !varType || varType === "__NO_TYPE__";
+    let isNoType = !varType || varType === "__NO_TYPE__";
     const connectedBlock = valueInput?.connection?.targetBlock() || null;
     const connectedType = inferConnectedValueType(connectedBlock);
 
-    if (varType && connectedType && !checkTypeCompatibility(connectedType, varType)) {
-      block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
-      if (valueInput?.connection?.targetBlock()) {
-        valueInput.connection.disconnect();
-      }
-      return;
-    }
-
     if (connectedType) {
-      if (isNoType) {
+      const canAutoRetype = !typedVariable.__ucbManualType;
+      if (isNoType || (canAutoRetype && varType !== connectedType)) {
         setVariableType(variable, connectedType);
         typedVariable.__ucbManualType = false;
         varType = variable.getType();
+        isNoType = !varType || varType === "__NO_TYPE__";
+      }
+
+      if (varType && !checkTypeCompatibility(connectedType, varType)) {
+        block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
+        if (valueInput?.connection?.targetBlock()) {
+          valueInput.connection.disconnect();
+        }
+        return;
       }
       if (valueInput?.connection) {
         valueInput.connection.setCheck(getBlocklyCompatibleChecks(variable.getType()));
