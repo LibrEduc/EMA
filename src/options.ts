@@ -38,6 +38,7 @@ import HighContrastTheme from '@blockly/theme-highcontrast';
 import DeuteranopiaTheme from '@blockly/theme-deuteranopia';
 import TritanopiaTheme from '@blockly/theme-tritanopia';
 import BandWTheme from './theme_black_and_white';
+import SeshatTheme from './theme_seshat';
 
 /**
  * Maps theme keys to Blockly theme instances.
@@ -50,5 +51,6 @@ export const themeMappings: { [key: string]: Blockly.Theme } = {
   zelos: Blockly.Themes.Zelos,
   high_contrast: HighContrastTheme,
   dark: DarkTheme,
+  seshat: SeshatTheme,
   blackWhite: BandWTheme,
 };

@@ -138,9 +138,11 @@ export const variables_get_dynamic = function (
  * @returns Generated code string.
  */
 export const variables_set_type = function (
-  block: Blockly.Block,
-  generator: ArduinoGenerator,
+  _block: Blockly.Block,
+  _generator: ArduinoGenerator,
 ): string {
+  void _block;
+  void _generator;
   return '';
 };
 

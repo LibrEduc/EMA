@@ -10,6 +10,7 @@ import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
+import WebpackObfuscator from "webpack-obfuscator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -148,7 +149,11 @@ let config = {
 };
 
 export default (_env, argv) => {
-  if (argv.mode === "development") {
+  const isDevelopment = argv.mode === "development";
+  const isProduction = argv.mode === "production";
+  const isHardenedRelease = isProduction && process.env.UCB_HARDENED === "1";
+
+  if (isDevelopment) {
     config.output.path = path.resolve(__dirname, "build");
     config.devtool = "eval-cheap-module-source-map";
 
@@ -163,5 +168,46 @@ export default (_env, argv) => {
     // It can't find source maps for some Closure modules and that is expected
     config.ignoreWarnings = [/Failed to parse source map/];
   }
+
+  if (isProduction) {
+    // Release bundles must not expose source maps.
+    config.devtool = false;
+
+    if (isHardenedRelease) {
+      config.plugins.push(
+        new WebpackObfuscator(
+          {
+            compact: true,
+            controlFlowFlattening: false,
+            deadCodeInjection: false,
+            debugProtection: false,
+            disableConsoleOutput: false,
+            identifierNamesGenerator: "hexadecimal",
+            renameGlobals: false,
+            selfDefending: false,
+            simplify: true,
+            sourceMap: false,
+            splitStrings: false,
+            stringArray: true,
+            stringArrayThreshold: 0.6,
+            transformObjectKeys: false,
+            unicodeEscapeSequence: false,
+          },
+          [
+            "blockly.*.js",
+            "monaco.*.js",
+            "vendors.*.js",
+            "*.worker.js",
+            "editor.worker.js",
+            "ts.worker.js",
+            "css.worker.js",
+            "html.worker.js",
+            "json.worker.js",
+          ],
+        ),
+      );
+    }
+  }
+
   return config;
 };

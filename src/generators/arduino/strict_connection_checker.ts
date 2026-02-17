@@ -100,9 +100,9 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
   /**
    * Override doTypeChecks to use getBlockType() when available.
    * This is the key method that checks type compatibility.
-   * 
-   * @param a Connection to compare.
-   * @param b Connection to compare against.
+   *
+   * @param a - Connection to compare.
+   * @param b - Connection to compare against.
    * @returns True if the connections share a type.
    */
   doTypeChecks(a: Blockly.Connection, b: Blockly.Connection): boolean {
@@ -221,9 +221,9 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
 
   /**
    * Checks if two types are compatible.
-   * 
-   * @param sourceType The type from the source block (from getBlockType()).
-   * @param targetType The type expected by the target connection.
+   *
+   * @param sourceType - The type from the source block (from getBlockType()).
+   * @param targetType - The type expected by the target connection.
    * @returns True if types are compatible, false otherwise.
    */
   private checkTypeCompatibility(sourceType: string, targetType: string): boolean {

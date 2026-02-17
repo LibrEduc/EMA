@@ -383,10 +383,6 @@ export const defineVariablesConstBlock = (): void => {
       }
       const typedVariable = variable as VariableWithMutableType;
       const constOwner = typedVariable.__ucbConstBlockId;
-      const alreadyInitialized = Boolean(
-        (this as Blockly.Block & { __ucbConstInitialized?: boolean })
-          .__ucbConstInitialized,
-      );
       const valueInput = this.getInput("VAL_CONST");
       const targetBlock = valueInput?.connection?.targetBlock() || null;
       const isShadow = Boolean(targetBlock?.isShadow?.());

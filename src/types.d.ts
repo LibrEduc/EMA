@@ -32,10 +32,10 @@
 
 declare module "@blockly/block-plus-minus";
 declare module "@blockly/block-plus-minus/src/field_plus" {
-  export function createPlusField(args?: unknown): any;
+  export function createPlusField(args?: unknown): import("blockly").Field<unknown>;
 }
 declare module "@blockly/block-plus-minus/src/field_minus" {
-  export function createMinusField(args?: unknown): any;
+  export function createMinusField(args?: unknown): import("blockly").Field<unknown>;
 }
 declare module "@blockly/workspace-backpack";
 declare module "@blockly/workspace-minimap";

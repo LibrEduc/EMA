@@ -15,7 +15,7 @@ import { ArduinoGenerator, Order } from "../arduino_generator";
 import { getArduinoType } from "../arduino_types";
 
 /**
- * Array_with - value block with mutator, outputs {v0, v1, ...} (null when empty).
+ * Array_with - value block with mutator, outputs \{v0, v1, ...\} (null when empty).
  */
 export const Array_with = function (
   block: Blockly.Block,
@@ -74,7 +74,7 @@ export const Array_modify = function (
 };
 
 /**
- * Array_declare - int arr[size]; or int arr[] = {...};
+ * Array_declare - int arr[size]; or int arr[] = \{...\};
  */
 export const Array_declare = function (
   block: Blockly.Block,
@@ -117,7 +117,7 @@ export const Array_declare = function (
 };
 
 /**
- * Array_create - int arr[size]; or int arr[] = {...}; (1D-5D with FieldVariable)
+ * Array_create - int arr[size]; or int arr[] = \{...\}; (1D-5D with FieldVariable)
  */
 export const Array_create = function (
   block: Blockly.Block,
