@@ -4,6 +4,7 @@
 - color category
 - math category
 - text category
+- board selection
 
 ## 2.0.2, 2025-08-13
 - update with Blockly v12.2

@@ -12,7 +12,7 @@ exemples/
 
 # Generated files
 build/
-dist/
+**/dist/
 .DS_Store
 
 # Optional npm cache directory
