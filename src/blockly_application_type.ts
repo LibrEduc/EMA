@@ -797,6 +797,22 @@ export class BlocklyApplication implements BlocklyApplicationType {
     if (rendererFromUrl && this.workspace && previousRenderer !== newParam) {
       this.changeRenderer(newParam);
     }
+
+    newParam = searchParams.get('board');
+    const boardMenu = document.getElementById('boardMenu') as HTMLSelectElement | null;
+    if (boardMenu && boardMenu.options.length > 0) {
+      const fallbackBoard = boardMenu.options[boardMenu.selectedIndex]?.value
+        ?? boardMenu.options[0].value;
+      if (newParam == null || newParam == "null") {
+        newParam = fallbackBoard;
+      } else if (Array.from(boardMenu.options).some((option) => option.value === newParam)) {
+        boardMenu.value = newParam;
+      } else {
+        newParam = fallbackBoard;
+      }
+      window.sessionStorage?.setItem('paramBoard', newParam);
+      window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "board", newParam));
+    }
   };
 
   /**

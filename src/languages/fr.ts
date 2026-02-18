@@ -62,6 +62,7 @@ export const frLang: LanguageMap = {
     RENDERER_THRASOS: "thrasos",
     RENDERER_ZELOS: "zelos",
     RENDERER_MINI: "minimaliste",
+    BOARD_NONE: "Aucune",
     EMPTY_BACKPACK: "Vider le sac à dos",
     REMOVE_FROM_BACKPACK: "Retirer du sac à dos",
     COPY_TO_BACKPACK: "Copier dans le sac à dos",

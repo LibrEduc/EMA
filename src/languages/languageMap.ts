@@ -109,6 +109,7 @@ export interface LanguageItem {
   RENDERER_THRASOS: string;
   RENDERER_ZELOS: string;
   RENDERER_MINI: string;
+  BOARD_NONE: string;
   EMPTY_BACKPACK: string;
   REMOVE_FROM_BACKPACK: string;
   COPY_TO_BACKPACK: string;

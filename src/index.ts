@@ -111,6 +111,8 @@ import {
   getLangParamFromUrl,
   HTML_changeLanguage,
 } from "./language";
+import { languagesMap } from "./languages/languageMap";
+import { BOARD_PROFILES, DEFAULT_BOARD_ID } from "./boards";
 
 // Exposer arduinoGenerator globalement IMMÉDIATEMENT après l'import
 if (typeof window !== 'undefined') {
@@ -123,7 +125,7 @@ if (typeof window !== 'undefined') {
   debugLog('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
   debugLog('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
 }
-import { setPluginsInURL } from "./tools";
+import { addReplaceParamToUrl, setPluginsInURL } from "./tools";
 import { basic_toolbox } from "./toolbox";
 import { BlocklyApplication } from "./blockly_application_type";
 //plugins
@@ -157,6 +159,7 @@ const elements = {
   languageMenu: document.getElementById("languageMenu") as HTMLSelectElement,
   themeMenu: document.getElementById("themeMenu") as HTMLSelectElement,
   rendererMenu: document.getElementById("rendererMenu") as HTMLSelectElement,
+  boardMenu: document.getElementById("boardMenu") as HTMLSelectElement,
   pluginMinimap: document.getElementById("pluginMinimap") as HTMLInputElement,
   pluginHighlight: document.getElementById(
     "pluginHighlight",
@@ -252,6 +255,7 @@ const requiredElements = [
   "languageMenu",
   "themeMenu",
   "rendererMenu",
+  "boardMenu",
   "pluginMinimap",
   "pluginHighlight",
   "saveButton",
@@ -328,6 +332,96 @@ export const µcB_codeEditor = new LazyMonacoEditor();
 if (elements.contentMonacoEditor) {
   elements.contentMonacoEditor.style.display = "none";
 }
+
+/**
+ * Populates the board dropdown with all available board profiles.
+ */
+const HTML_populateBoards = (): void => {
+  if (!elements.boardMenu) {
+    return;
+  }
+
+  const getBoardFamily = (boardId: string): string => {
+    if (boardId === "none") return "Other";
+    if (boardId.startsWith("arduino_") || boardId === "lilypad" || boardId === "LilyPadUSB" || boardId === "attiny85") {
+      return "Arduino / AVR";
+    }
+    if (boardId.startsWith("esp8266")) return "ESP8266";
+    if (boardId.startsWith("esp32")) return "ESP32";
+    if (boardId.startsWith("franzininho_")) return "Franzininho";
+    if (boardId.startsWith("pi-pico")) return "Raspberry Pi Pico";
+    if (boardId.startsWith("st-nucleo")) return "STM32 Nucleo";
+    if (boardId.startsWith("teensy")) return "Teensy";
+    if (boardId.startsWith("makeblock_")) return "Makeblock";
+    if (boardId.startsWith("dfrobot_")) return "DFRobot";
+    if (boardId.startsWith("dagu_")) return "Dagu";
+    if (boardId.startsWith("peguino_")) return "Peguino";
+    if (boardId.startsWith("kit_")) return "Kits";
+    return "Other";
+  };
+
+  const currentLang =
+    (elements.languageMenu?.value && elements.languageMenu.value.trim().length > 0
+      ? elements.languageMenu.value
+      : getLangParamFromUrl()) || "en";
+  const noneLabel =
+    languagesMap[currentLang]?.BOARD_NONE ??
+    languagesMap.en?.BOARD_NONE ??
+    "none";
+  const previousValue = elements.boardMenu.value;
+
+  elements.boardMenu.innerHTML = "";
+  // Keep "none" as the first plain option (outside categories).
+  if (BOARD_PROFILES.none) {
+    const noneOption = document.createElement("option");
+    noneOption.value = "none";
+    noneOption.textContent = noneLabel;
+    elements.boardMenu.appendChild(noneOption);
+  }
+
+  const groupedBoards = new Map<string, Array<{ boardId: string; label: string }>>();
+  for (const [boardId, profile] of Object.entries(BOARD_PROFILES)) {
+    if (boardId === "none") continue;
+    const family = getBoardFamily(boardId);
+    const description =
+      typeof profile.description === "string" && profile.description.trim().length > 0
+        ? profile.description
+        : boardId;
+    const list = groupedBoards.get(family) ?? [];
+    list.push({ boardId, label: description });
+    groupedBoards.set(family, list);
+  }
+
+  const sortedFamilies = [...groupedBoards.keys()].sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" }),
+  );
+  for (const family of sortedFamilies) {
+    const familyBoards = groupedBoards.get(family);
+    if (!familyBoards || familyBoards.length === 0) continue;
+
+    familyBoards.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
+    const group = document.createElement("optgroup");
+    group.label = family;
+    for (const { boardId, label } of familyBoards) {
+      const option = document.createElement("option");
+      option.value = boardId;
+      option.textContent = label;
+      group.appendChild(option);
+    }
+    elements.boardMenu.appendChild(group);
+  }
+  if (elements.boardMenu.options.length > 0) {
+    const fallbackValue =
+      BOARD_PROFILES[DEFAULT_BOARD_ID] !== undefined
+        ? DEFAULT_BOARD_ID
+        : elements.boardMenu.options[0].value;
+    const targetValue =
+      (previousValue && BOARD_PROFILES[previousValue] !== undefined
+        ? previousValue
+        : fallbackValue);
+    elements.boardMenu.value = targetValue;
+  }
+};
 
 // Initialize Blockly Application
 // Ensure custom blocks are registered before toolbox injection.
@@ -738,6 +832,14 @@ export const unregisterContinuousToolboxComponents = (): void => {
  */
 const HTML_onChange = (): void => {
   elements.languageMenu.onchange = () => {
+    const selectedBoardBeforeLanguageChange = elements.boardMenu.value;
+    HTML_populateBoards();
+    if (
+      selectedBoardBeforeLanguageChange &&
+      BOARD_PROFILES[selectedBoardBeforeLanguageChange] !== undefined
+    ) {
+      elements.boardMenu.value = selectedBoardBeforeLanguageChange;
+    }
     const rtl: boolean = µcB.changeLanguage(true);
     µcB.WORKSPACE_OPTIONS["rtl"] = rtl;
     µcB.workspaceReboot();
@@ -749,6 +851,16 @@ const HTML_onChange = (): void => {
 
   elements.rendererMenu.onchange = () => {
     µcB.changeRenderer(elements.rendererMenu.value);
+  };
+
+  elements.boardMenu.onchange = () => {
+    const boardValue = elements.boardMenu.value;
+    window.sessionStorage?.setItem("paramBoard", boardValue);
+    window.history.pushState(
+      {},
+      "µcB",
+      addReplaceParamToUrl(window.location.search, "board", boardValue),
+    );
   };
 
   elements.pluginMinimap.onchange = () => {
@@ -965,6 +1077,7 @@ DomIsLoaded((): void => {
   }
 
   HTML_populateLanguages(µcB);
+  HTML_populateBoards();
   µcB.changeLanguage(false);
   µcB.workspaceInit();
 });

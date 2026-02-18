@@ -1,4 +1,11 @@
 # CHANGELOG.md
+## 2.1.0, 2026-02-17
+- variable typing
+- array category
+- color category
+- math category
+- text category
+
 ## 2.0.2, 2025-08-13
 - update with Blockly v12.2
 - fix switch toolboxes, categories and continuous 'Scratch like'

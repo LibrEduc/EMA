@@ -42,3 +42,14 @@ flex>flex-resizer {
   text-decoration: none;
   color: inherit;
 }
+
+#boardMenu optgroup {
+  background-color: #e5e7eb;
+  color: #000000;
+  font-weight: 600;
+}
+
+#boardMenu option {
+  background-color: #ffffff;
+  color: #111827;
+}

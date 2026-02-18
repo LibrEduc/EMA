@@ -62,6 +62,7 @@ export const arLang: LanguageMap = {
     RENDERER_THRASOS: "thrasos",
     RENDERER_ZELOS: "zelos",
     RENDERER_MINI: "minimalist",
+    BOARD_NONE: "بدون",
     EMPTY_BACKPACK: "إفراغ الحقيبة",
     REMOVE_FROM_BACKPACK: "إزالة من الحقيبة",
     COPY_TO_BACKPACK: "نسخ إلى الحقيبة",
