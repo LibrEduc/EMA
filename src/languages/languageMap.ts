@@ -110,6 +110,14 @@ export interface LanguageItem {
   RENDERER_ZELOS: string;
   RENDERER_MINI: string;
   BOARD_NONE: string;
+  A11Y_GENERATED_CODE_REGION: string;
+  A11Y_CONSOLE_REGION: string;
+  A11Y_HORIZONTAL_RESIZER: string;
+  A11Y_VERTICAL_RESIZER: string;
+  A11Y_COLLAPSE_CODE_PANEL: string;
+  A11Y_OPEN_CODE_PANEL: string;
+  A11Y_COLLAPSE_CONSOLE_PANEL: string;
+  A11Y_OPEN_CONSOLE_PANEL: string;
   EMPTY_BACKPACK: string;
   REMOVE_FROM_BACKPACK: string;
   COPY_TO_BACKPACK: string;

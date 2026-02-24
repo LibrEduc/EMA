@@ -6,7 +6,113 @@
 
 :root {
   --resizer-size: 10px;
-  --resizer-color: black;
+  --resizer-color: #1f2937;
+  --resizer-focus: #0b57d0;
+  --resizer-bg: #e5e7eb;
+  --toggle-bg: #ffffff;
+  --toggle-bg-hover: #e5e7eb;
+  --toggle-border: #6b7280;
+  --toggle-fg: #111827;
+  --panel-code-bg: #fffdfa;
+  --panel-code-fg: #111827;
+  --panel-console-bg: #f5f3ff;
+  --panel-console-fg: #111827;
+  --panel-right-bg: #f6f1e8;
+  --panel-bottom-bg: #ede9fe;
+  --topbar-bg: #ffffff;
+  --topbar-fg: #111827;
+  --topbar-control-bg: #ffffff;
+  --topbar-control-fg: #111827;
+  --topbar-control-border: #6b7280;
+  --topbar-control-hover: #e5e7eb;
+  --focus-ring: #0b57d0;
+  --board-group-bg: #e5e7eb;
+  --board-group-fg: #000000;
+  --board-option-bg: #ffffff;
+  --board-option-fg: #111827;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --resizer-color: #cbd5e1;
+    --resizer-focus: #93c5fd;
+    --resizer-bg: #0f172a;
+    --toggle-bg: #111827;
+    --toggle-bg-hover: #1f2937;
+    --toggle-border: #94a3b8;
+    --toggle-fg: #f8fafc;
+    --panel-code-bg: #0b1220;
+    --panel-code-fg: #f8fafc;
+    --panel-console-bg: #111827;
+    --panel-console-fg: #f8fafc;
+    --panel-right-bg: #111827;
+    --panel-bottom-bg: #0f172a;
+    --topbar-bg: #0b1220;
+    --topbar-fg: #f8fafc;
+    --topbar-control-bg: #111827;
+    --topbar-control-fg: #f8fafc;
+    --topbar-control-border: #94a3b8;
+    --topbar-control-hover: #1f2937;
+    --focus-ring: #93c5fd;
+    --board-group-bg: #1f2937;
+    --board-group-fg: #f8fafc;
+    --board-option-bg: #0b1220;
+    --board-option-fg: #f8fafc;
+  }
+}
+
+:root[data-ui-theme="dark"] {
+  --resizer-color: #cbd5e1;
+  --resizer-focus: #93c5fd;
+  --resizer-bg: #0f172a;
+  --toggle-bg: #111827;
+  --toggle-bg-hover: #1f2937;
+  --toggle-border: #94a3b8;
+  --toggle-fg: #f8fafc;
+  --panel-code-bg: #0b1220;
+  --panel-code-fg: #f8fafc;
+  --panel-console-bg: #111827;
+  --panel-console-fg: #f8fafc;
+  --panel-right-bg: #111827;
+  --panel-bottom-bg: #0f172a;
+  --topbar-bg: #0b1220;
+  --topbar-fg: #f8fafc;
+  --topbar-control-bg: #111827;
+  --topbar-control-fg: #f8fafc;
+  --topbar-control-border: #94a3b8;
+  --topbar-control-hover: #1f2937;
+  --focus-ring: #93c5fd;
+  --board-group-bg: #1f2937;
+  --board-group-fg: #f8fafc;
+  --board-option-bg: #0b1220;
+  --board-option-fg: #f8fafc;
+}
+
+:root[data-ui-theme="high-contrast"] {
+  --resizer-color: #000000;
+  --resizer-focus: #ffbf00;
+  --resizer-bg: #ffffff;
+  --toggle-bg: #ffffff;
+  --toggle-bg-hover: #f3f4f6;
+  --toggle-border: #000000;
+  --toggle-fg: #000000;
+  --panel-code-bg: #ffffff;
+  --panel-code-fg: #000000;
+  --panel-console-bg: #ffffff;
+  --panel-console-fg: #000000;
+  --panel-right-bg: #ffffff;
+  --panel-bottom-bg: #ffffff;
+  --topbar-bg: #ffffff;
+  --topbar-fg: #000000;
+  --topbar-control-bg: #ffffff;
+  --topbar-control-fg: #000000;
+  --topbar-control-border: #000000;
+  --topbar-control-hover: #f3f4f6;
+  --focus-ring: #ffbf00;
+  --board-group-bg: #d1d5db;
+  --board-group-fg: #000000;
+  --board-option-bg: #ffffff;
+  --board-option-fg: #000000;
 }
 
 html,
@@ -37,6 +143,7 @@ flex.wrapper_global {
 
 flex>flex-resizer {
   flex: 0 0 var(--resizer-size);
+  background-color: var(--resizer-bg);
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -44,6 +151,45 @@ flex>flex-resizer {
 flex.wrapper_element>flex-resizer {
   cursor: ew-resize;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='30'><path d='M2 0 v30 M5 0 v30 M8 0 v30' fill='none' stroke='var(--resizer-color)'/></svg>");
+}
+
+#flex_container_up > flex-resizer,
+#container_page > flex-resizer {
+  position: relative;
+}
+
+.flex-panel-toggle-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 28px;
+  border: 1px solid var(--toggle-border);
+  border-radius: 6px;
+  background: var(--toggle-bg);
+  color: var(--toggle-fg);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  z-index: 2;
+}
+
+.flex-panel-toggle-button--horizontal {
+  width: 28px;
+  height: 18px;
+}
+
+.flex-panel-toggle-button:hover {
+  background: var(--toggle-bg-hover);
+}
+
+.flex-panel-toggle-button:focus-visible,
+flex-resizer:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
 }
 
 flex.wrapper_global>flex-resizer {

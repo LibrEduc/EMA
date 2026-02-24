@@ -8,26 +8,29 @@
  */
 
 #flex_container_up_right {
-  background-color: rgba(247, 240, 228);
+  background-color: var(--panel-right-bg);
 }
 
 #flex_container_bottom_down {
-  background: rgb(186, 163, 250);
+  background: var(--panel-bottom-bg);
+  color: var(--panel-console-fg);
 }
 
 flex>flex-resizer {
-  background-color: rgb(255, 255, 255);
+  background-color: var(--resizer-bg);
 }
 
 .divTableCell {
   width: 100%;
+  background-color: var(--topbar-bg);
+  color: var(--topbar-fg);
 }
 
 .divTableCell div {
   display: inline-block;
   padding: 10px;
   text-align: center;
-  color: #000000;
+  color: var(--topbar-fg);
   font-family: arial, sans-serif;
 }
 
@@ -43,13 +46,65 @@ flex>flex-resizer {
   color: inherit;
 }
 
+#languageMenu,
+#themeMenu,
+#rendererMenu,
+#boardMenu {
+  background-color: var(--topbar-control-bg);
+  color: var(--topbar-control-fg);
+  border: 1px solid var(--topbar-control-border);
+}
+
+#languageMenu:hover,
+#themeMenu:hover,
+#rendererMenu:hover,
+#boardMenu:hover {
+  background-color: var(--topbar-control-hover);
+}
+
+#saveButton,
+#loadButton,
+#undoButton,
+#redoButton {
+  border-radius: 4px;
+}
+
+#saveButton:hover,
+#loadButton:hover,
+#undoButton:hover,
+#redoButton:hover {
+  background-color: var(--topbar-control-hover);
+}
+
+#languageMenu:focus-visible,
+#themeMenu:focus-visible,
+#rendererMenu:focus-visible,
+#boardMenu:focus-visible,
+#saveButton:focus-visible,
+#loadButton:focus-visible,
+#undoButton:focus-visible,
+#redoButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
 #boardMenu optgroup {
-  background-color: #e5e7eb;
-  color: #000000;
+  background-color: var(--board-group-bg);
+  color: var(--board-group-fg);
   font-weight: 600;
 }
 
 #boardMenu option {
-  background-color: #ffffff;
-  color: #111827;
+  background-color: var(--board-option-bg);
+  color: var(--board-option-fg);
+}
+
+#div_content_code {
+  background-color: var(--panel-code-bg);
+  color: var(--panel-code-fg);
+}
+
+#content_console {
+  background-color: var(--panel-console-bg);
+  color: var(--panel-console-fg);
 }

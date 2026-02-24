@@ -113,6 +113,7 @@ import {
 } from "./language";
 import { languagesMap } from "./languages/languageMap";
 import { BOARD_PROFILES, DEFAULT_BOARD_ID } from "./boards";
+import { themeMappings } from "./options";
 
 // Exposer arduinoGenerator globalement IMMÉDIATEMENT après l'import
 if (typeof window !== 'undefined') {
@@ -179,6 +180,184 @@ const elements = {
     "codeEditorSwitch",
   ) as HTMLInputElement,
   debugSwitch: document.getElementById("debugSwitch") as HTMLInputElement,
+};
+
+const syncUiPaletteTheme = (): void => {
+  const clamp = (value: number): number => Math.max(0, Math.min(255, Math.round(value)));
+  const toHex = (r: number, g: number, b: number): string =>
+    `#${[r, g, b].map((v) => clamp(v).toString(16).padStart(2, "0")).join("")}`;
+  type Rgb = { r: number; g: number; b: number };
+  const parseColor = (raw: string | undefined): Rgb | null => {
+    if (!raw) return null;
+    const value = raw.trim().toLowerCase();
+    if (value.startsWith("#")) {
+      const hex = value.slice(1);
+      if (hex.length === 3) {
+        return {
+          r: parseInt(hex[0] + hex[0], 16),
+          g: parseInt(hex[1] + hex[1], 16),
+          b: parseInt(hex[2] + hex[2], 16),
+        };
+      }
+      if (hex.length === 6) {
+        return {
+          r: parseInt(hex.slice(0, 2), 16),
+          g: parseInt(hex.slice(2, 4), 16),
+          b: parseInt(hex.slice(4, 6), 16),
+        };
+      }
+      return null;
+    }
+    const rgb = value.match(/^rgba?\(([^)]+)\)$/);
+    if (!rgb) return null;
+    const parts = rgb[1].split(",").map((p) => Number(p.trim()));
+    if (parts.length < 3 || parts.some((p) => !Number.isFinite(p))) return null;
+    return { r: clamp(parts[0]), g: clamp(parts[1]), b: clamp(parts[2]) };
+  };
+  const mix = (a: Rgb, b: Rgb, ratio: number): Rgb => ({
+    r: clamp(a.r + (b.r - a.r) * ratio),
+    g: clamp(a.g + (b.g - a.g) * ratio),
+    b: clamp(a.b + (b.b - a.b) * ratio),
+  });
+  const relativeLuminance = (c: Rgb): number => {
+    const channel = (x: number): number => {
+      const value = x / 255;
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+  };
+  const contrastRatio = (a: Rgb, b: Rgb): number => {
+    const l1 = relativeLuminance(a);
+    const l2 = relativeLuminance(b);
+    const light = Math.max(l1, l2);
+    const dark = Math.min(l1, l2);
+    return (light + 0.05) / (dark + 0.05);
+  };
+  const textOn = (bg: Rgb): Rgb => {
+    const white = { r: 248, g: 250, b: 252 };
+    const black = { r: 17, g: 24, b: 39 };
+    return contrastRatio(white, bg) >= contrastRatio(black, bg) ? white : black;
+  };
+  const ensureContrast = (
+    candidate: Rgb,
+    against: Rgb,
+    minRatio: number,
+    preferLighten: boolean,
+  ): Rgb => {
+    let out = candidate;
+    if (contrastRatio(out, against) >= minRatio) {
+      return out;
+    }
+    const toward = preferLighten ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 };
+    for (let i = 1; i <= 10; i += 1) {
+      const mixed = mix(out, toward, i * 0.08);
+      if (contrastRatio(mixed, against) >= minRatio) {
+        out = mixed;
+        break;
+      }
+      out = mixed;
+    }
+    return out;
+  };
+
+  const selectedThemeKey = (elements.themeMenu?.value || "classic") as keyof typeof themeMappings;
+  const selectedTheme = themeMappings[selectedThemeKey] ?? themeMappings.classic;
+  const styles = selectedTheme.componentStyles ?? {};
+  const workspace = parseColor(styles.workspaceBackgroundColour) ?? { r: 248, g: 250, b: 252 };
+  const toolbox = parseColor(styles.toolboxBackgroundColour) ?? mix(workspace, { r: 226, g: 232, b: 240 }, 0.45);
+  const flyout = parseColor(styles.flyoutBackgroundColour) ?? mix(toolbox, workspace, 0.4);
+  const accent = parseColor(styles.markerColour) ?? parseColor(styles.cursorColour) ?? { r: 11, g: 87, b: 208 };
+  const scrollbar = parseColor(styles.scrollbarColour) ?? mix(toolbox, textOn(toolbox), 0.45);
+  const isDark = relativeLuminance(workspace) < 0.35;
+
+  const panelCodeBg = mix(workspace, flyout, isDark ? 0.35 : 0.15);
+  const panelConsoleBg = mix(toolbox, flyout, isDark ? 0.5 : 0.35);
+  const panelRightBg = mix(workspace, toolbox, isDark ? 0.45 : 0.3);
+  const panelBottomBg = mix(flyout, toolbox, isDark ? 0.55 : 0.45);
+  const resizerBg = mix(workspace, toolbox, isDark ? 0.6 : 0.5);
+  // Derive button colors from each Blockly theme, then enforce readability.
+  const toggleBase = mix(resizerBg, accent, isDark ? 0.22 : 0.14);
+  const toggleBg = ensureContrast(toggleBase, resizerBg, 1.35, isDark);
+  const toggleFg = textOn(toggleBg);
+  const toggleHoverCandidate = mix(toggleBg, toggleFg, isDark ? 0.22 : 0.1);
+  const toggleHover = ensureContrast(toggleHoverCandidate, resizerBg, 1.45, isDark);
+  const toggleBorderCandidate = mix(toggleBg, accent, isDark ? 0.45 : 0.35);
+  const toggleBorder = ensureContrast(toggleBorderCandidate, toggleBg, 1.3, !isDark);
+
+  const rootStyle = document.documentElement.style;
+  rootStyle.setProperty("--panel-code-bg", toHex(panelCodeBg.r, panelCodeBg.g, panelCodeBg.b));
+  {
+    const fg = textOn(panelCodeBg);
+    rootStyle.setProperty("--panel-code-fg", toHex(fg.r, fg.g, fg.b));
+  }
+  rootStyle.setProperty("--panel-console-bg", toHex(panelConsoleBg.r, panelConsoleBg.g, panelConsoleBg.b));
+  {
+    const fg = textOn(panelConsoleBg);
+    rootStyle.setProperty("--panel-console-fg", toHex(fg.r, fg.g, fg.b));
+  }
+  rootStyle.setProperty("--panel-right-bg", toHex(panelRightBg.r, panelRightBg.g, panelRightBg.b));
+  rootStyle.setProperty("--panel-bottom-bg", toHex(panelBottomBg.r, panelBottomBg.g, panelBottomBg.b));
+  rootStyle.setProperty("--resizer-bg", toHex(resizerBg.r, resizerBg.g, resizerBg.b));
+  rootStyle.setProperty("--resizer-color", toHex(scrollbar.r, scrollbar.g, scrollbar.b));
+  rootStyle.setProperty("--resizer-focus", toHex(accent.r, accent.g, accent.b));
+  rootStyle.setProperty("--focus-ring", toHex(accent.r, accent.g, accent.b));
+  rootStyle.setProperty("--toggle-bg", toHex(toggleBg.r, toggleBg.g, toggleBg.b));
+  rootStyle.setProperty("--toggle-bg-hover", toHex(toggleHover.r, toggleHover.g, toggleHover.b));
+  rootStyle.setProperty("--toggle-border", toHex(toggleBorder.r, toggleBorder.g, toggleBorder.b));
+  rootStyle.setProperty("--toggle-fg", toHex(toggleFg.r, toggleFg.g, toggleFg.b));
+};
+
+const FLEX_UP_RIGHT_LAST_OPEN_KEY = "flexContainerUpRightLastOpen";
+const FLEX_BOTTOM_LAST_OPEN_KEY = "flexContainerBottomLastOpen";
+const RIGHT_PANEL_TOGGLE_BUTTON_ID = "flex_up_right_toggle_button";
+const BOTTOM_PANEL_TOGGLE_BUTTON_ID = "flex_bottom_toggle_button";
+const FLEX_COLLAPSE_EPSILON = 0.01;
+
+const parsePositiveFlex = (rawValue: string | null | undefined, fallback = 0): number => {
+  const parsed = Number(rawValue);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const snapNearZeroFlex = (previous: HTMLElement, next: HTMLElement): void => {
+  const prevGrow = parsePositiveFlex(previous.style.flexGrow, 0);
+  const nextGrow = parsePositiveFlex(next.style.flexGrow, 0);
+  const total = prevGrow + nextGrow;
+  if (total <= 0) {
+    return;
+  }
+  if (prevGrow <= FLEX_COLLAPSE_EPSILON) {
+    previous.style.flexGrow = "0";
+    next.style.flexGrow = String(total);
+    return;
+  }
+  if (nextGrow <= FLEX_COLLAPSE_EPSILON) {
+    next.style.flexGrow = "0";
+    previous.style.flexGrow = String(total);
+  }
+};
+
+type SupportedLang = "fr" | "en" | "es" | "ar";
+const getSupportedLang = (): SupportedLang => {
+  const value = (elements.languageMenu?.value || getLangParamFromUrl() || "en").toLowerCase();
+  if (value === "fr" || value === "es" || value === "ar") {
+    return value;
+  }
+  return "en";
+};
+
+const getA11yLabel = (
+  key:
+    | "A11Y_GENERATED_CODE_REGION"
+    | "A11Y_CONSOLE_REGION"
+    | "A11Y_HORIZONTAL_RESIZER"
+    | "A11Y_VERTICAL_RESIZER"
+    | "A11Y_COLLAPSE_CODE_PANEL"
+    | "A11Y_OPEN_CODE_PANEL"
+    | "A11Y_COLLAPSE_CONSOLE_PANEL"
+    | "A11Y_OPEN_CONSOLE_PANEL",
+): string => {
+  const lang = getSupportedLang();
+  return languagesMap[lang]?.[key] ?? languagesMap.en[key] ?? key;
 };
 
 /**
@@ -526,6 +705,226 @@ const saveLayoutToSessionStorage = (): void => {
       window.sessionStorage.setItem(key, flexGrowValue);
     }
   });
+
+  const rightOpenFlex = parsePositiveFlex(
+    layoutElements.flexContainerUpRight?.style.flexGrow,
+  );
+  if (rightOpenFlex > 0 && window.sessionStorage) {
+    window.sessionStorage.setItem(FLEX_UP_RIGHT_LAST_OPEN_KEY, String(rightOpenFlex));
+  }
+  const bottomOpenFlex = parsePositiveFlex(
+    layoutElements.flexContainerBottom?.style.flexGrow,
+  );
+  if (bottomOpenFlex > 0 && window.sessionStorage) {
+    window.sessionStorage.setItem(FLEX_BOTTOM_LAST_OPEN_KEY, String(bottomOpenFlex));
+  }
+};
+
+const updateRightPanelToggleButton = (): void => {
+  const button = document.getElementById(RIGHT_PANEL_TOGGLE_BUTTON_ID) as HTMLButtonElement | null;
+  const rightPanel = document.getElementById("flex_container_up_right") as HTMLElement | null;
+  if (!button || !rightPanel) {
+    return;
+  }
+  const isOpen = parsePositiveFlex(rightPanel.style.flexGrow) > 0;
+  button.textContent = isOpen ? ">" : "<";
+  button.title = isOpen
+    ? getA11yLabel("A11Y_COLLAPSE_CODE_PANEL")
+    : getA11yLabel("A11Y_OPEN_CODE_PANEL");
+  button.setAttribute(
+    "aria-label",
+    isOpen ? getA11yLabel("A11Y_COLLAPSE_CODE_PANEL") : getA11yLabel("A11Y_OPEN_CODE_PANEL"),
+  );
+  button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+};
+
+const updateBottomPanelToggleButton = (): void => {
+  const button = document.getElementById(BOTTOM_PANEL_TOGGLE_BUTTON_ID) as HTMLButtonElement | null;
+  const bottomPanel = document.getElementById("flex_container_bottom") as HTMLElement | null;
+  if (!button || !bottomPanel) {
+    return;
+  }
+  const isOpen = parsePositiveFlex(bottomPanel.style.flexGrow) > 0;
+  button.textContent = isOpen ? "v" : "^";
+  button.title = isOpen
+    ? getA11yLabel("A11Y_COLLAPSE_CONSOLE_PANEL")
+    : getA11yLabel("A11Y_OPEN_CONSOLE_PANEL");
+  button.setAttribute(
+    "aria-label",
+    isOpen ? getA11yLabel("A11Y_COLLAPSE_CONSOLE_PANEL") : getA11yLabel("A11Y_OPEN_CONSOLE_PANEL"),
+  );
+  button.setAttribute("aria-expanded", isOpen ? "true" : "false");
+};
+
+const toggleRightPanel = (): void => {
+  const leftPanel = document.getElementById("flex_container_up_left") as HTMLElement | null;
+  const rightPanel = document.getElementById("flex_container_up_right") as HTMLElement | null;
+  if (!leftPanel || !rightPanel) {
+    return;
+  }
+
+  const leftGrow = parsePositiveFlex(leftPanel.style.flexGrow, 1);
+  const rightGrow = parsePositiveFlex(rightPanel.style.flexGrow, 0);
+
+  if (rightGrow > 0) {
+    window.sessionStorage?.setItem(FLEX_UP_RIGHT_LAST_OPEN_KEY, String(rightGrow));
+    leftPanel.style.flexGrow = String(leftGrow + rightGrow);
+    rightPanel.style.flexGrow = "0";
+  } else {
+    const reopenGrow = parsePositiveFlex(
+      window.sessionStorage?.getItem(FLEX_UP_RIGHT_LAST_OPEN_KEY),
+      1,
+    );
+    const total = leftGrow + rightGrow;
+    const nextRightGrow = reopenGrow;
+    const nextLeftGrow = total > nextRightGrow ? total - nextRightGrow : 1;
+    leftPanel.style.flexGrow = String(nextLeftGrow);
+    rightPanel.style.flexGrow = String(nextRightGrow);
+  }
+
+  saveLayoutToSessionStorage();
+  updateRightPanelToggleButton();
+  µcB_workspaceOnResize();
+};
+
+const toggleBottomPanel = (): void => {
+  const upPanel = document.getElementById("flex_container_up") as HTMLElement | null;
+  const bottomPanel = document.getElementById("flex_container_bottom") as HTMLElement | null;
+  if (!upPanel || !bottomPanel) {
+    return;
+  }
+
+  const upGrow = parsePositiveFlex(upPanel.style.flexGrow, 1);
+  const bottomGrow = parsePositiveFlex(bottomPanel.style.flexGrow, 0);
+
+  if (bottomGrow > 0) {
+    window.sessionStorage?.setItem(FLEX_BOTTOM_LAST_OPEN_KEY, String(bottomGrow));
+    upPanel.style.flexGrow = String(upGrow + bottomGrow);
+    bottomPanel.style.flexGrow = "0";
+  } else {
+    const reopenGrow = parsePositiveFlex(
+      window.sessionStorage?.getItem(FLEX_BOTTOM_LAST_OPEN_KEY),
+      1,
+    );
+    const total = upGrow + bottomGrow;
+    const nextBottomGrow = reopenGrow;
+    const nextUpGrow = total > nextBottomGrow ? total - nextBottomGrow : 1;
+    upPanel.style.flexGrow = String(nextUpGrow);
+    bottomPanel.style.flexGrow = String(nextBottomGrow);
+  }
+
+  saveLayoutToSessionStorage();
+  updateBottomPanelToggleButton();
+  µcB_workspaceOnResize();
+};
+
+const initializeRightPanelToggleButton = (): void => {
+  const horizontalResizer = document.querySelector(
+    "#flex_container_up > flex-resizer",
+  ) as HTMLElement | null;
+  if (!horizontalResizer) {
+    return;
+  }
+  if (document.getElementById(RIGHT_PANEL_TOGGLE_BUTTON_ID)) {
+    updateRightPanelToggleButton();
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.id = RIGHT_PANEL_TOGGLE_BUTTON_ID;
+  button.type = "button";
+  button.className = "flex-panel-toggle-button";
+  button.textContent = ">";
+  button.setAttribute("aria-controls", "flex_container_up_right");
+  button.addEventListener("mousedown", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+  });
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    toggleRightPanel();
+  });
+  horizontalResizer.appendChild(button);
+  updateRightPanelToggleButton();
+};
+
+const initializeBottomPanelToggleButton = (): void => {
+  const verticalResizer = document.querySelector(
+    "#container_page > flex-resizer",
+  ) as HTMLElement | null;
+  if (!verticalResizer) {
+    return;
+  }
+  if (document.getElementById(BOTTOM_PANEL_TOGGLE_BUTTON_ID)) {
+    updateBottomPanelToggleButton();
+    return;
+  }
+
+  const button = document.createElement("button");
+  button.id = BOTTOM_PANEL_TOGGLE_BUTTON_ID;
+  button.type = "button";
+  button.className = "flex-panel-toggle-button flex-panel-toggle-button--horizontal";
+  button.textContent = "v";
+  button.setAttribute("aria-controls", "flex_container_bottom");
+  button.addEventListener("mousedown", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+  });
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    toggleBottomPanel();
+  });
+  verticalResizer.appendChild(button);
+  updateBottomPanelToggleButton();
+};
+
+const updateResizerAriaValue = (resizer: HTMLElement): void => {
+  const previous = resizer.previousElementSibling as HTMLElement | null;
+  const next = resizer.nextElementSibling as HTMLElement | null;
+  if (!previous || !next) return;
+  const prevGrow = parsePositiveFlex(previous.style.flexGrow, 1);
+  const nextGrow = parsePositiveFlex(next.style.flexGrow, 1);
+  const total = prevGrow + nextGrow;
+  const percentage = total > 0 ? Math.round((prevGrow / total) * 100) : 50;
+  resizer.setAttribute("aria-valuemin", "0");
+  resizer.setAttribute("aria-valuemax", "100");
+  resizer.setAttribute("aria-valuenow", String(percentage));
+};
+
+const applyA11yAttributes = (): void => {
+  if (elements.contentCode) {
+    elements.contentCode.setAttribute("role", "region");
+    elements.contentCode.setAttribute("aria-label", getA11yLabel("A11Y_GENERATED_CODE_REGION"));
+    elements.contentCode.setAttribute("tabindex", "0");
+  }
+  const consoleElement = document.getElementById("content_console") as HTMLElement | null;
+  if (consoleElement) {
+    consoleElement.setAttribute("role", "log");
+    consoleElement.setAttribute("aria-live", "polite");
+    consoleElement.setAttribute("aria-relevant", "additions text");
+    consoleElement.setAttribute("aria-label", getA11yLabel("A11Y_CONSOLE_REGION"));
+    consoleElement.setAttribute("tabindex", "0");
+  }
+  const horizontalResizer = document.querySelector("#flex_container_up > flex-resizer") as HTMLElement | null;
+  const verticalResizer = document.querySelector("#container_page > flex-resizer") as HTMLElement | null;
+  if (horizontalResizer) {
+    horizontalResizer.setAttribute("role", "separator");
+    horizontalResizer.setAttribute("aria-orientation", "vertical");
+    horizontalResizer.setAttribute("aria-label", getA11yLabel("A11Y_HORIZONTAL_RESIZER"));
+    horizontalResizer.setAttribute("tabindex", "0");
+    updateResizerAriaValue(horizontalResizer);
+  }
+  if (verticalResizer) {
+    verticalResizer.setAttribute("role", "separator");
+    verticalResizer.setAttribute("aria-orientation", "horizontal");
+    verticalResizer.setAttribute("aria-label", getA11yLabel("A11Y_VERTICAL_RESIZER"));
+    verticalResizer.setAttribute("tabindex", "0");
+    updateResizerAriaValue(verticalResizer);
+  }
+  updateRightPanelToggleButton();
+  updateBottomPanelToggleButton();
 };
 
 /**
@@ -607,9 +1006,12 @@ const µcB_workspaceManageResize = (
     } else {
       recall.style.cursor = "ns-resize";
     }
+    snapNearZeroFlex(prev, next);
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
     saveLayoutToSessionStorage();
+    updateRightPanelToggleButton();
+    updateBottomPanelToggleButton();
   };
 
   window.addEventListener("mousemove", onMouseMove);
@@ -646,6 +1048,57 @@ export const µcB_addFlexResizerEvents = (): void => {
       µcB_workspaceManageResize(mouseDown, "offsetHeight", "pageY");
     }
     Blockly.svgResize(µcB.workspace as Blockly.WorkspaceSvg);
+  });
+  document.body.addEventListener("mouseup", () => {
+    updateRightPanelToggleButton();
+    updateBottomPanelToggleButton();
+    const resizers = document.querySelectorAll("flex-resizer");
+    resizers.forEach((resizer) => updateResizerAriaValue(resizer as HTMLElement));
+  });
+  document.body.addEventListener("keydown", (event: KeyboardEvent) => {
+    const target = event.target as HTMLElement | null;
+    if (!target || target.tagName !== "FLEX-RESIZER") return;
+    const previous = target.previousElementSibling as HTMLElement | null;
+    const next = target.nextElementSibling as HTMLElement | null;
+    if (!previous || !next) return;
+
+    const parentNode = target.parentNode as HTMLElement;
+    const isHorizontal = parentNode.classList.contains("wrapper_element");
+    const isVertical = parentNode.classList.contains("wrapper_global");
+    const step = event.shiftKey ? 0.2 : 0.1;
+
+    let delta = 0;
+    if (isHorizontal) {
+      if (event.key === "ArrowLeft") delta = -step;
+      else if (event.key === "ArrowRight") delta = step;
+      else if (event.key === "Home") delta = -999;
+      else if (event.key === "End") delta = 999;
+    } else if (isVertical) {
+      if (event.key === "ArrowUp") delta = -step;
+      else if (event.key === "ArrowDown") delta = step;
+      else if (event.key === "Home") delta = -999;
+      else if (event.key === "End") delta = 999;
+    }
+    if (delta === 0) return;
+
+    event.preventDefault();
+    const prevGrow = parsePositiveFlex(previous.style.flexGrow, 1);
+    const nextGrow = parsePositiveFlex(next.style.flexGrow, 1);
+    const total = prevGrow + nextGrow;
+    if (total <= 0) return;
+
+    let nextPrevGrow = prevGrow + delta;
+    if (delta <= -999) nextPrevGrow = 0;
+    if (delta >= 999) nextPrevGrow = total;
+    nextPrevGrow = Math.max(0, Math.min(total, nextPrevGrow));
+    const nextNextGrow = Math.max(0, total - nextPrevGrow);
+    previous.style.flexGrow = String(nextPrevGrow);
+    next.style.flexGrow = String(nextNextGrow);
+    saveLayoutToSessionStorage();
+    updateRightPanelToggleButton();
+    updateBottomPanelToggleButton();
+    updateResizerAriaValue(target);
+    µcB_workspaceOnResize();
   });
 };
 
@@ -842,10 +1295,12 @@ const HTML_onChange = (): void => {
     }
     const rtl: boolean = µcB.changeLanguage(true);
     µcB.WORKSPACE_OPTIONS["rtl"] = rtl;
+    applyA11yAttributes();
     µcB.workspaceReboot();
   };
 
   elements.themeMenu.onchange = () => {
+    syncUiPaletteTheme();
     µcB.changeTheme(elements.themeMenu.value);
   };
 
@@ -1078,6 +1533,10 @@ DomIsLoaded((): void => {
 
   HTML_populateLanguages(µcB);
   HTML_populateBoards();
+  syncUiPaletteTheme();
+  initializeRightPanelToggleButton();
+  initializeBottomPanelToggleButton();
+  applyA11yAttributes();
   µcB.changeLanguage(false);
   µcB.workspaceInit();
 });
@@ -1114,6 +1573,7 @@ window.onload = (): void => {
     // Prevent startup events/reboots from overwriting saved blocks with an empty workspace.
     µcB.setAutoSaveEnabled(false);
     µcB.setParamsBlockly();
+    syncUiPaletteTheme();
     µcB.pluginsSetupWorkspace();
     // Initialize plugins first so minimap observes restore events, like historical behavior.
     µcB.workspaceSetupPlugins(false);
