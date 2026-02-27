@@ -15,6 +15,7 @@ import { defineControlsSwitchBlocks } from "./logic";
 import { defineMathCompatBlocks } from "./math";
 import { defineTextCompatBlocks } from "./text";
 import { defineArrayBlocks } from "./array";
+import { defineLibreBlocks } from "./libre";
 import { defineColourBlocks } from "./colour";
 import {
   defineVariablesConstBlock,
@@ -37,6 +38,7 @@ export const defineBlocklyArduinoCompatBlocks = (): void => {
   defineMathCompatBlocks();
   defineTextCompatBlocks();
   defineArrayBlocks();
+  defineLibreBlocks();
   defineColourBlocks();
 };
 
@@ -70,6 +72,7 @@ export const defineAllTypedVariableBlocks = (): void => {
 
 export {
   defineArrayBlocks,
+  defineLibreBlocks,
   defineControlsSwitchBlocks,
   defineColourBlocks,
   defineVariablesConstBlock,

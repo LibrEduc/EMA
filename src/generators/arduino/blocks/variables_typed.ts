@@ -37,13 +37,18 @@ export const variables_set_dynamic = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
-  // Typed variable setter - use standard variable name resolution
+  const valueBlock = block.getInputTargetBlock("VALUE");
+  if (
+    valueBlock?.type === "Array_with" ||
+    valueBlock?.type === "Array_list_3"
+  ) {
+    return "";
+  }
   const varName = generator.getVariableName(block.getFieldValue('VAR'));
   const value = generator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
-  const localWrapper = block.getInputTargetBlock("VALUE");
+  const localWrapper = valueBlock;
   const isLocal = localWrapper?.type === "variables_local";
 
-  // Ensure we have a valid variable name
   if (!varName || varName === 'variable') {
     console.warn('variables_set_dynamic: Invalid variable name');
     return '// Error: Invalid variable name\n';

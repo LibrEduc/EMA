@@ -147,7 +147,7 @@ const getTranslatedToolboxJson = (
    */
   function replaceCategoryName(category: Category) {
     if (
-      category.kind === "category" &&
+      (category.kind === "category" || category.kind === "search") &&
       category.name &&
       langMap[category.name as keyof LanguageItem]
     ) {

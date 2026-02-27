@@ -44,7 +44,7 @@ declare module "@blockly/continuous-toolbox";
 declare module "@blockly/plugin-workspace-search";
 declare module "@blockly/workspace-content-highlight";
 declare module "@blockly/plugin-modal";
-// declare module "@blockly/toolbox-search";
+declare module "@blockly/toolbox-search";
 declare module "@blockly/theme-dark";
 declare module "@blockly/theme-modern";
 declare module "@blockly/theme-highcontrast";

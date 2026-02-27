@@ -179,6 +179,31 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
     }
     return '__NO_TYPE__';
   },
+  /** List block: type is the type of the first connected element (no standalone "array" type). */
+  'arrayFromInputs': (block: Blockly.Block): string => {
+    const inferOne = (b: Blockly.Block | null): string | null => {
+      if (!b) return null;
+      const typed = b as Blockly.Block & { getBlockType?: () => string | null };
+      const raw = typed.getBlockType?.() ?? null;
+      const norm = normalizeBlocklyType(raw);
+      if (norm && norm !== "__NO_TYPE__") return norm;
+      const check = b.outputConnection?.getCheck() ?? null;
+      const checkNorm = normalizeBlocklyType(
+        Array.isArray(check) ? (check[0] ?? null) : check,
+      );
+      return checkNorm && checkNorm !== "__NO_TYPE__" ? checkNorm : null;
+    };
+    let i = 0;
+    for (;;) {
+      const input = block.getInput("ADD" + i);
+      if (!input) break;
+      const target = input.connection?.targetBlock();
+      const t = inferOne(target ?? null);
+      if (t) return t;
+      i++;
+    }
+    return "__NO_TYPE__";
+  },
   'procedureReturn': (block: Blockly.Block): string => {
     if (block.type !== "procedures_callreturn" || !block.workspace) {
       return 'int';
@@ -330,6 +355,13 @@ export function checkTypeCompatibility(
   if (
     (sourceType === "int" || sourceType === "float") &&
     (targetType === "Number" || targetType === "number")
+  ) {
+    return true;
+  }
+
+  if (
+    (sourceType === "Array" || sourceType === "array") &&
+    (targetType === "Array" || targetType === "array")
   ) {
     return true;
   }

@@ -139,6 +139,40 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.PLUGINS = [];
     this.WORKSPACE_OPTIONS = WORKSPACE_OPTIONS;
 
+    // Appliquer la locale et les messages (listes/tableaux) avant la première injection.
+    const initialLang = getLangParamFromUrl();
+    Blockly.setLocale(languagesMapBlockly[initialLang]);
+    mergeArrayMessages(initialLang);
+    const initialCustom = languagesMap[initialLang];
+    if (initialCustom) {
+      const msg = Blockly.Msg as Record<string, string>;
+      [
+        "VARIABLES_GET_ITEM",
+        "ARRAY_UNE_LISTE",
+        "ARRAY_WITH_TOOLTIP",
+        "ARRAY_WITH_HELPURL",
+        "LIBRE_TOOLTIP",
+        "LIBRE_LOOP_DO",
+        "TOOLBOX_SEARCH_PLACEHOLDER",
+        "TOOLBOX_SEARCH_HINT",
+        "TOOLBOX_SEARCH_NO_MATCH",
+      ].forEach((key) => {
+        const value = initialCustom[key as keyof typeof initialCustom];
+        if (value !== undefined) msg[key] = value;
+      });
+    }
+
+    // Thème au premier chargement (évite "Style libre_category must exist" à l'inject).
+    const themeFromUrl = new URLSearchParams(window.location.search).get("theme");
+    const themeFromMenu = (document.getElementById("themeMenu") as HTMLSelectElement | null)?.value;
+    const initialThemeKey =
+      (themeFromUrl && Object.prototype.hasOwnProperty.call(themeMappings, themeFromUrl)
+        ? themeFromUrl
+        : themeFromMenu && Object.prototype.hasOwnProperty.call(themeMappings, themeFromMenu)
+          ? themeFromMenu
+          : "classic") as keyof typeof themeMappings;
+    this.WORKSPACE_OPTIONS["theme"] = themeMappings[initialThemeKey] ?? themeMappings.classic;
+
     // Force checker via plugins only when strict typing overlay is enabled.
     const plugins = (WORKSPACE_OPTIONS.plugins as Record<string, unknown>) || {};
     if (ENABLE_STRICT_CONNECTION_CHECKER && !plugins.connectionChecker) {
@@ -1336,6 +1370,24 @@ export class BlocklyApplication implements BlocklyApplicationType {
       variableKeys.forEach((key) => {
         const value = customMessages[key];
         if (value) {
+          msg[key] = value;
+        }
+      });
+      // Clés utilisées par la catégorie Listes (blocs tableau/liste)
+      const arrayAndListKeys = [
+        "VARIABLES_GET_ITEM",
+        "ARRAY_UNE_LISTE",
+        "ARRAY_WITH_TOOLTIP",
+        "ARRAY_WITH_HELPURL",
+        "LIBRE_TOOLTIP",
+        "LIBRE_LOOP_DO",
+        "TOOLBOX_SEARCH_PLACEHOLDER",
+        "TOOLBOX_SEARCH_HINT",
+        "TOOLBOX_SEARCH_NO_MATCH",
+      ] as const;
+      arrayAndListKeys.forEach((key) => {
+        const value = customMessages[key];
+        if (value !== undefined) {
           msg[key] = value;
         }
       });

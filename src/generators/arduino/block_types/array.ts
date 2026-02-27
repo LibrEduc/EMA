@@ -12,10 +12,11 @@
 
 /**
  * Block type mappings for Array category (s4e blocks).
+ * Array_with has no fixed type: it is typed by its first connected input (__DYNAMIC__arrayFromInputs).
  */
 export const ARRAY_BLOCK_TYPES = {
-  Array_with: "array",
-  Array_list_3: "array", // legacy alias
+  Array_with: "__DYNAMIC__arrayFromInputs",
+  Array_list_3: "__DYNAMIC__arrayFromInputs", // legacy alias
   Array_getIndex_in_list: "null", // dynamic: element type
   Array_modify: "null",
   Array_declare: "null",

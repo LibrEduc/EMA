@@ -14,9 +14,73 @@ import * as Blockly from "blockly";
 import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
 import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { getBlocklyMsgOr } from "./shared";
+import { getBlocklyCompatibleChecks } from "./shared";
 import { getVariableTypeDropdownOptions } from "./variables";
+import { inferConnectedValueType } from "./shared";
 
 let arrayBlocksRegistered = false;
+
+/**
+ * Infers the list block's element type: from parent (define list/array) when connected, otherwise from first ADD input.
+ * Uses strict checks when type comes from parent so e.g. int does not accept float.
+ */
+function arrayWithTypeFromInputsOnChange(this: Blockly.Block, event: Blockly.Events.Abstract): void {
+  if (event.isUiEvent) return;
+  const workspace = this.workspace as Blockly.WorkspaceSvg | null;
+  if (workspace?.isDragging?.()) return;
+  if (
+    event.type !== Blockly.Events.BLOCK_CHANGE &&
+    event.type !== Blockly.Events.BLOCK_MOVE &&
+    event.type !== Blockly.Events.BLOCK_CREATE &&
+    event.type !== Blockly.Events.BLOCK_DELETE
+  ) {
+    return;
+  }
+  let firstType: string | null = null;
+  let strict = false;
+  const parent = this.outputConnection?.targetBlock?.() ?? null;
+  const parentChoice = parent?.getFieldValue?.("choix");
+  if (
+    parent &&
+    parentChoice === "c2" &&
+    (parent.type === "Array_declare" || parent.type === "Array_create")
+  ) {
+    const declaredType = parent.getFieldValue?.("type");
+    if (declaredType && declaredType !== "__NO_TYPE__") {
+      firstType = declaredType;
+      strict = true;
+    }
+  }
+  if (firstType === null) {
+    let i = 0;
+    for (;;) {
+      const input = this.getInput("ADD" + i);
+      if (!input) break;
+      const target = input.connection?.targetBlock();
+      const t = inferConnectedValueType(target ?? null);
+      if (t && t !== "__NO_TYPE__") {
+        firstType = t;
+        break;
+      }
+      i++;
+    }
+  }
+  const checks = firstType ? getBlocklyCompatibleChecks(firstType, strict) : null;
+  const blocklyOutputType =
+    firstType === "bool"
+      ? "Boolean"
+      : firstType === "int" || firstType === "float"
+        ? "Number"
+        : firstType === "string"
+          ? "String"
+          : firstType || null;
+  for (let j = 0; ; j++) {
+    const inp = this.getInput("ADD" + j);
+    if (!inp?.connection) break;
+    inp.connection.setCheck(checks);
+  }
+  this.setOutput(true, blocklyOutputType);
+}
 
 /**
  * Registers S4e-style array blocks (Array_create_with, Array_declare, Array_create,
@@ -129,6 +193,9 @@ export const defineArrayBlocks = (): void => {
     arrayWithHelper,
   );
 
+  (Blockly.Blocks["Array_with"] as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange =
+    arrayWithTypeFromInputsOnChange;
+
   type ArrayWithMutatorBlock = Blockly.Block & {
     itemCount_: number;
     topInput_: Blockly.Input | null;
@@ -144,10 +211,11 @@ export const defineArrayBlocks = (): void => {
   Blockly.Blocks["Array_list_3"] = Blockly.Blocks["Array_with"];
 
   // Array_getIndex_in_list - element at index of list value (variable or array expression)
+  // Accept any typed list (String, Number, etc.), not only "Array".
   Blockly.Blocks["Array_getIndex_in_list"] = {
     init: function (this: Blockly.Block) {
       this.appendValueInput("AT").setCheck("Number").appendField(getBlocklyMsgOr("ARRAY_GETINDEX_AT", "element at"));
-      this.appendValueInput("VAR").setCheck("Array").appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "in list"));
+      this.appendValueInput("VAR").setCheck(null).appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "in list"));
       this.setInputsInline(true);
       this.setOutput(true);
       this.setStyle("list_blocks");
@@ -170,6 +238,17 @@ export const defineArrayBlocks = (): void => {
       this.setHelpUrl(getBlocklyMsgOr("ARRAY_MODIFY_HELPURL", ""));
     },
   };
+
+  /** Notify connected list block (Array_with) to refresh its type from this define block. */
+  function notifyListBlockTypeFromParent(block: Blockly.Block): void {
+    const inputName = block.type === "Array_declare" ? "contenu" : "D0";
+    const listBlock = block.getInputTargetBlock(inputName);
+    if (listBlock?.type === "Array_with" || listBlock?.type === "Array_list_3") {
+      (listBlock as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange?.(
+        { type: Blockly.Events.BLOCK_CHANGE, isUiEvent: false } as Blockly.Events.Abstract,
+      );
+    }
+  }
 
   // Array_declare - int arr[size]; or int arr[] = {...};
   Blockly.Blocks["Array_declare"] = {
@@ -194,13 +273,32 @@ export const defineArrayBlocks = (): void => {
             [getBlocklyMsgOr("ARRAY_CONTIENT", "contains"), "c2"],
           ]),
           "choix",
-        );
+        )
+        .setCheck(getBlocklyCompatibleChecks("int", true));
       this.setInputsInline(false);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP2", "Declare array"));
       this.setHelpUrl(getBlocklyMsgOr("HELPURL", ""));
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (
+        event.type === Blockly.Events.BLOCK_CHANGE &&
+        (event as Blockly.Events.BlockChange).element === "field" &&
+        ((event as Blockly.Events.BlockChange).name === "type" ||
+          (event as Blockly.Events.BlockChange).name === "choix")
+      ) {
+        const contenuInput = this.getInput("contenu");
+        if (contenuInput?.connection) {
+          if (this.getFieldValue("choix") === "c1") {
+            contenuInput.connection.setCheck(getBlocklyCompatibleChecks("int", true));
+          } else {
+            contenuInput.connection.setCheck(null);
+          }
+        }
+        notifyListBlockTypeFromParent(this);
+      }
     },
   };
 
@@ -234,13 +332,32 @@ export const defineArrayBlocks = (): void => {
             [getBlocklyMsgOr("ARRAY_contenu", "contains"), "c2"],
           ]),
           "choix",
-        );
+        )
+        .setCheck(getBlocklyCompatibleChecks("int", true));
       this.setInputsInline(false);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP2", "Create array"));
       this.setHelpUrl(getBlocklyMsgOr("HELPURL", ""));
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (
+        event.type === Blockly.Events.BLOCK_CHANGE &&
+        (event as Blockly.Events.BlockChange).element === "field" &&
+        ((event as Blockly.Events.BlockChange).name === "type" ||
+          (event as Blockly.Events.BlockChange).name === "choix")
+      ) {
+        const d0Input = this.getInput("D0");
+        if (d0Input?.connection) {
+          if (this.getFieldValue("choix") === "c1") {
+            d0Input.connection.setCheck(getBlocklyCompatibleChecks("int", true));
+          } else {
+            d0Input.connection.setCheck(null);
+          }
+        }
+        notifyListBlockTypeFromParent(this);
+      }
     },
     updateShape_: function (this: Blockly.Block, option: string) {
       for (let i = 1; i < 7; i++) {

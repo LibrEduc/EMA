@@ -28,6 +28,7 @@ import * as procedures from './arduino/blocks/procedures';
 import * as text from './arduino/blocks/text';
 import * as variables from './arduino/blocks/variables';
 import * as variablesTyped from './arduino/blocks/variables_typed';
+import * as libre from './arduino/blocks/libre';
 
 export * from './arduino/arduino_generator';
 export * from './arduino/arduino_types';
@@ -53,6 +54,7 @@ const generators: typeof arduinoGenerator.forBlock = {
   ...text,
   ...variables,
   ...variablesTyped,
+  ...libre,
 };
 
 // Enregistrer explicitement chaque générateur

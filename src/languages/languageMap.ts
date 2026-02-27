@@ -94,6 +94,8 @@ export interface LanguageItem {
   CAT_MATHS: string;
   CAT_TEXT: string;
   CAT_LISTS: string;
+  CAT_LIBRE: string;
+  CAT_SEARCH: string;
   CAT_COLOR: string;
   CAT_VARIABLES: string;
   CAT_FUNCTIONS: string;
@@ -182,6 +184,11 @@ export interface LanguageItem {
   ARRAY_UNE_LISTE: string;
   ARRAY_WITH_TOOLTIP: string;
   ARRAY_WITH_HELPURL: string;
+  LIBRE_TOOLTIP: string;
+  LIBRE_LOOP_DO: string;
+  TOOLBOX_SEARCH_PLACEHOLDER: string;
+  TOOLBOX_SEARCH_HINT: string;
+  TOOLBOX_SEARCH_NO_MATCH: string;
   MATH_ANGLE: string;
   INOUT_ANGLE_MATHS_TOOLTIP: string;
   MATH_INTERVAL_TOOLTIP: string;

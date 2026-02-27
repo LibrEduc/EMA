@@ -95,10 +95,12 @@ export const setVariableTypeAndMarkManual = (
 /**
  * Converts a variable type into Blockly connection checks.
  * @param type - Variable or inferred type.
+ * @param strict - When true, int does not accept Number (so float blocks are rejected); for list "define" downward type checking.
  * @returns Array of compatible checks or null when not applicable.
  */
 export const getBlocklyCompatibleChecks = (
   type: string | null | undefined,
+  strict?: boolean,
 ): string[] | null => {
   const compatibleTypes = getCompatibleTypesForCheck(type);
   if (!compatibleTypes) {
@@ -108,12 +110,21 @@ export const getBlocklyCompatibleChecks = (
   if (checks.has("bool")) {
     checks.add("Boolean");
   }
-  if (checks.has("int") || checks.has("float")) {
-    checks.add("Number");
+  if (!strict) {
+    if (checks.has("int") || checks.has("float")) {
+      checks.add("Number");
+    }
+  } else {
+    if (checks.has("float")) {
+      checks.add("Number");
+    }
   }
   if (checks.has("string")) {
     checks.add("String");
     checks.add("Colour");
+  }
+  if (checks.has("array")) {
+    checks.add("Array");
   }
   return Array.from(checks);
 };
@@ -141,6 +152,7 @@ export const normalizeBlocklyTypeToVariableType = (type: string): string => {
   if (type === "Number") return "int";
   if (type === "String") return "string";
   if (type === "Colour") return "string";
+  if (type === "Array") return "array";
   return type;
 };
 

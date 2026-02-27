@@ -50,7 +50,7 @@ export const TYPE_COMPATIBILITY: Record<string, string[]> = {
 
   // Types spéciaux
   'null': ['null'], // null n'accepte que null
-  'array': ['array'], // array n'accepte que array
+  // Pas de type 'array' : les listes sont typées par leurs entrées (string, int, etc.)
 };
 
 const EXCLUDED_DROPDOWN_TYPES = new Set(['null', 'array']);

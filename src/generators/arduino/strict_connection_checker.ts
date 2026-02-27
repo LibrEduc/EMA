@@ -138,7 +138,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       const sourceBlock = sourceConnection.getSourceBlock();
 
       // Skip strict checks for blocks that trigger Blockly edge cases (e.g. value block drag from flyout)
-      if (sourceBlock?.type === 'Array_list_3') {
+      if (sourceBlock?.type === 'Array_list_3' || sourceBlock?.type === 'Array_with') {
         return super.doTypeChecks(a, b);
       }
 

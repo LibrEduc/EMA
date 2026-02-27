@@ -108,3 +108,8 @@ flex>flex-resizer {
   background-color: var(--panel-console-bg);
   color: var(--panel-console-fg);
 }
+
+/* Corrige le CSS Blockly qui utilise maxWidth (invalide) au lieu de max-width */
+.blocklyDropDownContent {
+  max-width: 18rem;
+}

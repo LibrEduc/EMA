@@ -17,6 +17,7 @@
  */
 
 import * as Blockly from "blockly";
+import { getArduinoType } from "./arduino_types";
 
 export enum Order {
   ATOMIC = 0, // 0 "" ...
@@ -327,6 +328,36 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       }
     }
 
+    // Variables assigned from a list block are declared as ElementType varName[] = {...};
+    const declaredAsArrayVariableIds = new Set<string>();
+    for (const block of workspace.getAllBlocks(false)) {
+      if (
+        block.type !== "variables_set_dynamic" &&
+        block.type !== "variables_set"
+      ) {
+        continue;
+      }
+      const valueBlock = block.getInputTargetBlock?.("VALUE");
+      if (
+        valueBlock?.type !== "Array_with" &&
+        valueBlock?.type !== "Array_list_3"
+      ) {
+        continue;
+      }
+      const varId = block.getFieldValue?.("VAR");
+      if (!varId || declaredAsArrayVariableIds.has(varId)) continue;
+      const varName = this.nameDB_!.getName(varId, Blockly.Names.NameType.VARIABLE);
+      const listCode = this.valueToCode(block, "VALUE", Order.ASSIGNMENT);
+      if (!listCode) continue;
+      const typedList = valueBlock as Blockly.Block & { getBlockType?: () => string | null };
+      let elementType = typedList.getBlockType?.() ?? null;
+      if (!elementType || elementType === "__NO_TYPE__") elementType = "int";
+      const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
+      const cppType = getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
+      this.addArrayDeclaration(cppType + " " + varName + "[] = " + listCode + ";");
+      declaredAsArrayVariableIds.add(varId);
+    }
+
     const getProcedureParamNames = (block: Blockly.Block): Set<string> => {
       const names = new Set<string>();
       const vars = (block as Blockly.Block & { getVars?: () => string[] | null }).getVars?.();
@@ -408,6 +439,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         continue;
       }
       if (declaredVariableIds.has(variable.getId())) {
+        continue;
+      }
+      if (declaredAsArrayVariableIds.has(variable.getId())) {
         continue;
       }
       if (

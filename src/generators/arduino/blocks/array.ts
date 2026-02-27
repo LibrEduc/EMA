@@ -12,10 +12,10 @@
 
 import * as Blockly from "blockly";
 import { ArduinoGenerator, Order } from "../arduino_generator";
-import { getArduinoType } from "../arduino_types";
+import { getArduinoType, getDefaultValueForType } from "../arduino_types";
 
 /**
- * Array_with - value block with mutator, outputs \{v0, v1, ...\} (null when empty).
+ * Array_with - list literal; type comes from first connected input. Empty slots use type default (no "null").
  */
 export const Array_with = function (
   block: Blockly.Block,
@@ -24,16 +24,26 @@ export const Array_with = function (
   const typedBlock = block as Blockly.Block & { itemCount_?: number };
   let itemCount = typedBlock.itemCount_ ?? 0;
 
-  // Fallback for legacy/partial states: detect ADD inputs dynamically.
   if (itemCount <= 0) {
     let i = 0;
     while (block.getInput("ADD" + i)) i++;
     itemCount = i;
   }
 
+  const blockWithType = block as Blockly.Block & { getBlockType?: () => string | null };
+  const elementType = blockWithType.getBlockType?.() ?? null;
+  const safeType =
+    elementType && elementType !== "__NO_TYPE__"
+      ? elementType === "bool"
+        ? "boolean"
+        : elementType
+      : "int";
+  const defaultVal =
+    getArduinoType(safeType)?.defaultValue ?? getDefaultValueForType("int") ?? "0";
+
   const parts: string[] = [];
   for (let i = 0; i < itemCount; i++) {
-    const value = generator.valueToCode(block, "ADD" + i, Order.ATOMIC) || "null";
+    const value = generator.valueToCode(block, "ADD" + i, Order.ATOMIC) || defaultVal;
     parts.push(value);
   }
   return ["{" + parts.join(", ") + "}", Order.ATOMIC];

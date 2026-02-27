@@ -34,7 +34,9 @@ import * as Blockly from "blockly";
 import { SeparatorAxis } from "blockly/core/flyout_separator";
 import type * as Monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
-// import "@blockly/toolbox-search";
+import "@blockly/toolbox-search";
+import { registerToolboxSearchI18n } from "./toolbox_search_i18n";
+registerToolboxSearchI18n();
 
 // Configuration de Monaco Editor pour utilisation locale (chemins relatifs)
 // Force la définition de MonacoEnvironment pour s'assurer que les chemins sont corrects
@@ -628,6 +630,8 @@ const µcB: BlocklyApplication = new BlocklyApplication(
       pinch: true,
     },
     trashcan: true,
+    /** Path to Blockly media (sounds, cursors, sprites). After build, public/media is copied to output as media/. */
+    media: "./media/",
   },
   elements.workspaceContentBlockly,
 );

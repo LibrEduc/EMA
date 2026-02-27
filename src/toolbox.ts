@@ -87,11 +87,30 @@ export const basic_toolbox: ToolboxConfiguration = {
       custom: 'RECENTLY_USED',
       categorystyle: 'recently_used_category',
     },*/
-    // {
-    //   'kind': 'search',
-    //   'name': 'Search',
-    //   'contents': [],
-    // },
+    {
+      'kind': 'search',
+      'name': 'CAT_SEARCH',
+      'contents': [],
+    },
+    {
+      'kind': 'category',
+      'name': 'CAT_LIBRE',
+      'categorystyle': 'libre_category',
+      'contents': [
+        { 'kind': 'block', 'type': 'libre_start' },
+        { 'kind': 'block', 'type': 'libre_in' },
+        { 'kind': 'block', 'type': 'libre_out' },
+        { 'kind': 'block', 'type': 'libre_in_out' },
+        { 'kind': 'block', 'type': 'libre_end' },
+        { 'kind': 'block', 'type': 'libre_loop' },
+        { 'kind': 'block', 'type': 'libre_loop_with_return' },
+        { 'kind': 'block', 'type': 'libre_loop_inside' },
+        { 'kind': 'block', 'type': 'libre_loop_inside_in' },
+        { 'kind': 'block', 'type': 'libre_loop_inside_in_mutator' },
+        { 'kind': 'block', 'type': 'libre_loop_do_inside' },
+        { 'kind': 'block', 'type': 'libre_loop_do_inside_in' },
+      ],
+    },
     {
       'kind': 'category',
       'name': 'CAT_LOGIC',

@@ -35,10 +35,16 @@ export const variables_set = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string | [string, number] {
-  // Variable setter.
-  const argument0 = generator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
-  const varName = generator.getVariableName(block.getFieldValue('VAR'));
-  return varName + ' = ' + argument0 + ';\n';
+  const valueBlock = block.getInputTargetBlock?.("VALUE");
+  if (
+    valueBlock?.type === "Array_with" ||
+    valueBlock?.type === "Array_list_3"
+  ) {
+    return "";
+  }
+  const argument0 = generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  return varName + " = " + argument0 + ";\n";
 };
 
 /**

@@ -40,17 +40,43 @@ import TritanopiaTheme from '@blockly/theme-tritanopia';
 import BandWTheme from './theme_black_and_white';
 import SeshatTheme from './theme_seshat';
 
+/** Styles pour la catégorie et les blocs « Libre » (couleur Arduino #00979D). */
+const LIBRE_CATEGORY_STYLE = { colour: '#00979D' };
+const LIBRE_BLOCK_STYLE = { colourPrimary: '#00979D' };
+
+/** Noir pour le thème black and white (comme les autres catégories). */
+const LIBRE_BLACK = { colour: '#000000', colourPrimary: '#000000' };
+
+/**
+ * Étend un thème avec les styles libre_category et libre_blocks pour éviter
+ * l'erreur "Style libre_category must exist and contain a colour value"
+ * lorsque la catégorie Libre est affichée avec un thème qui ne les définit pas.
+ * En thème black and white, libre reste noir comme les autres catégories.
+ */
+function extendThemeWithLibre(key: string, base: Blockly.Theme): Blockly.Theme {
+  const isBlackWhite = key === 'blackWhite';
+  const categoryStyle = isBlackWhite ? { colour: LIBRE_BLACK.colour } : LIBRE_CATEGORY_STYLE;
+  const blockStyle = isBlackWhite ? { colourPrimary: LIBRE_BLACK.colourPrimary } : LIBRE_BLOCK_STYLE;
+  return Blockly.Theme.defineTheme(`${key}_libre`, {
+    name: `${key}_libre`,
+    base,
+    categoryStyles: { libre_category: categoryStyle },
+    blockStyles: { libre_blocks: blockStyle },
+  });
+}
+
 /**
  * Maps theme keys to Blockly theme instances.
+ * Chaque thème est étendu avec libre_category et libre_blocks.
  */
 export const themeMappings: { [key: string]: Blockly.Theme } = {
-  classic: Blockly.Themes.Classic,
-  modern: ModernTheme,
-  deuteranopia: DeuteranopiaTheme,
-  tritanopia: TritanopiaTheme,
-  zelos: Blockly.Themes.Zelos,
-  high_contrast: HighContrastTheme,
-  dark: DarkTheme,
-  seshat: SeshatTheme,
-  blackWhite: BandWTheme,
+  classic: extendThemeWithLibre('classic', Blockly.Themes.Classic),
+  modern: extendThemeWithLibre('modern', ModernTheme),
+  deuteranopia: extendThemeWithLibre('deuteranopia', DeuteranopiaTheme),
+  tritanopia: extendThemeWithLibre('tritanopia', TritanopiaTheme),
+  zelos: extendThemeWithLibre('zelos', Blockly.Themes.Zelos),
+  high_contrast: extendThemeWithLibre('high_contrast', HighContrastTheme),
+  dark: extendThemeWithLibre('dark', DarkTheme),
+  seshat: extendThemeWithLibre('seshat', SeshatTheme),
+  blackWhite: extendThemeWithLibre('blackWhite', BandWTheme),
 };

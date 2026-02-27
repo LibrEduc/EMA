@@ -24,6 +24,7 @@ const SeshatTheme = Blockly.Theme.defineTheme("seshat", {
     variable_blocks: { colourPrimary: "#9081bc" },
     variable_dynamic_blocks: { colourPrimary: "#7461a8" },
     hat_blocks: { colourPrimary: "#5a9359" },
+    libre_blocks: { colourPrimary: "#00979D" },
   },
   categoryStyles: {
     colour_category: { colour: "#56a5d8" },
@@ -35,6 +36,7 @@ const SeshatTheme = Blockly.Theme.defineTheme("seshat", {
     text_category: { colour: "#ab3c16" },
     variable_category: { colour: "#9081bc" },
     variable_dynamic_category: { colour: "#7461a8" },
+    libre_category: { colour: "#00979D" },
   },
   componentStyles: {
     workspaceBackgroundColour: "#f8f8f8",

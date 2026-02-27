@@ -18,6 +18,7 @@ import { TEXT_BLOCK_TYPES } from "./text";
 import { VARIABLES_BLOCK_TYPES } from "./variables";
 import { LOOPS_BLOCK_TYPES } from "./loops";
 import { COLOUR_BLOCK_TYPES } from "./colour";
+import { LIBRE_BLOCK_TYPES } from "./libre";
 
 export const BLOCK_TYPES = {
   ...LOGIC_BLOCK_TYPES,
@@ -25,6 +26,7 @@ export const BLOCK_TYPES = {
   ...MATH_BLOCK_TYPES,
   ...LOOPS_BLOCK_TYPES,
   ...COLOUR_BLOCK_TYPES,
+  ...LIBRE_BLOCK_TYPES,
   ...PROCEDURES_BLOCK_TYPES,
   ...TEXT_BLOCK_TYPES,
   ...VARIABLES_BLOCK_TYPES,

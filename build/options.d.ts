@@ -31,6 +31,7 @@
 import * as Blockly from 'blockly';
 /**
  * Maps theme keys to Blockly theme instances.
+ * Chaque thème est étendu avec libre_category et libre_blocks.
  */
 export declare const themeMappings: {
     [key: string]: Blockly.Theme;

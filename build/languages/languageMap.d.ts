@@ -54,6 +54,8 @@ export interface LanguageItem {
     CAT_MATHS: string;
     CAT_TEXT: string;
     CAT_LISTS: string;
+    CAT_LIBRE: string;
+    CAT_SEARCH: string;
     CAT_COLOR: string;
     CAT_VARIABLES: string;
     CAT_FUNCTIONS: string;
@@ -70,6 +72,14 @@ export interface LanguageItem {
     RENDERER_ZELOS: string;
     RENDERER_MINI: string;
     BOARD_NONE: string;
+    A11Y_GENERATED_CODE_REGION: string;
+    A11Y_CONSOLE_REGION: string;
+    A11Y_HORIZONTAL_RESIZER: string;
+    A11Y_VERTICAL_RESIZER: string;
+    A11Y_COLLAPSE_CODE_PANEL: string;
+    A11Y_OPEN_CODE_PANEL: string;
+    A11Y_COLLAPSE_CONSOLE_PANEL: string;
+    A11Y_OPEN_CONSOLE_PANEL: string;
     EMPTY_BACKPACK: string;
     REMOVE_FROM_BACKPACK: string;
     COPY_TO_BACKPACK: string;
@@ -134,6 +144,11 @@ export interface LanguageItem {
     ARRAY_UNE_LISTE: string;
     ARRAY_WITH_TOOLTIP: string;
     ARRAY_WITH_HELPURL: string;
+    LIBRE_TOOLTIP: string;
+    LIBRE_LOOP_DO: string;
+    TOOLBOX_SEARCH_PLACEHOLDER: string;
+    TOOLBOX_SEARCH_HINT: string;
+    TOOLBOX_SEARCH_NO_MATCH: string;
     MATH_ANGLE: string;
     INOUT_ANGLE_MATHS_TOOLTIP: string;
     MATH_INTERVAL_TOOLTIP: string;

@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@blockly/block-plus-minus": "^9.0.9",
+    "@blockly/block-shareable-procedures": "^6.0.10",
     "@blockly/continuous-toolbox": "^7.0.8",
     "@blockly/field-angle": "^6.0.8",
     "@blockly/field-colour": "^6.0.11",
