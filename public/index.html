@@ -6,6 +6,7 @@
   <title>µcBlockly</title>
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: ws: wss:; frame-src 'self' https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https: file: app:">
   <% const faviconSvg = publicAsset("favicon.svg"); if (faviconSvg) { %>
   <link rel="icon" type="image/svg+xml" href="<%= faviconSvg %>">
   <% } %>

@@ -173,6 +173,7 @@ export default (_env, argv) => {
     // Release bundles must not expose source maps.
     config.devtool = false;
 
+    // Obfuscation uniquement si UCB_HARDENED=1 (évite crash sur Windows)
     if (isHardenedRelease) {
       config.plugins.push(
         new WebpackObfuscator(
@@ -180,16 +181,16 @@ export default (_env, argv) => {
             compact: true,
             controlFlowFlattening: false,
             deadCodeInjection: false,
-            debugProtection: false,
-            disableConsoleOutput: false,
+            debugProtection: true,
+            disableConsoleOutput: true,
             identifierNamesGenerator: "hexadecimal",
             renameGlobals: false,
-            selfDefending: false,
+            selfDefending: true,
             simplify: true,
             sourceMap: false,
             splitStrings: false,
             stringArray: true,
-            stringArrayThreshold: 0.6,
+            stringArrayThreshold: 0.5,
             transformObjectKeys: false,
             unicodeEscapeSequence: false,
           },
