@@ -504,7 +504,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     const functionNames = Object.values(this.functionNames_);
     const setups = Object.values(this.setups_);
     const loop = Object.values(this.loop_);
-    // const pins = Object.values(this.pins_); // Utilisé dans validatePinUsage()
+    // const pins = Object.values(this.pins_); // Used in validatePinUsage()
 
     // Call Blockly.CodeGenerator's finish.
     super.finish(code);

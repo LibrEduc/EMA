@@ -74,7 +74,7 @@ patchConnectionCheckerForConstBlock();
 patchBlocklyDefensive();
 
 import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
-import { ToolboxConfiguration } from "./toolbox";
+import { ToolboxConfiguration, getToolboxForCurrentBoard } from "./toolbox";
 import { themeMappings } from "./options";
 import { addReplaceParamToUrl } from "./tools";
 import { arduinoGenerator } from "./generators/arduino";
@@ -86,6 +86,8 @@ import {
   HTML_changeLanguage,
 } from './language';
 import { mergeArrayMessages } from './languages/array_messages';
+import { mergeBoardMessages } from './languages/board_messages';
+import { refreshBoardPinDropdowns } from './categories/blockly';
 
 /* import {blocks, unregisterProcedureBlocks} from '@blockly/block-shareable-procedures';
 unregisterProcedureBlocks();
@@ -109,11 +111,7 @@ import { ZoomToFitControl } from "@blockly/zoom-to-fit";
 const div_workspace_content_blockly: HTMLElement = document.getElementById("div_workspace_content_blockly")!;
 const div_content_code: HTMLElement = document.getElementById('div_content_code')!;
 
-/* The above code is creating instances of different plugins for a TypeScript application.*/
-
-
-/* The above code is defining an interface called `BlocklyApplicationType` in TypeScript. This
-interface has the following properties: */
+/** Application state and configuration (workspace, toolbox, language, plugins). */
 export interface BlocklyApplicationType {
   workspace: Blockly.Workspace;
   toolbox: ToolboxConfiguration;
@@ -139,10 +137,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.PLUGINS = [];
     this.WORKSPACE_OPTIONS = WORKSPACE_OPTIONS;
 
-    // Appliquer la locale et les messages (listes/tableaux) avant la première injection.
+    // Apply locale and messages (lists/arrays) before first injection.
     const initialLang = getLangParamFromUrl();
     Blockly.setLocale(languagesMapBlockly[initialLang]);
     mergeArrayMessages(initialLang);
+    mergeBoardMessages(initialLang);
     const initialCustom = languagesMap[initialLang];
     if (initialCustom) {
       const msg = Blockly.Msg as Record<string, string>;
@@ -162,7 +161,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       });
     }
 
-    // Thème au premier chargement (évite "Style libre_category must exist" à l'inject).
+    // Theme on first load (avoids "Style libre_category must exist" on inject).
     const themeFromUrl = new URLSearchParams(window.location.search).get("theme");
     const themeFromMenu = (document.getElementById("themeMenu") as HTMLSelectElement | null)?.value;
     const initialThemeKey =
@@ -374,7 +373,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         }
         if (variable.getName() === 'item') {
           variableMap.deleteVariable(variable);
-          debugLog('🗑️ Variable "item" supprimée');
+          debugLog('🗑️ Variable "item" removed');
           break;
         }
       }
@@ -451,11 +450,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
       uninstallStrictTypeEnforcer(this.workspace);
     }
     this.workspace.dispose();
-    // S'assurer que la langue actuelle est appliquée à la toolbox ET à Blockly
+    // Ensure current language is applied to toolbox AND Blockly
     const currentLang = getLangParamFromUrl();
     this.changeLanguageToolbox(currentLang);
     Blockly.setLocale(languagesMapBlockly[currentLang]);
     mergeArrayMessages(currentLang);
+    mergeBoardMessages(currentLang);
     const originalToolbox = this.WORKSPACE_OPTIONS.toolbox as
       | ToolboxConfiguration
       | undefined;
@@ -469,7 +469,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       div_workspace_content_blockly,
       this.WORKSPACE_OPTIONS,
     );
-    // Reconnecter les mécanismes requis après réinjection
+    // Reconnect required mechanisms after reinjection
     if (ENABLE_STRICT_CONNECTION_CHECKER) {
       registerStrictConnectionChecker(this.workspace);
     }
@@ -847,6 +847,22 @@ export class BlocklyApplication implements BlocklyApplicationType {
       window.sessionStorage?.setItem('paramBoard', newParam);
       window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "board", newParam));
     }
+    // Sync toolbox (and pin dropdowns) with current board when board came from URL or default.
+    if (this.workspace) {
+      this.syncToolboxAndPinsToCurrentBoard();
+    }
+  };
+
+  /**
+   * Updates the workspace toolbox to include or remove the board category
+   * according to the current board selection, and refreshes pin dropdowns.
+   */
+  public syncToolboxAndPinsToCurrentBoard = (): void => {
+    if (!this.workspace) return;
+    const lang = getLangParamFromUrl();
+    const toolbox = translateToolbox(lang, getToolboxForCurrentBoard(this.toolbox));
+    (this.workspace as Blockly.WorkspaceSvg).updateToolbox(toolbox);
+    refreshBoardPinDropdowns(this.workspace);
   };
 
   /**
@@ -951,6 +967,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.isBulkLoading = false;
       }
       this.normalizeVariableTypes();
+      refreshBoardPinDropdowns(this.workspace);
     } catch (error) {
       console.error('Failed to load workspace blocks:', error);
       // Remove corrupted data to prevent repeated failures
@@ -1038,6 +1055,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
 
         this.normalizeVariableTypes();
         this.hasBlocks = this.workspace.getTopBlocks(false).length > 0;
+        refreshBoardPinDropdowns(this.workspace);
         this.workspaceSaveBlocks("mainWorkspace_blocks");
         const code = arduinoGenerator.workspaceToCode(this.workspace);
         µcB_codeEditor.setValue(code);
@@ -1278,7 +1296,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * @param newLang - Language code used to localize toolbox categories.
    */
   private readonly changeLanguageToolbox = (newLang: string): void => {
-    this.WORKSPACE_OPTIONS.toolbox = translateToolbox(newLang, this.toolbox);
+    this.WORKSPACE_OPTIONS.toolbox = translateToolbox(newLang, getToolboxForCurrentBoard(this.toolbox));
   }
 
   /**
@@ -1288,11 +1306,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
    */
   public changeLanguage = (menuOrUrl: boolean): boolean => {
     const newLang: string = menuOrUrl ? getLangParamFromDropdown() : getLangParamFromUrl();
-    // Set the HTML's language and direction.
-    const rtl: boolean = this.isLangRtl();
+    // Set the HTML's language and direction for the *new* language.
+    const rtl: boolean = this.LANGUAGE_RTL.indexOf(newLang) !== -1;
     HTML_changeLanguage(newLang);
     Blockly.setLocale(languagesMapBlockly[newLang]);
     mergeArrayMessages(newLang);
+    mergeBoardMessages(newLang);
     const customMessages = languagesMap[newLang];
     if (customMessages) {
       const msg = Blockly.Msg as Record<string, string>;
@@ -1373,7 +1392,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
           msg[key] = value;
         }
       });
-      // Clés utilisées par la catégorie Listes (blocs tableau/liste)
+      // Keys used by the Lists category (array/list blocks)
       const arrayAndListKeys = [
         "VARIABLES_GET_ITEM",
         "ARRAY_UNE_LISTE",
@@ -1393,6 +1412,38 @@ export class BlocklyApplication implements BlocklyApplicationType {
       });
     }
     this.changeLanguageToolbox(newLang);
+    this.updatePluginOptionsDirection(rtl);
     return rtl;
   };
+
+  /**
+   * Updates the DOM order of plugin options (label text vs checkbox)
+   * depending on text direction.
+   * @param rtl - True when current language is RTL.
+   */
+  private updatePluginOptionsDirection(rtl: boolean): void {
+    const container = document.getElementById("pluginOptions");
+    if (!container) {
+      return;
+    }
+    const labels = container.querySelectorAll("label.plugin-option");
+    labels.forEach((label) => {
+      const input = label.querySelector("input");
+      const span = label.querySelector("span.lang");
+      if (!input || !span) {
+        return;
+      }
+      if (rtl) {
+        // LTR: input (checkbox) before span (text)
+        if (input.nextSibling !== span) {
+          label.insertBefore(input, span);
+        }
+      } else {
+        // RTL: span (text) before input (checkbox)
+        if (span.nextSibling !== input) {
+          label.insertBefore(span, input);
+        }
+      }
+    });
+  }
 }

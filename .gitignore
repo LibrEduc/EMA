@@ -13,10 +13,18 @@ exemples/
 # Generated files
 build/
 **/dist/
+dist/
 .DS_Store
+.cursor/
+
+# Generated API docs (TypeDoc: npm run docs)
+docs/api/
 
 # Optional npm cache directory
 .npm
+
+# Test coverage (if you add tests later)
+coverage/
 
 # IDEs and editors
 .idea

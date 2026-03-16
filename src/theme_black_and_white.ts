@@ -96,6 +96,11 @@ export default Blockly.Theme.defineTheme('black_and_white', {
       'colourSecondary': '#000000',
       'colourTertiary': '#000000',
     },
+    'board_blocks': {
+      'colourPrimary': '#000000',
+      'colourSecondary': '#000000',
+      'colourTertiary': '#000000',
+    },
   },
   'categoryStyles': {
     'colour_category': {
@@ -126,6 +131,9 @@ export default Blockly.Theme.defineTheme('black_and_white', {
       'colour': '#000000',
     },
     'libre_category': {
+      'colour': '#000000',
+    },
+    'board_category': {
       'colour': '#000000',
     },
   },

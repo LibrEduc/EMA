@@ -29,6 +29,7 @@ import * as text from './arduino/blocks/text';
 import * as variables from './arduino/blocks/variables';
 import * as variablesTyped from './arduino/blocks/variables_typed';
 import * as libre from './arduino/blocks/libre';
+import * as board from './arduino/blocks/board';
 
 export * from './arduino/arduino_generator';
 export * from './arduino/arduino_types';
@@ -55,13 +56,14 @@ const generators: typeof arduinoGenerator.forBlock = {
   ...variables,
   ...variablesTyped,
   ...libre,
+  ...board,
 };
 
-// Enregistrer explicitement chaque générateur
+// Register each generator explicitly
 for (const name in generators) {
   arduinoGenerator.forBlock[name] = generators[name];
 }
 
-// Supprimer les enregistrements en double qui peuvent causer des conflits
+// Remove duplicate registrations that can cause conflicts
 // arduinoGenerator.forBlock['variables_get_dynamic'] = variablesTyped.variables_get_dynamic;
 // arduinoGenerator.forBlock['variables_set_dynamic'] = variablesTyped.variables_set_dynamic;

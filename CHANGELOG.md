@@ -1,4 +1,8 @@
 # CHANGELOG.md
+## 2.1.1, 2026-03-13
+- amélioration de la barre d’options (groupement des plugins, spans/checkbox alignés)
+- meilleure prise en charge LTR / RTL pour les libellés des options
+
 ## 2.1.0, 2026-02-17
 - variable typing
 - array category

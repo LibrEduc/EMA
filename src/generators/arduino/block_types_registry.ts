@@ -262,7 +262,7 @@ function initializeBlockTypeRegistry(): void {
     }
   }
 
-  debugLog(`✅ Registre de types initialisé avec ${Object.keys(BLOCK_TYPE_REGISTRY).length} blocs depuis block_types.ts`);
+  debugLog(`✅ Type registry initialized with ${Object.keys(BLOCK_TYPE_REGISTRY).length} blocks from block_types.ts`);
 }
 
 /**
@@ -405,7 +405,7 @@ export function applyBlockTypesFromRegistry(): void {
     }
   }
 
-  debugLog(`✅ Types appliqués à ${appliedCount} blocs depuis le registre`);
+  debugLog(`✅ Types applied to ${appliedCount} blocks from registry`);
 }
 
 // Initialize the registry when the module is loaded

@@ -154,9 +154,9 @@ export function patchFieldVariableValidation(): void {
 }
 
 // ─── Defensive patches ─────────────────────────────────────────────────────────────
-// Lors du drag, Blockly appelle previewMarker → connect_ → setParent → removeTopBlock.
-// Si le bloc (ex. Array_list_3) n'est pas encore dans topBlocks, removeTopBlock lance.
-// On absorbe pour éviter le crash.
+// During drag, Blockly calls previewMarker → connect_ → setParent → removeTopBlock.
+// If the block (e.g. Array_list_3) is not yet in topBlocks, removeTopBlock throws.
+// We absorb the error to avoid a crash.
 
 /**
  * Applies defensive patches (setParent, removeTypedBlock, removeTopBlock).

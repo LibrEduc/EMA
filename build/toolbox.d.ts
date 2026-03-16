@@ -30,13 +30,42 @@
  */
 import '@blockly/field-angle';
 /**
- * The above type represents the configuration of a toolbox in TypeScript, which includes
- * various kinds of blocks and their properties.
- * @param kind - The "kind" property in the ToolboxConfiguration type represents the
- * type or category of the toolbox item. It can be a string value that describes the kind of
- * item, such as "category", "block", or "separator".
- * @param contents - The `contents` property is an array that contains objects with the
- * following properties:
+ * Block entry in a toolbox category (flat block with type).
+ */
+type ToolboxBlockEntry = {
+    kind: string;
+    type: string;
+    fields?: {
+        [key: string]: number | string;
+    };
+    inputs?: {
+        [key: string]: {
+            shadow?: {
+                type?: string;
+                fields?: {
+                    [key: string]: number | string;
+                };
+            };
+            block?: {
+                type: string;
+            };
+        };
+    };
+};
+/**
+ * Category entry: can contain blocks or nested subcategories (sous-menus).
+ */
+type ToolboxCategoryContentEntry = ToolboxBlockEntry | {
+    kind: string;
+    name?: string;
+    categorystyle?: string;
+    custom?: string;
+    contents?: ToolboxCategoryContentEntry[];
+};
+/**
+ * Top-level toolbox configuration.
+ * @param kind - "categoryToolbox".
+ * @param contents - Array of categories (each may have nested subcategories in contents).
  */
 export type ToolboxConfiguration = {
     kind: string;
@@ -45,28 +74,21 @@ export type ToolboxConfiguration = {
         name?: string;
         categorystyle?: string;
         custom?: string;
-        contents?: Array<{
-            kind: string;
-            type: string;
-            fields?: {
-                [key: string]: number | string;
-            };
-            inputs?: {
-                [key: string]: {
-                    shadow?: {
-                        type?: string;
-                        fields?: {
-                            [key: string]: number | string;
-                        };
-                    };
-                    block?: {
-                        type: string;
-                    };
-                };
-            };
-        }>;
+        contents?: ToolboxCategoryContentEntry[];
         blockxml?: string;
     }>;
 };
 export declare const basic_toolbox: ToolboxConfiguration;
+/**
+ * Returns a deep clone of the toolbox with the board category (CAT_BOARD) removed.
+ * Used when no board is selected so the toolbox does not show board blocks.
+ */
+export declare function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): ToolboxConfiguration;
+/**
+ * Returns the toolbox to use for the workspace: without the board category if
+ * no board is selected, otherwise a clone of the full toolbox.
+ * Read the current selection from the board menu in the DOM.
+ */
+export declare function getToolboxForCurrentBoard(toolbox: ToolboxConfiguration): ToolboxConfiguration;
+export {};
 //# sourceMappingURL=toolbox.d.ts.map

@@ -5,15 +5,41 @@
  */
 
 import path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
+import fs from "fs";
+import { execSync } from "child_process";
 import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
+import TerserPlugin from "terser-webpack-plugin";
 import WebpackObfuscator from "webpack-obfuscator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/**
+ * Build fingerprint (watermark) for this build: version + git short hash + ISO date.
+ * Injected at compile time; exposed in app for tracing / leak detection.
+ */
+function getBuildFingerprint() {
+  let version = "0.0.0";
+  try {
+    const pkgPath = path.join(__dirname, "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    version = pkg.version || version;
+  } catch (_) {
+    // ignore
+  }
+  let gitHash = "";
+  try {
+    gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+  } catch (_) {
+    // not a git repo or git unavailable
+  }
+  const iso = new Date().toISOString();
+  return [version, gitHash, iso].filter(Boolean).join("-");
+}
 
 const resolvePublicAsset = (compilation, assetName) => {
   const normalized = assetName.replace(/^\/+/, "").replaceAll("\\", "/");
@@ -106,6 +132,30 @@ let config = {
     },
   },
   plugins: [
+    new webpack.DefinePlugin({
+      __UCB_BUILD_FINGERPRINT__: JSON.stringify(getBuildFingerprint()),
+    }),
+    new webpack.BannerPlugin({
+      banner: () => {
+        const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "package.json"), "utf8"));
+        const v = pkg.version || "";
+        return [
+          "/*!",
+          " * µcBlockly – " + (pkg.description || ""),
+          " *",
+          " * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany).",
+          " * License: GPL-3.0-or-later. See https://www.gnu.org/licenses/gpl-3.0.html",
+          " *",
+          " * This program is free software; you may redistribute and/or modify it under the terms of the GPLv3.",
+          " * Copying, reverse-engineering, or redistribution of this bundle outside the license terms is prohibited.",
+          " *",
+          " * " + (v ? "Version " + v + ". " : "") + "https://github.com/A-S-T-U-C-E/ucBlockly",
+          " */",
+        ].join("\n");
+      },
+      raw: true,
+      entryOnly: true,
+    }),
     new webpack.optimize.ModuleConcatenationPlugin(),
     new HtmlWebpackPlugin({
       template: "public/index.html",
@@ -173,14 +223,54 @@ export default (_env, argv) => {
     // Release bundles must not expose source maps.
     config.devtool = false;
 
-    // Obfuscation uniquement si UCB_HARDENED=1 (évite crash sur Windows)
     if (isHardenedRelease) {
+      // Hardened production build:
+      // 1) Terser avec options agressives (sans sourcemaps).
+      // 2) Obfuscateur appliqué uniquement aux chunks applicatifs (pas aux vendors/monaco/workers).
+
+      config.optimization.minimizer = [
+        new TerserPlugin({
+          extractComments: false,
+          terserOptions: {
+            format: {
+              comments: false,
+            },
+            compress: {
+              passes: 3,
+              dead_code: true,
+              drop_console: true,
+              drop_debugger: true,
+              keep_fargs: false,
+              unsafe: true,
+              unsafe_arrows: true,
+              unsafe_comps: true,
+              unsafe_Function: true,
+              unsafe_math: true,
+              unsafe_methods: true,
+              unsafe_proto: true,
+              unsafe_regexp: true,
+              unsafe_undefined: true,
+            },
+            mangle: {
+              toplevel: true,
+              properties: {
+                regex: /^_\w+$/,
+              },
+            },
+            keep_classnames: false,
+            keep_fnames: false,
+          },
+        }),
+      ];
+
       config.plugins.push(
         new WebpackObfuscator(
           {
             compact: true,
-            controlFlowFlattening: false,
-            deadCodeInjection: false,
+            controlFlowFlattening: true,
+            controlFlowFlatteningThreshold: 0.75,
+            deadCodeInjection: true,
+            deadCodeInjectionThreshold: 0.4,
             debugProtection: true,
             disableConsoleOutput: true,
             identifierNamesGenerator: "hexadecimal",
@@ -188,13 +278,22 @@ export default (_env, argv) => {
             selfDefending: true,
             simplify: true,
             sourceMap: false,
-            splitStrings: false,
+            splitStrings: true,
+            splitStringsChunkLength: 5,
             stringArray: true,
-            stringArrayThreshold: 0.5,
+            stringArrayEncoding: ["rc4"],
+            stringArrayThreshold: 1.0,
             transformObjectKeys: false,
             unicodeEscapeSequence: false,
+            // Ne jamais toucher à certains identifiants critiques.
+            reservedNames: [
+              "^MonacoEnvironment$",
+              "^getWorkerUrl$",
+              "^Blockly$",
+            ],
           },
           [
+            // Ne PAS obfusquer les chunks critiques des dépendances.
             "blockly.*.js",
             "monaco.*.js",
             "vendors.*.js",

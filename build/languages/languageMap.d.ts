@@ -55,6 +55,14 @@ export interface LanguageItem {
     CAT_TEXT: string;
     CAT_LISTS: string;
     CAT_LIBRE: string;
+    CAT_BOARD: string;
+    CAT_BOARD_BASE: string;
+    CAT_BOARD_IN: string;
+    CAT_BOARD_OUT: string;
+    CAT_BOARD_INOUT: string;
+    CAT_BOARD_TIME: string;
+    CAT_BOARD_CONVERSION: string;
+    CAT_BOARD_SERIAL: string;
     CAT_SEARCH: string;
     CAT_COLOR: string;
     CAT_VARIABLES: string;

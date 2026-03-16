@@ -10,6 +10,9 @@
  * @since 1.0.0
  */
 
+/** Injected at build time by Webpack DefinePlugin (watermark for leak detection). */
+declare const __UCB_BUILD_FINGERPRINT__: string | undefined;
+
 /**
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
@@ -38,14 +41,21 @@ import "@blockly/toolbox-search";
 import { registerToolboxSearchI18n } from "./toolbox_search_i18n";
 registerToolboxSearchI18n();
 
-// Configuration de Monaco Editor pour utilisation locale (chemins relatifs)
-// Force la définition de MonacoEnvironment pour s'assurer que les chemins sont corrects
+// Monaco Editor configuration for local use (relative paths)
+// Force MonacoEnvironment definition so that paths are correct
 const globalWindow = window as Window & {
   MonacoEnvironment?: {
     getWorkerUrl: (moduleId: string, label: string) => string;
   };
   Blockly?: typeof Blockly;
+  /** Build fingerprint (version-gitHash-date); set at build time for tracing. */
+  __ucbBuildFingerprint__?: string;
 };
+
+// Expose build fingerprint (watermark) for support / leak detection
+if (typeof __UCB_BUILD_FINGERPRINT__ !== "undefined") {
+  globalWindow.__ucbBuildFingerprint__ = __UCB_BUILD_FINGERPRINT__;
+}
 
 globalWindow.MonacoEnvironment = {
   getWorkerUrl: function (_moduleId: string, label: string) {
@@ -65,12 +75,12 @@ globalWindow.MonacoEnvironment = {
   }
 };
 
-// Exposer Blockly globalement IMMÉDIATEMENT après l'import
+// Expose Blockly globally IMMEDIATELY after import
 if (typeof window !== 'undefined') {
-  // Exposer Blockly et toutes ses propriétés
+  // Expose Blockly and all its properties
   globalWindow.Blockly = Blockly;
 
-  // Exposer également les propriétés principales individuellement
+  // Also expose main properties individually
   globalWindow.Blockly = {
     ...Blockly,
     Blocks: Blockly.Blocks,
@@ -86,8 +96,8 @@ if (typeof window !== 'undefined') {
     utils: Blockly.utils
   };
 
-  debugLog('✅ Blockly et toutes ses propriétés exposés globalement immédiatement');
-  debugLog('Propriétés disponibles:', Object.keys(globalWindow.Blockly));
+  debugLog('✅ Blockly and all its properties exposed globally');
+  debugLog('Available properties:', Object.keys(globalWindow.Blockly));
 }
 
 /**
@@ -103,7 +113,7 @@ function defineTypedVariableBlocks() {
 }
 
 import { arduinoGenerator } from "./generators/arduino";
-import { defineAllTypedVariableBlocks } from "./categories/blockly";
+import { defineAllTypedVariableBlocks, refreshBoardPinDropdowns } from "./categories/blockly";
 import { applyBlockTypesFromRegistry } from "./generators/arduino/block_types_registry";
 import { configureStandardBlocks } from "./generators/arduino/configure_standard_blocks";
 import { debugLog } from "./generators/arduino/debug";
@@ -117,19 +127,19 @@ import { languagesMap } from "./languages/languageMap";
 import { BOARD_PROFILES, DEFAULT_BOARD_ID } from "./boards";
 import { themeMappings } from "./options";
 
-// Exposer arduinoGenerator globalement IMMÉDIATEMENT après l'import
+// Expose arduinoGenerator globally IMMEDIATELY after import
 if (typeof window !== 'undefined') {
-  // Exposer arduinoGenerator et ses propriétés principales
+  // Expose arduinoGenerator and its main properties
   const exposedArduinoGenerator = arduinoGenerator;
   (globalWindow as typeof globalWindow & {
     arduinoGenerator?: typeof arduinoGenerator;
   }).arduinoGenerator = exposedArduinoGenerator;
 
-  debugLog('✅ arduinoGenerator et toutes ses propriétés exposés globalement immédiatement');
-  debugLog('Propriétés arduinoGenerator disponibles:', Object.keys(exposedArduinoGenerator));
+  debugLog('✅ arduinoGenerator and all its properties exposed globally');
+  debugLog('Available arduinoGenerator properties:', Object.keys(exposedArduinoGenerator));
 }
 import { addReplaceParamToUrl, setPluginsInURL } from "./tools";
-import { basic_toolbox } from "./toolbox";
+import { basic_toolbox, getToolboxForCurrentBoard, getToolboxWithoutBoardCategory } from "./toolbox";
 import { BlocklyApplication } from "./blockly_application_type";
 //plugins
 import {
@@ -609,6 +619,8 @@ const HTML_populateBoards = (): void => {
 restoreLayoutFromSessionStorage();
 defineTypedVariableBlocks();
 primeWorkspaceContainerDimensions();
+// No board selected at init: hide board category until user selects a board.
+const initialToolbox = getToolboxWithoutBoardCategory(basic_toolbox);
 const µcB: BlocklyApplication = new BlocklyApplication(
   basic_toolbox,
   {
@@ -619,7 +631,7 @@ const µcB: BlocklyApplication = new BlocklyApplication(
       snap: true,
     },
     scrollbars: true,
-    toolbox: changeLanguageToolbox(getLangParamFromUrl(), basic_toolbox),
+    toolbox: changeLanguageToolbox(getLangParamFromUrl(), initialToolbox),
     zoom: {
       controls: true,
       wheel: true,
@@ -1200,7 +1212,7 @@ export const registerContinuousToolboxComponents = (): void => {
     true,
   );
 
-  // Ajouter les styles CSS pour surcharger l'apparence de la toolbox
+  // Add CSS styles to override toolbox appearance
   const style = document.createElement("style");
   style.textContent = `
     .categoryBubble {
@@ -1236,28 +1248,28 @@ export const registerContinuousToolboxComponents = (): void => {
  * and flyout inflaters, and unregisters the continuous toolbox components.
  */
 export const unregisterContinuousToolboxComponents = (): void => {
-  // Supprimer les styles CSS personnalisés pour revenir au style normal de Blockly
+  // Remove custom CSS styles to restore Blockly default style
   const customStyles = document.querySelectorAll("style");
   customStyles.forEach((style) => {
     if (style.textContent?.includes(".categoryBubble")) {
       style.remove();
     }
   });
-  // Restaurer la catégorie standard de Blockly
+  // Restore Blockly default category
   Blockly.registry.register(
     Blockly.registry.Type.TOOLBOX_ITEM,
     Blockly.ToolboxCategory.registrationName,
     Blockly.ToolboxCategory,
     true,
   );
-  // Restaurer l'inflater de bloc par défaut
+  // Restore default block inflater
   Blockly.registry.register(
     Blockly.registry.Type.FLYOUT_INFLATER,
     "block",
     Blockly.BlockFlyoutInflater,
     true,
   );
-  // Supprimer l'inflater "category" spécifique à la toolbox continue
+  // Remove the "category" inflater specific to the continuous toolbox
   try {
     Blockly.registry.unregister(Blockly.registry.Type.FLYOUT_INFLATER, "category");
   } catch {
@@ -1320,6 +1332,11 @@ const HTML_onChange = (): void => {
       "µcB",
       addReplaceParamToUrl(window.location.search, "board", boardValue),
     );
+    const lang = getLangParamFromUrl();
+    const toolboxForBoard = changeLanguageToolbox(lang, getToolboxForCurrentBoard(basic_toolbox));
+    µcB.WORKSPACE_OPTIONS.toolbox = toolboxForBoard;
+    (µcB.workspace as Blockly.WorkspaceSvg).updateToolbox(toolboxForBoard);
+    refreshBoardPinDropdowns(µcB.workspace);
   };
 
   elements.pluginMinimap.onchange = () => {
@@ -1454,16 +1471,16 @@ const resetAllParameters = (): void => {
   µcB.workspaceSetupPlugins(true);
   µcB.workspace.dispose();
 
-  // Effacer toutes les données du sessionStorage
+  // Clear all sessionStorage data
   if (window.sessionStorage) {
     window.sessionStorage.clear();
   }
-  // Effacer toutes les données du localStorage (si utilisé)
+  // Clear all localStorage data (if used)
   if (window.localStorage) {
     window.localStorage.clear();
   }
 
-  // Réinitialiser les tailles des divs aux valeurs par défaut
+  // Reset div sizes to default values
   document.getElementById("flex_container_up_right")!.style.flexGrow = "0";
   document.getElementById("flex_container_bottom")!.style.flexGrow = "0";
   document.getElementById("flex_container_up")!.style.flexGrow = "1";
@@ -1507,13 +1524,13 @@ const scheduleNonCriticalDomInit = (callback: () => void): void => {
 };
 // The `DomIsLoaded` function prepares everything needed by structure of DOM.
 DomIsLoaded((): void => {
-  // Définir les blocs de variables typées après que Blockly soit chargé
+  // Define typed variable blocks after Blockly is loaded
   if (ENABLE_TYPED_VARIABLE_BLOCKS) {
     if (defineTypedVariableBlocks()) {
-      debugLog('✅ Blocs de variables typées définis au bon moment');
+      debugLog('✅ Typed variable blocks defined at the right time');
     } else {
       debugLog('⚠️ Blockly pas encore disponible, retry dans 100ms...');
-      // Retry après un délai
+      // Retry after a delay
       setTimeout(() => {
         if (defineTypedVariableBlocks()) {
           debugLog('✅ Blocs de variables typées définis après retry');
@@ -1524,13 +1541,13 @@ DomIsLoaded((): void => {
     }
   }
 
-  // Appliquer les types de blocs depuis le registre
+  // Apply block types from the registry
   if (typeof Blockly !== 'undefined') {
     if (ENABLE_BLOCK_TYPES_REGISTRY) {
       applyBlockTypesFromRegistry();
     }
     if (ENABLE_CONFIGURE_STANDARD_BLOCKS) {
-      // Configurer les blocs standards (controls_if, procédures, etc.)
+      // Configure standard blocks (controls_if, procedures, etc.)
       configureStandardBlocks();
     }
   }
@@ -1543,20 +1560,28 @@ DomIsLoaded((): void => {
   applyA11yAttributes();
   µcB.changeLanguage(false);
   µcB.workspaceInit();
+  // If a board is already selected (e.g. from URL), show board category and refresh pin dropdowns.
+  if (elements.boardMenu.value && elements.boardMenu.value !== "none") {
+    const lang = getLangParamFromUrl();
+    const toolboxForBoard = changeLanguageToolbox(lang, getToolboxForCurrentBoard(basic_toolbox));
+    µcB.WORKSPACE_OPTIONS.toolbox = toolboxForBoard;
+    (µcB.workspace as Blockly.WorkspaceSvg).updateToolbox(toolboxForBoard);
+    refreshBoardPinDropdowns(µcB.workspace);
+  }
 });
 
 /* The `window.onload` event is triggered when the entire page has finished loading, including all
 resources such as images and scripts. */
 window.onload = (): void => {
-  // Blockly et arduinoGenerator sont déjà exposés globalement
-  debugLog('🔄 window.onload - Vérification des composants...');
+  // Blockly and arduinoGenerator are already exposed globally
+  debugLog('🔄 window.onload - Checking components...');
 
-  // S'assurer que les blocs de variables typées sont définis
+  // Ensure typed variable blocks are defined
   if (
     ENABLE_TYPED_VARIABLE_BLOCKS &&
     (!Blockly.Blocks['variables_get_dynamic'] || !Blockly.Blocks['variables_set_dynamic'])
   ) {
-    debugLog('🔄 Redéfinition des blocs de variables typées dans window.onload...');
+    debugLog('🔄 Redefining typed variable blocks in window.onload...');
     defineTypedVariableBlocks();
   }
 
@@ -1570,8 +1595,8 @@ window.onload = (): void => {
   // Ensure layout is restored before startup sizing/reflow.
   restoreLayoutFromSessionStorage();
 
-  // Attendre que le DOM soit complètement stabilisé avant d'appeler workspaceOnResize
-  // Utiliser requestAnimationFrame pour s'assurer que le layout est calculé
+  // Wait for the DOM to be fully stable before calling workspaceOnResize
+  // Use requestAnimationFrame so that layout is computed
   requestAnimationFrame(() => {
     µcB_workspaceOnResize();
     // Prevent startup events/reboots from overwriting saved blocks with an empty workspace.
@@ -1632,24 +1657,24 @@ window.onload = (): void => {
         }
       }
 
-      // Attacher l'événement de clic sur le titre pour réinitialiser tous les paramètres
+      // Attach click event on title to reset all parameters
       const titleElement = document.getElementById("title");
       if (titleElement) {
         titleElement.addEventListener("click", resetAllParameters);
-        // Ajouter un style pour indiquer que c'est cliquable
+        // Add style to indicate it is clickable
         titleElement.style.cursor = "pointer";
 
-        // Créer un span avec la classe lang pour la traduction automatique
+        // Create a span with class lang for automatic translation
         const titleSpan = document.createElement("span");
         titleSpan.className = "lang";
         titleSpan.setAttribute("key", "RESET_TITLE");
         titleSpan.textContent = "Click to reset all parameters";
 
-        // Appliquer la traduction selon la langue actuelle
+        // Apply translation for the current language
         const currentLang = getLangParamFromUrl();
         HTML_changeLanguage(currentLang);
 
-        // Définir le tooltip avec le texte traduit
+        // Set tooltip with translated text
         titleElement.title = titleSpan.textContent;
       }
     });
@@ -1657,8 +1682,7 @@ window.onload = (): void => {
 
 };
 
-/* The above code is a TypeScript code snippet that sets the `onbeforeunload` event handler for the
-window object. This event is triggered when the user is about to leave the current page, and save windows position in UI. */
+// Persist layout when the user leaves the page (save window positions to sessionStorage).
 window.onbeforeunload = (): void => {
   saveLayoutToSessionStorage();
   µcB.workspaceSaveBlocks("mainWorkspace_blocks");

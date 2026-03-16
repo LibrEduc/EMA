@@ -11,46 +11,66 @@
  */
 
 /**
- * @fileoverview Types de base pour le typage Blockly Arduino
- * @description Les définitions de types de blocs sont maintenant dans src/generators/arduino/block_types/.
- * Chaque catégorie exporte un objet de types, puis l'index les agrège.
+ * @fileoverview Base types for Blockly Arduino typing
+ * @description Block type definitions are now in src/generators/arduino/block_types/.
+ * Each category exports a type object, and the index aggregates them.
  *
- * Pour ajouter un nouveau type de bloc :
- * 1. Choisissez le fichier de catégorie dans block_types/ (ou créez-en un)
- * 2. Ajoutez "nom_du_bloc": "int" (statique) ou "__DYNAMIC__nom_fonction" (dynamique)
- * 3. Si dynamique, ajoutez la fonction dans DYNAMIC_TYPE_FUNCTIONS dans block_types_registry.ts
+ * To add a new block type:
+ * 1. Choose the category file in block_types/ (or create one)
+ * 2. Add "block_name": "int" (static) or "__DYNAMIC__function_name" (dynamic)
+ * 3. If dynamic, add the function to DYNAMIC_TYPE_FUNCTIONS in block_types_registry.ts
  */
 
 /**
- * Version du registre 2026-01-11
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
+ * Registry version 2026-01-11
  */
 export const BLOCK_TYPES_VERSION = '1.0.0';
 
 /**
- * Compatibilité de types - Définit quels types peuvent être convertis implicitement
- * 
- * Exemple : 
- * - 'float' peut recevoir 'int' (promotion implicite)
- * - 'int' ne peut pas recevoir 'float' (perte de précision)
- * 
- * Format : `type_cible: [types_compatibles]`
- * Les types compatibles incluent toujours le type lui-même.
+ * Type compatibility - Defines which types can be implicitly converted.
+ *
+ * Example:
+ * - 'float' can receive 'int' (implicit promotion)
+ * - 'int' cannot receive 'float' (loss of precision)
+ *
+ * Format: `target_type: [compatible_types]`
+ * Compatible types always include the type itself.
  */
 export const TYPE_COMPATIBILITY: Record<string, string[]> = {
-  // Types numériques
-  'int': ['int'], // int n'accepte que int (pas de perte de précision)
-  'float': ['float', 'int'], // float accepte float et int (promotion implicite)
+  // Numeric types
+  'int': ['int'], // int accepts only int (no loss of precision)
+  'float': ['float', 'int'], // float accepts float and int (implicit promotion)
 
-  // Types booléens
-  'bool': ['bool'], // bool n'accepte que bool
+  // Boolean types
+  'bool': ['bool'], // bool accepts only bool
 
-  // Types texte
-  'string': ['string', 'char'], // string accepte string et char
-  'char': ['char'], // char n'accepte que char
+  // Text types
+  'string': ['string', 'char'], // string accepts string and char
+  'char': ['char'], // char accepts only char
 
-  // Types spéciaux
-  'null': ['null'], // null n'accepte que null
-  // Pas de type 'array' : les listes sont typées par leurs entrées (string, int, etc.)
+  // Special types
+  'null': ['null'], // null accepts only null
+  // No 'array' type: lists are typed by their entries (string, int, etc.)
 };
 
 const EXCLUDED_DROPDOWN_TYPES = new Set(['null', 'array']);
@@ -67,30 +87,18 @@ export function getVariableTypeOptions(): string[] {
 }
 
 /**
- * Obtenir les types compatibles pour un type donné
- * @param targetType - Le type cible
- * @returns Liste des types compatibles (inclut toujours le type lui-même)
- */
-/**
  * Returns compatible types for a target type.
  * @param targetType - Target type to match.
  * @returns List of compatible types (includes the target type).
  */
 export function getCompatibleTypes(targetType: string | null | undefined): string[] {
   if (!targetType) {
-    return []; // Pas de type, pas de compatibilité
+    return []; // No type, no compatibility
   }
 
-  // Retourner les types compatibles depuis le mapping, ou juste le type lui-même par défaut
   return TYPE_COMPATIBILITY[targetType] || [targetType];
 }
 
-/**
- * Vérifier si un type source est compatible avec un type cible
- * @param sourceType - Le type source (celui qui est connecté)
- * @param targetType - Le type cible (celui qui est attendu)
- * @returns true si sourceType est compatible avec targetType
- */
 /**
  * Checks if a source type can connect to a target type.
  * @param sourceType - Source type from a connected block.
@@ -102,17 +110,15 @@ export function isTypeCompatible(sourceType: string | null | undefined, targetTy
     return false;
   }
 
-  // Si les types sont identiques, ils sont compatibles
   if (sourceType === targetType) {
     return true;
   }
 
-  // Vérifier si sourceType est dans la liste des types compatibles de targetType
   const compatibleTypes = getCompatibleTypes(targetType);
   return compatibleTypes.includes(sourceType);
 }
 
 /**
- * Registre des types de blocs
- * Basé sur les informations extraites de BlocklyArduino dans src/types/
+ * Block type registry.
+ * Based on information extracted from BlocklyArduino in src/types/
  */

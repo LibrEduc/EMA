@@ -10,12 +10,33 @@
  * @since 1.0.0
  */
 
+/**
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { debugLog } from "../../generators/arduino/debug";
 import { defineControlsSwitchBlocks } from "./logic";
 import { defineMathCompatBlocks } from "./math";
 import { defineTextCompatBlocks } from "./text";
 import { defineArrayBlocks } from "./array";
 import { defineLibreBlocks } from "./libre";
+import { defineBoardBlocks, refreshBoardPinDropdowns } from "./board";
 import { defineColourBlocks } from "./colour";
 import {
   defineVariablesConstBlock,
@@ -39,14 +60,12 @@ export const defineBlocklyArduinoCompatBlocks = (): void => {
   defineTextCompatBlocks();
   defineArrayBlocks();
   defineLibreBlocks();
+  defineBoardBlocks();
   defineColourBlocks();
 };
 
 /**
- * Define all typed variable blocks
- */
-/**
- * Registers all typed variable blocks and extensions.
+ * Registers all typed variable blocks and extensions (get/set/define/local and standard block extensions).
  */
 export const defineAllTypedVariableBlocks = (): void => {
   if (typedVariableBlocksRegistered) {
@@ -67,12 +86,14 @@ export const defineAllTypedVariableBlocks = (): void => {
   extendStandardVariablesGetBlock();
   extendStandardVariablesSetBlock();
 
-  debugLog("Blocs de variables typées définis avec succès");
+  debugLog("Typed variable blocks registered successfully");
 };
 
 export {
   defineArrayBlocks,
   defineLibreBlocks,
+  defineBoardBlocks,
+  refreshBoardPinDropdowns,
   defineControlsSwitchBlocks,
   defineColourBlocks,
   defineVariablesConstBlock,

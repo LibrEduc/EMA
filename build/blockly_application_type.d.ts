@@ -194,6 +194,11 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      */
     setParamsBlockly: () => void;
     /**
+     * Updates the workspace toolbox to include or remove the board category
+     * according to the current board selection, and refreshes pin dropdowns.
+     */
+    syncToolboxAndPinsToCurrentBoard: () => void;
+    /**
      * Enables plugins based on URL options and stored preferences.
      * @remarks
      * Applies toggles for minimap, highlight, continuous toolbox, flyout,
@@ -278,5 +283,11 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      * @returns True when the current language is RTL.
      */
     changeLanguage: (menuOrUrl: boolean) => boolean;
+    /**
+     * Updates the DOM order of plugin options (label text vs checkbox)
+     * depending on text direction.
+     * @param rtl - True when current language is RTL.
+     */
+    private updatePluginOptionsDirection;
 }
 //# sourceMappingURL=blockly_application_type.d.ts.map

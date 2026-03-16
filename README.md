@@ -11,3 +11,5 @@
 
 ---
 <p align = 'center'><a href="https://github.com/A-S-T-U-C-E/ucBlockly/pulls">Thanks for helping</a></p>
+
+**Contributors:** see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for project layout and [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for how to get started.

@@ -17,6 +17,26 @@
  * @author scanet\@libreduc.cc (Sébastien Canet)
  */
 
+/**
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import * as Blockly from 'blockly/core';
 import { checkTypeCompatibility as sharedCheckTypeCompatibility } from "./block_types_registry";
 import { debugLog } from "./debug";
@@ -177,12 +197,12 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
           // Filter out null/undefined from the checks
           const validChecks = targetChecks.filter(check => check !== null && check !== undefined && check !== '__NO_TYPE__');
           if (validChecks.length > 0) {
-            debugLog(`🚫 [StrictChecker] Blocage: source='${sourceType}' ne peut pas se connecter à target='${validChecks.join(',')}'`);
+            debugLog(`🚫 [StrictChecker] Blocked: source='${sourceType}' cannot connect to target='${validChecks.join(',')}'`);
             return false;
           }
         }
         // If target has no type check, allow connection (untyped can connect to untyped)
-        debugLog(`✅ [StrictChecker] Autorisation: source='${sourceType}' peut se connecter à target non typé`);
+        debugLog(`✅ [StrictChecker] Allowed: source='${sourceType}' can connect to untyped target`);
         return true;
       }
 
@@ -211,7 +231,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       }
 
       // No match found - connection not allowed
-      debugLog(`🚫 [StrictChecker] Blocage: source='${sourceType}' ne correspond pas à target='${targetChecks.join(',')}'`);
+      debugLog(`🚫 [StrictChecker] Blocked: source='${sourceType}' does not match target='${targetChecks.join(',')}'`);
       return false;
     }
 

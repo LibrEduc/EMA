@@ -1,16 +1,36 @@
 /**
  * @packageDocumentation
  * @module ToolboxSearchI18n
- * @description Enregistre une sous-classe i18n du plugin toolbox-search sans modifier son code.
+ * @description Registers an i18n subclass of the toolbox-search plugin without modifying its code.
  * @remarks
- * Après chargement de @blockly/toolbox-search, on remplace la catégorie enregistrée par une
- * sous-classe qui lit les chaînes dans Blockly.Msg. Résistant aux montées de version du plugin.
+ * After loading @blockly/toolbox-search, the registered category is replaced by a subclass that
+ * reads strings from Blockly.Msg. Resilient to plugin version upgrades.
  * @license GPL-3.0-or-later
+ */
+
+/**
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import * as Blockly from "blockly";
 
-/** Chaînes par défaut du plugin (en) pour les faire correspondre et les remplacer. */
+/** Default plugin strings (en) used for matching and replacement. */
 const DEFAULT_PLACEHOLDER = "Search";
 const DEFAULT_HINT = "Type to search for blocks";
 const DEFAULT_NO_MATCH = "No matching blocks found";
@@ -23,8 +43,8 @@ function getMsg(key: string, fallback: string): string {
 }
 
 /**
- * Enregistre la catégorie toolbox-search multilingue.
- * À appeler une fois après import de @blockly/toolbox-search.
+ * Registers the multilingual toolbox-search category.
+ * Call once after importing @blockly/toolbox-search.
  */
 export function registerToolboxSearchI18n(): void {
   const Base = Blockly.registry.getClass(

@@ -1,10 +1,30 @@
 /**
  * @packageDocumentation
  * @module Arduino.Generators.Libre
- * @description Générateurs Arduino pour les blocs « libre » (ex-catégorie null Blockly@rduino).
+ * @description Arduino generators for "libre" blocks (formerly Blockly@rduino null category).
  * @remarks
- * Les blocs libres n’émettent pas de code par défaut ; le texte sert de commentaire ou de repère.
+ * Libre blocks do not emit code by default; the text is used as a comment or marker.
  * @license GPL-3.0-or-later
+ */
+
+/**
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import type { Block } from "blockly/core/block";
@@ -12,7 +32,7 @@ import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 
 /**
- * Génère un commentaire C++ à partir du champ TEXT du bloc (si non vide).
+ * Generates a C++ comment from the block's TEXT field (if non-empty).
  */
 function commentFromField(block: Block, fieldName: string): string {
   const text = (block.getFieldValue(fieldName) as string) || "";

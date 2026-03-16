@@ -32,13 +32,35 @@
 import '@blockly/field-angle';
 
 /**
- * The above type represents the configuration of a toolbox in TypeScript, which includes
- * various kinds of blocks and their properties.
- * @param kind - The "kind" property in the ToolboxConfiguration type represents the
- * type or category of the toolbox item. It can be a string value that describes the kind of
- * item, such as "category", "block", or "separator".
- * @param contents - The `contents` property is an array that contains objects with the
- * following properties:
+ * Block entry in a toolbox category (flat block with type).
+ */
+export type ToolboxBlockEntry = {
+  kind: string,
+  type: string,
+  fields?: { [key: string]: number | string },
+  inputs?: {
+    [key: string]: {
+      shadow?: { type?: string, fields?: { [key: string]: number | string } },
+      block?: { type: string },
+    }
+  },
+};
+
+/**
+ * Category entry: can contain blocks or nested subcategories (submenus).
+ */
+export type ToolboxCategoryContentEntry = ToolboxBlockEntry | {
+  kind: string,
+  name?: string,
+  categorystyle?: string,
+  custom?: string,
+  contents?: ToolboxCategoryContentEntry[],
+};
+
+/**
+ * Top-level toolbox configuration.
+ * @param kind - "categoryToolbox".
+ * @param contents - Array of categories (each may have nested subcategories in contents).
  */
 export type ToolboxConfiguration = {
   kind: string,
@@ -47,31 +69,12 @@ export type ToolboxConfiguration = {
     name?: string,
     categorystyle?: string,
     custom?: string,
-    contents?: Array<{
-      kind: string,
-      type: string,
-      fields?: {
-        [key: string]: number | string
-      },
-      inputs?: {
-        [key: string]: {
-          shadow?: {
-            type?: string,
-            fields?: {
-              [key: string]: number | string
-            }
-          },
-          block?: {
-            type: string,
-          }
-        }
-      },
-    }>,
+    contents?: ToolboxCategoryContentEntry[],
     blockxml?: string
   }>
 }
 
-/* The above code is defining a toolbox configuration for a coding environment. */
+/** Default toolbox: categories and block list (search, Libre, Logic, Loops, Math, etc.). */
 export const basic_toolbox: ToolboxConfiguration = {
   'kind': 'categoryToolbox',
   'contents': [
@@ -109,6 +112,93 @@ export const basic_toolbox: ToolboxConfiguration = {
         { 'kind': 'block', 'type': 'libre_loop_inside_in_mutator' },
         { 'kind': 'block', 'type': 'libre_loop_do_inside' },
         { 'kind': 'block', 'type': 'libre_loop_do_inside_in' },
+      ],
+    },
+    {
+      'kind': 'category',
+      'name': 'CAT_BOARD',
+      'categorystyle': 'board_category',
+      'contents': [
+        {
+          'kind': 'category',
+          'name': 'CAT_BOARD_BASE',
+          'categorystyle': 'board_category',
+          'contents': [
+            { 'kind': 'block', 'type': 'board_base_setup' },
+            { 'kind': 'block', 'type': 'board_base_loop' },
+          ],
+        },
+        {
+          'kind': 'category',
+          'name': 'CAT_BOARD_IN',
+          'categorystyle': 'board_category',
+          'contents': [
+            { 'kind': 'block', 'type': 'board_base_inout_digital_read' },
+            { 'kind': 'block', 'type': 'board_base_inout_analog_read' },
+            { 'kind': 'block', 'type': 'board_base_inout_highlow' },
+            { 'kind': 'block', 'type': 'board_base_inout_map' },
+            { 'kind': 'block', 'type': 'board_base_inout_angle' },
+            { 'kind': 'block', 'type': 'board_base_inout_pin_mode' },
+            { 'kind': 'block', 'type': 'board_base_inout_pulsein' },
+            { 'kind': 'block', 'type': 'board_base_inout_pulsein_timeout', 'inputs': { 'TIMEOUT': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 1000000 } } } } },
+          ],
+        },
+        {
+          'kind': 'category',
+          'name': 'CAT_BOARD_OUT',
+          'categorystyle': 'board_category',
+          'contents': [
+            { 'kind': 'block', 'type': 'board_base_inout_buildin_led' },
+            { 'kind': 'block', 'type': 'board_base_inout_digital_write' },
+            { 'kind': 'block', 'type': 'board_base_inout_analog_write' },
+            { 'kind': 'block', 'type': 'board_base_inout_analog_write_slider' },
+            { 'kind': 'block', 'type': 'board_base_inout_tone' },
+            { 'kind': 'block', 'type': 'board_base_inout_notone' },
+          ],
+        },
+        {
+          'kind': 'category',
+          'name': 'CAT_BOARD_TIME',
+          'categorystyle': 'board_category',
+          'contents': [
+            { 'kind': 'block', 'type': 'board_base_time_delay', 'inputs': { 'DELAY_TIME': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 1000 } } } } },
+            { 'kind': 'block', 'type': 'board_base_time_delay_sec', 'inputs': { 'DELAY_TIME': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 1 } } } } },
+            { 'kind': 'block', 'type': 'board_base_time_millis' },
+          ],
+        },
+        {
+          'kind': 'category',
+          'name': 'CAT_BOARD_CONVERSION',
+          'categorystyle': 'board_category',
+          'contents': [
+            { 'kind': 'block', 'type': 'board_conversion_toint', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
+            { 'kind': 'block', 'type': 'board_conversion_tofloat', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
+            { 'kind': 'block', 'type': 'board_conversion_tochar', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 65 } } } } },
+            { 'kind': 'block', 'type': 'board_conversion_tobyte', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
+            { 'kind': 'block', 'type': 'board_conversion_toString', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
+            { 'kind': 'block', 'type': 'board_conversion_constrain', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } }, 'LOW': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } }, 'HIGH': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 255 } } } } },
+          ],
+        },
+        {
+          'kind': 'category',
+          'name': 'CAT_BOARD_SERIAL',
+          'categorystyle': 'board_category',
+          'contents': [
+            { 'kind': 'block', 'type': 'board_serial_begin' },
+            { 'kind': 'block', 'type': 'board_serial_print', 'inputs': { 'TEXT': { 'shadow': { 'type': 'text', 'fields': { 'TEXT': '' } } } } },
+            { 'kind': 'block', 'type': 'board_serial_println', 'inputs': { 'TEXT': { 'shadow': { 'type': 'text', 'fields': { 'TEXT': '' } } } } },
+            { 'kind': 'block', 'type': 'board_serial_printfor', 'inputs': { 'CONTENT': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
+            { 'kind': 'block', 'type': 'board_serial_write', 'inputs': { 'DATA': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
+            { 'kind': 'block', 'type': 'board_serial_flush' },
+            { 'kind': 'block', 'type': 'board_serial_read' },
+            { 'kind': 'block', 'type': 'board_serial_peek' },
+            { 'kind': 'block', 'type': 'board_serial_available' },
+            { 'kind': 'block', 'type': 'board_serial_readString' },
+            { 'kind': 'block', 'type': 'board_serial_readStringUntil', 'inputs': { 'TERMINATOR': { 'shadow': { 'type': 'text', 'fields': { 'TEXT': '\\n' } } } } },
+            { 'kind': 'block', 'type': 'board_serial_parseInt' },
+            { 'kind': 'block', 'type': 'board_serial_parseFloat' },
+          ],
+        },
       ],
     },
     {
@@ -755,4 +845,32 @@ export const basic_toolbox: ToolboxConfiguration = {
       'custom': 'PROCEDURE',
     },
   ]
+};
+
+const CAT_BOARD_NAME = 'CAT_BOARD';
+
+/**
+ * Returns a deep clone of the toolbox with the board category (CAT_BOARD) removed.
+ * Used when no board is selected so the toolbox does not show board blocks.
+ */
+export function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): ToolboxConfiguration {
+  const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
+  if (Array.isArray(clone.contents)) {
+    clone.contents = clone.contents.filter((c) => c.name !== CAT_BOARD_NAME);
+  }
+  return clone;
+}
+
+/**
+ * Returns the toolbox to use for the workspace: without the board category if
+ * no board is selected, otherwise a clone of the full toolbox.
+ * Read the current selection from the board menu in the DOM.
+ */
+export function getToolboxForCurrentBoard(toolbox: ToolboxConfiguration): ToolboxConfiguration {
+  const menu = document.getElementById('boardMenu') as HTMLSelectElement | null;
+  const value = menu?.value?.trim();
+  if (!value || value === 'none') {
+    return getToolboxWithoutBoardCategory(toolbox);
+  }
+  return JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
 }

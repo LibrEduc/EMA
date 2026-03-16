@@ -57,7 +57,7 @@ export const setPluginsInURL = (pluginName: string, pluginKey: string): void => 
   let paramsURL: string[] | null = [""];
   if (searchParams.get('options') !== null)
     paramsURL = searchParams.get('options')!.split(',');
-  //clean array from all null or undefined entry
+  // Remove null/undefined entries from the options array
   paramsURL = paramsURL.filter(Boolean);
 
   let result: string = "";

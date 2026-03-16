@@ -10,6 +10,26 @@
  * @since 1.0.0
  */
 
+/**
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { LanguageMap } from './languageMap';
 
 export const frLang: LanguageMap = {
@@ -48,6 +68,14 @@ export const frLang: LanguageMap = {
     CAT_TEXT: "Texte",
     CAT_LISTS: "Tableaux / listes",
     CAT_LIBRE: "Libre",
+    CAT_BOARD: "Carte",
+    CAT_BOARD_BASE: "Base",
+    CAT_BOARD_IN: "Entrées",
+    CAT_BOARD_OUT: "Sorties",
+    CAT_BOARD_INOUT: "Entrée / Sortie",
+    CAT_BOARD_TIME: "Temps",
+    CAT_BOARD_CONVERSION: "Conversion",
+    CAT_BOARD_SERIAL: "Communication série",
     CAT_SEARCH: "Recherche",
     CAT_COLOR: "Couleur",
     CAT_VARIABLES: "Variables",

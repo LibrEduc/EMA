@@ -1,10 +1,30 @@
 /**
  * @packageDocumentation
  * @module BlocklyCategories.Libre
- * @description Blocs « libres » (catégorie reprise de Blockly\@rduino « null »).
+ * @description "Libre" blocks (category from Blockly@rduino "null" category).
  * @remarks
- * Blocs avec champ texte libre pour commentaires ou code personnalisé.
+ * Blocks with free-text field for comments or custom code.
  * @license GPL-3.0-or-later
+ */
+
+/**
+ * @license
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import * as Blockly from "blockly";
@@ -28,16 +48,16 @@ type LibreLoopMutatorBlock = Blockly.Block & {
 let libreBlocksRegistered = false;
 
 /**
- * Enregistre les blocs de la catégorie Libre (ex-catégorie null Blockly\@rduino).
+ * Registers the Libre category blocks (formerly Blockly@rduino "null" category).
  */
 export const defineLibreBlocks = (): void => {
   if (libreBlocksRegistered) return;
   libreBlocksRegistered = true;
 
   const tooltip = (): string =>
-    getBlocklyMsgOr("LIBRE_TOOLTIP", "Bloc libre : texte ou commentaire pour ton code.");
+    getBlocklyMsgOr("LIBRE_TOOLTIP", "Free block: text or comment for your code.");
 
-  // Bloc valeur (output Number) avec champ texte
+  // Value block (output Number) with text field
   Blockly.Blocks["libre_in"] = {
     init(this: Blockly.Block) {
       this.appendDummyInput()
@@ -48,7 +68,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Bloc instruction (statement) avec champ texte
+  // Statement block with text field
   Blockly.Blocks["libre_out"] = {
     init(this: Blockly.Block) {
       this.appendDummyInput()
@@ -61,7 +81,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Bloc instruction avec une entrée valeur + champ texte
+  // Statement block with value input and text field
   Blockly.Blocks["libre_in_out"] = {
     init(this: Blockly.Block) {
       this.appendValueInput("VALUE")
@@ -73,7 +93,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Début de pile (pas de previous, next oui)
+  // Stack start (no previous, has next)
   Blockly.Blocks["libre_start"] = {
     init(this: Blockly.Block) {
       this.appendDummyInput()
@@ -111,7 +131,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Boucle (duplicata pour usage « avec return » dans LOOP)
+  // Loop block (duplicate for "with return" usage in LOOP)
   Blockly.Blocks["libre_loop_with_return"] = {
     init(this: Blockly.Block) {
       this.appendDummyInput()
@@ -125,7 +145,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Boucle au milieu (prev/next + statement LOOP)
+  // Loop in the middle (prev/next + statement LOOP)
   Blockly.Blocks["libre_loop_inside"] = {
     init(this: Blockly.Block) {
       this.appendDummyInput()
@@ -139,7 +159,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Boucle au milieu avec entrée valeur
+  // Loop in the middle with value input
   Blockly.Blocks["libre_loop_inside_in"] = {
     init(this: Blockly.Block) {
       this.appendValueInput("VALUE")
@@ -153,7 +173,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Boucle au milieu avec entrée valeur + mutator +/- (plusieurs emplacements LOOP)
+  // Loop in the middle with value input and +/- mutator (multiple LOOP slots)
   Blockly.defineBlocksWithJsonArray([
     {
       type: "libre_loop_inside_in_mutator",
@@ -241,7 +261,7 @@ export const defineLibreBlocks = (): void => {
     libreLoopInsideInMutatorHelper,
   );
 
-  // Boucle « do » (champ + statement DO avec son champ)
+  // "Do" loop block (field + DO statement with its own field)
   Blockly.Blocks["libre_loop_do_inside"] = {
     init(this: Blockly.Block) {
       this.appendDummyInput()
@@ -256,7 +276,7 @@ export const defineLibreBlocks = (): void => {
     },
   };
 
-  // Boucle « do » avec entrée valeur
+  // "Do" loop block with value input
   Blockly.Blocks["libre_loop_do_inside_in"] = {
     init(this: Blockly.Block) {
       this.appendValueInput("VALUE")

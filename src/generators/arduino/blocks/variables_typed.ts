@@ -134,13 +134,10 @@ export const variables_get_dynamic = function (
 
 /**
  * Generator for variables_set_type block.
- * This block only changes the variable type in the workspace.
- */
-/**
- * Generates Arduino code for variable type assignment blocks.
- * @param block - Blockly block instance.
- * @param generator - Arduino generator instance.
- * @returns Generated code string.
+ * This block only changes the variable type in the workspace; no code is emitted.
+ * @param _block - Blockly block instance (unused, for API consistency).
+ * @param _generator - Arduino generator instance (unused, for API consistency).
+ * @returns Empty string (no generated code).
  */
 export const variables_set_type = function (
   _block: Blockly.Block,
