@@ -1,6 +1,6 @@
 {
   "name": "µcBlockly",
-  "version": "2.1.1",
+  "version": "2.1.5",
   "description": "Program microcontrollers thanks to Blockly",
   "main": "build/src/index.js",
   "module": "build/src/index.js",
@@ -14,10 +14,8 @@
     "build:local": "webpack --config webpack.local.config.mjs",
     "build:prod-hardened": "cross-env UCB_HARDENED=1 webpack --mode production",
     "docs": "typedoc",
-    "docs:functions": "node scripts/extract-functions.js",
     "lint": "eslint src --fix --ignore-pattern src/out/**",
-    "dev": "webpack serve --open --mode development",
-    "update": "npm update"
+    "dev": "webpack serve --open --mode development"
   },
   "repository": {
     "type": "git",

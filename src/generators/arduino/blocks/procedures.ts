@@ -3,7 +3,7 @@
  * @module Arduino.Generators.Procedures
  * @description Arduino code generators for procedure blocks.
  * @remarks
- * Implements generator functions for the procedures category.
+ * Implements generator functions for the procedures category. Generates Arduino code for procedure blocks.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -14,10 +14,6 @@
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
- */
-
-/**
- * @fileoverview Generating Arduino code for procedure blocks.
  */
 
 import * as Blockly from "blockly";

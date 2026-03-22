@@ -3,7 +3,7 @@
  * @module Arduino.Generators.Logic
  * @description Arduino code generators for logic blocks.
  * @remarks
- * Implements generator functions for the logic category.
+ * Implements generator functions for the logic category. Generates Arduino code for logic blocks.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -14,10 +14,6 @@
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
- */
-
-/**
- * @fileoverview Generating JavaScript for logic blocks.
  */
 
 // Former goog.module ID: Blockly.JavaScript.logic

@@ -3,7 +3,7 @@
  * @module Arduino.Generators.Colour
  * @description Arduino code generators for colour blocks.
  * @remarks
- * Implements generator functions for the colour category.
+ * Implements generator functions for the colour category. Generates Arduino code for colour blocks.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -14,10 +14,6 @@
  * @license
  * Copyright 2012 Google LLC
  * SPDX-License-Identifier: Apache-2.0
- */
-
-/**
- * @fileoverview Generating Arduino code for colour blocks.
  */
 
 import type { Block } from "blockly/core/block";

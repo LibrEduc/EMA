@@ -14,40 +14,6 @@ import "@blockly/toolbox-search";
 import "./css/index.css";
 import "./css/µcBlockly.css";
 /**
- * Lazily initializes Monaco Editor to avoid heavy startup cost.
- */
-export declare class LazyMonacoEditor {
-    private editor?;
-    private pendingValue;
-    private initializing;
-    /**
-     * Initializes the Monaco editor if it is not already created.
-     * @param container - DOM element that hosts the editor.
-     * @returns Resolves when the editor is ready.
-     */
-    ensureInitialized(container: HTMLElement): Promise<void>;
-    /**
-     * Sets the editor content, deferring until initialization if needed.
-     * @param value - Full editor text content.
-     */
-    setValue(value: string): void;
-}
-export declare const µcB_codeEditor: LazyMonacoEditor;
-/**
- * Updates workspace SVG size and position to match layout.
- * @remarks
- * Computes offset and dimensions from the layout container and calls
- * Blockly.svgResize to update rendering.
- */
-export declare const µcB_workspaceOnResize: () => void;
-/**
- * Attaches mouse handlers to flex resizer elements.
- * @remarks
- * Detects resizer orientation from parent classes and delegates to the
- * resize handler.
- */
-export declare const µcB_addFlexResizerEvents: () => void;
-/**
  * Registers components needed for the continuous toolbox.
  * @public
  * @remarks
@@ -64,4 +30,8 @@ export declare const registerContinuousToolboxComponents: () => void;
  * and flyout inflaters, and unregisters the continuous toolbox components.
  */
 export declare const unregisterContinuousToolboxComponents: () => void;
+/** Public API surface (same exports as before the workspace module split). */
+export { LazyMonacoEditor, µcB_codeEditor } from "./code_editor";
+export { µcB_workspaceOnResize } from "./workspace_resize";
+export { µcB_addFlexResizerEvents } from "./workspace_flex";
 //# sourceMappingURL=index.d.ts.map

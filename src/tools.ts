@@ -48,29 +48,42 @@ export const addReplaceParamToUrl = (url: string, param: string, value: string):
 };
 
 /**
+ * Builds pathname + updated search + hash for the current page (same-origin URL without host).
+ * Use with {@link pushStateReplaceSearchParam} so the browser keeps the correct path and fragment (#).
+ * @param param - Query parameter name.
+ * @param value - New value for the parameter.
+ * @returns Full path string suitable for `history.pushState` (pathname + search + hash).
+ */
+export function buildCurrentUrlWithSearchParam(param: string, value: string): string {
+  const newSearch = addReplaceParamToUrl(window.location.search, param, value);
+  return window.location.pathname + (newSearch || '') + window.location.hash;
+}
+
+/**
+ * Updates one query parameter and pushes history state (full pathname + search + hash).
+ * @param param - Query parameter name.
+ * @param value - New value for the parameter.
+ */
+export function pushStateReplaceSearchParam(param: string, value: string): void {
+  window.history.pushState({}, "µcB", buildCurrentUrlWithSearchParam(param, value));
+}
+
+/**
  * Updates plugin flags in the URL based on a checkbox state.
  * @param pluginName - DOM checkbox element id.
  * @param pluginKey - URL key representing the plugin.
  */
 export const setPluginsInURL = (pluginName: string, pluginKey: string): void => {
   const searchParams = new URLSearchParams(window.location.search);
-  let paramsURL: string[] | null = [""];
-  if (searchParams.get('options') !== null)
-    paramsURL = searchParams.get('options')!.split(',');
-  // Remove null/undefined entries from the options array
-  paramsURL = paramsURL.filter(Boolean);
+  const optionsRaw = searchParams.get('options');
+  const paramsURL: string[] = optionsRaw ? optionsRaw.split(',').filter(Boolean) : [];
 
-  let result: string = "";
-  const checkBox: boolean = (document.getElementById(pluginName) as HTMLInputElement).checked;
-  window.sessionStorage.setItem(pluginName, checkBox.toString());
-  if (checkBox) {
-    if (!paramsURL.includes(pluginKey)) {
-      paramsURL.push(pluginKey);
-    }
-    result = paramsURL.join(',');
-  } else {
-    result = paramsURL.join(',');
-    result = result.split(",").filter(n => n != pluginKey).join(",");
-  }
-  window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "options", result));
-}
+  const checkBox = (document.getElementById(pluginName) as HTMLInputElement | null)?.checked ?? false;
+  window.sessionStorage.setItem(pluginName, String(checkBox));
+
+  const nextOptions = checkBox
+    ? (paramsURL.includes(pluginKey) ? paramsURL : [...paramsURL, pluginKey]).join(',')
+    : paramsURL.filter((n) => n !== pluginKey).join(',');
+
+  pushStateReplaceSearchParam("options", nextOptions);
+};

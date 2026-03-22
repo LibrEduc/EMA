@@ -35,7 +35,6 @@ declare const __UCB_BUILD_FINGERPRINT__: string | undefined;
 
 import * as Blockly from "blockly";
 import { SeparatorAxis } from "blockly/core/flyout_separator";
-import type * as Monaco from "monaco-editor";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 import { registerToolboxSearchI18n } from "./toolbox_search_i18n";
@@ -75,12 +74,8 @@ globalWindow.MonacoEnvironment = {
   }
 };
 
-// Expose Blockly globally IMMEDIATELY after import
+// Expose Blockly globally (subset used by external scripts / debugging).
 if (typeof window !== 'undefined') {
-  // Expose Blockly and all its properties
-  globalWindow.Blockly = Blockly;
-
-  // Also expose main properties individually
   globalWindow.Blockly = {
     ...Blockly,
     Blocks: Blockly.Blocks,
@@ -93,9 +88,8 @@ if (typeof window !== 'undefined') {
     ToolboxCategory: Blockly.ToolboxCategory,
     Names: Blockly.Names,
     Variables: Blockly.Variables,
-    utils: Blockly.utils
+    utils: Blockly.utils,
   };
-
   debugLog('✅ Blockly and all its properties exposed globally');
   debugLog('Available properties:', Object.keys(globalWindow.Blockly));
 }
@@ -138,22 +132,35 @@ if (typeof window !== 'undefined') {
   debugLog('✅ arduinoGenerator and all its properties exposed globally');
   debugLog('Available arduinoGenerator properties:', Object.keys(exposedArduinoGenerator));
 }
-import { addReplaceParamToUrl, setPluginsInURL } from "./tools";
+import { pushStateReplaceSearchParam, setPluginsInURL } from "./tools";
 import { basic_toolbox, getToolboxForCurrentBoard, getToolboxWithoutBoardCategory } from "./toolbox";
 import { BlocklyApplication } from "./blockly_application_type";
 //plugins
 import {
   ContinuousCategory,
   ContinuousFlyout,
-  ContinuousMetrics,
   ContinuousToolbox,
   RecyclableBlockFlyoutInflater,
 } from "@blockly/continuous-toolbox";
+import { ContinuousMetricsOverlayFlyout } from "./continuous_metrics_overlay_flyout";
 import { ContentHighlight } from "@blockly/workspace-content-highlight";
 //import { KeyboardNavigation } from '@blockly/keyboard-navigation';
 //KeyboardNavigation.registerKeyboardNavigationStyles();
 import "./css/index.css";
 import "./css/µcBlockly.css";
+
+import { getA11yLabel } from "./a11y_labels";
+import { µcB_codeEditor } from "./code_editor";
+import { registerWorkspaceForSvgResize, µcB_workspaceOnResize } from "./workspace_resize";
+import {
+  µcB_addFlexResizerEvents,
+  initializeBottomPanelToggleButton,
+  initializeRightPanelToggleButton,
+  saveLayoutToSessionStorage,
+  updateBottomPanelToggleButton,
+  updateResizerAriaValue,
+  updateRightPanelToggleButton,
+} from "./workspace_flex";
 
 // Diagnostic switches for stepwise re-enable of typing overlay.
 // Current step (requested): only configureStandardBlocks enabled.
@@ -319,59 +326,6 @@ const syncUiPaletteTheme = (): void => {
   rootStyle.setProperty("--toggle-fg", toHex(toggleFg.r, toggleFg.g, toggleFg.b));
 };
 
-const FLEX_UP_RIGHT_LAST_OPEN_KEY = "flexContainerUpRightLastOpen";
-const FLEX_BOTTOM_LAST_OPEN_KEY = "flexContainerBottomLastOpen";
-const RIGHT_PANEL_TOGGLE_BUTTON_ID = "flex_up_right_toggle_button";
-const BOTTOM_PANEL_TOGGLE_BUTTON_ID = "flex_bottom_toggle_button";
-const FLEX_COLLAPSE_EPSILON = 0.01;
-
-const parsePositiveFlex = (rawValue: string | null | undefined, fallback = 0): number => {
-  const parsed = Number(rawValue);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-};
-
-const snapNearZeroFlex = (previous: HTMLElement, next: HTMLElement): void => {
-  const prevGrow = parsePositiveFlex(previous.style.flexGrow, 0);
-  const nextGrow = parsePositiveFlex(next.style.flexGrow, 0);
-  const total = prevGrow + nextGrow;
-  if (total <= 0) {
-    return;
-  }
-  if (prevGrow <= FLEX_COLLAPSE_EPSILON) {
-    previous.style.flexGrow = "0";
-    next.style.flexGrow = String(total);
-    return;
-  }
-  if (nextGrow <= FLEX_COLLAPSE_EPSILON) {
-    next.style.flexGrow = "0";
-    previous.style.flexGrow = String(total);
-  }
-};
-
-type SupportedLang = "fr" | "en" | "es" | "ar";
-const getSupportedLang = (): SupportedLang => {
-  const value = (elements.languageMenu?.value || getLangParamFromUrl() || "en").toLowerCase();
-  if (value === "fr" || value === "es" || value === "ar") {
-    return value;
-  }
-  return "en";
-};
-
-const getA11yLabel = (
-  key:
-    | "A11Y_GENERATED_CODE_REGION"
-    | "A11Y_CONSOLE_REGION"
-    | "A11Y_HORIZONTAL_RESIZER"
-    | "A11Y_VERTICAL_RESIZER"
-    | "A11Y_COLLAPSE_CODE_PANEL"
-    | "A11Y_OPEN_CODE_PANEL"
-    | "A11Y_COLLAPSE_CONSOLE_PANEL"
-    | "A11Y_OPEN_CONSOLE_PANEL",
-): string => {
-  const lang = getSupportedLang();
-  return languagesMap[lang]?.[key] ?? languagesMap.en[key] ?? key;
-};
-
 /**
  * Restores panel layout from session storage.
  * Falls back to sane defaults when nothing is stored yet.
@@ -465,61 +419,6 @@ requiredElements.forEach((id) => {
   }
 });
 
-/**
- * Lazily initializes Monaco Editor to avoid heavy startup cost.
- */
-export class LazyMonacoEditor {
-  private editor?: Monaco.editor.IStandaloneCodeEditor;
-  private pendingValue: string | null = null;
-  private initializing: Promise<void> | null = null;
-
-  /**
-   * Initializes the Monaco editor if it is not already created.
-   * @param container - DOM element that hosts the editor.
-   * @returns Resolves when the editor is ready.
-   */
-  async ensureInitialized(container: HTMLElement): Promise<void> {
-    if (this.editor) {
-      return;
-    }
-    if (this.initializing) {
-      await this.initializing;
-      return;
-    }
-    this.initializing = (async () => {
-      const monaco = await import("monaco-editor");
-      this.editor = monaco.editor.create(container, {
-        automaticLayout: true,
-        formatOnPaste: true,
-        formatOnType: true,
-        language: "cpp",
-        lineNumbers: "on",
-        readOnly: false,
-        scrollBeyondLastLine: false,
-      });
-      if (this.pendingValue !== null) {
-        this.editor.setValue(this.pendingValue);
-        this.pendingValue = null;
-      }
-    })();
-    await this.initializing;
-  }
-
-  /**
-   * Sets the editor content, deferring until initialization if needed.
-   * @param value - Full editor text content.
-   */
-  setValue(value: string): void {
-    if (this.editor) {
-      this.editor.setValue(value);
-      return;
-    }
-    this.pendingValue = value;
-  }
-}
-
-// Initialize Monaco Editor lazily
-export const µcB_codeEditor = new LazyMonacoEditor();
 if (elements.contentMonacoEditor) {
   elements.contentMonacoEditor.style.display = "none";
 }
@@ -663,251 +562,7 @@ const µcB: BlocklyApplication = new BlocklyApplication(
  */
 µcB.LANGUAGE_RTL = ["ar", "fa", "he", "lki"];
 
-/**
- * Updates workspace SVG size and position to match layout.
- * @remarks
- * Computes offset and dimensions from the layout container and calls
- * Blockly.svgResize to update rendering.
- */
-export const µcB_workspaceOnResize = (): void => {
-  if (!elements.workspaceContentArea || !elements.workspaceContentBlockly) {
-    console.warn("Workspace elements not found, skipping resize");
-    return;
-  }
-
-  let x = Number(elements.workspaceContentArea.offsetLeft) || 0;
-  let y = Number(elements.workspaceContentArea.offsetTop) || 0;
-  let element: HTMLElement = elements.workspaceContentArea;
-  while (element.offsetParent) {
-    element = element.offsetParent as HTMLElement;
-    x += Number(element.offsetLeft) || 0;
-    y += Number(element.offsetTop) || 0;
-  }
-  const rawWidth = Number(elements.workspaceContentArea.offsetWidth);
-  const rawHeight = Number(elements.workspaceContentArea.offsetHeight);
-  const width = Number.isFinite(rawWidth) && rawWidth > 0 ? rawWidth : 1;
-  const height = Number.isFinite(rawHeight) && rawHeight > 0 ? rawHeight : 1;
-  Object.assign(elements.workspaceContentBlockly.style, {
-    width: `${width}px`,
-    height: `${height}px`,
-    left: `${Number.isFinite(x) ? x : 0}px`,
-    top: `${Number.isFinite(y) ? y : 0}px`,
-  });
-  Blockly.svgResize(µcB.workspace as Blockly.WorkspaceSvg);
-};
-
-/**
- * Persists layout flex grow values to session storage.
- */
-const saveLayoutToSessionStorage = (): void => {
-  const layoutElements = {
-    flexContainerUp: document.getElementById(
-      "flex_container_up",
-    ) as HTMLElement,
-    flexContainerUpLeft: document.getElementById(
-      "flex_container_up_left",
-    ) as HTMLElement,
-    flexContainerUpRight: document.getElementById(
-      "flex_container_up_right",
-    ) as HTMLElement,
-    flexContainerBottom: document.getElementById(
-      "flex_container_bottom",
-    ) as HTMLElement,
-  };
-
-  Object.entries(layoutElements).forEach(([key, element]) => {
-    if (element && window.sessionStorage) {
-      const flexGrowValue = element.style.flexGrow || "1";
-      window.sessionStorage.setItem(key, flexGrowValue);
-    }
-  });
-
-  const rightOpenFlex = parsePositiveFlex(
-    layoutElements.flexContainerUpRight?.style.flexGrow,
-  );
-  if (rightOpenFlex > 0 && window.sessionStorage) {
-    window.sessionStorage.setItem(FLEX_UP_RIGHT_LAST_OPEN_KEY, String(rightOpenFlex));
-  }
-  const bottomOpenFlex = parsePositiveFlex(
-    layoutElements.flexContainerBottom?.style.flexGrow,
-  );
-  if (bottomOpenFlex > 0 && window.sessionStorage) {
-    window.sessionStorage.setItem(FLEX_BOTTOM_LAST_OPEN_KEY, String(bottomOpenFlex));
-  }
-};
-
-const updateRightPanelToggleButton = (): void => {
-  const button = document.getElementById(RIGHT_PANEL_TOGGLE_BUTTON_ID) as HTMLButtonElement | null;
-  const rightPanel = document.getElementById("flex_container_up_right") as HTMLElement | null;
-  if (!button || !rightPanel) {
-    return;
-  }
-  const isOpen = parsePositiveFlex(rightPanel.style.flexGrow) > 0;
-  button.textContent = isOpen ? ">" : "<";
-  button.title = isOpen
-    ? getA11yLabel("A11Y_COLLAPSE_CODE_PANEL")
-    : getA11yLabel("A11Y_OPEN_CODE_PANEL");
-  button.setAttribute(
-    "aria-label",
-    isOpen ? getA11yLabel("A11Y_COLLAPSE_CODE_PANEL") : getA11yLabel("A11Y_OPEN_CODE_PANEL"),
-  );
-  button.setAttribute("aria-expanded", isOpen ? "true" : "false");
-};
-
-const updateBottomPanelToggleButton = (): void => {
-  const button = document.getElementById(BOTTOM_PANEL_TOGGLE_BUTTON_ID) as HTMLButtonElement | null;
-  const bottomPanel = document.getElementById("flex_container_bottom") as HTMLElement | null;
-  if (!button || !bottomPanel) {
-    return;
-  }
-  const isOpen = parsePositiveFlex(bottomPanel.style.flexGrow) > 0;
-  button.textContent = isOpen ? "v" : "^";
-  button.title = isOpen
-    ? getA11yLabel("A11Y_COLLAPSE_CONSOLE_PANEL")
-    : getA11yLabel("A11Y_OPEN_CONSOLE_PANEL");
-  button.setAttribute(
-    "aria-label",
-    isOpen ? getA11yLabel("A11Y_COLLAPSE_CONSOLE_PANEL") : getA11yLabel("A11Y_OPEN_CONSOLE_PANEL"),
-  );
-  button.setAttribute("aria-expanded", isOpen ? "true" : "false");
-};
-
-const toggleRightPanel = (): void => {
-  const leftPanel = document.getElementById("flex_container_up_left") as HTMLElement | null;
-  const rightPanel = document.getElementById("flex_container_up_right") as HTMLElement | null;
-  if (!leftPanel || !rightPanel) {
-    return;
-  }
-
-  const leftGrow = parsePositiveFlex(leftPanel.style.flexGrow, 1);
-  const rightGrow = parsePositiveFlex(rightPanel.style.flexGrow, 0);
-
-  if (rightGrow > 0) {
-    window.sessionStorage?.setItem(FLEX_UP_RIGHT_LAST_OPEN_KEY, String(rightGrow));
-    leftPanel.style.flexGrow = String(leftGrow + rightGrow);
-    rightPanel.style.flexGrow = "0";
-  } else {
-    const reopenGrow = parsePositiveFlex(
-      window.sessionStorage?.getItem(FLEX_UP_RIGHT_LAST_OPEN_KEY),
-      1,
-    );
-    const total = leftGrow + rightGrow;
-    const nextRightGrow = reopenGrow;
-    const nextLeftGrow = total > nextRightGrow ? total - nextRightGrow : 1;
-    leftPanel.style.flexGrow = String(nextLeftGrow);
-    rightPanel.style.flexGrow = String(nextRightGrow);
-  }
-
-  saveLayoutToSessionStorage();
-  updateRightPanelToggleButton();
-  µcB_workspaceOnResize();
-};
-
-const toggleBottomPanel = (): void => {
-  const upPanel = document.getElementById("flex_container_up") as HTMLElement | null;
-  const bottomPanel = document.getElementById("flex_container_bottom") as HTMLElement | null;
-  if (!upPanel || !bottomPanel) {
-    return;
-  }
-
-  const upGrow = parsePositiveFlex(upPanel.style.flexGrow, 1);
-  const bottomGrow = parsePositiveFlex(bottomPanel.style.flexGrow, 0);
-
-  if (bottomGrow > 0) {
-    window.sessionStorage?.setItem(FLEX_BOTTOM_LAST_OPEN_KEY, String(bottomGrow));
-    upPanel.style.flexGrow = String(upGrow + bottomGrow);
-    bottomPanel.style.flexGrow = "0";
-  } else {
-    const reopenGrow = parsePositiveFlex(
-      window.sessionStorage?.getItem(FLEX_BOTTOM_LAST_OPEN_KEY),
-      1,
-    );
-    const total = upGrow + bottomGrow;
-    const nextBottomGrow = reopenGrow;
-    const nextUpGrow = total > nextBottomGrow ? total - nextBottomGrow : 1;
-    upPanel.style.flexGrow = String(nextUpGrow);
-    bottomPanel.style.flexGrow = String(nextBottomGrow);
-  }
-
-  saveLayoutToSessionStorage();
-  updateBottomPanelToggleButton();
-  µcB_workspaceOnResize();
-};
-
-const initializeRightPanelToggleButton = (): void => {
-  const horizontalResizer = document.querySelector(
-    "#flex_container_up > flex-resizer",
-  ) as HTMLElement | null;
-  if (!horizontalResizer) {
-    return;
-  }
-  if (document.getElementById(RIGHT_PANEL_TOGGLE_BUTTON_ID)) {
-    updateRightPanelToggleButton();
-    return;
-  }
-
-  const button = document.createElement("button");
-  button.id = RIGHT_PANEL_TOGGLE_BUTTON_ID;
-  button.type = "button";
-  button.className = "flex-panel-toggle-button";
-  button.textContent = ">";
-  button.setAttribute("aria-controls", "flex_container_up_right");
-  button.addEventListener("mousedown", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-  });
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    toggleRightPanel();
-  });
-  horizontalResizer.appendChild(button);
-  updateRightPanelToggleButton();
-};
-
-const initializeBottomPanelToggleButton = (): void => {
-  const verticalResizer = document.querySelector(
-    "#container_page > flex-resizer",
-  ) as HTMLElement | null;
-  if (!verticalResizer) {
-    return;
-  }
-  if (document.getElementById(BOTTOM_PANEL_TOGGLE_BUTTON_ID)) {
-    updateBottomPanelToggleButton();
-    return;
-  }
-
-  const button = document.createElement("button");
-  button.id = BOTTOM_PANEL_TOGGLE_BUTTON_ID;
-  button.type = "button";
-  button.className = "flex-panel-toggle-button flex-panel-toggle-button--horizontal";
-  button.textContent = "v";
-  button.setAttribute("aria-controls", "flex_container_bottom");
-  button.addEventListener("mousedown", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-  });
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    toggleBottomPanel();
-  });
-  verticalResizer.appendChild(button);
-  updateBottomPanelToggleButton();
-};
-
-const updateResizerAriaValue = (resizer: HTMLElement): void => {
-  const previous = resizer.previousElementSibling as HTMLElement | null;
-  const next = resizer.nextElementSibling as HTMLElement | null;
-  if (!previous || !next) return;
-  const prevGrow = parsePositiveFlex(previous.style.flexGrow, 1);
-  const nextGrow = parsePositiveFlex(next.style.flexGrow, 1);
-  const total = prevGrow + nextGrow;
-  const percentage = total > 0 ? Math.round((prevGrow / total) * 100) : 50;
-  resizer.setAttribute("aria-valuemin", "0");
-  resizer.setAttribute("aria-valuemax", "100");
-  resizer.setAttribute("aria-valuenow", String(percentage));
-};
+registerWorkspaceForSvgResize(µcB.workspace);
 
 const applyA11yAttributes = (): void => {
   if (elements.contentCode) {
@@ -941,181 +596,6 @@ const applyA11yAttributes = (): void => {
   }
   updateRightPanelToggleButton();
   updateBottomPanelToggleButton();
-};
-
-/**
- * Handles flex resizing via mouse drag.
- * @param mouseDown - Initial mouse down event on the resizer.
- * @param sizeProp - Size property to adjust ("offsetWidth" or "offsetHeight").
- * @param posProp - Mouse position property ("pageX" or "pageY").
- */
-const µcB_workspaceManageResize = (
-  mouseDown: Event,
-  sizeProp: string,
-  posProp: string,
-): void => {
-  const recall: HTMLElement = mouseDown.target as HTMLElement;
-  const prev = recall?.previousElementSibling as HTMLInputElement | null;
-  const next = recall?.nextElementSibling as HTMLInputElement | null;
-  if (!prev || !next) {
-    return;
-  }
-  mouseDown.preventDefault();
-  interface IElement {
-    [key: string]: string;
-  }
-  let prevSize: number = Number((prev as unknown as IElement)[sizeProp]);
-  let nextSize: number = Number((next as unknown as IElement)[sizeProp]);
-  const sumSize: number = prevSize + nextSize;
-  const prevGrowParsed: number = Number(prev.style.flexGrow);
-  const nextGrowParsed: number = Number(next.style.flexGrow);
-  const prevGrow: number = Number.isFinite(prevGrowParsed) && prevGrowParsed > 0
-    ? prevGrowParsed
-    : 1;
-  const nextGrow: number = Number.isFinite(nextGrowParsed) && nextGrowParsed > 0
-    ? nextGrowParsed
-    : 1;
-  const sumGrow: number = prevGrow + nextGrow;
-  if (!Number.isFinite(sumSize) || sumSize <= 0) {
-    return;
-  }
-  let lastPos: number = Number((mouseDown as unknown as IElement)[posProp]);
-
-  /**
-   * Adjusts flex grow while dragging.
-   * @param mouseMove - Mouse move event during resize.
-   */
-  const onMouseMove = (mouseMove: Event): void => {
-    let pos: number = Number((mouseMove as unknown as IElement)[posProp]);
-    const difference: number = pos - lastPos;
-    prevSize += difference;
-    nextSize -= difference;
-    if (prevSize < 0) {
-      nextSize += prevSize;
-      pos -= prevSize;
-      prevSize = 0;
-    }
-    if (nextSize < 0) {
-      prevSize += nextSize;
-      pos += nextSize;
-      nextSize = 0;
-    }
-    const prevGrowNew: number = sumGrow * (prevSize / sumSize);
-    const nextGrowNew: number = sumGrow * (nextSize / sumSize);
-    if (!Number.isFinite(prevGrowNew) || !Number.isFinite(nextGrowNew)) {
-      return;
-    }
-    prev.style.flexGrow = String(prevGrowNew);
-    next.style.flexGrow = String(nextGrowNew);
-    lastPos = pos;
-    µcB_workspaceOnResize();
-  };
-
-  /**
-   * Cleans up listeners and persists layout after resize.
-   */
-  const onMouseUp = (): void => {
-    const html = document.querySelector("html") as HTMLElement;
-    html.style.cursor = "default";
-    if (String(posProp) === "pageX") {
-      recall.style.cursor = "ew-resize";
-    } else {
-      recall.style.cursor = "ns-resize";
-    }
-    snapNearZeroFlex(prev, next);
-    window.removeEventListener("mousemove", onMouseMove);
-    window.removeEventListener("mouseup", onMouseUp);
-    saveLayoutToSessionStorage();
-    updateRightPanelToggleButton();
-    updateBottomPanelToggleButton();
-  };
-
-  window.addEventListener("mousemove", onMouseMove);
-  window.addEventListener("mouseup", onMouseUp);
-};
-
-/**
- * Attaches mouse handlers to flex resizer elements.
- * @remarks
- * Detects resizer orientation from parent classes and delegates to the
- * resize handler.
- */
-export const µcB_addFlexResizerEvents = (): void => {
-  document.body.addEventListener("mousedown", function (mouseDown: Event) {
-    const html = document.querySelector("html") as HTMLElement;
-    const mouseTarget = mouseDown.target as HTMLElement;
-    if (mouseTarget.nodeType !== 1 || mouseTarget.tagName !== "FLEX-RESIZER") {
-      return;
-    }
-    const parentNode = mouseTarget.parentNode as HTMLElement;
-    const resizeHorizontal: boolean =
-      parentNode.classList.contains("wrapper_element");
-    const resizeVertical: boolean =
-      parentNode.classList.contains("wrapper_global");
-    if (resizeHorizontal && resizeVertical) {
-      return;
-    } else if (resizeHorizontal) {
-      mouseTarget.style.cursor = "col-resize";
-      html.style.cursor = "col-resize"; // avoid cursor's flickering
-      µcB_workspaceManageResize(mouseDown, "offsetWidth", "pageX");
-    } else if (resizeVertical) {
-      mouseTarget.style.cursor = "row-resize";
-      html.style.cursor = "row-resize"; // avoid cursor's flickering
-      µcB_workspaceManageResize(mouseDown, "offsetHeight", "pageY");
-    }
-    Blockly.svgResize(µcB.workspace as Blockly.WorkspaceSvg);
-  });
-  document.body.addEventListener("mouseup", () => {
-    updateRightPanelToggleButton();
-    updateBottomPanelToggleButton();
-    const resizers = document.querySelectorAll("flex-resizer");
-    resizers.forEach((resizer) => updateResizerAriaValue(resizer as HTMLElement));
-  });
-  document.body.addEventListener("keydown", (event: KeyboardEvent) => {
-    const target = event.target as HTMLElement | null;
-    if (!target || target.tagName !== "FLEX-RESIZER") return;
-    const previous = target.previousElementSibling as HTMLElement | null;
-    const next = target.nextElementSibling as HTMLElement | null;
-    if (!previous || !next) return;
-
-    const parentNode = target.parentNode as HTMLElement;
-    const isHorizontal = parentNode.classList.contains("wrapper_element");
-    const isVertical = parentNode.classList.contains("wrapper_global");
-    const step = event.shiftKey ? 0.2 : 0.1;
-
-    let delta = 0;
-    if (isHorizontal) {
-      if (event.key === "ArrowLeft") delta = -step;
-      else if (event.key === "ArrowRight") delta = step;
-      else if (event.key === "Home") delta = -999;
-      else if (event.key === "End") delta = 999;
-    } else if (isVertical) {
-      if (event.key === "ArrowUp") delta = -step;
-      else if (event.key === "ArrowDown") delta = step;
-      else if (event.key === "Home") delta = -999;
-      else if (event.key === "End") delta = 999;
-    }
-    if (delta === 0) return;
-
-    event.preventDefault();
-    const prevGrow = parsePositiveFlex(previous.style.flexGrow, 1);
-    const nextGrow = parsePositiveFlex(next.style.flexGrow, 1);
-    const total = prevGrow + nextGrow;
-    if (total <= 0) return;
-
-    let nextPrevGrow = prevGrow + delta;
-    if (delta <= -999) nextPrevGrow = 0;
-    if (delta >= 999) nextPrevGrow = total;
-    nextPrevGrow = Math.max(0, Math.min(total, nextPrevGrow));
-    const nextNextGrow = Math.max(0, total - nextPrevGrow);
-    previous.style.flexGrow = String(nextPrevGrow);
-    next.style.flexGrow = String(nextNextGrow);
-    saveLayoutToSessionStorage();
-    updateRightPanelToggleButton();
-    updateBottomPanelToggleButton();
-    updateResizerAriaValue(target);
-    µcB_workspaceOnResize();
-  });
 };
 
 /**
@@ -1181,7 +661,7 @@ export const registerContinuousToolboxComponents = (): void => {
   Blockly.registry.register(
     Blockly.registry.Type.METRICS_MANAGER,
     "ContinuousMetrics",
-    ContinuousMetrics,
+    ContinuousMetricsOverlayFlyout,
     true,
   );
 
@@ -1327,11 +807,7 @@ const HTML_onChange = (): void => {
   elements.boardMenu.onchange = () => {
     const boardValue = elements.boardMenu.value;
     window.sessionStorage?.setItem("paramBoard", boardValue);
-    window.history.pushState(
-      {},
-      "µcB",
-      addReplaceParamToUrl(window.location.search, "board", boardValue),
-    );
+    pushStateReplaceSearchParam("board", boardValue);
     const lang = getLangParamFromUrl();
     const toolboxForBoard = changeLanguageToolbox(lang, getToolboxForCurrentBoard(basic_toolbox));
     µcB.WORKSPACE_OPTIONS.toolbox = toolboxForBoard;
@@ -1687,3 +1163,8 @@ window.onbeforeunload = (): void => {
   saveLayoutToSessionStorage();
   µcB.workspaceSaveBlocks("mainWorkspace_blocks");
 };
+
+/** Public API surface (same exports as before the workspace module split). */
+export { LazyMonacoEditor, µcB_codeEditor } from "./code_editor";
+export { µcB_workspaceOnResize } from "./workspace_resize";
+export { µcB_addFlexResizerEvents } from "./workspace_flex";

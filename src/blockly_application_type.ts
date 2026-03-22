@@ -73,10 +73,15 @@ if (ENABLE_STRICT_CONNECTION_CHECKER) {
 patchConnectionCheckerForConstBlock();
 patchBlocklyDefensive();
 
-import { µcB_addFlexResizerEvents, µcB_workspaceOnResize, µcB_codeEditor } from "./index";
+import { µcB_codeEditor } from "./code_editor";
+import { µcB_addFlexResizerEvents } from "./workspace_flex";
+import {
+  registerWorkspaceForSvgResize,
+  µcB_workspaceOnResize,
+} from "./workspace_resize";
 import { ToolboxConfiguration, getToolboxForCurrentBoard } from "./toolbox";
 import { themeMappings } from "./options";
-import { addReplaceParamToUrl } from "./tools";
+import { pushStateReplaceSearchParam } from "./tools";
 import { arduinoGenerator } from "./generators/arduino";
 import { languagesMap, languagesMapBlockly } from './languages/languageMap';
 import {
@@ -409,7 +414,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       (this.workspace as Blockly.WorkspaceSvg).setTheme(themeMappings[themeChoice]);
     }
     this.workspaceReboot();
-    window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "theme", themeChoice));
+    pushStateReplaceSearchParam("theme", themeChoice);
     return themeChoice;
   }
 
@@ -430,7 +435,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
     this.WORKSPACE_OPTIONS['renderer'] = renderNew;
     this.workspaceReboot();
-    window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "renderer", renderNew));
+    pushStateReplaceSearchParam("renderer", renderNew);
     return renderNew;
   }
 
@@ -445,6 +450,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
     if (this.autoSaveEnabled) {
       this.workspaceSaveBlocks("mainWorkspace_blocks");
     }
+    // Sync host div + SVG metrics before tearing down plugins (minimap uses them on dispose).
+    µcB_workspaceOnResize();
+    Blockly.svgResize(this.workspace as Blockly.WorkspaceSvg);
     this.workspaceSetupPlugins(true);
     if (ENABLE_STRICT_TYPE_ENFORCER) {
       uninstallStrictTypeEnforcer(this.workspace);
@@ -469,6 +477,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       div_workspace_content_blockly,
       this.WORKSPACE_OPTIONS,
     );
+    registerWorkspaceForSvgResize(this.workspace);
     // Reconnect required mechanisms after reinjection
     if (ENABLE_STRICT_CONNECTION_CHECKER) {
       registerStrictConnectionChecker(this.workspace);
@@ -482,6 +491,25 @@ export class BlocklyApplication implements BlocklyApplicationType {
       if (toolbox && typeof toolbox.refreshSelection === "function") {
         toolbox.refreshSelection();
       }
+      // refreshSelection() selects a category and opens the flyout; if the user did not
+      // enable "always opened flyout", close it so metrics match the real workspace area.
+      const alwaysOpenedFlyoutCb = document.getElementById(
+        "alwaysOpenedToolboxFlyout",
+      ) as HTMLInputElement | null;
+      if (alwaysOpenedFlyoutCb && !alwaysOpenedFlyoutCb.checked && toolbox) {
+        const flyoutAfterRefresh = toolbox.getFlyout?.();
+        if (flyoutAfterRefresh) {
+          if (typeof flyoutAfterRefresh.hide === "function") {
+            flyoutAfterRefresh.hide();
+          }
+          if (typeof flyoutAfterRefresh.setVisible === "function") {
+            flyoutAfterRefresh.setVisible(false);
+          }
+        }
+        µcB_workspaceOnResize();
+        Blockly.svgResize(this.workspace as Blockly.WorkspaceSvg);
+        (this.workspace as Blockly.WorkspaceSvg).resize();
+      }
     }
     patchFieldVariableValidation();
     patchVariableMapCreateVariable(this.workspace);
@@ -492,23 +520,27 @@ export class BlocklyApplication implements BlocklyApplicationType {
       });
     }
     this.workspaceListeners();
-    // Initialize plugins first so minimap receives restore events during load.
-    this.workspaceSetupPlugins(false);
-    // specific to this plugin
-    const isThereMinimap: HTMLElement = document.getElementsByClassName(
-      "blockly-minimap",
-    )[0] as HTMLElement;
-    if (isThereMinimap) {
-      const pluginMinimapCheck = <HTMLInputElement>(
-        document.getElementById("pluginMinimap")
-      );
-      isThereMinimap.style.visibility = pluginMinimapCheck.checked
-        ? "visible"
-        : "hidden";
-    }
-    this.workspaceLoadBlocks("mainWorkspace_blocks");
-    (this.workspace as Blockly.WorkspaceSvg).scrollCenter();
-    this.applyAlwaysOpenedToolboxFlyout();
+    // Ensure toolbox / continuous layout has reported size before plugins (minimap) read metrics.
+    µcB_workspaceOnResize();
+    Blockly.svgResize(this.workspace as Blockly.WorkspaceSvg);
+    (this.workspace as Blockly.WorkspaceSvg).resize();
+    // Initialize plugins; with continuous toolbox, minimap init is deferred so load runs after metrics exist.
+    this.workspaceSetupPlugins(false, () => {
+      const isThereMinimap: HTMLElement = document.getElementsByClassName(
+        "blockly-minimap",
+      )[0] as HTMLElement;
+      if (isThereMinimap) {
+        const pluginMinimapCheck = <HTMLInputElement>(
+          document.getElementById("pluginMinimap")
+        );
+        isThereMinimap.style.visibility = pluginMinimapCheck.checked
+          ? "visible"
+          : "hidden";
+      }
+      this.workspaceLoadBlocks("mainWorkspace_blocks");
+      (this.workspace as Blockly.WorkspaceSvg).scrollCenter();
+      this.applyAlwaysOpenedToolboxFlyout();
+    });
   };
 
   /**
@@ -517,7 +549,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
    * @remarks
    * Prevents double initialization and wires change listeners as needed.
    */
-  public workspaceSetupPlugins = (disposePlugin: boolean = false): void => {
+  public workspaceSetupPlugins = (
+    disposePlugin: boolean = false,
+    onPluginsReady?: () => void,
+  ): void => {
     const pluginHighlightCheck: HTMLInputElement = document.getElementById("pluginHighlight") as HTMLInputElement;
     if (disposePlugin) {
       if (!this.pluginsInitialized) {
@@ -526,8 +561,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
       }
       // shadow-block-converter disabled: causes array blocks to disappear / not stay clipped
       // this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
+      // Dispose minimap first: it listens to workspace metrics; other plugins' dispose may fire
+      // events that update the minimap SVG with NaN if minimap is still attached.
       try {
-        this.plugin_backpack.dispose();
+        this.plugin_minimap.dispose();
       } catch {
         // no-op if already disposed
       }
@@ -537,7 +574,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         // no-op if never initialized
       }
       try {
-        this.plugin_minimap.dispose();
+        this.plugin_backpack.dispose();
       } catch {
         // no-op if already disposed
       }
@@ -590,22 +627,39 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.plugin_workspaceSearch?.init();
       }
       this.plugin_zoomToFit.init();
-      // Initialize minimap last, once workspace/toolbox metrics are stable.
-      this.plugin_minimap = new PositionedMinimap(this.workspace);
-      Blockly.svgResize(this.workspace as Blockly.WorkspaceSvg);
-      this.plugin_minimap.init();
-      const pluginMinimapCheck: HTMLInputElement | null =
-        document.getElementById("pluginMinimap") as HTMLInputElement | null;
-      const minimapEl = document.getElementsByClassName(
-        "blockly-minimap",
-      )[0] as HTMLElement | undefined;
-      if (minimapEl) {
-        minimapEl.style.visibility = pluginMinimapCheck?.checked
-          ? "visible"
-          : "hidden";
+      const svgWs = this.workspace as Blockly.WorkspaceSvg;
+      const finishMinimapAndPlugins = (): void => {
+        Blockly.svgResize(svgWs);
+        this.plugin_minimap = new PositionedMinimap(this.workspace);
+        Blockly.svgResize(svgWs);
+        this.plugin_minimap.init();
+        const pluginMinimapCheck: HTMLInputElement | null =
+          document.getElementById("pluginMinimap") as HTMLInputElement | null;
+        const minimapEl = document.getElementsByClassName(
+          "blockly-minimap",
+        )[0] as HTMLElement | undefined;
+        if (minimapEl) {
+          minimapEl.style.visibility = pluginMinimapCheck?.checked
+            ? "visible"
+            : "hidden";
+        }
+        this.pluginsInitialized = true;
+        this.pluginsWorkspace = this.workspace;
+        onPluginsReady?.();
+      };
+      // Defer minimap only during reboot (callback provided): continuous toolbox layout can be
+      // 0/NaN until after paint. Startup calls workspaceSetupPlugins(false) without callback — keep sync.
+      const deferMinimap =
+        this.isContinuousToolboxEnabled() && typeof onPluginsReady === "function";
+      if (deferMinimap) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            finishMinimapAndPlugins();
+          });
+        });
+      } else {
+        finishMinimapAndPlugins();
       }
-      this.pluginsInitialized = true;
-      this.pluginsWorkspace = this.workspace;
       //this.plugin_keyboardNav.navigationController.addWorkspace(this.workspace);
       //this.plugin_keyboardNav.navigationController.enable(this.workspace);
     }
@@ -713,8 +767,57 @@ export class BlocklyApplication implements BlocklyApplicationType {
     if (typeof (flyout as Blockly.Flyout).autoHide === "function") {
       (flyout as Blockly.Flyout).autoHide(!shouldStayOpen);
     }
+
+    const snapLayout = (): void => {
+      µcB_workspaceOnResize();
+      const ws = this.workspace as Blockly.WorkspaceSvg;
+      Blockly.svgResize(ws);
+      // Reposition toolbox/flyout and refresh scrollbars after container/svg size changes.
+      if (typeof ws.resize === "function") {
+        ws.resize();
+      }
+    };
+
+    const closeFlyoutIfPresent = (): void => {
+      const f = (this.workspace as Blockly.WorkspaceSvg)
+        .getToolbox()
+        ?.getFlyout();
+      if (!f) {
+        return;
+      }
+      if (typeof f.hide === "function") {
+        f.hide();
+      }
+      if (typeof f.setVisible === "function") {
+        f.setVisible(false);
+      }
+      snapLayout();
+    };
+
     if (shouldStayOpen && typeof (flyout as Blockly.Flyout).setVisible === "function") {
       (flyout as Blockly.Flyout).setVisible(true);
+      snapLayout();
+      return;
+    }
+
+    // Case "flyout not pinned open": ensure it is closed. The continuous toolbox may
+    // auto-open the first category during init; closing + snap fixes workspace size.
+    closeFlyoutIfPresent();
+    if (this.isContinuousToolboxEnabled()) {
+      const resyncIfStillClosed = (): void => {
+        const cb = document.getElementById(
+          "alwaysOpenedToolboxFlyout",
+        ) as HTMLInputElement | null;
+        if (cb?.checked) {
+          return;
+        }
+        closeFlyoutIfPresent();
+      };
+      window.requestAnimationFrame(() => {
+        resyncIfStillClosed();
+        window.requestAnimationFrame(resyncIfStillClosed);
+      });
+      window.setTimeout(resyncIfStillClosed, 0);
     }
   }
 
@@ -798,7 +901,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     else
       (document.getElementById('languageMenu')! as HTMLSelectElement).value = newParam;
     window.sessionStorage?.setItem('paramLang', newParam);
-    window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "lang", newParam));
+    pushStateReplaceSearchParam("lang", newParam);
 
     newParam = searchParams.get('theme');
     dropdownMenu = document.getElementById('themeMenu') as HTMLSelectElement;
@@ -813,7 +916,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
       (this.workspace as Blockly.WorkspaceSvg).setTheme(mappedTheme);
     }
     window.sessionStorage?.setItem('paramTheme', newParam);
-    window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "theme", newParam));
+    pushStateReplaceSearchParam("theme", newParam);
 
     const previousRenderer = String(this.WORKSPACE_OPTIONS['renderer'] ?? "");
     newParam = searchParams.get('renderer');
@@ -826,7 +929,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     }
     this.WORKSPACE_OPTIONS['renderer'] = newParam;
     window.sessionStorage?.setItem('paramRenderer', newParam);
-    window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "renderer", newParam));
+    pushStateReplaceSearchParam("renderer", newParam);
     // Reboot only when URL requests a different renderer than current state.
     if (rendererFromUrl && this.workspace && previousRenderer !== newParam) {
       this.changeRenderer(newParam);
@@ -845,7 +948,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         newParam = fallbackBoard;
       }
       window.sessionStorage?.setItem('paramBoard', newParam);
-      window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "board", newParam));
+      pushStateReplaceSearchParam("board", newParam);
     }
     // Sync toolbox (and pin dropdowns) with current board when board came from URL or default.
     if (this.workspace) {

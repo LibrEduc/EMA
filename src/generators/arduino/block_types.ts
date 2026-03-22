@@ -4,21 +4,16 @@
  * @description Type compatibility and dropdown options for typed blocks.
  * @remarks
  * Defines type compatibility rules for block connections.
+ * Block type definitions live in `block_types/` (one file per category); the index aggregates them.
+ *
+ * To add a new block type:
+ * 1. Choose the category file in block_types/ (or create one)
+ * 2. Add `"block_name": "int"` (static) or `"__DYNAMIC__function_name"` (dynamic)
+ * 3. If dynamic, add the function to DYNAMIC_TYPE_FUNCTIONS in block_types_registry.ts
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
- */
-
-/**
- * @fileoverview Base types for Blockly Arduino typing
- * @description Block type definitions are now in src/generators/arduino/block_types/.
- * Each category exports a type object, and the index aggregates them.
- *
- * To add a new block type:
- * 1. Choose the category file in block_types/ (or create one)
- * 2. Add "block_name": "int" (static) or "__DYNAMIC__function_name" (dynamic)
- * 3. If dynamic, add the function to DYNAMIC_TYPE_FUNCTIONS in block_types_registry.ts
  */
 
 /**

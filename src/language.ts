@@ -31,7 +31,7 @@
  */
 
 import { BlocklyApplicationType } from './blockly_application_type';
-import { addReplaceParamToUrl } from './tools';
+import { pushStateReplaceSearchParam } from './tools';
 import { languagesMap, LanguageItem } from './languages/languageMap';
 import { ToolboxConfiguration } from "./toolbox";
 
@@ -190,7 +190,7 @@ export const getLangParamFromUrl = (): string => {
 export const getLangParamFromDropdown = (): string => {
   const dropdownMenu: HTMLSelectElement = document.getElementById('languageMenu') as HTMLSelectElement;
   const newLang: string = dropdownMenu.options[dropdownMenu.selectedIndex].value;
-  window.history.pushState({}, "µcB", addReplaceParamToUrl(window.location.search, "lang", newLang));
+  pushStateReplaceSearchParam("lang", newLang);
   return newLang;
 };
 

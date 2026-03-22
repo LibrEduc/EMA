@@ -20,6 +20,11 @@ src/
 ├── language.ts                 # Language switching, toolbox translation, URL lang param
 ├── types.d.ts                  # Ambient declarations (Blockly plugins, Monaco, etc.)
 ├── boards.ts                   # Board profiles (pins, PWM, serial, etc.) – data + helpers
+├── code_editor.ts              # Lazy Monaco editor (generated C++ panel); shared µcB_codeEditor
+├── workspace_resize.ts         # Blockly.svgResize + registerWorkspaceForSvgResize (no import from index)
+├── workspace_flex.ts           # Flex resizers, panel toggles, saveLayoutToSessionStorage, µcB_addFlexResizerEvents
+├── workspace_layout_utils.ts   # Flex helpers (parsePositiveFlex, snapNearZeroFlex, layout keys)
+├── a11y_labels.ts              # getA11yLabel for layout UI (avoids importing language.ts from flex stack)
 │
 ├── categories/blockly/         # Block *definitions* (UI blocks, fields, mutators)
 │   ├── index.ts                # Entry: defineBlocklyArduinoCompatBlocks, defineAllTypedVariableBlocks
@@ -61,8 +66,8 @@ src/
 
 ## Conventions
 
-- **Comments and JSDoc**: In English. Use `@description`, `@remarks`, `@param`, `@returns` for public APIs. File-level `@packageDocumentation` describes the module role.
-- **License header**: Each source file starts with a short `@packageDocumentation` (or `@fileoverview`) and the GPL-3.0-or-later license block. Author/copyright (e.g. ASTUCE) is kept as-is.
+- **Comments (TSDoc / TypeDoc)**: In English. Use `@description`, `@remarks`, `@param`, `@returns` for public APIs. File-level `@packageDocumentation` (with optional `@module`) describes the module for the generated API site. Avoid legacy **`@fileoverview`** (JSDoc); fold that text into `@remarks` or `@description`.
+- **License header**: Each source file starts with `@packageDocumentation` where applicable, then the GPL-3.0-or-later license block. Author/copyright (e.g. ASTUCE) is kept as-is.
 - **Block definitions vs code generation**:
   - **categories/blockly/** = what the user sees (block shape, fields, connections). Register with `Blockly.Blocks["block_type"] = { init() { … } }` or `Blockly.defineBlocksWithJsonArray`.
   - **generators/arduino/blocks/** = how each block becomes C++ (e.g. `arduinoGenerator.forBlock["block_type"] = function(block, generator) { return "code"; }`).
@@ -92,7 +97,7 @@ src/
 ## Build and docs
 
 - `npm run build` – compile TypeScript and bundle (Webpack).
-- `npm run docs` – generate API docs (TypeDoc) in `docs/api/`.
+- `npm run docs` – generate API documentation with **TypeDoc** into `docs/api/` (landing page config: [TYPEDOC.md](./TYPEDOC.md), [typedoc.json](../typedoc.json)).
 - `npm run dev` – development server with hot reload.
 
 Keeping comments, headers, and this architecture doc up to date will help new contributors navigate and improve the project.

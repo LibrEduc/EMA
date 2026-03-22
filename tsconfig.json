@@ -15,10 +15,5 @@
     "types": [
       "node"
     ]
-  },
-  "typedocOptions": {
-      "entryPoints": ["src"],
-      "entryPointStrategy": "expand",
-      "out": "./docs/api"
   }
 }

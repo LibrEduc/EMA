@@ -37,6 +37,7 @@ import "@blockly/field-slider";
 import * as Blockly from "blockly";
 import "./categories/blockly/field_colour_picker";
 import { ToolboxConfiguration } from "./toolbox";
+/** Application state and configuration (workspace, toolbox, language, plugins). */
 export interface BlocklyApplicationType {
     workspace: Blockly.Workspace;
     toolbox: ToolboxConfiguration;
@@ -145,7 +146,7 @@ export declare class BlocklyApplication implements BlocklyApplicationType {
      * @remarks
      * Prevents double initialization and wires change listeners as needed.
      */
-    workspaceSetupPlugins: (disposePlugin?: boolean) => void;
+    workspaceSetupPlugins: (disposePlugin?: boolean, onPluginsReady?: () => void) => void;
     /**
      * Registers callbacks for custom toolbox categories.
      * @remarks

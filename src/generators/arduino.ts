@@ -35,10 +35,7 @@ export * from './arduino/arduino_generator';
 export * from './arduino/arduino_types';
 export * from './arduino/block_types_registry';
 
-/**
- * Arduino code generator instance.
- * {@type ArduinoGenerator}
- */
+/** Arduino code generator instance for all registered block emitters. */
 export const arduinoGenerator: ArduinoGenerator = new ArduinoGenerator();
 // Add reserved words.  This list should include all words mentioned
 // in RESERVED WORDS: comments in the imports above.

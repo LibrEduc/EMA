@@ -1,13 +1,17 @@
 {
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "µcBlockly",
   "entryPoints": ["src"],
   "entryPointStrategy": "expand",
   "out": "./docs/api",
+  "readme": "./docs/TYPEDOC.md",
   "excludeNotDocumented": false,
   "excludePrivate": true,
   "excludeProtected": false,
   "excludeInternal": false,
   "includeVersion": true,
-  "readme": "none",
+  "searchInComments": true,
+  "sort": ["source-order"],
   "visibilityFilters": {
     "protected": false,
     "private": false,

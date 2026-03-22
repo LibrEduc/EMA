@@ -32,7 +32,7 @@ import '@blockly/field-angle';
 /**
  * Block entry in a toolbox category (flat block with type).
  */
-type ToolboxBlockEntry = {
+export type ToolboxBlockEntry = {
     kind: string;
     type: string;
     fields?: {
@@ -53,9 +53,9 @@ type ToolboxBlockEntry = {
     };
 };
 /**
- * Category entry: can contain blocks or nested subcategories (sous-menus).
+ * Category entry: can contain blocks or nested subcategories (submenus).
  */
-type ToolboxCategoryContentEntry = ToolboxBlockEntry | {
+export type ToolboxCategoryContentEntry = ToolboxBlockEntry | {
     kind: string;
     name?: string;
     categorystyle?: string;
@@ -78,6 +78,7 @@ export type ToolboxConfiguration = {
         blockxml?: string;
     }>;
 };
+/** Default toolbox: categories and block list (search, Libre, Logic, Loops, Math, etc.). */
 export declare const basic_toolbox: ToolboxConfiguration;
 /**
  * Returns a deep clone of the toolbox with the board category (CAT_BOARD) removed.
@@ -90,5 +91,4 @@ export declare function getToolboxWithoutBoardCategory(toolbox: ToolboxConfigura
  * Read the current selection from the board menu in the DOM.
  */
 export declare function getToolboxForCurrentBoard(toolbox: ToolboxConfiguration): ToolboxConfiguration;
-export {};
 //# sourceMappingURL=toolbox.d.ts.map

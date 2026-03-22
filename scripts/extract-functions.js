@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Script to extract all exported functions with their JSDoc comments
+ * Script to extract exported functions and their preceding TSDoc / block documentation comments.
  */
 
 import fs from 'fs';
@@ -14,7 +14,7 @@ const srcDir = path.join(__dirname, '..', 'src');
 const outputFile = path.join(__dirname, '..', 'docs', 'functions-list.md');
 
 /**
- * Extracts JSDoc comments from a file
+ * Extracts block documentation comments from a file (TSDoc / TypeDoc style).
  */
 function extractJSDocComments(content) {
   const comments = [];
@@ -29,7 +29,7 @@ function extractJSDocComments(content) {
 }
 
 /**
- * Finds all JSDoc comments in the content
+ * Finds all block doc comments in the content.
  */
 function findAllJSDocComments(content) {
   const comments = [];
@@ -58,7 +58,7 @@ function findFunctionsWithDocs(content, filePath) {
   const functions = [];
   const lines = content.split('\n');
   
-  // First, find all JSDoc comments
+  // First, find all block doc comments
   const allComments = findAllJSDocComments(content);
   
   // Pattern for exported functions
@@ -120,7 +120,7 @@ function findFunctionsWithDocs(content, filePath) {
 }
 
 /**
- * Formats JSDoc to markdown, preserving all tags and content
+ * Formats a doc block to markdown, preserving tags and content.
  */
 function formatJSDoc(jsdoc) {
   if (!jsdoc) return '';
