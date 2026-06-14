@@ -113,6 +113,28 @@ export const setVariableTypeAndMarkManual = (
 };
 
 /**
+ * Aligns a loop counter variable with the type required by its for-loops.
+ * Promotes int → float when any bound uses decimals; never overrides manual types.
+ */
+export const syncLoopCounterVariableType = (
+  variable: Blockly.IVariableModel<Blockly.IVariableState>,
+  loopCounterType: "int" | "float",
+): void => {
+  const typedVariable = variable as VariableWithMutableType;
+  if (typedVariable.__ucbManualType) {
+    return;
+  }
+  const varType = variable.getType();
+  if (!varType || varType === "__NO_TYPE__") {
+    setVariableType(variable, loopCounterType);
+    return;
+  }
+  if (loopCounterType === "float" && varType === "int") {
+    setVariableType(variable, "float");
+  }
+};
+
+/**
  * Converts a variable type into Blockly connection checks.
  * @param type - Variable or inferred type.
  * @param strict - When true, int does not accept Number (so float blocks are rejected); for list "define" downward type checking.
@@ -251,6 +273,149 @@ const inferProcedureCallReturnType = (block: Blockly.Block): string | null => {
 };
 
 /**
+ * Infers the numeric type of a value block connected to a loop bound input.
+ * @param block - Connected block or null.
+ * @returns Normalized numeric type or null when unknown/non-numeric.
+ */
+export const inferNumericInputType = (block: Blockly.Block | null): string | null => {
+  if (!block) {
+    return null;
+  }
+  if (block.type === "variables_get" || block.type === "variables_get_dynamic") {
+    const variableId = block.getFieldValue("VAR");
+    const rawType = variableId
+      ? block.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
+      : null;
+    return rawType ? normalizeBlocklyTypeToVariableType(rawType) : null;
+  }
+  if (block.type === "math_number") {
+    const raw = block.getFieldValue("NUM");
+    const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
+    if (!Number.isNaN(numeric)) {
+      return Number.isInteger(numeric) ? "int" : "float";
+    }
+  }
+  const typed = block as Blockly.Block & { getBlockType?: () => string | null };
+  const typedType = typed.getBlockType?.() || null;
+  if (typedType) {
+    return normalizeBlocklyTypeToVariableType(typedType);
+  }
+  const check = block.outputConnection?.getCheck() ?? null;
+  const firstCheck = getFirstCheckType(check);
+  return firstCheck ? normalizeBlocklyTypeToVariableType(firstCheck) : null;
+};
+
+const isNumericVariableType = (type: string | null | undefined): type is "int" | "float" =>
+  type === "int" || type === "float" || type === "number";
+
+/**
+ * Returns true when two loop bound types can coexist (int/float may mix).
+ */
+export const areLoopBoundTypesCompatible = (
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean => {
+  if (!a || !b) {
+    return false;
+  }
+  const na = normalizeBlocklyTypeToVariableType(a);
+  const nb = normalizeBlocklyTypeToVariableType(b);
+  return isNumericVariableType(na) && isNumericVariableType(nb);
+};
+
+/**
+ * Unifies loop bound types; any float bound promotes the counter to float.
+ */
+export const unifyLoopBoundTypes = (
+  types: Array<string | null | undefined>,
+): "int" | "float" | null => {
+  let hasNumeric = false;
+  let hasFloat = false;
+  for (const raw of types) {
+    if (!raw) {
+      continue;
+    }
+    const normalized = normalizeBlocklyTypeToVariableType(raw);
+    if (!isNumericVariableType(normalized)) {
+      return null;
+    }
+    hasNumeric = true;
+    if (normalized === "float") {
+      hasFloat = true;
+    }
+  }
+  if (!hasNumeric) {
+    return null;
+  }
+  return hasFloat ? "float" : "int";
+};
+
+/**
+ * Checks whether a variable type can serve as a loop counter of the given type.
+ */
+export const isLoopCounterVariableCompatible = (
+  variableType: string | null | undefined,
+  counterType: "int" | "float",
+): boolean => checkTypeCompatibility(variableType, counterType);
+
+/**
+ * Infers int/float for the counter variable of a controls_for block from its bounds.
+ * @param forBlock - controls_for block instance.
+ * @returns Counter type or null when bounds are not fully numeric.
+ */
+export const inferLoopCounterTypeFromForBlock = (
+  forBlock: Blockly.Block,
+): "int" | "float" | null => {
+  const inputNames = ["FROM", "TO", "BY"] as const;
+  const boundTypes = inputNames.map((name) =>
+    inferNumericInputType(forBlock.getInputTargetBlock(name)),
+  );
+  let hasFloatLiteral = false;
+  for (const name of inputNames) {
+    const inputBlock = forBlock.getInputTargetBlock(name);
+    if (
+      inputBlock?.type === "math_number" &&
+      !Number.isInteger(Number(inputBlock.getFieldValue("NUM")))
+    ) {
+      hasFloatLiteral = true;
+      break;
+    }
+  }
+  const unified = unifyLoopBoundTypes(boundTypes);
+  if (!unified) {
+    return null;
+  }
+  return hasFloatLiteral || unified === "float" ? "float" : "int";
+};
+
+/**
+ * Infers the loop-counter type implied by controls_for blocks using a variable.
+ * @param workspace - Workspace containing the variable uses.
+ * @param variableId - Target variable ID.
+ * @returns int, float, or null when not used as a numeric loop counter.
+ */
+export const inferLoopCounterType = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): "int" | "float" | null => {
+  const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
+  let result: "int" | "float" | null = null;
+  for (const block of uses) {
+    if (block.type !== "controls_for" || block.getFieldValue("VAR") !== variableId) {
+      continue;
+    }
+    const loopType = inferLoopCounterTypeFromForBlock(block);
+    if (loopType === "float") {
+      return "float";
+    }
+    if (loopType === "int") {
+      result = "int";
+    }
+  }
+  return result;
+};
+
+/**
  * Infers a block's output type from its definition or connection.
  * @param block - Connected block or null.
  * @returns Normalized type or null when unknown.
@@ -364,18 +529,24 @@ export const handleVariablesSetChange = (
     let isNoType = !varType || varType === "__NO_TYPE__";
     const connectedBlock = valueInput?.connection?.targetBlock() || null;
     const connectedType = inferConnectedValueType(connectedBlock);
+    const loopCounterType = inferLoopCounterType(block.workspace, variableId);
 
     if (connectedType) {
-      const canAutoRetype = !typedVariable.__ucbManualType;
-      if (isNoType || (canAutoRetype && varType !== connectedType)) {
+      const canAutoRetype = !typedVariable.__ucbManualType && !loopCounterType;
+      if (loopCounterType) {
+        syncLoopCounterVariableType(variable, loopCounterType);
+        varType = variable.getType();
+        isNoType = !varType || varType === "__NO_TYPE__";
+      } else if (isNoType || (canAutoRetype && varType !== connectedType)) {
         setVariableType(variable, connectedType);
         typedVariable.__ucbManualType = false;
         varType = variable.getType();
         isNoType = !varType || varType === "__NO_TYPE__";
       }
 
-      if (varType && !checkTypeCompatibility(connectedType, varType)) {
-        block.setWarningText(getTypeMismatchWarningText(varType, connectedType));
+      const typeForCheck = loopCounterType ?? varType;
+      if (typeForCheck && !checkTypeCompatibility(connectedType, typeForCheck)) {
+        block.setWarningText(getTypeMismatchWarningText(typeForCheck, connectedType));
         if (valueInput?.connection?.targetBlock()) {
           valueInput.connection.disconnect();
         }

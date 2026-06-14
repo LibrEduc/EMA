@@ -1,15 +1,13 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
+    "rootDir": "./src",
+    "ignoreDeprecations": "6.0",
     "declaration": true,
     "declarationMap": true,
     "module": "ES2020",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "outDir": "build",
-    "paths": {
-        "*": ["types/*"]
-    },
     "strict": true,
     "target": "ES2015",
     "types": [

@@ -627,6 +627,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.plugin_workspaceSearch?.init();
       }
       this.plugin_zoomToFit.init();
+      // Mark sync plugins ready immediately so a second workspaceSetupPlugins (e.g. window.onload
+      // after pluginsSetupWorkspace → workspaceReboot) does not register Backpack twice. Minimap may
+      // still be created in finishMinimapAndPlugins (sync or deferred for continuous toolbox).
+      this.pluginsInitialized = true;
+      this.pluginsWorkspace = this.workspace;
       const svgWs = this.workspace as Blockly.WorkspaceSvg;
       const finishMinimapAndPlugins = (): void => {
         Blockly.svgResize(svgWs);
@@ -643,8 +648,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
             ? "visible"
             : "hidden";
         }
-        this.pluginsInitialized = true;
-        this.pluginsWorkspace = this.workspace;
         onPluginsReady?.();
       };
       // Defer minimap only during reboot (callback provided): continuous toolbox layout can be

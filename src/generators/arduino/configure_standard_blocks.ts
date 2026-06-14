@@ -34,6 +34,14 @@ import * as Blockly from "blockly";
 import {
   setVariableTypeAndMarkManual,
   normalizeBlocklyTypeToVariableType,
+  inferNumericInputType,
+  inferLoopCounterTypeFromForBlock,
+  inferLoopCounterType,
+  areLoopBoundTypesCompatible,
+  unifyLoopBoundTypes,
+  isLoopCounterVariableCompatible,
+  syncLoopCounterVariableType,
+  getTypeMismatchWarningText,
 } from "../../categories/blockly/shared";
 import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
 import { checkTypeCompatibility, getCompatibleTypesForCheck } from "./block_types_registry";
@@ -246,28 +254,6 @@ export function configureStandardBlocks(): void {
     controlsForDef.__typedConfiguredControlsFor = true;
     const originalInit = controlsForDef.init;
     const originalOnchange = controlsForDef.onchange;
-    const inferInputType = (block: Blockly.Block | null): string | null => {
-      if (!block) return null;
-      if (block.type === "variables_get" || block.type === "variables_get_dynamic") {
-        const variableId = block.getFieldValue("VAR");
-        return variableId
-          ? block.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
-          : null;
-      }
-      const typed = block as Blockly.Block & { getBlockType?: () => string | null };
-      const typedType = typed.getBlockType?.() || null;
-      if (typedType) return typedType;
-      if (block.type === "math_number") {
-        const raw = block.getFieldValue("NUM");
-        const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
-        if (!Number.isNaN(numeric)) {
-          return Number.isInteger(numeric) ? "int" : "float";
-        }
-      }
-      const check = block.outputConnection?.getCheck();
-      if (Array.isArray(check)) return check[0] || null;
-      return check || null;
-    };
     const normalizeType = (raw: string | null): string | null => {
       if (!raw) return null;
       return normalizeBlocklyTypeToVariableType(raw);
@@ -298,7 +284,8 @@ export function configureStandardBlocks(): void {
           event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
           event.type !== Blockly.Events.VAR_CREATE &&
           event.type !== Blockly.Events.VAR_RENAME &&
-          event.type !== Blockly.Events.VAR_DELETE
+          event.type !== Blockly.Events.VAR_DELETE &&
+          event.type !== "var_type_change"
         )
       ) {
         return;
@@ -311,25 +298,44 @@ export function configureStandardBlocks(): void {
         this.setWarningText(null);
         return;
       }
-      for (const entry of connected) {
-        const rawType = inferInputType(entry.block);
+      const boundTypes = connected.map((entry) => inferNumericInputType(entry.block));
+      for (const rawType of boundTypes) {
         if (!isNumeric(rawType)) {
           this.setWarningText(Blockly.Msg.MATH_CHANGE_VAR_WARNING || "Connect a variable.");
-          this.getInput(entry.name)?.connection?.disconnect();
           return;
         }
       }
-      const anchorType = normalizeType(inferInputType(connected[0].block));
+      const anchorType = normalizeType(boundTypes[0]);
       if (!anchorType) {
         this.setWarningText(null);
         return;
       }
-      for (let i = 1; i < connected.length; i += 1) {
-        const type = normalizeType(inferInputType(connected[i].block));
-        if (!type || !checkTypeCompatibility(type, anchorType)) {
+      for (let i = 1; i < boundTypes.length; i += 1) {
+        const type = normalizeType(boundTypes[i]);
+        if (!type || !areLoopBoundTypesCompatible(anchorType, type)) {
           this.setWarningText(Blockly.Msg.MATH_CHANGE_VAR_WARNING || "Connect a variable.");
-          this.getInput(connected[i].name)?.connection?.disconnect();
           return;
+        }
+      }
+      const variableId = this.getFieldValue("VAR");
+      const boundsCounterType = unifyLoopBoundTypes(boundTypes);
+      const loopCounterType =
+        (variableId ? inferLoopCounterType(this.workspace, variableId) : null) ??
+        boundsCounterType ??
+        inferLoopCounterTypeFromForBlock(this);
+      if (variableId && loopCounterType) {
+        const variable = this.workspace.getVariableMap().getVariableById(variableId);
+        if (variable) {
+          syncLoopCounterVariableType(variable, loopCounterType);
+          const varType = variable.getType();
+          if (
+            varType &&
+            varType !== "__NO_TYPE__" &&
+            !isLoopCounterVariableCompatible(varType, loopCounterType)
+          ) {
+            this.setWarningText(getTypeMismatchWarningText(varType, loopCounterType));
+            return;
+          }
         }
       }
       this.setWarningText(null);

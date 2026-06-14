@@ -50,6 +50,7 @@ declare module "@blockly/theme-modern";
 declare module "@blockly/theme-highcontrast";
 declare module "@blockly/theme-deuteranopia";
 declare module "@blockly/theme-tritanopia";
+declare module "*.css";
 declare module "@jaames/iro" {
   export const ColorPicker: new (
     selector: string,

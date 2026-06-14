@@ -11,6 +11,10 @@ import { execSync } from "child_process";
 import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
+import {
+  monacoResolve,
+  monacoWebpackPluginOptions,
+} from "./monaco.webpack.config.mjs";
 import CopyPlugin from "copy-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
 import WebpackObfuscator from "webpack-obfuscator";
@@ -105,6 +109,7 @@ let config = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    ...monacoResolve,
   },
   optimization: {
     runtimeChunk: "single",
@@ -130,6 +135,16 @@ let config = {
         },
       },
     },
+  },
+  performance: {
+    hints: "warning",
+    // Monaco workers are intentionally large; keep hints only for abnormal growth.
+    maxEntrypointSize: 2 * 1024 * 1024,
+    maxAssetSize: 13 * 1024 * 1024,
+    assetFilter: (assetFilename) =>
+      !/(^monaco\.|\.worker\.js$)/.test(
+        assetFilename.replace(/^.*[\\/]/, ""),
+      ),
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -170,12 +185,15 @@ let config = {
         publicAsset: (name) => resolvePublicAsset(compilation, name),
       }),
     }),
-    new MonacoWebpackPlugin(),
+    new MonacoWebpackPlugin(monacoWebpackPluginOptions),
     new CopyPlugin({
       patterns: [
         {
           from: path.resolve(__dirname, "./node_modules/blockly/media"),
           to: "media",
+          globOptions: {
+            ignore: ["**/Thumbs.db"],
+          },
         },
         {
           from: path.resolve(__dirname, "public/assets"),
@@ -206,6 +224,9 @@ export default (_env, argv) => {
   if (isDevelopment) {
     config.output.path = path.resolve(__dirname, "build");
     config.devtool = "eval-cheap-module-source-map";
+
+    // Blockly + plugins exceed 2 MiB unminified; hints are kept for production only.
+    config.performance = { hints: false };
 
     // Include the source maps for Blockly for easier debugging Blockly code.
     config.module.rules.push({

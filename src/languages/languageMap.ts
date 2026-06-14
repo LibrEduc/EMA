@@ -49,12 +49,19 @@ export type LanguageMapBlockly = {
   [key: string]: { [key: string]: string };
 }
 
+type BlocklyMsgModule = { [key: string]: string } | { default: { [key: string]: string } };
+const unwrapBlocklyMessages = (moduleValue: BlocklyMsgModule): { [key: string]: string } => {
+  const maybeDefault = (moduleValue as { default?: unknown }).default;
+  const raw = (maybeDefault && typeof maybeDefault === "object" ? maybeDefault : moduleValue) as Record<string, unknown>;
+  return raw as { [key: string]: string };
+};
+
 // Create table for alockly workspace language map
 export const languagesMapBlockly: LanguageMapBlockly = {
-  'ar': ar,
-  'es': es,
-  'en': en,
-  'fr': fr,
+  'ar': unwrapBlocklyMessages(ar),
+  'es': unwrapBlocklyMessages(es),
+  'en': unwrapBlocklyMessages(en),
+  'fr': unwrapBlocklyMessages(fr),
 };
 
 /* The `export interface LanguageItem` is defining an interface called `LanguageItem`. This interface

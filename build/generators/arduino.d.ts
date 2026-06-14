@@ -18,9 +18,6 @@ import { ArduinoGenerator } from './arduino/arduino_generator';
 export * from './arduino/arduino_generator';
 export * from './arduino/arduino_types';
 export * from './arduino/block_types_registry';
-/**
- * Arduino code generator instance.
- * {@type ArduinoGenerator}
- */
+/** Arduino code generator instance for all registered block emitters. */
 export declare const arduinoGenerator: ArduinoGenerator;
 //# sourceMappingURL=arduino.d.ts.map

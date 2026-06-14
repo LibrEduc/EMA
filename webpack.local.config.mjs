@@ -8,6 +8,10 @@ import { fileURLToPath } from 'url';
 import webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
+import {
+  monacoResolve,
+  monacoWebpackPluginOptions,
+} from "./monaco.webpack.config.mjs";
 import CopyPlugin from "copy-webpack-plugin";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -71,6 +75,7 @@ const config = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    ...monacoResolve,
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -88,6 +93,7 @@ const config = {
     }),
     // Configuration Monaco pour utilisation locale avec publicPath relatif
     new MonacoWebpackPlugin({
+      ...monacoWebpackPluginOptions,
       filename: "[name].worker.js",
       publicPath: "./",
     }),

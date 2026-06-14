@@ -84,9 +84,10 @@ export function controls_repeat_ext(
   block: Block,
   generator: ArduinoGenerator,
 ): string {
-  // Repeat n times.
-  const repeats =
-    generator.valueToCode(block, "TIMES", Order.NONE) || "0";
+  // Repeat n times (controls_repeat_ext: value input; controls_repeat: field).
+  const repeats = block.getField("TIMES")
+    ? String(Number(block.getFieldValue("TIMES")))
+    : generator.valueToCode(block, "TIMES", Order.NONE) || "0";
   const branch = generator.addLoopTrap(
     generator.statementToCode(block, "DO"),
     block,
