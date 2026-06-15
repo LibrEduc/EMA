@@ -31,6 +31,8 @@
  */
 
 import * as Blockly from "blockly";
+import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
+import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
   configureTypedVariableField,
@@ -44,11 +46,11 @@ import {
 type SwitchBlock = Blockly.Block & {
   casebreakCount_?: number;
   defaultCount_?: number;
-};
-
-type MutatorClauseBlock = Blockly.Block & {
-  valueConnection_?: Blockly.Connection | null;
-  statementConnection_?: Blockly.Connection | null;
+  updateShape_?: (targetCount: number) => void;
+  addCase_?: () => void;
+  removeCase_?: (caseIndex?: number) => void;
+  plus?: () => void;
+  minus?: (caseIndex?: number) => void;
 };
 
 type CaseConnection = {
@@ -176,10 +178,136 @@ const getSwitchTooltip = (block: SwitchBlock): string => {
   return getBlocklyMsg("CONTROLS_SWITCH_TOOLTIP_4");
 };
 
+const appendSwitchCaseInputs = (
+  block: SwitchBlock,
+  caseIndex: number,
+  withMinus: boolean,
+): void => {
+  const caseInput = block
+    .appendValueInput("CASE" + caseIndex)
+    .setAlign(Blockly.inputs.Align.RIGHT)
+    .setCheck(SWITCH_CASE_CHECKS)
+    .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
+  if (withMinus) {
+    caseInput.appendField(createMinusField(caseIndex), "MINUS" + caseIndex);
+  }
+  block
+    .appendStatementInput("DO" + caseIndex)
+    .setAlign(Blockly.inputs.Align.RIGHT)
+    .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
+};
+
+const controlsSwitchPlusMinusMutator = {
+  mutationToDom: function (this: SwitchBlock): Element | null {
+    if (!this.casebreakCount_) {
+      return null;
+    }
+    const container = Blockly.utils.xml.createElement("mutation");
+    container.setAttribute("casebreak", String(this.casebreakCount_));
+    return container;
+  },
+  domToMutation: function (this: SwitchBlock, xmlElement: Element) {
+    const targetCount = Number(xmlElement.getAttribute("casebreak") || 0);
+    this.updateShape_?.(targetCount);
+  },
+  saveExtraState: function (this: SwitchBlock) {
+    if (!this.casebreakCount_) {
+      return null;
+    }
+    return { casebreakCount: this.casebreakCount_ };
+  },
+  loadExtraState: function (this: SwitchBlock, state: { casebreakCount?: number }) {
+    this.updateShape_?.(state.casebreakCount ?? 0);
+  },
+  updateShape_: function (this: SwitchBlock, targetCount: number) {
+    while ((this.casebreakCount_ || 0) < targetCount) {
+      this.addCase_?.();
+    }
+    while ((this.casebreakCount_ || 0) > targetCount) {
+      this.removeCase_?.();
+    }
+    applySwitchCaseTyping(this);
+  },
+  plus: function (this: SwitchBlock) {
+    this.addCase_?.();
+    applySwitchCaseTyping(this);
+  },
+  minus: function (this: SwitchBlock, caseIndex?: number) {
+    if (!this.casebreakCount_) {
+      return;
+    }
+    this.removeCase_?.(caseIndex);
+    applySwitchCaseTyping(this);
+  },
+  addCase_: function (this: SwitchBlock) {
+    this.casebreakCount_ = (this.casebreakCount_ || 0) + 1;
+    appendSwitchCaseInputs(this, this.casebreakCount_, true);
+    if (this.getInput("DEFAULT")) {
+      this.moveInputBefore("DEFAULT", null);
+    }
+  },
+  removeCase_: function (this: SwitchBlock, caseIndex?: number) {
+    const count = this.casebreakCount_ || 0;
+    if (count <= 0) {
+      return;
+    }
+    const removeIndex = caseIndex ?? count;
+    if (removeIndex <= 0 || removeIndex > count) {
+      return;
+    }
+    if (caseIndex !== undefined && caseIndex !== count) {
+      const caseInputIndex = this.inputList.findIndex(
+        (input) => input.name === "CASE" + caseIndex,
+      );
+      if (caseInputIndex >= 0) {
+        const caseConnection = this.inputList[caseInputIndex].connection;
+        if (caseConnection?.isConnected()) {
+          caseConnection.disconnect();
+        }
+        const doConnection = this.inputList[caseInputIndex + 1]?.connection;
+        if (doConnection?.isConnected()) {
+          doConnection.disconnect();
+        }
+        const bump = (this as Blockly.Block & { bumpNeighbours?: () => void }).bumpNeighbours;
+        bump?.call(this);
+        for (let n = caseInputIndex + 2; n < this.inputList.length; n += 1) {
+          const input = this.inputList[n];
+          if (!input || input.name === "DEFAULT") {
+            break;
+          }
+          const targetConnection = input.connection?.targetConnection;
+          if (targetConnection && this.inputList[n - 2]?.connection) {
+            this.inputList[n - 2].connection!.connect(targetConnection);
+          }
+        }
+      }
+    }
+    this.removeInput("CASE" + count);
+    this.removeInput("DO" + count);
+    this.casebreakCount_ = count - 1;
+  },
+};
+
+const registerControlsSwitchPlusMinusMutator = (): void => {
+  const mutatorName = "controls_switch_plus_minus_mutator";
+  if (Blockly.Extensions.isRegistered(mutatorName)) {
+    return;
+  }
+  Blockly.Extensions.registerMutator(
+    mutatorName,
+    controlsSwitchPlusMinusMutator,
+    function (this: SwitchBlock) {
+      this.getInput("CASE0")?.insertFieldAt(0, createPlusField(), "PLUS");
+    },
+  );
+};
+
 /**
  * Registers the controls_switch block definitions and typing.
  */
 export const defineControlsSwitchBlocks = (): void => {
+  registerControlsSwitchPlusMinusMutator();
+
   if (!Blockly.Blocks["controls_if_if"]) {
     Blockly.Blocks["controls_if_if"] = {
       init: function (this: Blockly.Block) {
@@ -248,27 +376,16 @@ export const defineControlsSwitchBlocks = (): void => {
         Blockly.Msg.VARIABLES_GET_CREATE_SET ?? "";
       (this as Blockly.Block & { contextMenuType_?: string }).contextMenuType_ =
         "variables_set";
-      this.appendValueInput("CASE0")
-        .setAlign(Blockly.inputs.Align.RIGHT)
-        .setCheck(SWITCH_CASE_CHECKS)
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
-      this.appendStatementInput("DO0")
-        .setAlign(Blockly.inputs.Align.RIGHT)
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
+      appendSwitchCaseInputs(this, 0, false);
       this.appendStatementInput("DEFAULT")
         .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
-      this.setMutator(
-        new Blockly.icons.MutatorIcon(
-          ["controls_case_break"],
-          this as unknown as Blockly.BlockSvg,
-        ),
-      );
       this.setTooltip(() => getSwitchTooltip(this));
       this.casebreakCount_ = 0;
       this.defaultCount_ = 1;
+      Blockly.Extensions.apply("controls_switch_plus_minus_mutator", this, true);
     },
     onchange: function (this: SwitchBlock, event: Blockly.Events.Abstract) {
       updateSwitchCaseTyping(this, event);
@@ -277,142 +394,6 @@ export const defineControlsSwitchBlocks = (): void => {
       if (Blockly.Names.equals(oldName, this.getFieldValue("SWVAR"))) {
         this.setFieldValue(newName, "SWVAR");
       }
-    },
-    mutationToDom: function (this: SwitchBlock): Element | null {
-      if (!this.casebreakCount_) {
-        return null;
-      }
-      const container = document.createElement("mutation");
-      container.setAttribute("casebreak", String(this.casebreakCount_));
-      return container;
-    },
-    domToMutation: function (this: SwitchBlock, xmlElement: Element) {
-      const defaultConnection =
-        this.getInput("DEFAULT")?.connection?.targetConnection || null;
-      if (this.getInput("DEFAULT")) {
-        this.removeInput("DEFAULT");
-      }
-      this.casebreakCount_ = Number(xmlElement.getAttribute("casebreak") || 0);
-      this.defaultCount_ = 1;
-      for (let i = 1; i <= (this.casebreakCount_ || 0); i += 1) {
-        this.appendValueInput("CASE" + i)
-          .setAlign(Blockly.inputs.Align.RIGHT)
-          .setCheck(SWITCH_CASE_CHECKS)
-          .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
-        this.appendStatementInput("DO" + i)
-          .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
-      }
-      const defaultInput = this.appendStatementInput("DEFAULT")
-        .setAlign(Blockly.inputs.Align.RIGHT)
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
-      if (defaultConnection) {
-        defaultInput.connection?.connect(defaultConnection);
-      }
-    },
-    decompose: function (this: SwitchBlock, workspace: Blockly.Workspace): Blockly.Block {
-      const containerBlock = workspace.newBlock("controls_switch_var") as Blockly.BlockSvg;
-      containerBlock.initSvg();
-      let connection: Blockly.Connection | null =
-        containerBlock.getInput("STACK")?.connection || null;
-      for (let i = 1; i <= (this.casebreakCount_ || 0); i += 1) {
-        const caseBlock = workspace.newBlock("controls_case_break") as Blockly.BlockSvg;
-        caseBlock.initSvg();
-        if (connection && caseBlock.previousConnection) {
-          connection.connect(caseBlock.previousConnection);
-        }
-        connection = caseBlock.nextConnection;
-      }
-      return containerBlock;
-    },
-    compose: function (this: SwitchBlock, containerBlock: Blockly.Block) {
-      const defaultConnection =
-        this.getInput("DEFAULT")?.connection?.targetConnection || null;
-      if (this.getInput("DEFAULT")) {
-        this.removeInput("DEFAULT");
-      }
-      this.defaultCount_ = 1;
-      for (let i = this.casebreakCount_ || 0; i > 0; i -= 1) {
-        this.removeInput("CASE" + i);
-        this.removeInput("DO" + i);
-      }
-      this.casebreakCount_ = 0;
-      let clauseBlock = containerBlock.getInputTargetBlock("STACK");
-      while (clauseBlock) {
-        if (clauseBlock.type !== "controls_case_break") {
-          throw new Error("Unknown block type.");
-        }
-        this.casebreakCount_ += 1;
-        const caseInput = this.appendValueInput("CASE" + this.casebreakCount_)
-          .setCheck(SWITCH_CASE_CHECKS)
-          .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
-        const doInput = this.appendStatementInput("DO" + this.casebreakCount_);
-        doInput.appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
-        const clause = clauseBlock as MutatorClauseBlock;
-        if (clause.valueConnection_) {
-          caseInput.connection?.connect(clause.valueConnection_);
-        }
-        if (clause.statementConnection_) {
-          doInput.connection?.connect(clause.statementConnection_);
-        }
-        clauseBlock = clauseBlock.nextConnection?.targetBlock() || null;
-      }
-      const defaultInput = this.appendStatementInput("DEFAULT")
-        .setAlign(Blockly.inputs.Align.RIGHT)
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
-      if (defaultConnection) {
-        defaultInput.connection?.connect(defaultConnection);
-      }
-    },
-    saveConnections: function (this: SwitchBlock, containerBlock: Blockly.Block) {
-      let clauseBlock = containerBlock.getInputTargetBlock("STACK");
-      let i = 1;
-      while (clauseBlock) {
-        if (clauseBlock.type !== "controls_case_break") {
-          throw new Error("Unknown block type.");
-        }
-        const inputCase = this.getInput("CASE" + i);
-        const inputDo = this.getInput("DO" + i);
-        const clause = clauseBlock as MutatorClauseBlock;
-        clause.valueConnection_ = inputCase?.connection?.targetConnection || null;
-        clause.statementConnection_ = inputDo?.connection?.targetConnection || null;
-        i += 1;
-        clauseBlock = clauseBlock.nextConnection?.targetBlock() || null;
-      }
-      applySwitchCaseTyping(this);
-    },
-  };
-
-  Blockly.Blocks["controls_switch_var"] = {
-    init: function (this: Blockly.Block) {
-      this.setStyle("logic_blocks");
-      this.appendDummyInput()
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_SWITCHVAR"));
-      this.appendStatementInput("STACK");
-      this.setTooltip(getBlocklyMsg("CONTROLS_SWITCH_VAR_TOOLTIP"));
-      this.contextMenu = false;
-    },
-  };
-
-  Blockly.Blocks["controls_case_break"] = {
-    init: function (this: Blockly.Block) {
-      this.setStyle("logic_blocks");
-      this.appendDummyInput()
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
-      this.setPreviousStatement(true);
-      this.setNextStatement(true);
-      this.setTooltip(getBlocklyMsg("CONTROLS_SWITCH_CASEBREAK_TOOLTIP"));
-      this.contextMenu = false;
-    },
-  };
-
-  Blockly.Blocks["controls_case_default"] = {
-    init: function (this: Blockly.Block) {
-      this.setStyle("logic_blocks");
-      this.appendDummyInput()
-        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
-      this.setPreviousStatement(true);
-      this.setTooltip(getBlocklyMsg("CONTROLS_SWITCH_DEFAULT_TOOLTIP"));
-      this.contextMenu = false;
     },
   };
 };
