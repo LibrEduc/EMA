@@ -38,6 +38,15 @@ export function board_base_setup(block: Block, generator: ArduinoGenerator): str
   return "";
 }
 
+export function board_base_setup_loop(block: Block, generator: ArduinoGenerator): string {
+  let setupCode = generator.statementToCode(block, "SETUP") || "";
+  setupCode = generator.scrubArduino_(block, setupCode, true);
+  generator.addSetup("base_setup", setupCode);
+  let loopCode = generator.statementToCode(block, "LOOP") || "";
+  loopCode = generator.scrubArduino_(block, loopCode, true);
+  return loopCode;
+}
+
 export function board_base_loop(block: Block, generator: ArduinoGenerator): string {
   let code = generator.statementToCode(block, "LOOP") || "";
   return generator.scrubArduino_(block, code);

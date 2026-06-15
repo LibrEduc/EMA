@@ -588,6 +588,31 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   }
 
   /**
+   * Prépare le corps d'une fonction Arduino (setup/loop) : indente les lignes
+   * brutes (ex. pinMode via addSetup) sans double-indenter le code issu de
+   * statementToCode (chaque ligne commence déjà par INDENT).
+   */
+  private formatFunctionBodyContent(content: string): string {
+    const trimmed = content.trimEnd();
+    if (!trimmed) {
+      return "";
+    }
+    const indent = this.INDENT ?? "  ";
+    return trimmed
+      .split("\n")
+      .map((line) => {
+        if (!line.trim()) {
+          return line;
+        }
+        if (line.startsWith(indent) || line.startsWith("\t")) {
+          return line;
+        }
+        return indent + line;
+      })
+      .join("\n");
+  }
+
+  /**
    * Format Arduino code with proper structure and spacing.
    * @param sections - Object containing all code sections.
    * @returns Formatted Arduino code.
@@ -640,17 +665,29 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     // Add setup function
     arduinoCode += 'void setup() {\n';
     if (setups.length > 0) {
-      arduinoCode += '  ' + setups.join('\n  ') + '\n';
+      const setupBody = setups
+        .map((entry) => this.formatFunctionBodyContent(String(entry)))
+        .filter(Boolean)
+        .join("\n");
+      if (setupBody) {
+        arduinoCode += setupBody + "\n";
+      }
     }
     arduinoCode += '}\n\n';
 
     // Add loop function
     arduinoCode += 'void loop() {\n';
     if (loop.length > 0) {
-      arduinoCode += '  ' + loop.join('\n  ') + '\n';
+      const loopBody = loop
+        .map((entry) => this.formatFunctionBodyContent(String(entry)))
+        .filter(Boolean)
+        .join("\n");
+      if (loopBody) {
+        arduinoCode += loopBody + "\n";
+      }
     }
     if (code.trim()) {
-      arduinoCode += '  ' + code.trim().split('\n').join('\n  ') + '\n';
+      arduinoCode += this.formatFunctionBodyContent(code.trim()) + "\n";
     }
     arduinoCode += '}\n';
 

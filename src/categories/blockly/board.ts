@@ -91,7 +91,7 @@ export const defineBoardBlocks = (): void => {
 
   Blockly.Blocks["board_base_setup"] = {
     init(this: Blockly.Block) {
-      this.appendDummyInput().appendField(getBlocklyMsgOr("ARDUINO_BASE_SETUP", "setup"));
+      this.appendDummyInput().appendField(getBlocklyMsgOr("ARDUINO_BASE_SETUP", "initialization"));
       this.appendStatementInput("SETUP").setCheck(null);
       this.setInputsInline(false);
       this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_SETUP_TOOLTIP", "The setup() function is called when a sketch starts. Use it to initialize variables, pin modes, etc. It runs once after each powerup or reset of the Arduino board."));
@@ -100,12 +100,34 @@ export const defineBoardBlocks = (): void => {
     },
   };
 
-  Blockly.Blocks["board_base_loop"] = {
+  Blockly.Blocks["board_base_setup_loop"] = {
     init(this: Blockly.Block) {
-      this.appendDummyInput().appendField(getBlocklyMsgOr("ARDUINO_BASE_LOOP", "loop"));
+      this.appendDummyInput().appendField(
+        getBlocklyMsgOr("ARDUINO_BASE_SETUP_LOOP_SETUP", "initialization (setup)"),
+      );
+      this.appendStatementInput("SETUP").setCheck(null);
+      this.appendDummyInput().appendField(
+        getBlocklyMsgOr("ARDUINO_BASE_SETUP_LOOP_LOOP", "repeat indefinitely (loop)"),
+      );
       this.appendStatementInput("LOOP").setCheck(null);
       this.setInputsInline(false);
-      this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_LOOP_TOOLTIP", "the loop() function does precisely what its name suggests, and loops consecutively"));
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARDUINO_BASE_SETUP_LOOP_TOOLTIP",
+          "Arduino program structure: run the setup section once at startup, then repeat the loop section indefinitely.",
+        ),
+      );
+      this.setHelpUrl("https://www.arduino.cc/reference/en/language/structure/sketch/setup/");
+      this.setStyle(BOARD_STYLE);
+    },
+  };
+
+  Blockly.Blocks["board_base_loop"] = {
+    init(this: Blockly.Block) {
+      this.appendDummyInput().appendField(getBlocklyMsgOr("ARDUINO_BASE_LOOP", "infinite loop"));
+      this.appendStatementInput("LOOP").setCheck(null);
+      this.setInputsInline(false);
+      this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_LOOP_TOOLTIP", "The loop() function runs continuously and repeats the instructions it contains."));
       this.setHelpUrl("https://www.arduino.cc/reference/en/language/structure/sketch/loop/");
       this.setStyle(BOARD_STYLE);
     },

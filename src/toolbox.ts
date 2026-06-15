@@ -124,6 +124,7 @@ export const basic_toolbox: ToolboxConfiguration = {
           'name': 'CAT_BOARD_BASE',
           'categorystyle': 'board_category',
           'contents': [
+            { 'kind': 'block', 'type': 'board_base_setup_loop' },
             { 'kind': 'block', 'type': 'board_base_setup' },
             { 'kind': 'block', 'type': 'board_base_loop' },
           ],

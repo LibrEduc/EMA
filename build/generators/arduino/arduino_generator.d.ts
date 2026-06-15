@@ -94,6 +94,12 @@ export declare class ArduinoGenerator extends Blockly.CodeGenerator {
      */
     private validatePinUsage;
     /**
+     * Prépare le corps d'une fonction Arduino (setup/loop) : indente les lignes
+     * brutes (ex. pinMode via addSetup) sans double-indenter le code issu de
+     * statementToCode (chaque ligne commence déjà par INDENT).
+     */
+    private formatFunctionBodyContent;
+    /**
      * Format Arduino code with proper structure and spacing.
      * @param sections - Object containing all code sections.
      * @returns Formatted Arduino code.

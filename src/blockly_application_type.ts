@@ -44,9 +44,14 @@ import {
   StrictConnectionChecker,
 } from "./generators/arduino/strict_connection_checker";
 import {
+  installProgramStructureEnforcer,
+  uninstallProgramStructureEnforcer,
+} from "./program_structure_enforcer";
+import {
   installStrictTypeEnforcer,
   uninstallStrictTypeEnforcer,
 } from "./generators/arduino/strict_type_enforcer";
+import { registerProceduresCategory } from "./generators/arduino/procedures_flyout";
 import { registerTypedVariablesCategory } from "./generators/arduino/typed_variables_flyout";
 import { debugLog } from "./generators/arduino/debug";
 import { normalizeVariableType } from "./generators/arduino/variable_utils";
@@ -64,6 +69,7 @@ import {
 // 4) strict connection checker (this file)
 const ENABLE_STRICT_CONNECTION_CHECKER = false;
 const ENABLE_STRICT_TYPE_ENFORCER = true;
+const ENABLE_PROGRAM_STRUCTURE_ENFORCER = true;
 const ENABLE_WORKSPACE_SEARCH_PLUGIN = true;
 
 // Register our checker BEFORE any workspace is created so ConnectionDB gets it at init.
@@ -197,6 +203,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
         mode: "disconnect",
         scope: "variables-only",
       });
+    }
+    if (ENABLE_PROGRAM_STRUCTURE_ENFORCER) {
+      installProgramStructureEnforcer(this.workspace);
     }
 
     // Listen for variable creation events to normalize variable types
@@ -457,6 +466,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
     if (ENABLE_STRICT_TYPE_ENFORCER) {
       uninstallStrictTypeEnforcer(this.workspace);
     }
+    if (ENABLE_PROGRAM_STRUCTURE_ENFORCER) {
+      uninstallProgramStructureEnforcer(this.workspace);
+    }
     this.workspace.dispose();
     // Ensure current language is applied to toolbox AND Blockly
     const currentLang = getLangParamFromUrl();
@@ -518,6 +530,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
         mode: "disconnect",
         scope: "variables-only",
       });
+    }
+    if (ENABLE_PROGRAM_STRUCTURE_ENFORCER) {
+      installProgramStructureEnforcer(this.workspace);
     }
     this.workspaceListeners();
     // Ensure toolbox / continuous layout has reported size before plugins (minimap) read metrics.
@@ -683,12 +698,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
   public registerCustomToolboxCallbacks(): void {
     const svgWorkspace = this.workspace as Blockly.WorkspaceSvg;
     registerTypedVariablesCategory(svgWorkspace);
-    if (Blockly.Procedures && typeof Blockly.Procedures.flyoutCategory === "function") {
-      svgWorkspace.registerToolboxCategoryCallback(
-        Blockly.Procedures.CATEGORY_NAME ?? "PROCEDURE",
-        (workspace) => Blockly.Procedures.flyoutCategory(workspace, false),
-      );
-    }
+    registerProceduresCategory(svgWorkspace);
   }
 
   /**
@@ -708,6 +718,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
         mode: "disconnect",
         scope: "variables-only",
       });
+    }
+    if (ENABLE_PROGRAM_STRUCTURE_ENFORCER) {
+      installProgramStructureEnforcer(this.workspace);
     }
     this.workspaceListeners();
   }
