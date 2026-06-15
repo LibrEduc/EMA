@@ -19,61 +19,40 @@
 import type { ArduinoGenerator } from "../arduino_generator";
 
 /**
- * Adds text-related includes to the generator.
+ * Blockly@rduino-style upper/lower case helper (Arduino String methods, no ctype).
  * @param generator - Arduino generator instance.
  */
-export function addTextInclude(generator: ArduinoGenerator): void {
-  generator.addInclude("ctype", "#include <ctype.h>");
+export function addUpperLowerHelper(generator: ArduinoGenerator): void {
+  generator.addCodeFunction(
+    "upper_lower_string",
+    [
+      "String UpperLowerString(String Source, bool ToUpper) {",
+      "  if (ToUpper == true) Source.toUpperCase();",
+      "  else Source.toLowerCase();",
+      "  return Source;",
+      "}",
+    ].join("\n"),
+  );
 }
 
 /**
- * Adds helper functions for text operations to the generator.
+ * Title-case helper without ctype (ASCII letter checks only).
  * @param generator - Arduino generator instance.
  */
-export function addTextHelpers(generator: ArduinoGenerator): void {
-  addTextInclude(generator);
+export function addTitleCaseHelper(generator: ArduinoGenerator): void {
   generator.addCodeFunction(
-    "text_helpers",
+    "text_toTitleCase",
     [
-      "char text_charAt(String text, long index) {",
-      "  if (index < 0 || index >= text.length()) return '\\0';",
-      "  return text.charAt(index);",
-      "}",
-      "",
-      "String text_substring(String text, long start, long end) {",
-      "  long length = text.length();",
-      "  if (start < 0) start = 0;",
-      "  if (end < 0) end = 0;",
-      "  if (start > length) start = length;",
-      "  if (end > length) end = length;",
-      "  if (start > end) {",
-      "    long tmp = start;",
-      "    start = end;",
-      "    end = tmp;",
-      "  }",
-      "  return text.substring(start, end);",
-      "}",
-      "",
-      "String text_toUpper(String text) {",
-      "  text.toUpperCase();",
-      "  return text;",
-      "}",
-      "",
-      "String text_toLower(String text) {",
-      "  text.toLowerCase();",
-      "  return text;",
-      "}",
-      "",
       "String text_toTitleCase(String text) {",
       "  bool newWord = true;",
       "  for (unsigned int i = 0; i < text.length(); i++) {",
       "    char c = text.charAt(i);",
-      "    if (isalpha(static_cast<unsigned char>(c))) {",
+      "    if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {",
       "      if (newWord) {",
-      "        text.setCharAt(i, static_cast<char>(toupper(c)));",
+      "        if (c >= 'a' && c <= 'z') text.setCharAt(i, c - 32);",
       "        newWord = false;",
-      "      } else {",
-      "        text.setCharAt(i, static_cast<char>(tolower(c)));",
+      "      } else if (c >= 'A' && c <= 'Z') {",
+      "        text.setCharAt(i, c + 32);",
       "      }",
       "    } else {",
       "      newWord = true;",
@@ -81,12 +60,55 @@ export function addTextHelpers(generator: ArduinoGenerator): void {
       "  }",
       "  return text;",
       "}",
-      "",
-      "String text_trim(String text) {",
-      "  text.trim();",
-      "  return text;",
-      "}",
-      "",
+    ].join("\n"),
+  );
+}
+
+export type TextTrimMode = "BOTH" | "LEFT" | "RIGHT";
+
+const TRIM_HELPER_BODIES: Record<TextTrimMode, string> = {
+  BOTH: [
+    "String TrimString(String Source) {",
+    "  Source.trim();",
+    "  return Source;",
+    "}",
+  ].join("\n"),
+  LEFT: [
+    "String TrimStringLeft(String Source) {",
+    "  int start = 0;",
+    "  while (start < (int)Source.length() && Source.charAt(start) <= ' ') start++;",
+    "  return Source.substring(start);",
+    "}",
+  ].join("\n"),
+  RIGHT: [
+    "String TrimStringRight(String Source) {",
+    "  int end = Source.length();",
+    "  while (end > 0 && Source.charAt(end - 1) <= ' ') end--;",
+    "  return Source.substring(0, end);",
+    "}",
+  ].join("\n"),
+};
+
+/**
+ * Injects only the trim helper required for the selected mode.
+ * @param generator - Arduino generator instance.
+ * @param mode - BOTH, LEFT, or RIGHT.
+ */
+export function addTrimHelper(
+  generator: ArduinoGenerator,
+  mode: TextTrimMode,
+): void {
+  generator.addCodeFunction(`trim_string_${mode.toLowerCase()}`, TRIM_HELPER_BODIES[mode]);
+}
+
+/**
+ * Adds helper functions for text list operations (count, replace, reverse).
+ * @param generator - Arduino generator instance.
+ */
+export function addTextHelpers(generator: ArduinoGenerator): void {
+  generator.addCodeFunction(
+    "text_helpers",
+    [
       "long text_count(String text, String sub) {",
       "  if (sub.length() == 0) return 0;",
       "  long count = 0;",

@@ -550,19 +550,22 @@ export const basic_toolbox: ToolboxConfiguration = {
         },
         {
           'kind': 'block',
-          'type': 'text_no_quote',
-        },
-        {
-          'kind': 'block',
           'type': 'text_multiline',
-        },
-        {
-          'kind': 'block',
-          'type': 'text_date',
+          'fields': {
+            'TEXT': 'µc\nblockly',
+          },
         },
         {
           'kind': 'block',
           'type': 'text_char',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_no_quote',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_date',
         },
         {
           'kind': 'block',

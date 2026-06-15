@@ -19,7 +19,12 @@
 import type { Block } from "blockly/core";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
-import { addTextHelpers } from "./text_helpers";
+import {
+  addTextHelpers,
+  addTitleCaseHelper,
+  addTrimHelper,
+  addUpperLowerHelper,
+} from "./text_helpers";
 
 function quoteString(value: string): string {
   const escaped = value
@@ -36,6 +41,18 @@ function toTextExpression(
 ): string {
   const value = generator.valueToCode(block, inputName, Order.NONE) || '""';
   return "String(" + value + ")";
+}
+
+/** Text input for String member calls (Blockly@rduino style, no String() wrap). */
+function textExpression(
+  generator: ArduinoGenerator,
+  block: Block,
+  inputName: string,
+): string {
+  if (!block.getInput(inputName)) {
+    return '""';
+  }
+  return generator.valueToCode(block, inputName, Order.NONE) || '""';
 }
 
 function quoteChar(value: string): string {
@@ -66,7 +83,7 @@ export function text_no_quote(block: Block): [string, Order] {
 }
 
 /**
- * Generates Arduino code for a multiline text literal.
+ * Generates Arduino code for a multiline quoted text literal.
  * @param block - Blockly block instance.
  * @returns Code string with order.
  */
@@ -202,11 +219,13 @@ export function text_charAt(
   block: Block,
   generator: ArduinoGenerator,
 ): [string, Order] {
-  addTextHelpers(generator);
-  const value = toTextExpression(generator, block, "VALUE");
+  const value = textExpression(generator, block, "VALUE");
   const where = block.getFieldValue("WHERE");
-  const at = generator.valueToCode(block, "AT", Order.NONE) || "1";
   const length = value + ".length()";
+  const atInput = block.getInput("AT");
+  const at = atInput
+    ? generator.valueToCode(block, "AT", Order.NONE) || "1"
+    : "1";
   let index = "0";
 
   switch (where) {
@@ -229,7 +248,7 @@ export function text_charAt(
       index = "0";
   }
 
-  const code = "String(text_charAt(" + value + ", " + index + "))";
+  const code = value + ".charAt(" + index + ")";
   return [code, Order.FUNCTION_CALL];
 }
 
@@ -243,12 +262,15 @@ export function text_getSubstring(
   block: Block,
   generator: ArduinoGenerator,
 ): [string, Order] {
-  addTextHelpers(generator);
-  const value = toTextExpression(generator, block, "STRING");
+  const value = textExpression(generator, block, "STRING");
   const where1 = block.getFieldValue("WHERE1");
   const where2 = block.getFieldValue("WHERE2");
-  const at1 = generator.valueToCode(block, "AT1", Order.NONE) || "1";
-  const at2 = generator.valueToCode(block, "AT2", Order.NONE) || "1";
+  const at1 = block.getInput("AT1")
+    ? generator.valueToCode(block, "AT1", Order.NONE) || "1"
+    : "1";
+  const at2 = block.getInput("AT2")
+    ? generator.valueToCode(block, "AT2", Order.NONE) || "1"
+    : "1";
   const length = value + ".length()";
 
   const indexFrom = (where: string, at: string): string => {
@@ -270,8 +292,7 @@ export function text_getSubstring(
 
   const start = indexFrom(where1, at1);
   const end = indexFrom(where2, at2);
-  const code =
-    "text_substring(" + value + ", " + start + ", (" + end + " + 1))";
+  const code = value + ".substring(" + start + ", (" + end + " + 1))";
   return [code, Order.FUNCTION_CALL];
 }
 
@@ -285,15 +306,17 @@ export function text_changeCase(
   block: Block,
   generator: ArduinoGenerator,
 ): [string, Order] {
-  addTextHelpers(generator);
-  const value = toTextExpression(generator, block, "TEXT");
+  const value = textExpression(generator, block, "TEXT");
   const mode = block.getFieldValue("CASE");
   if (mode === "UPPERCASE") {
-    return ["text_toUpper(" + value + ")", Order.FUNCTION_CALL];
+    addUpperLowerHelper(generator);
+    return ["UpperLowerString(" + value + ", true)", Order.FUNCTION_CALL];
   }
   if (mode === "LOWERCASE") {
-    return ["text_toLower(" + value + ")", Order.FUNCTION_CALL];
+    addUpperLowerHelper(generator);
+    return ["UpperLowerString(" + value + ", false)", Order.FUNCTION_CALL];
   }
+  addTitleCaseHelper(generator);
   return ["text_toTitleCase(" + value + ")", Order.FUNCTION_CALL];
 }
 
@@ -307,10 +330,19 @@ export function text_trim(
   block: Block,
   generator: ArduinoGenerator,
 ): [string, Order] {
-  addTextHelpers(generator);
-  const value = toTextExpression(generator, block, "TEXT");
-  const code = "text_trim(" + value + ")";
-  return [code, Order.FUNCTION_CALL];
+  const value = textExpression(generator, block, "TEXT");
+  const mode = (block.getFieldValue("MODE") || "BOTH") as
+    | "BOTH"
+    | "LEFT"
+    | "RIGHT";
+  addTrimHelper(generator, mode);
+  if (mode === "LEFT") {
+    return ["TrimStringLeft(" + value + ")", Order.FUNCTION_CALL];
+  }
+  if (mode === "RIGHT") {
+    return ["TrimStringRight(" + value + ")", Order.FUNCTION_CALL];
+  }
+  return ["TrimString(" + value + ")", Order.FUNCTION_CALL];
 }
 
 /**

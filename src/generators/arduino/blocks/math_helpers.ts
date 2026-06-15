@@ -20,10 +20,33 @@ import type { ArduinoGenerator } from "../arduino_generator";
 
 /**
  * Adds math include headers to the generator.
+ * Only needed for libm symbols (sin, sqrt, pow, …) not provided by Arduino.h alone.
  * @param generator - Arduino generator instance.
  */
 export function addMathInclude(generator: ArduinoGenerator): void {
   generator.addInclude("math", "#include <math.h>");
+}
+
+/**
+ * Injects an integer square-root helper (avoids &lt;math.h&gt; for list statistics).
+ * @param generator - Arduino generator instance.
+ */
+export function addSqrtHelper(generator: ArduinoGenerator): void {
+  generator.addCodeFunction(
+    "math_sqrt",
+    [
+      "double math_sqrt(double value) {",
+      "  if (value <= 0.0) {",
+      "    return 0.0;",
+      "  }",
+      "  double root = value / 2.0;",
+      "  for (uint8_t i = 0; i < 10; i++) {",
+      "    root = (root + value / root) / 2.0;",
+      "  }",
+      "  return root;",
+      "}",
+    ].join("\n"),
+  );
 }
 
 /**
@@ -52,7 +75,7 @@ export function addPrimeHelper(generator: ArduinoGenerator): void {
  * @param generator - Arduino generator instance.
  */
 export function addListHelpers(generator: ArduinoGenerator): void {
-  addMathInclude(generator);
+  addSqrtHelper(generator);
   generator.addCodeFunction(
     "math_list_helpers",
     [
@@ -140,7 +163,7 @@ export function addListHelpers(generator: ArduinoGenerator): void {
       "    double diff = list[i] - mean;",
       "    sum += diff * diff;",
       "  }",
-      "  return sqrt(sum / N);",
+      "  return math_sqrt(sum / N);",
       "}",
       "",
       "template <typename T, size_t N>",

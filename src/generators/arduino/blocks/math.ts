@@ -23,6 +23,7 @@ import {
   addListHelpers,
   addMathInclude,
   addPrimeHelper,
+  addSqrtHelper,
 } from "./math_helpers";
 
 /**
@@ -122,11 +123,22 @@ export function math_single(
 ): [string, Order] {
   const operator = block.getFieldValue("OP");
   const arg = generator.valueToCode(block, "NUM", Order.NONE) || "0";
-  addMathInclude(generator);
 
   switch (operator) {
     case "ABS":
-      return ["abs(" + arg + ")", Order.FUNCTION_CALL];
+      return [
+        "((" + arg + ") < 0 ? -(" + arg + ") : (" + arg + "))",
+        Order.CONDITIONAL,
+      ];
+    case "NEG":
+      return ["-" + arg, Order.UNARY_NEGATION];
+    default:
+      break;
+  }
+
+  addMathInclude(generator);
+
+  switch (operator) {
     case "ROOT":
       return ["sqrt(" + arg + ")", Order.FUNCTION_CALL];
     case "LN":
@@ -137,8 +149,6 @@ export function math_single(
       return ["exp(" + arg + ")", Order.FUNCTION_CALL];
     case "POW10":
       return ["pow(10, " + arg + ")", Order.FUNCTION_CALL];
-    case "NEG":
-      return ["-" + arg, Order.UNARY_NEGATION];
     case "ROUND":
       return ["round(" + arg + ")", Order.FUNCTION_CALL];
     case "ROUNDUP":
@@ -234,12 +244,8 @@ export function math_trig(
  * @param block - Blockly block instance.
  * @returns Code string with order.
  */
-export function math_constant(
-  block: Block,
-  generator: ArduinoGenerator,
-): [string, Order] {
+export function math_constant(block: Block): [string, Order] {
   const constant = block.getFieldValue("CONSTANT");
-  addMathInclude(generator);
   switch (constant) {
     case "PI":
       return ["PI", Order.ATOMIC];
@@ -251,8 +257,6 @@ export function math_constant(
       return ["1.4142135623730951", Order.ATOMIC];
     case "SQRT1_2":
       return ["0.7071067811865476", Order.ATOMIC];
-    case "INFINITY":
-      return ["INFINITY", Order.ATOMIC];
     default:
       return ["0", Order.ATOMIC];
   }
@@ -356,6 +360,9 @@ export function math_on_list(
 ): [string, Order] {
   const list = generator.valueToCode(block, "LIST", Order.NONE) || "{}";
   const operator = block.getFieldValue("OP");
+  if (operator === "STD_DEV") {
+    addSqrtHelper(generator);
+  }
   addListHelpers(generator);
 
   switch (operator) {
@@ -394,9 +401,9 @@ export function math_modulo(
     generator.valueToCode(block, "DIVIDEND", Order.NONE) || "0";
   const divisor =
     generator.valueToCode(block, "DIVISOR", Order.NONE) || "1";
-  addMathInclude(generator);
-  const code = "fmod(" + dividend + ", " + divisor + ")";
-  return [code, Order.FUNCTION_CALL];
+  const code =
+    "(" + divisor + " != 0 ? ((long)(" + dividend + ") % (long)(" + divisor + ")) : 0)";
+  return [code, Order.MODULUS];
 }
 
 /**

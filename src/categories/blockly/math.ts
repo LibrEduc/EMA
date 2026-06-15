@@ -33,7 +33,16 @@
 import * as Blockly from "blockly";
 import { FieldAngle } from "@blockly/field-angle";
 import { FieldSlider } from "@blockly/field-slider";
-import { getBlocklyMsgOr, inferRequiredNumericTypeForVariable, resolveMathChangeVariableId, syncNumericVariableType, getTypeMismatchWarningText, shouldSkipVariableChange, type VariableWithMutableType, inferNumericInputType } from "./shared";
+import { getBlocklyMsgOr, inferRequiredNumericTypeForVariable, resolveMathChangeVariableId, syncNumericVariableType, getTypeMismatchWarningText, shouldSkipVariableChange, type VariableWithMutableType, inferNumericInputType, getBlocklyMsg } from "./shared";
+
+/** Blockly menu options for math_constant (Arduino: no INFINITY). */
+const getMathConstantDropdownOptions = (): Blockly.MenuOption[] => [
+  [getBlocklyMsgOr("MATH_CONSTANT_PI", "π"), "PI"],
+  [getBlocklyMsgOr("MATH_CONSTANT_E", "e"), "E"],
+  [getBlocklyMsgOr("MATH_CONSTANT_GOLDEN_RATIO", "φ"), "GOLDEN_RATIO"],
+  [getBlocklyMsgOr("MATH_CONSTANT_SQRT2", "√2"), "SQRT2"],
+  [getBlocklyMsgOr("MATH_CONSTANT_SQRT1_2", "√½"), "SQRT1_2"],
+];
 
 /**
  * Registers math compatibility blocks for µcBlockly.
@@ -177,4 +186,31 @@ export const defineMathCompatBlocks = (): void => {
       },
     };
   }
+
+  Blockly.Blocks["math_constant"] = {
+    init: function (this: Blockly.Block) {
+      this.appendDummyInput()
+        .appendField(
+          new Blockly.FieldDropdown(getMathConstantDropdownOptions),
+          "CONSTANT",
+        );
+      this.setOutput(true, "Number");
+      this.setStyle("math_blocks");
+      this.setTooltip(getBlocklyMsg("MATH_CONSTANT_TOOLTIP"));
+      this.setHelpUrl(getBlocklyMsg("MATH_CONSTANT_HELPURL"));
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE
+      ) {
+        return;
+      }
+      if (this.getFieldValue("CONSTANT") === "INFINITY") {
+        this.setFieldValue("PI", "CONSTANT");
+      }
+    },
+  };
 };

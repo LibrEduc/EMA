@@ -40,5 +40,6 @@ export const TEXT_BLOCK_TYPES = {
   text_append: "string",
   text_length: "int",
   text_isEmpty: "bool",
+  text_charAt: "char",
   text_prompt_ext: "__DYNAMIC__textPromptType",
 } as const;
