@@ -18,7 +18,7 @@
 
 import * as Blockly from "blockly";
 import { ArduinoGenerator, Order } from "../arduino_generator";
-import { getArduinoType } from "../arduino_types";
+import { getCppTypeName } from "../block_types";
 
 /**
  * Generator for variables_set_dynamic block.
@@ -133,6 +133,18 @@ export const variables_get_dynamic = function (
 };
 
 /**
+ * Generates Arduino code for variables_cast: (type)(expression).
+ */
+export const variables_cast = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): [string, number] {
+  const value = generator.valueToCode(block, "VALUE", Order.NONE) || "0";
+  const castType = getCppTypeName(block.getFieldValue("CAST_TYPE") || "int");
+  return [`(${castType})(${value})`, Order.UNARY_NEGATION];
+};
+
+/**
  * Generator for variables_set_type block.
  * This block only changes the variable type in the workspace; no code is emitted.
  * @param _block - Blockly block instance (unused, for API consistency).
@@ -160,8 +172,7 @@ const getDeclarationType = (
     variable?.getType() && variable.getType() !== "__NO_TYPE__"
       ? variable.getType()
       : fallback;
-  const arduinoType = getArduinoType(rawType);
-  return arduinoType?.cppName || rawType;
+  return getCppTypeName(rawType);
 };
 
 const normalizeValueType = (type: string | null | undefined): string | null => {

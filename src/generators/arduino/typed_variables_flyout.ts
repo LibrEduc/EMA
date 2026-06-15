@@ -89,6 +89,14 @@ export function createTypedVariablesFlyout(
   getBlock.appendChild(getField);
   xmlList.push(getBlock);
 
+  const castBlock = document.createElement("block");
+  castBlock.setAttribute("type", "variables_cast");
+  const castTypeField = document.createElement("field");
+  castTypeField.setAttribute("name", "CAST_TYPE");
+  castTypeField.textContent = "byte";
+  castBlock.appendChild(castTypeField);
+  xmlList.push(castBlock);
+
   const typeBlock = document.createElement("block");
   typeBlock.setAttribute("type", "variables_set_type");
   const typeVarField = document.createElement("field");

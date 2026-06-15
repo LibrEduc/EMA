@@ -71,7 +71,7 @@ src/
 - **Block definitions vs code generation**:
   - **categories/blockly/** = what the user sees (block shape, fields, connections). Register with `Blockly.Blocks["block_type"] = { init() { … } }` or `Blockly.defineBlocksWithJsonArray`.
   - **generators/arduino/blocks/** = how each block becomes C++ (e.g. `arduinoGenerator.forBlock["block_type"] = function(block, generator) { return "code"; }`).
-- **Block types**: Typing (int/float/bool/string/…) is defined in **block_types/** and **block_types.ts** (compatibility). **block_types_registry.ts** applies `setCheck` to blocks so connections respect types.
+- **Block types**: Typing (int/float/bool/string/char/long/…) is defined in **block_types/** and **block_types.ts** (`TYPE_COMPATIBILITY`, cast mapping). **block_types_registry.ts** applies types and runs `checkTypeCompatibility`. See **[TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md)** for the full matrix and cast rules.
 - **Board-specific behaviour**: **boards.ts** holds board profiles (pins, PWM, serial, etc.). **toolbox.ts** uses `getToolboxForCurrentBoard()` to build the toolbox for the selected board. Pin dropdowns and validators are wired from **categories/blockly/board.ts** and refreshed via `refreshBoardPinDropdowns`.
 
 ## Key flows
@@ -86,7 +86,7 @@ src/
 | Goal | Main files |
 |------|------------|
 | Add a new block (UI) | `categories/blockly/<category>.ts`, then register in `categories/blockly/index.ts` |
-| Add block type / compatibility | `generators/arduino/block_types/` + `block_types.ts`, then `block_types_registry.ts` |
+| Add block type / compatibility | `generators/arduino/block_types/` + `block_types.ts`, then `block_types_registry.ts` — see [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Generate code for a block | `generators/arduino/blocks/<category>.ts` + register in `generators/arduino.ts` |
 | Change toolbox structure | `toolbox.ts` (basic_toolbox, getToolboxForCurrentBoard) |
 | Add a board | `boards.ts` (BOARD_PROFILES + helpers) |

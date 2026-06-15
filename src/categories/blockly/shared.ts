@@ -148,6 +148,9 @@ export const syncLoopCounterVariableType = syncNumericVariableType;
  * @param type - Variable or inferred type.
  * @param strict - When true, int does not accept Number (so float blocks are rejected); for list "define" downward type checking.
  * @returns Array of compatible checks or null when not applicable.
+ * @remarks
+ * Built on {@link getCompatibleTypesForCheck} from `block_types_registry`.
+ * See `docs/TYPES_ET_COMPATIBILITES.md` for the mapping table (bool→Boolean, int→Number, etc.).
  */
 export const getBlocklyCompatibleChecks = (
   type: string | null | undefined,
@@ -162,7 +165,7 @@ export const getBlocklyCompatibleChecks = (
     checks.add("Boolean");
   }
   if (!strict) {
-    if (checks.has("int") || checks.has("float")) {
+    if (checks.has("int") || checks.has("float") || checks.has("long")) {
       checks.add("Number");
     }
   } else {

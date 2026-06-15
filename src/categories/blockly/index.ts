@@ -41,6 +41,7 @@ import { defineColourBlocks } from "./colour";
 import {
   defineVariablesConstBlock,
   defineVariablesGetDynamicBlock,
+  defineVariablesCastBlock,
   defineVariablesLocalBlock,
   defineVariablesSetDynamicBlock,
   defineVariablesSetInitBlock,
@@ -73,6 +74,7 @@ export const defineAllTypedVariableBlocks = (): void => {
   }
   typedVariableBlocksRegistered = true;
   defineVariablesGetDynamicBlock();
+  defineVariablesCastBlock();
   defineVariablesSetDynamicBlock();
   defineVariablesLocalBlock();
   defineVariablesSetTypeBlock();
@@ -98,6 +100,7 @@ export {
   defineColourBlocks,
   defineVariablesConstBlock,
   defineVariablesGetDynamicBlock,
+  defineVariablesCastBlock,
   defineVariablesLocalBlock,
   defineVariablesSetDynamicBlock,
   defineVariablesSetInitBlock,

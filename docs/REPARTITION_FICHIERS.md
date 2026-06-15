@@ -46,7 +46,7 @@ Dans `configure_standard_blocks`, un wrapper appelle `variable_utils.setVariable
 
 ## 2. Répartition actuelle – points corrects
 
-- **`block_types.ts`** : règles de types pures (`TYPE_COMPATIBILITY`, `getCompatibleTypes`, `isTypeCompatible`, `getVariableTypeOptions`). Pas de Blockly.
+- **`block_types.ts`** : règles de types pures (`TYPE_COMPATIBILITY`, `CAST_TYPE_TO_INTERNAL`, `getInternalTypeForCast`, `getCompatibleTypes`, `isTypeCompatible`, `getVariableTypeOptions`). Pas de Blockly. Documenté dans [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md).
 - **`block_types_registry.ts`** : registre, `checkTypeCompatibility` (côté Blockly), `getCompatibleTypesForCheck`, application aux blocs. Utilise `block_types`. Bonne séparation.
 - **`variable_utils.ts`** : `setVariableType`, `clearVariableType`, `normalizeVariableType`. Utilisé par shared, variables, logic, configure_standard_blocks, blockly_application_type. Rôle clair.
 - **`shared.ts`** : i18n, inférence de type, helpers variables/blocs, avertissements, validation. Centralise le réutilisable entre categories/blockly. Cohérent.

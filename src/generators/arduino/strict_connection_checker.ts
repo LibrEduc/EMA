@@ -6,6 +6,7 @@
  * Enforces type compatibility beyond default Blockly checks.
  * Custom ConnectionChecker that uses `getBlockType()` for type checking — more robust than the
  * default ConnectionChecker, especially for blocks with dynamic types (e.g. typed variables).
+ * Compatibility rules: `docs/TYPES_ET_COMPATIBILITES.md`.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0

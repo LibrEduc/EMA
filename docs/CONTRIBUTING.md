@@ -27,7 +27,7 @@ Thank you for considering contributing. This short guide will help you get start
 |------|----------------|
 | Add or change a block (UI) | `src/categories/blockly/` + `index.ts` |
 | Add or change code generation for a block | `src/generators/arduino/blocks/` + `src/generators/arduino.ts` |
-| Add block types / compatibility | `src/generators/arduino/block_types/`, `block_types.ts`, `block_types_registry.ts` |
+| Add block types / compatibility | `src/generators/arduino/block_types/`, `block_types.ts`, `block_types_registry.ts` — [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Change toolbox or categories | `src/toolbox.ts` |
 | Add a board or change pins | `src/boards.ts` |
 | Add or edit a language | `src/languages/` |

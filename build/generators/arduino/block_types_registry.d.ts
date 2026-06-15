@@ -10,6 +10,9 @@
  * @since 1.0.0
  *
  * This module loads block type definitions from block_types.json and applies them to Blockly blocks.
+ *
+ * Runtime compatibility checks (including Blockly aliases) are documented in
+ * `docs/TYPES_ET_COMPATIBILITES.md`.
  */
 /**
  * @license

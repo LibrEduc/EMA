@@ -10,6 +10,9 @@
  * @since 1.0.0
  *
  * This module loads block type definitions from block_types.json and applies them to Blockly blocks.
+ *
+ * Runtime compatibility checks (including Blockly aliases) are documented in
+ * `docs/TYPES_ET_COMPATIBILITES.md`.
  */
 
 /**
@@ -20,7 +23,7 @@
 
 import * as Blockly from "blockly";
 import { BLOCK_TYPES } from "./block_types/index";
-import { getCompatibleTypes, isTypeCompatible } from "./block_types";
+import { getCompatibleTypes, getInternalTypeForArduinoType, isTypeCompatible } from "./block_types";
 import { debugLog } from "./debug";
 
 /**
@@ -180,7 +183,7 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
       const variable = block.workspace.getVariableMap().getVariableById(variableId);
       if (variable) {
         const varType = variable.getType();
-        return varType || '__NO_TYPE__';
+        return varType ? getInternalTypeForArduinoType(varType) : '__NO_TYPE__';
       }
     } catch (error) {
       debugLog('Variable not found:', variableId, error);
@@ -241,6 +244,8 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
     const type = block.getFieldValue("TYPE");
     return type === "NUMBER" ? "int" : "string";
   },
+  'castType': (block: Blockly.Block): string =>
+    getInternalTypeForArduinoType(block.getFieldValue("CAST_TYPE") || "int"),
 };
 
 /**
@@ -355,13 +360,13 @@ export function checkTypeCompatibility(
 
   if (
     (sourceType === "Number" || sourceType === "number") &&
-    (targetType === "int" || targetType === "float")
+    (targetType === "int" || targetType === "float" || targetType === "long")
   ) {
     return true;
   }
 
   if (
-    (sourceType === "int" || sourceType === "float") &&
+    (sourceType === "int" || sourceType === "float" || sourceType === "long") &&
     (targetType === "Number" || targetType === "number")
   ) {
     return true;

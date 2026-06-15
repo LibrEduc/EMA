@@ -32,7 +32,12 @@
 
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
-import { getVariableTypeOptions } from "../../generators/arduino/block_types";
+import {
+  getVariableTypeOptions,
+  getInternalTypeForArduinoType,
+  getArduinoTypeLabelKey,
+  getCppTypeName,
+} from "../../generators/arduino/block_types";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
   configureTypedVariableField,
@@ -49,19 +54,38 @@ import {
 } from "./shared";
 
 /**
- * Returns the display label for a variable type (e.g. VAR_TYPE_INT → "int").
+ * Returns the display label for an Arduino type (Blockly.Msg `VAR_CAST_TYPE_*`).
  */
-export const getVariableTypeLabel = (type: string): string =>
-  getBlocklyMsgOr(`VAR_TYPE_${type.toUpperCase()}`, type);
+export const getArduinoTypeLabel = (type: string): string =>
+  getBlocklyMsgOr(getArduinoTypeLabelKey(type), type);
 
 /**
- * Returns Blockly menu options for the variable type dropdown.
+ * Shared Blockly menu options for every Arduino type dropdown
+ * (variables_set_init, variables_set_type, variables_cast, procedures, lists).
  */
-export const getVariableTypeDropdownOptions = (): Blockly.MenuOption[] =>
+export const getArduinoTypeDropdownOptions = (): Blockly.MenuOption[] =>
   getVariableTypeOptions().map((type) => [
-    getVariableTypeLabel(type),
+    getArduinoTypeLabel(type),
     type,
   ] as Blockly.MenuOption);
+
+/** @deprecated Use {@link getArduinoTypeDropdownOptions} */
+export const getVariableTypeDropdownOptions = getArduinoTypeDropdownOptions;
+
+/** @deprecated Use {@link getArduinoTypeLabel} */
+export const getVariableTypeLabel = getArduinoTypeLabel;
+
+/** @deprecated Use {@link getArduinoTypeDropdownOptions} */
+export const getVariableCastTypeOptions = getArduinoTypeDropdownOptions;
+
+/** @deprecated Use {@link getCppTypeName} from `block_types` */
+export const getCastCppKeyword = getCppTypeName;
+
+const applyCastOutputType = (block: Blockly.Block): void => {
+  const castType = block.getFieldValue("CAST_TYPE") || "int";
+  const checks = getBlocklyCompatibleChecks(getInternalTypeForArduinoType(castType));
+  block.setOutput(true, checks);
+};
 
 /**
  * Define the variables_get_dynamic block
@@ -130,12 +154,10 @@ export const defineVariablesGetDynamicBlock = (): void => {
             // Use '__NO_TYPE__' to prevent connections to typed inputs (like Boolean)
             this.setOutput(true, "__NO_TYPE__");
           } else {
-            // Map our internal types to Blockly types
-            // Blockly uses 'Boolean' (capital B), we use 'bool'
-            const blocklyType = varType === "bool" ? "Boolean" : varType;
-            // setOutput(true, type) sets the check on the output connection
-            // This is what the ConnectionChecker actually verifies
-            this.setOutput(true, blocklyType);
+            const checks = getBlocklyCompatibleChecks(
+              getInternalTypeForArduinoType(varType),
+            );
+            this.setOutput(true, checks);
           }
         } else {
           // Variable not found - block all typed connections
@@ -189,6 +211,50 @@ export const defineVariablesSetDynamicBlock = (): void => {
         return;
       }
       handleVariablesSetChange(this, event, "variables_set_dynamic");
+    },
+  };
+};
+
+/**
+ * Value block: cast a connected expression, e.g. (byte)(toto) when a get block is plugged in.
+ */
+export const defineVariablesCastBlock = (): void => {
+  Blockly.Blocks["variables_cast"] = {
+    init: function (this: Blockly.Block) {
+      this.appendValueInput("VALUE").setCheck(null);
+      this.appendDummyInput("CAST_ROW")
+        .appendField(getBlocklyMsgOr("VARIABLES_CAST_AS_TYPE", "de type"))
+        .appendField(
+          new Blockly.FieldDropdown(getArduinoTypeDropdownOptions),
+          "CAST_TYPE",
+        );
+      this.setInputsInline(true);
+      this.setOutput(true, getBlocklyCompatibleChecks("int"));
+      this.setStyle("variable_dynamic_blocks");
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "VARIABLES_CAST_TOOLTIP",
+          "Cast the connected value (variable, number, etc.) to the selected Arduino type.",
+        ),
+      );
+      this.setHelpUrl("");
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (shouldSkipVariableChange(this, event)) {
+        return;
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE
+      ) {
+        return;
+      }
+      applyCastOutputType(this);
+    },
+    getBlockType: function (this: Blockly.Block): string {
+      return getInternalTypeForArduinoType(this.getFieldValue("CAST_TYPE") || "int");
     },
   };
 };
@@ -259,7 +325,7 @@ export const defineVariablesSetTypeBlock = (): void => {
         )
         .appendField(getBlocklyMsg("TYPED_VAR_TYPE_TO_LABEL"))
         .appendField(
-          new Blockly.FieldDropdown(getVariableTypeDropdownOptions),
+          new Blockly.FieldDropdown(getArduinoTypeDropdownOptions),
           "TYPE",
         );
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
@@ -460,7 +526,7 @@ export const defineVariablesSetInitBlock = (): void => {
         )
         .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"))
         .appendField(
-          new Blockly.FieldDropdown(getVariableTypeDropdownOptions),
+          new Blockly.FieldDropdown(getArduinoTypeDropdownOptions),
           "VARIABLE_SETTYPE_TYPE",
         )
         .appendField(getBlocklyMsgOr("_AT", "at"));
