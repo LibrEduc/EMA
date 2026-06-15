@@ -71,6 +71,14 @@ function identifyNumber(numString: string | number | null | undefined): string {
   return 'int';
 }
 
+/** Infers int/float from a math_number field value. */
+export function identifyMathNumberType(
+  numString: string | number | null | undefined,
+): "int" | "float" {
+  const identified = identifyNumber(numString);
+  return identified === "float" ? "float" : "int";
+}
+
 const normalizeBlocklyType = (blocklyType: string | string[] | null): string | null => {
   if (!blocklyType) {
     return null;

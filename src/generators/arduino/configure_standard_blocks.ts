@@ -36,12 +36,15 @@ import {
   normalizeBlocklyTypeToVariableType,
   inferNumericInputType,
   inferLoopCounterTypeFromForBlock,
-  inferLoopCounterType,
+  inferRequiredNumericTypeForVariable,
   areLoopBoundTypesCompatible,
   unifyLoopBoundTypes,
   isLoopCounterVariableCompatible,
-  syncLoopCounterVariableType,
+  syncNumericVariableType,
   getTypeMismatchWarningText,
+  isBlockOnMainWorkspace,
+  resolveMathNumberBlockType,
+  revalidateTypedNumericBlocks,
 } from "../../categories/blockly/shared";
 import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
 import { checkTypeCompatibility, getCompatibleTypesForCheck } from "./block_types_registry";
@@ -55,6 +58,48 @@ import { debugLog } from "./debug";
  * Applies typed variable behavior to standard Blockly blocks.
  */
 export function configureStandardBlocks(): void {
+  type MathNumberDef = Blockly.Block & {
+    init?: (this: Blockly.Block) => void;
+    onchange?: (this: Blockly.Block, event: Blockly.Events.Abstract) => void;
+    getBlockType?: (this: Blockly.Block) => string;
+    __typedMathNumberConfigured?: boolean;
+  };
+  const mathNumberDef = Blockly.Blocks["math_number"] as MathNumberDef | undefined;
+  if (mathNumberDef && !mathNumberDef.__typedMathNumberConfigured) {
+    mathNumberDef.__typedMathNumberConfigured = true;
+    const originalInit = mathNumberDef.init;
+    const originalOnchange = mathNumberDef.onchange;
+    mathNumberDef.init = function (this: Blockly.Block) {
+      if (originalInit) {
+        originalInit.call(this);
+      }
+      this.setOutput(true, "Number");
+    };
+    mathNumberDef.getBlockType = function (this: Blockly.Block): string {
+      return resolveMathNumberBlockType(this);
+    };
+    mathNumberDef.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      if (originalOnchange) {
+        originalOnchange.call(this, event);
+      }
+      if (event.isUiEvent) {
+        return;
+      }
+      if (
+        event.type !== Blockly.Events.BLOCK_CREATE &&
+        event.type !== Blockly.Events.BLOCK_MOVE &&
+        event.type !== Blockly.Events.BLOCK_CHANGE &&
+        event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE
+      ) {
+        return;
+      }
+      if (!isBlockOnMainWorkspace(this) || !this.workspace) {
+        return;
+      }
+      revalidateTypedNumericBlocks(this.workspace, event);
+    };
+  }
+
   // Note: controls_if already uses 'Boolean' which is correct for Blockly
   // We map 'bool' to 'Boolean' in getBlockType of variables_get_dynamic
   // So controls_if will accept our variables with type 'bool' (mapped to 'Boolean')
@@ -318,22 +363,20 @@ export function configureStandardBlocks(): void {
         }
       }
       const variableId = this.getFieldValue("VAR");
-      const boundsCounterType = unifyLoopBoundTypes(boundTypes);
-      const loopCounterType =
-        (variableId ? inferLoopCounterType(this.workspace, variableId) : null) ??
-        boundsCounterType ??
-        inferLoopCounterTypeFromForBlock(this);
-      if (variableId && loopCounterType) {
+      const requiredNumericType = variableId
+        ? inferRequiredNumericTypeForVariable(this.workspace, variableId)
+        : unifyLoopBoundTypes(boundTypes) ?? inferLoopCounterTypeFromForBlock(this);
+      if (variableId && requiredNumericType) {
         const variable = this.workspace.getVariableMap().getVariableById(variableId);
         if (variable) {
-          syncLoopCounterVariableType(variable, loopCounterType);
+          syncNumericVariableType(variable, requiredNumericType);
           const varType = variable.getType();
           if (
             varType &&
             varType !== "__NO_TYPE__" &&
-            !isLoopCounterVariableCompatible(varType, loopCounterType)
+            !isLoopCounterVariableCompatible(varType, requiredNumericType)
           ) {
-            this.setWarningText(getTypeMismatchWarningText(varType, loopCounterType));
+            this.setWarningText(getTypeMismatchWarningText(varType, requiredNumericType));
             return;
           }
         }

@@ -34,6 +34,7 @@
 
 import * as Blockly from 'blockly/core';
 import { checkTypeCompatibility as sharedCheckTypeCompatibility } from "./block_types_registry";
+import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
 import { debugLog } from "./debug";
 
 /**
@@ -57,6 +58,15 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     if (a && b && this.allowValueToUncheckedInput_(a, b)) {
       return Blockly.Connection.CAN_CONNECT;
     }
+    if (a && b) {
+      const switchCase = this.checkSwitchCaseIntConnection_(a, b);
+      if (switchCase === true) {
+        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (switchCase === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
+    }
     return super.canConnectWithReason(a, b, isDragging, opt_distance);
   }
 
@@ -71,6 +81,15 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
   ): boolean {
     if (a && b && this.allowValueToUncheckedInput_(a, b)) {
       return true;
+    }
+    if (a && b) {
+      const switchCase = this.checkSwitchCaseIntConnection_(a, b);
+      if (switchCase === true) {
+        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+      }
+      if (switchCase === false) {
+        return false;
+      }
     }
     const standardResult = super.canConnect(a, b, isDragging, opt_distance);
     if (!standardResult || !a || !b) {
@@ -91,7 +110,16 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     if (a && b && this.allowValueToUncheckedInput_(a, b)) {
       return Blockly.Connection.CAN_CONNECT;
     }
-    return super.doSafetyChecks(a, b);
+    const result = super.doSafetyChecks(a, b);
+    if (
+      result === Blockly.Connection.REASON_DIFFERENT_WORKSPACES &&
+      a &&
+      b &&
+      this.checkSwitchCaseIntConnection_(a, b) === true
+    ) {
+      return Blockly.Connection.CAN_CONNECT;
+    }
+    return result;
   }
 
   /**
@@ -101,15 +129,165 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
    * Uses numeric type (1/2) so it works regardless of ConnectionType enum binding.
    */
   private allowValueToUncheckedInput_(a: Blockly.Connection, b: Blockly.Connection): boolean {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair) return false;
+    const targetBlock = pair.inp.getSourceBlock();
+    if (targetBlock && (targetBlock as Blockly.Block & { type: string }).type === "variables_const") return true;
+    const targetCheck = pair.inp.getCheck();
+    return !targetCheck || (Array.isArray(targetCheck) && targetCheck.length === 0);
+  }
+
+  private resolveOutputInputPair_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): { out: Blockly.Connection; inp: Blockly.Connection } | null {
     const aType = (a as { type: number }).type;
     const bType = (b as { type: number }).type;
     const out = aType === OUTPUT_VALUE_TYPE ? a : bType === OUTPUT_VALUE_TYPE ? b : null;
     const inp = aType === INPUT_VALUE_TYPE ? a : bType === INPUT_VALUE_TYPE ? b : null;
-    if (!out || !inp) return false;
-    const targetBlock = inp.getSourceBlock();
-    if (targetBlock && (targetBlock as Blockly.Block & { type: string }).type === "variables_const") return true;
-    const targetCheck = inp.getCheck();
-    return !targetCheck || (Array.isArray(targetCheck) && targetCheck.length === 0);
+    if (!out || !inp) return null;
+    return { out, inp };
+  }
+
+  private getInputNameForConnection_(
+    block: Blockly.Block,
+    connection: Blockly.Connection,
+  ): string | null {
+    for (const input of block.inputList) {
+      if (input.connection === connection) {
+        return input.name;
+      }
+    }
+    return null;
+  }
+
+  private isSwitchCaseInput_(inputConnection: Blockly.Connection): boolean {
+    const targetBlock = inputConnection.getSourceBlock();
+    if (!targetBlock || targetBlock.type !== "controls_switch") {
+      return false;
+    }
+    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    return !!inputName && inputName.startsWith("CASE");
+  }
+
+  private resolveSourceBlockType_(sourceBlock: Blockly.Block | null): string | null {
+    if (!sourceBlock) {
+      return null;
+    }
+    const typedBlock = sourceBlock as Blockly.Block & {
+      getBlockType?: () => string | null;
+    };
+    if (typeof typedBlock.getBlockType === "function") {
+      const blockType = typedBlock.getBlockType();
+      if (blockType !== null && blockType !== undefined) {
+        return blockType;
+      }
+    }
+    const sourceCheck = sourceBlock.outputConnection?.getCheck();
+    if (sourceCheck) {
+      if (Array.isArray(sourceCheck) && sourceCheck.length > 0) {
+        return sourceCheck[0] as string;
+      }
+      if (typeof sourceCheck === "string") {
+        return sourceCheck;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Resolves semantic type for a block connecting to a switch case input.
+   */
+  private resolveSwitchCaseSourceType_(
+    sourceBlock: Blockly.Block | null,
+  ): "int" | "float" | "invalid" | null {
+    if (!sourceBlock) {
+      return null;
+    }
+    if (sourceBlock.type === "math_number") {
+      return resolveMathNumberBlockType(sourceBlock);
+    }
+    const sourceType = this.resolveSourceBlockType_(sourceBlock);
+    if (sourceType === "int") {
+      return "int";
+    }
+    if (sourceType === "float") {
+      return "float";
+    }
+    if (sourceType === "__NO_TYPE__" || sourceType === "undefined") {
+      return "invalid";
+    }
+    if (sourceType === "Number" || sourceType === "number") {
+      return "int";
+    }
+    return null;
+  }
+
+  /**
+   * Switch case inputs require int values. Blockly's default checker compares
+   * output checks (e.g. math_number → "Number") against setCheck(["int"]) and
+   * rejects before getBlockType() runs — handle that case explicitly.
+   */
+  private checkSwitchCaseIntConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair || !this.isSwitchCaseInput_(pair.inp)) {
+      return null;
+    }
+
+    const semanticType = this.resolveSwitchCaseSourceType_(pair.out.getSourceBlock());
+    if (semanticType === "int") {
+      return true;
+    }
+    if (semanticType === "float" || semanticType === "invalid") {
+      return false;
+    }
+    return false;
+  }
+
+  private finishSwitchCaseConnect_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+    isDragging: boolean,
+    opt_distance?: number,
+  ): boolean {
+    const safety = this.doSafetyChecks(a, b);
+    if (safety !== Blockly.Connection.CAN_CONNECT) {
+      return false;
+    }
+    if (isDragging) {
+      return this.doDragChecks(
+        a as Blockly.RenderedConnection,
+        b as Blockly.RenderedConnection,
+        opt_distance ?? 0,
+      );
+    }
+    return true;
+  }
+
+  private finishSwitchCaseConnectWithReason_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+    isDragging: boolean,
+    opt_distance?: number,
+  ): number {
+    const safety = this.doSafetyChecks(a, b);
+    if (safety !== Blockly.Connection.CAN_CONNECT) {
+      return safety;
+    }
+    if (
+      isDragging &&
+      !this.doDragChecks(
+        a as Blockly.RenderedConnection,
+        b as Blockly.RenderedConnection,
+        opt_distance ?? 0,
+      )
+    ) {
+      return Blockly.Connection.REASON_DRAG_CHECKS_FAILED;
+    }
+    return Blockly.Connection.CAN_CONNECT;
   }
 
   /**
@@ -121,6 +299,14 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
    * @returns True if the connections share a type.
    */
   doTypeChecks(a: Blockly.Connection, b: Blockly.Connection): boolean {
+    const switchCase = this.checkSwitchCaseIntConnection_(a, b);
+    if (switchCase === true) {
+      return true;
+    }
+    if (switchCase === false) {
+      return false;
+    }
+
     const wsA = a.getSourceBlock()?.workspace as Blockly.WorkspaceSvg | null;
     const wsB = b.getSourceBlock()?.workspace as Blockly.WorkspaceSvg | null;
     if ((wsA?.isDragging && wsA.isDragging()) || (wsB?.isDragging && wsB.isDragging())) {

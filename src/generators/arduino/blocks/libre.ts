@@ -27,7 +27,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { Block } from "blockly/core/block";
+import type { Block } from "blockly/core";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 

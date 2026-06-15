@@ -32,7 +32,7 @@
 
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
-import { getCompatibleTypesForCheck, checkTypeCompatibility } from "../../generators/arduino/block_types_registry";
+import { getCompatibleTypesForCheck, checkTypeCompatibility, identifyMathNumberType } from "../../generators/arduino/block_types_registry";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 
 export type VariableWithMutableType = Blockly.VariableModel & {
@@ -113,26 +113,35 @@ export const setVariableTypeAndMarkManual = (
 };
 
 /**
- * Aligns a loop counter variable with the type required by its for-loops.
- * Promotes int → float when any bound uses decimals; never overrides manual types.
+ * Aligns a numeric variable with the type required by loops and change-by blocks.
+ * Promotes int ↔ float according to aggregated usage; never overrides manual types.
  */
-export const syncLoopCounterVariableType = (
+export const syncNumericVariableType = (
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
-  loopCounterType: "int" | "float",
+  requiredType: "int" | "float" | null,
 ): void => {
   const typedVariable = variable as VariableWithMutableType;
-  if (typedVariable.__ucbManualType) {
+  if (typedVariable.__ucbManualType || !requiredType) {
     return;
   }
   const varType = variable.getType();
   if (!varType || varType === "__NO_TYPE__") {
-    setVariableType(variable, loopCounterType);
+    setVariableType(variable, requiredType);
     return;
   }
-  if (loopCounterType === "float" && varType === "int") {
-    setVariableType(variable, "float");
+  if (varType === requiredType) {
+    return;
+  }
+  if (
+    (varType === "int" && requiredType === "float") ||
+    (varType === "float" && requiredType === "int")
+  ) {
+    setVariableType(variable, requiredType);
   }
 };
+
+/** @deprecated Use {@link syncNumericVariableType}. */
+export const syncLoopCounterVariableType = syncNumericVariableType;
 
 /**
  * Converts a variable type into Blockly connection checks.
@@ -225,6 +234,28 @@ export const shouldSkipVariableChange = (
 };
 
 /**
+ * Returns true when the block lives on the main workspace (not flyout/toolbox).
+ */
+export const isBlockOnMainWorkspace = (block: Blockly.Block): boolean => {
+  const workspace = block.workspace as Blockly.WorkspaceSvg | null;
+  if (!workspace) {
+    return false;
+  }
+  return !workspace.isFlyout;
+};
+
+/**
+ * Resolves math_number typing: int by default until on main workspace,
+ * then int/float from the NUM field via identifyMathNumberType.
+ */
+export const resolveMathNumberBlockType = (block: Blockly.Block): "int" | "float" => {
+  if (!isBlockOnMainWorkspace(block)) {
+    return "int";
+  }
+  return identifyMathNumberType(block.getFieldValue("NUM"));
+};
+
+/**
  * Retrieves the first check type from a check list.
  * @param check - Check string or list.
  * @returns First check type or null.
@@ -289,11 +320,12 @@ export const inferNumericInputType = (block: Blockly.Block | null): string | nul
     return rawType ? normalizeBlocklyTypeToVariableType(rawType) : null;
   }
   if (block.type === "math_number") {
-    const raw = block.getFieldValue("NUM");
-    const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
-    if (!Number.isNaN(numeric)) {
-      return Number.isInteger(numeric) ? "int" : "float";
+    const typed = block as Blockly.Block & { getBlockType?: () => string | null };
+    const typedType = typed.getBlockType?.() || null;
+    if (typedType === "int" || typedType === "float") {
+      return typedType;
     }
+    return resolveMathNumberBlockType(block);
   }
   const typed = block as Blockly.Block & { getBlockType?: () => string | null };
   const typedType = typed.getBlockType?.() || null;
@@ -416,6 +448,82 @@ export const inferLoopCounterType = (
 };
 
 /**
+ * Resolves the variable ID targeted by a math_change block (field or connected getter).
+ */
+export const resolveMathChangeVariableId = (block: Blockly.Block): string | null => {
+  const targetBlock = block.getInputTargetBlock("VAR") ?? block.getInputTargetBlock("NAME");
+  if (
+    targetBlock &&
+    (targetBlock.type === "variables_get" || targetBlock.type === "variables_get_dynamic")
+  ) {
+    return targetBlock.getFieldValue("VAR") || null;
+  }
+  if (block.getField("VAR")) {
+    return block.getFieldValue("VAR") || null;
+  }
+  return null;
+};
+
+/**
+ * Infers int/float required by a math_change block from its DELTA input.
+ */
+export const inferChangeByRequiredTypeFromBlock = (
+  changeBlock: Blockly.Block,
+): "int" | "float" | null => {
+  const deltaType = inferNumericInputType(changeBlock.getInputTargetBlock("DELTA"));
+  if (!deltaType || (deltaType !== "int" && deltaType !== "float" && deltaType !== "number")) {
+    return null;
+  }
+  return deltaType === "float" ? "float" : "int";
+};
+
+/**
+ * Infers int/float required by all math_change blocks using a variable.
+ */
+export const inferChangeByRequiredType = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): "int" | "float" | null => {
+  const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
+  let result: "int" | "float" | null = null;
+  for (const block of uses) {
+    if (block.type !== "math_change") {
+      continue;
+    }
+    const blockVarId = resolveMathChangeVariableId(block);
+    if (blockVarId !== variableId) {
+      continue;
+    }
+    const changeType = inferChangeByRequiredTypeFromBlock(block);
+    if (changeType === "float") {
+      return "float";
+    }
+    if (changeType === "int") {
+      result = "int";
+    }
+  }
+  return result;
+};
+
+/**
+ * Aggregates int/float required by loop counters and change-by blocks for a variable.
+ */
+export const inferRequiredNumericTypeForVariable = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): "int" | "float" | null => {
+  const loopType = inferLoopCounterType(workspace, variableId);
+  if (loopType === "float") {
+    return "float";
+  }
+  const changeType = inferChangeByRequiredType(workspace, variableId);
+  if (changeType === "float") {
+    return "float";
+  }
+  return loopType ?? changeType;
+};
+
+/**
  * Infers a block's output type from its definition or connection.
  * @param block - Connected block or null.
  * @returns Normalized type or null when unknown.
@@ -475,6 +583,27 @@ export const hasConnectedAssignmentForVariable = (
 };
 
 /**
+ * Re-runs onchange handlers for blocks whose variable typing depends on child values
+ * (e.g. math_change when a math_number field is edited).
+ */
+export const revalidateTypedNumericBlocks = (
+  workspace: Blockly.Workspace,
+  event: Blockly.Events.Abstract,
+): void => {
+  for (const blockType of ["math_change", "controls_for"] as const) {
+    for (const block of workspace.getAllBlocks(false)) {
+      if (block.type !== blockType) {
+        continue;
+      }
+      const onchange = Blockly.Blocks[blockType]?.onchange;
+      if (typeof onchange === "function") {
+        onchange.call(block, event);
+      }
+    }
+  }
+};
+
+/**
  * Handles variable assignment changes to enforce typing rules.
  * @param block - Variable set block.
  * @param event - Blockly change event.
@@ -529,12 +658,15 @@ export const handleVariablesSetChange = (
     let isNoType = !varType || varType === "__NO_TYPE__";
     const connectedBlock = valueInput?.connection?.targetBlock() || null;
     const connectedType = inferConnectedValueType(connectedBlock);
-    const loopCounterType = inferLoopCounterType(block.workspace, variableId);
+    const requiredNumericType = inferRequiredNumericTypeForVariable(
+      block.workspace,
+      variableId,
+    );
 
     if (connectedType) {
-      const canAutoRetype = !typedVariable.__ucbManualType && !loopCounterType;
-      if (loopCounterType) {
-        syncLoopCounterVariableType(variable, loopCounterType);
+      const canAutoRetype = !typedVariable.__ucbManualType && !requiredNumericType;
+      if (requiredNumericType) {
+        syncNumericVariableType(variable, requiredNumericType);
         varType = variable.getType();
         isNoType = !varType || varType === "__NO_TYPE__";
       } else if (isNoType || (canAutoRetype && varType !== connectedType)) {
@@ -544,7 +676,7 @@ export const handleVariablesSetChange = (
         isNoType = !varType || varType === "__NO_TYPE__";
       }
 
-      const typeForCheck = loopCounterType ?? varType;
+      const typeForCheck = requiredNumericType ?? varType;
       if (typeForCheck && !checkTypeCompatibility(connectedType, typeForCheck)) {
         block.setWarningText(getTypeMismatchWarningText(typeForCheck, connectedType));
         if (valueInput?.connection?.targetBlock()) {

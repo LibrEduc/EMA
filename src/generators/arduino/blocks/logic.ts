@@ -18,7 +18,7 @@
 
 // Former goog.module ID: Blockly.JavaScript.logic
 
-import type { Block } from "blockly/core/block";
+import type { Block } from "blockly/core";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 
@@ -199,10 +199,8 @@ export function controls_switch(
 
   const switchBlock = block as Block & {
     casebreakCount_?: number;
-    defaultCount_?: number;
   };
   const caseCount = switchBlock.casebreakCount_ ?? 0;
-  const hasDefault = (switchBlock.defaultCount_ ?? 0) > 0;
 
   for (let n = 1; n <= caseCount; n += 1) {
     const argument =
@@ -210,10 +208,8 @@ export function controls_switch(
     const branch = generator.statementToCode(block, "DO" + n);
     code += "case " + argument + ":\n" + branch + "  break;\n";
   }
-  if (hasDefault) {
-    const branch = generator.statementToCode(block, "DEFAULT");
-    code += "default:\n" + branch;
-  }
+  const defaultBranch = generator.statementToCode(block, "DEFAULT");
+  code += "default:\n" + defaultBranch + "  break;\n";
   code += "}\n";
   return code;
 }

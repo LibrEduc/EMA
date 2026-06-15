@@ -28,7 +28,7 @@
  */
 
 import * as Blockly from "blockly";
-import { handleVariablesSetChange } from "../../categories/blockly/shared";
+import { handleVariablesSetChange, revalidateTypedNumericBlocks } from "../../categories/blockly/shared";
 
 export type StrictTypeEnforcerMode = "warn" | "disconnect";
 export type StrictTypeEnforcerScope = "variables-only" | "extended";
@@ -91,25 +91,14 @@ export function installStrictTypeEnforcer(
     // Defer until Blockly finishes endDrag/applyConnections/render cycle.
     timer = window.setTimeout(() => {
       timer = null;
-      if (scope === "variables-only") {
-        const all = workspace.getAllBlocks(false);
-        for (const block of all) {
-          if (block.type === "variables_set" || block.type === "variables_set_dynamic") {
-            handleVariablesSetChange(block, e, "strict_enforcer");
-          }
-        }
-        return;
-      }
-
-      // Extended mode currently delegates to variable assignment enforcement,
-      // and can be expanded later to other typed sinks.
+      revalidateTypedNumericBlocks(workspace, e);
       const all = workspace.getAllBlocks(false);
       for (const block of all) {
         if (block.type === "variables_set" || block.type === "variables_set_dynamic") {
           handleVariablesSetChange(block, e, "strict_enforcer");
         }
       }
-      if (mode === "warn") {
+      if (scope !== "variables-only" && mode === "warn") {
         // mode reserved for future non-disconnecting behavior.
       }
     }, 0);

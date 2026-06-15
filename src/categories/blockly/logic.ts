@@ -31,7 +31,6 @@
  */
 
 import * as Blockly from "blockly";
-import { checkTypeCompatibility, getCompatibleTypesForCheck } from "../../generators/arduino/block_types_registry";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
   configureTypedVariableField,
@@ -58,21 +57,17 @@ type CaseConnection = {
   connectedType: string;
 };
 
-const numericCaseTypes = new Set(["int", "float"]);
+/** Switch case labels accept int values; Number keeps Blockly math_number compatible. */
+const SWITCH_CASE_CHECKS = ["Number", "int"];
 
-const getSwitchCaseChecks = (varType: string): string[] | null => {
-  const compatibleTypes = getCompatibleTypesForCheck(varType);
-  if (!compatibleTypes) {
-    return null;
+const applyCaseInputChecks = (block: SwitchBlock): void => {
+  const caseCount = block.casebreakCount_ || 0;
+  for (let i = 0; i <= caseCount; i += 1) {
+    const input = block.getInput(`CASE${i}`);
+    if (input?.connection) {
+      input.connection.setCheck(SWITCH_CASE_CHECKS);
+    }
   }
-  const checks = new Set(compatibleTypes);
-  if (checks.has("bool")) {
-    checks.add("Boolean");
-  }
-  if (checks.has("int") || checks.has("float")) {
-    checks.add("Number");
-  }
-  return Array.from(checks);
 };
 
 const getCaseConnections = (block: SwitchBlock): CaseConnection[] => {
@@ -90,47 +85,25 @@ const getCaseConnections = (block: SwitchBlock): CaseConnection[] => {
   return connections;
 };
 
-const applyCaseInputChecks = (
-  block: SwitchBlock,
-  check: string[] | null,
-): void => {
-  const caseCount = block.casebreakCount_ || 0;
-  for (let i = 0; i <= caseCount; i += 1) {
-    const input = block.getInput(`CASE${i}`);
-    if (input?.connection) {
-      input.connection.setCheck(check);
-    }
-  }
-};
-
-const inferTypeFromCases = (caseConnections: CaseConnection[]): string | null => {
+const inferTypeFromCases = (caseConnections: CaseConnection[]): "int" | null => {
   if (caseConnections.length === 0) {
     return null;
   }
-  const uniqueTypes = Array.from(
-    new Set(caseConnections.map((item) => item.connectedType)),
-  );
-  if (uniqueTypes.length === 1) {
-    return uniqueTypes[0];
-  }
-  const allNumeric = uniqueTypes.every((type) => numericCaseTypes.has(type));
-  if (allNumeric) {
-    return uniqueTypes.includes("float") ? "float" : "int";
-  }
-  return null;
+  const allInt = caseConnections.every((item) => item.connectedType === "int");
+  return allInt ? "int" : null;
 };
 
 const applySwitchCaseTyping = (block: SwitchBlock): void => {
+  applyCaseInputChecks(block);
+
   const variableId = block.getFieldValue("SWVAR");
   if (!variableId || !block.workspace) {
-    applyCaseInputChecks(block, null);
     block.setWarningText(null);
     return;
   }
 
   const variable = block.workspace.getVariableMap().getVariableById(variableId);
   if (!variable) {
-    applyCaseInputChecks(block, null);
     block.setWarningText(null);
     return;
   }
@@ -140,16 +113,21 @@ const applySwitchCaseTyping = (block: SwitchBlock): void => {
   const caseConnections = getCaseConnections(block);
   const typedVariable = variable as VariableWithMutableType;
 
-  if (isNoType) {
-    applyCaseInputChecks(block, null);
-    const inferredType = inferTypeFromCases(caseConnections);
-    if (inferredType) {
-      if (!typedVariable.__ucbManualType) {
-        setVariableType(variable, inferredType);
-        applyCaseInputChecks(block, getSwitchCaseChecks(inferredType));
-        block.setWarningText(null);
-      }
+  for (const caseItem of caseConnections) {
+    if (caseItem.connectedType !== "int") {
+      block.setWarningText(
+        getTypeMismatchWarningText("int", caseItem.connectedType),
+      );
+      return;
     }
+  }
+
+  if (isNoType) {
+    const inferredType = inferTypeFromCases(caseConnections);
+    if (inferredType && !typedVariable.__ucbManualType) {
+      setVariableType(variable, inferredType);
+    }
+    block.setWarningText(null);
     return;
   }
 
@@ -159,23 +137,13 @@ const applySwitchCaseTyping = (block: SwitchBlock): void => {
     !hasConnectedAssignmentForVariable(block.workspace, variableId)
   ) {
     clearVariableType(variable);
-    applyCaseInputChecks(block, null);
     block.setWarningText(null);
     return;
   }
 
-  applyCaseInputChecks(block, getSwitchCaseChecks(varType));
-
-  for (const caseItem of caseConnections) {
-    if (!checkTypeCompatibility(caseItem.connectedType, varType)) {
-      block.setWarningText(
-        getTypeMismatchWarningText(varType, caseItem.connectedType),
-      );
-      if (caseItem.connection.targetBlock()) {
-        caseItem.connection.disconnect();
-      }
-      return;
-    }
+  if (varType !== "int" && caseConnections.length > 0) {
+    block.setWarningText(getTypeMismatchWarningText("int", varType));
+    return;
   }
 
   block.setWarningText(null);
@@ -202,19 +170,10 @@ const updateSwitchCaseTyping = (
 };
 
 const getSwitchTooltip = (block: SwitchBlock): string => {
-  if (!block.casebreakCount_ && !block.defaultCount_) {
-    return getBlocklyMsg("CONTROLS_SWITCH_TOOLTIP_1");
-  }
-  if (!block.casebreakCount_ && block.defaultCount_) {
-    return getBlocklyMsg("CONTROLS_SWITCH_TOOLTIP_2");
-  }
-  if (block.casebreakCount_ && !block.defaultCount_) {
-    return getBlocklyMsg("CONTROLS_SWITCH_TOOLTIP_3");
-  }
-  if (block.casebreakCount_ && block.defaultCount_) {
+  if (!block.casebreakCount_) {
     return getBlocklyMsg("CONTROLS_SWITCH_TOOLTIP_4");
   }
-  return "";
+  return getBlocklyMsg("CONTROLS_SWITCH_TOOLTIP_4");
 };
 
 /**
@@ -291,21 +250,25 @@ export const defineControlsSwitchBlocks = (): void => {
         "variables_set";
       this.appendValueInput("CASE0")
         .setAlign(Blockly.inputs.Align.RIGHT)
+        .setCheck(SWITCH_CASE_CHECKS)
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
       this.appendStatementInput("DO0")
         .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
+      this.appendStatementInput("DEFAULT")
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setMutator(
         new Blockly.icons.MutatorIcon(
-          ["controls_case_break", "controls_case_default"],
+          ["controls_case_break"],
           this as unknown as Blockly.BlockSvg,
         ),
       );
       this.setTooltip(() => getSwitchTooltip(this));
       this.casebreakCount_ = 0;
-      this.defaultCount_ = 0;
+      this.defaultCount_ = 1;
     },
     onchange: function (this: SwitchBlock, event: Blockly.Events.Abstract) {
       updateSwitchCaseTyping(this, event);
@@ -316,32 +279,34 @@ export const defineControlsSwitchBlocks = (): void => {
       }
     },
     mutationToDom: function (this: SwitchBlock): Element | null {
-      if (!this.casebreakCount_ && !this.defaultCount_) {
+      if (!this.casebreakCount_) {
         return null;
       }
       const container = document.createElement("mutation");
-      if (this.casebreakCount_) {
-        container.setAttribute("casebreak", String(this.casebreakCount_));
-      }
-      if (this.defaultCount_) {
-        container.setAttribute("default", "1");
-      }
+      container.setAttribute("casebreak", String(this.casebreakCount_));
       return container;
     },
     domToMutation: function (this: SwitchBlock, xmlElement: Element) {
+      const defaultConnection =
+        this.getInput("DEFAULT")?.connection?.targetConnection || null;
+      if (this.getInput("DEFAULT")) {
+        this.removeInput("DEFAULT");
+      }
       this.casebreakCount_ = Number(xmlElement.getAttribute("casebreak") || 0);
-      this.defaultCount_ = Number(xmlElement.getAttribute("default") || 0);
+      this.defaultCount_ = 1;
       for (let i = 1; i <= (this.casebreakCount_ || 0); i += 1) {
         this.appendValueInput("CASE" + i)
           .setAlign(Blockly.inputs.Align.RIGHT)
+          .setCheck(SWITCH_CASE_CHECKS)
           .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
         this.appendStatementInput("DO" + i)
           .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
       }
-      if (this.defaultCount_) {
-        this.appendStatementInput("DEFAULT")
-          .setAlign(Blockly.inputs.Align.RIGHT)
-          .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
+      const defaultInput = this.appendStatementInput("DEFAULT")
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
+      if (defaultConnection) {
+        defaultInput.connection?.connect(defaultConnection);
       }
     },
     decompose: function (this: SwitchBlock, workspace: Blockly.Workspace): Blockly.Block {
@@ -357,20 +322,15 @@ export const defineControlsSwitchBlocks = (): void => {
         }
         connection = caseBlock.nextConnection;
       }
-      if (this.defaultCount_) {
-        const defaultBlock = workspace.newBlock("controls_case_default") as Blockly.BlockSvg;
-        defaultBlock.initSvg();
-        if (connection && defaultBlock.previousConnection) {
-          connection.connect(defaultBlock.previousConnection);
-        }
-      }
       return containerBlock;
     },
     compose: function (this: SwitchBlock, containerBlock: Blockly.Block) {
-      if (this.defaultCount_) {
+      const defaultConnection =
+        this.getInput("DEFAULT")?.connection?.targetConnection || null;
+      if (this.getInput("DEFAULT")) {
         this.removeInput("DEFAULT");
       }
-      this.defaultCount_ = 0;
+      this.defaultCount_ = 1;
       for (let i = this.casebreakCount_ || 0; i > 0; i -= 1) {
         this.removeInput("CASE" + i);
         this.removeInput("DO" + i);
@@ -378,61 +338,44 @@ export const defineControlsSwitchBlocks = (): void => {
       this.casebreakCount_ = 0;
       let clauseBlock = containerBlock.getInputTargetBlock("STACK");
       while (clauseBlock) {
-        switch (clauseBlock.type) {
-          case "controls_case_break": {
-            this.casebreakCount_ += 1;
-            const caseInput = this.appendValueInput("CASE" + this.casebreakCount_)
-              .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
-            const doInput = this.appendStatementInput("DO" + this.casebreakCount_);
-            doInput.appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
-            const clause = clauseBlock as MutatorClauseBlock;
-            if (clause.valueConnection_) {
-              caseInput.connection?.connect(clause.valueConnection_);
-            }
-            if (clause.statementConnection_) {
-              doInput.connection?.connect(clause.statementConnection_);
-            }
-            break;
-          }
-          case "controls_case_default": {
-            this.defaultCount_ += 1;
-            const defaultInput = this.appendStatementInput("DEFAULT");
-            defaultInput.appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
-            const clause = clauseBlock as MutatorClauseBlock;
-            if (clause.statementConnection_) {
-              defaultInput.connection?.connect(clause.statementConnection_);
-            }
-            break;
-          }
-          default:
-            throw new Error("Unknown block type.");
+        if (clauseBlock.type !== "controls_case_break") {
+          throw new Error("Unknown block type.");
+        }
+        this.casebreakCount_ += 1;
+        const caseInput = this.appendValueInput("CASE" + this.casebreakCount_)
+          .setCheck(SWITCH_CASE_CHECKS)
+          .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_CASEBREAK"));
+        const doInput = this.appendStatementInput("DO" + this.casebreakCount_);
+        doInput.appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DO"));
+        const clause = clauseBlock as MutatorClauseBlock;
+        if (clause.valueConnection_) {
+          caseInput.connection?.connect(clause.valueConnection_);
+        }
+        if (clause.statementConnection_) {
+          doInput.connection?.connect(clause.statementConnection_);
         }
         clauseBlock = clauseBlock.nextConnection?.targetBlock() || null;
+      }
+      const defaultInput = this.appendStatementInput("DEFAULT")
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsg("CONTROLS_SWITCH_MSG_DEFAULT"));
+      if (defaultConnection) {
+        defaultInput.connection?.connect(defaultConnection);
       }
     },
     saveConnections: function (this: SwitchBlock, containerBlock: Blockly.Block) {
       let clauseBlock = containerBlock.getInputTargetBlock("STACK");
       let i = 1;
       while (clauseBlock) {
-        switch (clauseBlock.type) {
-          case "controls_case_break": {
-            const inputCase = this.getInput("CASE" + i);
-            const inputDo = this.getInput("DO" + i);
-            const clause = clauseBlock as MutatorClauseBlock;
-            clause.valueConnection_ = inputCase?.connection?.targetConnection || null;
-            clause.statementConnection_ = inputDo?.connection?.targetConnection || null;
-            i += 1;
-            break;
-          }
-          case "controls_case_default": {
-            const inputDo = this.getInput("DEFAULT");
-            const clause = clauseBlock as MutatorClauseBlock;
-            clause.statementConnection_ = inputDo?.connection?.targetConnection || null;
-            break;
-          }
-          default:
-            throw new Error("Unknown block type.");
+        if (clauseBlock.type !== "controls_case_break") {
+          throw new Error("Unknown block type.");
         }
+        const inputCase = this.getInput("CASE" + i);
+        const inputDo = this.getInput("DO" + i);
+        const clause = clauseBlock as MutatorClauseBlock;
+        clause.valueConnection_ = inputCase?.connection?.targetConnection || null;
+        clause.statementConnection_ = inputDo?.connection?.targetConnection || null;
+        i += 1;
         clauseBlock = clauseBlock.nextConnection?.targetBlock() || null;
       }
       applySwitchCaseTyping(this);

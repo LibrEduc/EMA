@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Block } from "blockly/core/block";
+import type { Block } from "blockly/core";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
 import { addTextHelpers } from "./text_helpers";

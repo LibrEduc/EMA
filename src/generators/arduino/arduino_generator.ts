@@ -17,6 +17,7 @@
  */
 
 import * as Blockly from "blockly";
+import { resolveMathChangeVariableId } from "../../categories/blockly/shared";
 import { getArduinoType } from "./arduino_types";
 
 export enum Order {
@@ -328,6 +329,37 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       }
     }
 
+    const inferMathChangeDeltaType = (deltaBlock: Blockly.Block | null): string | null => {
+      if (!deltaBlock) {
+        return null;
+      }
+      if (deltaBlock.type === "math_number") {
+        const num = Number(deltaBlock.getFieldValue("NUM"));
+        if (!Number.isNaN(num)) {
+          return Number.isInteger(num) ? "int" : "float";
+        }
+      }
+      return getOutputBlockType(deltaBlock);
+    };
+    for (const block of workspace.getAllBlocks(false)) {
+      if (block.type !== "math_change") {
+        continue;
+      }
+      const varId = resolveMathChangeVariableId(block);
+      if (!varId) {
+        continue;
+      }
+      const deltaType = inferMathChangeDeltaType(block.getInputTargetBlock("DELTA"));
+      if (deltaType === "float") {
+        inferredTypesByVarId.set(varId, "float");
+      } else if (deltaType === "int") {
+        const existing = inferredTypesByVarId.get(varId);
+        if (existing !== "float") {
+          inferredTypesByVarId.set(varId, "int");
+        }
+      }
+    }
+
     // Variables assigned from a list block are declared as ElementType varName[] = {...};
     const declaredAsArrayVariableIds = new Set<string>();
     for (const block of workspace.getAllBlocks(false)) {
@@ -461,7 +493,12 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       // Normalize variable type to avoid emitting 'undefined' in declarations.
       const rawType = variable.getType();
       const inferredType = inferredTypesByVarId.get(variable.getId());
-      const typeKey = normalizeBlocklyType(rawType || "") || inferredType || "__NO_TYPE__";
+      let typeKey = normalizeBlocklyType(rawType || "") || inferredType || "__NO_TYPE__";
+      if (inferredType === "float" && typeKey === "int") {
+        typeKey = "float";
+      } else if (inferredType === "int" && typeKey === "float") {
+        typeKey = "int";
+      }
       if (!variableNamesByType[typeKey]) {
         variableNamesByType[typeKey] = [];
       }

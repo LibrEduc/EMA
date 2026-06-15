@@ -34,7 +34,6 @@ declare const __UCB_BUILD_FINGERPRINT__: string | undefined;
  */
 
 import * as Blockly from "blockly";
-import { SeparatorAxis } from "blockly/core/flyout_separator";
 import "@blockly/block-plus-minus";
 import "@blockly/toolbox-search";
 import { registerToolboxSearchI18n } from "./toolbox_search_i18n";
@@ -597,7 +596,9 @@ class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
    */
   load(_state: object, flyout: Blockly.IFlyout): Blockly.FlyoutItem {
     void _state;
-    const axis = flyout.horizontalLayout ? SeparatorAxis.X : SeparatorAxis.Y;
+    const axis = flyout.horizontalLayout
+      ? ("x" as ConstructorParameters<typeof Blockly.FlyoutSeparator>[1])
+      : ("y" as ConstructorParameters<typeof Blockly.FlyoutSeparator>[1]);
     const separator = new Blockly.FlyoutSeparator(0, axis);
     return new Blockly.FlyoutItem(separator, this.getType());
   }

@@ -27,6 +27,8 @@ export type BlockTypeDefinition = string | BlockTypeFunction;
  * Registry of block types loaded from block_types.json
  */
 export declare const BLOCK_TYPE_REGISTRY: Record<string, BlockTypeDefinition>;
+/** Infers int/float from a math_number field value. */
+export declare function identifyMathNumberType(numString: string | number | null | undefined): "int" | "float";
 /**
  * Get compatible types for a given type (for use with setCheck)
  * @param type - The target type

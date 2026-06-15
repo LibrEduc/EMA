@@ -33,44 +33,12 @@
 import * as Blockly from "blockly";
 import { FieldAngle } from "@blockly/field-angle";
 import { FieldSlider } from "@blockly/field-slider";
-import { getBlocklyMsgOr } from "./shared";
+import { getBlocklyMsgOr, inferRequiredNumericTypeForVariable, resolveMathChangeVariableId, syncNumericVariableType, getTypeMismatchWarningText, shouldSkipVariableChange, type VariableWithMutableType, inferNumericInputType } from "./shared";
 
 /**
  * Registers math compatibility blocks for µcBlockly.
  */
 export const defineMathCompatBlocks = (): void => {
-  const inferBlockType = (block: Blockly.Block | null): string | null => {
-    if (!block) {
-      return null;
-    }
-    if (
-      block.type === "variables_get" ||
-      block.type === "variables_get_dynamic"
-    ) {
-      const variableId = block.getFieldValue("VAR");
-      return variableId
-        ? block.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
-        : null;
-    }
-    const typed = block as Blockly.Block & { getBlockType?: () => string | null };
-    const typedType = typed.getBlockType?.() || null;
-    if (typedType) {
-      return typedType;
-    }
-    if (block.type === "math_number") {
-      const raw = block.getFieldValue("NUM");
-      const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
-      if (!Number.isNaN(numeric)) {
-        return Number.isInteger(numeric) ? "int" : "float";
-      }
-    }
-    const outputCheck = block.outputConnection?.getCheck();
-    if (Array.isArray(outputCheck)) {
-      return outputCheck[0] || null;
-    }
-    return outputCheck || null;
-  };
-
   if (!Blockly.Blocks["math_percent"]) {
     Blockly.Blocks["math_percent"] = {
       init: function (this: Blockly.Block) {
@@ -87,13 +55,12 @@ export const defineMathCompatBlocks = (): void => {
 
   Blockly.Blocks["math_change"] = {
     init: function (this: Blockly.Block) {
-      const numericDeltaChecks = ["Number", "int"];
       this.appendValueInput("VAR")
         .setAlign(Blockly.inputs.Align.CENTRE)
         .setCheck(null)
         .appendField(getBlocklyMsgOr("MATH_CHANGE_LABEL", "change"));
       this.appendValueInput("DELTA")
-        .setCheck(numericDeltaChecks)
+        .setCheck(["Number", "int", "float"])
         .appendField(getBlocklyMsgOr("MATH_CHANGE_BY", "by"));
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -103,7 +70,7 @@ export const defineMathCompatBlocks = (): void => {
       this.setHelpUrl(getBlocklyMsgOr("MATH_CHANGE_HELPURL", ""));
     },
     onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
-      if (event.isUiEvent) {
+      if (shouldSkipVariableChange(this, event)) {
         return;
       }
       if (
@@ -113,43 +80,60 @@ export const defineMathCompatBlocks = (): void => {
         event.type !== Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE &&
         event.type !== Blockly.Events.VAR_CREATE &&
         event.type !== Blockly.Events.VAR_RENAME &&
-        event.type !== Blockly.Events.VAR_DELETE
+        event.type !== Blockly.Events.VAR_DELETE &&
+        event.type !== "var_type_change"
       ) {
         return;
       }
-      const targetBlock =
-        this.getInputTargetBlock("VAR") ?? this.getInputTargetBlock("NAME");
-      if (!targetBlock) {
+      const variableId = resolveMathChangeVariableId(this);
+      if (!variableId || !this.workspace) {
         this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
         return;
       }
-      const isVariable =
-        targetBlock.type === "variables_get" ||
-        targetBlock.type === "variables_get_dynamic";
-      if (!isVariable) {
+      const variable = this.workspace.getVariableMap().getVariableById(variableId);
+      if (!variable) {
         this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
-        return;
-      }
-      const variableId = targetBlock.getFieldValue("VAR");
-      const variableType = variableId
-        ? targetBlock.workspace?.getVariableMap().getVariableById(variableId)?.getType()
-        : null;
-      if (variableType !== "int") {
-        this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
-        this.getInput("VAR")?.connection?.disconnect();
         return;
       }
       const deltaBlock = this.getInputTargetBlock("DELTA");
-      if (deltaBlock) {
-        const deltaType = inferBlockType(deltaBlock);
-        const isNumeric =
-          deltaType === "int" ||
-          deltaType === "float" ||
-          deltaType === "Number" ||
-          deltaType === "number";
-        if (!isNumeric) {
+      const requiredType = inferRequiredNumericTypeForVariable(this.workspace, variableId);
+      if (deltaBlock && !requiredType) {
+        const deltaType = inferNumericInputType(deltaBlock);
+        if (deltaType !== "int" && deltaType !== "float" && deltaType !== "number") {
           this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
-          this.getInput("DELTA")?.connection?.disconnect();
+          return;
+        }
+      }
+      if (requiredType) {
+        const typedVariable = variable as VariableWithMutableType;
+        syncNumericVariableType(variable, requiredType);
+        const varType = variable.getType();
+        if (
+          requiredType === "float" &&
+          varType === "int" &&
+          typedVariable.__ucbManualType
+        ) {
+          this.setWarningText(getTypeMismatchWarningText(varType, requiredType));
+          return;
+        }
+        if (
+          varType &&
+          varType !== "__NO_TYPE__" &&
+          varType !== "int" &&
+          varType !== "float"
+        ) {
+          this.setWarningText(getTypeMismatchWarningText(varType, requiredType));
+          return;
+        }
+      } else {
+        const varType = variable.getType();
+        if (
+          varType &&
+          varType !== "__NO_TYPE__" &&
+          varType !== "int" &&
+          varType !== "float"
+        ) {
+          this.setWarningText(getTypeMismatchWarningText(varType, "int"));
           return;
         }
       }
