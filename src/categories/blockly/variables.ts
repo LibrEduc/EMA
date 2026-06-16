@@ -37,11 +37,18 @@ import {
   getInternalTypeForArduinoType,
   getArduinoTypeLabelKey,
   getCppTypeName,
+  isArduinoScalarType,
 } from "../../generators/arduino/block_types";
-import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
+  clearVariableType,
+  LIST_VARIABLE_TYPE,
+  setVariableType,
+} from "../../generators/arduino/variable_utils";
+import {
+  configureScalarVariableField,
   configureTypedVariableField,
   getBlocklyCompatibleChecks,
+  getListVariableOutputCheck,
   getBlocklyMsg,
   getBlocklyMsgOr,
   getConstWarningText,
@@ -80,6 +87,39 @@ export const getVariableCastTypeOptions = getArduinoTypeDropdownOptions;
 
 /** @deprecated Use {@link getCppTypeName} from `block_types` */
 export const getCastCppKeyword = getCppTypeName;
+
+/** Resets a scalar type dropdown when its value is not a valid Arduino type (e.g. `list`). */
+const sanitizeArduinoTypeDropdown = (
+  block: Blockly.Block,
+  fieldName: string,
+): void => {
+  const field = block.getField(fieldName) as Blockly.FieldDropdown | null;
+  if (!field) {
+    return;
+  }
+  const value = field.getValue();
+  if (isArduinoScalarType(value)) {
+    return;
+  }
+  Blockly.Events.disable();
+  try {
+    field.setValue("int");
+  } finally {
+    Blockly.Events.enable();
+  }
+};
+
+/** Arduino scalar type dropdown; maps invalid values (e.g. `list`) to `int` on load. */
+export const createArduinoScalarTypeField = (
+  fieldName: string,
+): Blockly.FieldDropdown => {
+  const field = new Blockly.FieldDropdown(getArduinoTypeDropdownOptions);
+  field.setValidator((value) =>
+    isArduinoScalarType(String(value)) ? value : "int",
+  );
+  field.name = fieldName;
+  return field;
+};
 
 const applyCastOutputType = (block: Blockly.Block): void => {
   const castType = block.getFieldValue("CAST_TYPE") || "int";
@@ -153,6 +193,8 @@ export const defineVariablesGetDynamicBlock = (): void => {
             // Variable has no type - block all typed connections
             // Use '__NO_TYPE__' to prevent connections to typed inputs (like Boolean)
             this.setOutput(true, "__NO_TYPE__");
+          } else if (varType === LIST_VARIABLE_TYPE) {
+            this.setOutput(true, getListVariableOutputCheck());
           } else {
             const checks = getBlocklyCompatibleChecks(
               getInternalTypeForArduinoType(varType),
@@ -225,7 +267,7 @@ export const defineVariablesCastBlock = (): void => {
       this.appendDummyInput("CAST_ROW")
         .appendField(getBlocklyMsgOr("VARIABLES_CAST_AS_TYPE", "de type"))
         .appendField(
-          new Blockly.FieldDropdown(getArduinoTypeDropdownOptions),
+          createArduinoScalarTypeField("CAST_TYPE"),
           "CAST_TYPE",
         );
       this.setInputsInline(true);
@@ -325,7 +367,7 @@ export const defineVariablesSetTypeBlock = (): void => {
         )
         .appendField(getBlocklyMsg("TYPED_VAR_TYPE_TO_LABEL"))
         .appendField(
-          new Blockly.FieldDropdown(getArduinoTypeDropdownOptions),
+          createArduinoScalarTypeField("TYPE"),
           "TYPE",
         );
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
@@ -333,8 +375,6 @@ export const defineVariablesSetTypeBlock = (): void => {
         configureTypedVariableField(varField);
       }
       this.setInputsInline(true);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
       this.setStyle("variable_dynamic_blocks");
       this.setTooltip(getBlocklyMsg("VARIABLES_SET_TOOLTIP"));
       this.setHelpUrl("");
@@ -353,6 +393,12 @@ export const defineVariablesSetTypeBlock = (): void => {
         event.type !== Blockly.Events.VAR_CREATE
       ) {
         return;
+      }
+      if (
+        event.type === Blockly.Events.BLOCK_CREATE &&
+        (event as Blockly.Events.BlockCreate).blockId === this.id
+      ) {
+        sanitizeArduinoTypeDropdown(this, "TYPE");
       }
       const variableId = this.getFieldValue("VAR");
       const typeField = this.getField("TYPE") as Blockly.FieldDropdown | null;
@@ -377,9 +423,16 @@ export const defineVariablesSetTypeBlock = (): void => {
             if (typedVariable.__ucbConst) {
               this.setWarningText(getConstWarningText());
               const currentType = variable.getType();
-              if (currentType && currentType !== selectedType) {
+              if (
+                currentType &&
+                currentType !== selectedType &&
+                isArduinoScalarType(currentType)
+              ) {
                 typeField.setValue(currentType);
               }
+              return;
+            }
+            if (variable.getType() === LIST_VARIABLE_TYPE) {
               return;
             }
             if (variable.getType() !== selectedType) {
@@ -403,12 +456,15 @@ export const defineVariablesSetTypeBlock = (): void => {
           return;
         }
         const varType = variable.getType();
+        if (varType === LIST_VARIABLE_TYPE) {
+          return;
+        }
         const isNoType = !varType || varType === "__NO_TYPE__";
         if (isNoType && selectedType) {
           setVariableTypeAndMarkManual(variable, selectedType);
           return;
         }
-        if (varType && varType !== selectedType) {
+        if (varType && varType !== selectedType && isArduinoScalarType(varType)) {
           typeField.setValue(varType);
         }
       } catch (error) {
@@ -437,8 +493,6 @@ export const defineVariablesConstBlock = (): void => {
         configureTypedVariableField(varField);
       }
       this.setStyle("variable_dynamic_blocks");
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
       this.setTooltip(
         getBlocklyMsgOr("VARIABLES_SET_CONST_TOOLTIP", "set constant"),
       );
@@ -526,7 +580,7 @@ export const defineVariablesSetInitBlock = (): void => {
         )
         .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"))
         .appendField(
-          new Blockly.FieldDropdown(getArduinoTypeDropdownOptions),
+          createArduinoScalarTypeField("VARIABLE_SETTYPE_TYPE"),
           "VARIABLE_SETTYPE_TYPE",
         )
         .appendField(getBlocklyMsgOr("_AT", "at"));
@@ -558,6 +612,12 @@ export const defineVariablesSetInitBlock = (): void => {
       ) {
         return;
       }
+      if (
+        event.type === Blockly.Events.BLOCK_CREATE &&
+        (event as Blockly.Events.BlockCreate).blockId === this.id
+      ) {
+        sanitizeArduinoTypeDropdown(this, "VARIABLE_SETTYPE_TYPE");
+      }
       const variableId = this.getFieldValue("VAR");
       const typeField = this.getField("VARIABLE_SETTYPE_TYPE") as Blockly.FieldDropdown | null;
       if (!variableId || !typeField) {
@@ -569,10 +629,14 @@ export const defineVariablesSetInitBlock = (): void => {
         return;
       }
       const typedVariable = variable as VariableWithMutableType;
+      const varType = variable.getType();
+      if (varType === LIST_VARIABLE_TYPE) {
+        return;
+      }
       if (typedVariable.__ucbConst) {
         this.setWarningText(getConstWarningText());
         const currentType = variable.getType();
-        if (currentType && currentType !== selectedType) {
+        if (currentType && currentType !== selectedType && isArduinoScalarType(currentType)) {
           typeField.setValue(currentType);
         }
         const valueInput = this.getInput("VALUE");
@@ -688,6 +752,24 @@ export const defineVariablesDefineBlock = (): void => {
 export const extendStandardVariablesGetBlock = (): void => {
   // Add getBlockType to the standard variables_get block
   if (Blockly.Blocks["variables_get"]) {
+    type VariablesGetDef = Blockly.Block & {
+      init?: (this: Blockly.Block) => void;
+      __ucbScalarVarConfigured?: boolean;
+    };
+    const variablesGetDef = Blockly.Blocks["variables_get"] as VariablesGetDef;
+    if (!variablesGetDef.__ucbScalarVarConfigured) {
+      const originalInit = variablesGetDef.init;
+      variablesGetDef.init = function (this: Blockly.Block) {
+        if (originalInit) {
+          originalInit.call(this);
+        }
+        const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+        if (varField) {
+          configureScalarVariableField(varField);
+        }
+      };
+      variablesGetDef.__ucbScalarVarConfigured = true;
+    }
     // Add onchange to update the output connection type
     const originalOnchange = Blockly.Blocks["variables_get"].onchange;
     Blockly.Blocks["variables_get"].onchange = function (
@@ -724,6 +806,8 @@ export const extendStandardVariablesGetBlock = (): void => {
           const varType = variable.getType();
           if (!varType) {
             this.setOutput(true, "__NO_TYPE__");
+          } else if (varType === LIST_VARIABLE_TYPE) {
+            this.setOutput(true, getListVariableOutputCheck());
           } else {
             const blocklyType = varType === "bool" ? "Boolean" : varType;
             this.setOutput(true, blocklyType);
@@ -747,6 +831,24 @@ export const extendStandardVariablesGetBlock = (): void => {
  */
 export const extendStandardVariablesSetBlock = (): void => {
   if (Blockly.Blocks["variables_set"]) {
+    type VariablesSetDef = Blockly.Block & {
+      init?: (this: Blockly.Block) => void;
+      __ucbScalarVarConfigured?: boolean;
+    };
+    const variablesSetDef = Blockly.Blocks["variables_set"] as VariablesSetDef;
+    if (!variablesSetDef.__ucbScalarVarConfigured) {
+      const originalInit = variablesSetDef.init;
+      variablesSetDef.init = function (this: Blockly.Block) {
+        if (originalInit) {
+          originalInit.call(this);
+        }
+        const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+        if (varField) {
+          configureScalarVariableField(varField);
+        }
+      };
+      variablesSetDef.__ucbScalarVarConfigured = true;
+    }
     const originalOnchange = Blockly.Blocks["variables_set"].onchange;
     Blockly.Blocks["variables_set"].onchange = function (
       this: Blockly.Block,

@@ -26,9 +26,24 @@
  */
 
 import * as Blockly from "blockly";
+import { DEFAULT_TOOLBOX_BLOCK_LEVELS } from "../../toolbox";
 
 export const PROCEDURES_CATEGORY_ID =
   Blockly.Procedures.CATEGORY_NAME ?? "PROCEDURE";
+
+type FlyoutBlockItem = Blockly.utils.toolbox.FlyoutItemInfo & {
+  levels?: string;
+};
+
+function withFlyoutBlockLevels(
+  items: Blockly.utils.toolbox.FlyoutItemInfo[],
+): FlyoutBlockItem[] {
+  return items.map((item) =>
+    item.kind === "block"
+      ? { ...item, levels: DEFAULT_TOOLBOX_BLOCK_LEVELS }
+      : item,
+  );
+}
 
 /**
  * Flyout : blocs setup()/loop() Arduino, puis séparateur, puis procédures Blockly.
@@ -45,7 +60,7 @@ export function createProceduresFlyout(
   if (Blockly.Procedures && typeof Blockly.Procedures.flyoutCategory === "function") {
     items.push(...Blockly.Procedures.flyoutCategory(workspace, false));
   }
-  return items;
+  return withFlyoutBlockLevels(items);
 }
 
 /**

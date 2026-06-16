@@ -18,10 +18,23 @@
 
 import * as Blockly from "blockly";
 
+/** Type Blockly des variables déclarées par les blocs Listes (tableaux). */
+export const LIST_VARIABLE_TYPE = "list";
+
 export type MutableVariableModel = Blockly.IVariableModel<Blockly.IVariableState> & {
   setType?: (type: string) => void;
   type_?: string | null;
 };
+
+export function isListVariableType(type: string | null | undefined): boolean {
+  return type === LIST_VARIABLE_TYPE;
+}
+
+export function isListVariable(
+  variable: Blockly.IVariableModel<Blockly.IVariableState> | null | undefined,
+): boolean {
+  return isListVariableType(variable?.getType?.() ?? null);
+}
 
 /**
  * Sets a variable's type metadata and updates the model.
@@ -52,6 +65,15 @@ export function setVariableType(
     return true;
   }
   return false;
+}
+
+/**
+ * Tags a workspace variable as a list/array variable (`list`).
+ */
+export function tagVariableAsList(
+  variable: Blockly.IVariableModel<Blockly.IVariableState>,
+): boolean {
+  return setVariableType(variable, LIST_VARIABLE_TYPE);
 }
 
 /**

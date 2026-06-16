@@ -97,6 +97,11 @@ import { arduinoGenerator } from "./generators/arduino";
 import { defineAllTypedVariableBlocks, refreshBoardPinDropdowns } from "./categories/blockly";
 import { applyBlockTypesFromRegistry } from "./generators/arduino/block_types_registry";
 import { configureStandardBlocks } from "./generators/arduino/configure_standard_blocks";
+import { applyLevelsToAllBlockDefinitions } from "./block_levels";
+import {
+  applyBlockDebugMetadata,
+  installBlockDebugContextMenu,
+} from "./block_debug_context_menu";
 import { debugLog } from "./generators/arduino/debug";
 import {
   HTML_populateLanguages,
@@ -504,6 +509,8 @@ const HTML_populateBoards = (): void => {
 // Ensure custom blocks are registered before toolbox injection.
 restoreLayoutFromSessionStorage();
 defineTypedVariableBlocks();
+installBlockDebugContextMenu();
+applyBlockDebugMetadata();
 primeWorkspaceContainerDimensions();
 // No board selected at init: hide board category until user selects a board.
 const initialToolbox = getToolboxWithoutBoardCategory(basic_toolbox);
@@ -927,6 +934,8 @@ const HTML_onChange = (): void => {
     }
     setPluginsInURL("debugSwitch", "debug");
   };
+  (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ =
+    elements.debugSwitch.checked;
 };
 
 /**
@@ -1015,6 +1024,8 @@ DomIsLoaded((): void => {
       // Configure standard blocks (controls_if, procedures, etc.)
       configureStandardBlocks();
     }
+    applyLevelsToAllBlockDefinitions();
+    applyBlockDebugMetadata();
   }
 
   HTML_populateLanguages(µcB);
@@ -1048,6 +1059,8 @@ window.onload = (): void => {
   ) {
     debugLog('🔄 Redefining typed variable blocks in window.onload...');
     defineTypedVariableBlocks();
+    applyLevelsToAllBlockDefinitions();
+    applyBlockDebugMetadata();
   }
 
   HTML_onChange();

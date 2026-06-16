@@ -33,18 +33,254 @@
 import * as Blockly from "blockly";
 import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
 import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
-import { getBlocklyMsgOr } from "./shared";
-import { getBlocklyCompatibleChecks } from "./shared";
+import {
+  configureListVariableField,
+  getArrayIndexBlocklyChecks,
+  getBlocklyCompatibleChecks,
+  getBlocklyMsgOr,
+  getDeclareContenuBlocklyChecks,
+  getDeclareElementBlocklyChecks,
+  handleVariablesSetChange,
+  syncListVariableFromBlock,
+} from "./shared";
 import { getVariableTypeDropdownOptions } from "./variables";
-import { inferConnectedValueType } from "./shared";
+import { getInternalTypeForArduinoType } from "../../generators/arduino/block_types";
+import {
+  inferArrayElementTypeFromBlock,
+  inferArrayGetIndexElementType,
+} from "../../generators/arduino/block_types_registry";
+import { LIST_VARIABLE_TYPE } from "../../generators/arduino/variable_utils";
 
 let arrayBlocksRegistered = false;
 
+type ArrayWithMutatorBlock = Blockly.Block & {
+  itemCount_: number;
+  topInput_: Blockly.Input | null;
+  updateShape_: (targetCount: number) => void;
+  addPart_: () => void;
+  removePart_: () => void;
+  updateMinus_: () => void;
+  plus: () => void;
+  minus: () => void;
+};
+
+const ARRAY_LIST_LITERAL_LABEL = (): string =>
+  getBlocklyMsgOr("ARRAY_UNE_LISTE", "a list consisting of");
+
+const ARRAY_WITH_CONTAINING_LABEL = (): string =>
+  getBlocklyMsgOr("ARRAY_WITH_CONTAINING", "containing");
+
+const ARRAY_DEFAULT_VAR_NAME = "item";
+
+/** Lie le champ VAR à la variable par défaut « list » (flyout et workspace). */
+function bindArrayWithDefaultVariable(block: Blockly.Block): void {
+  const workspace = block.workspace;
+  if (!workspace) {
+    return;
+  }
+  const variableModel = Blockly.Variables.getOrCreateVariablePackage(
+    workspace,
+    null,
+    ARRAY_DEFAULT_VAR_NAME,
+    LIST_VARIABLE_TYPE,
+  );
+  if (variableModel?.getId()) {
+    block.setFieldValue(variableModel.getId(), "VAR");
+    syncListVariableFromBlock(block);
+  }
+}
+
+/** Synchronise le type Blockly `list` après création ou changement du champ VAR. */
+function handleArrayListVariableSync(
+  block: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  if (event.isUiEvent) {
+    return;
+  }
+  const workspace = block.workspace as Blockly.WorkspaceSvg | null;
+  if (workspace?.isDragging?.()) {
+    return;
+  }
+  if (
+    event.type === Blockly.Events.BLOCK_CREATE &&
+    (event as Blockly.Events.BlockCreate).blockId === block.id
+  ) {
+    syncListVariableFromBlock(block);
+    return;
+  }
+  if (
+    event.type === Blockly.Events.BLOCK_CHANGE &&
+    (event as Blockly.Events.BlockChange).element === "field" &&
+    (event as Blockly.Events.BlockChange).name === "VAR"
+  ) {
+    syncListVariableFromBlock(block);
+  }
+}
+
+/** Met à jour la sortie des blocs d'accès index et propage le typage vers le parent set. */
+function arrayGetIndexOutputSyncOnChange(
+  this: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  if (event.isUiEvent) {
+    return;
+  }
+  const workspace = this.workspace as Blockly.WorkspaceSvg | null;
+  if (workspace?.isDragging?.()) {
+    return;
+  }
+  if (
+    event.type !== Blockly.Events.BLOCK_CHANGE &&
+    event.type !== Blockly.Events.BLOCK_MOVE &&
+    event.type !== Blockly.Events.BLOCK_CREATE &&
+    event.type !== Blockly.Events.BLOCK_DELETE
+  ) {
+    return;
+  }
+  const elementType = inferArrayGetIndexElementType(this);
+  const checks =
+    elementType && elementType !== "__NO_TYPE__"
+      ? getBlocklyCompatibleChecks(elementType)
+      : null;
+  this.setOutput(true, checks);
+  const parent = this.outputConnection?.targetBlock?.() ?? null;
+  if (
+    parent &&
+    (parent.type === "variables_set_dynamic" || parent.type === "variables_set")
+  ) {
+    handleVariablesSetChange(parent, event, parent.type);
+  }
+}
+
+/** Revalide les blocs getIndex / modify qui référencent une variable liste. */
+function revalidateGetIndexBlocksForVariable(
+  workspace: Blockly.Workspace,
+  variableId: string,
+  event: Blockly.Events.Abstract,
+): void {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (block.getFieldValue("VAR") !== variableId) {
+      continue;
+    }
+    if (
+      block.type === "Array_getIndex_in_list" ||
+      block.type === "Array_getIndex_in_array"
+    ) {
+      arrayGetIndexOutputSyncOnChange.call(block, event);
+    } else if (block.type === "Array_modify" || block.type === "Array_fix") {
+      syncArrayListAssignValueInputCheck(block);
+      syncArrayIndexInputChecks(block);
+    }
+  }
+}
+
+/** Restreint les entrées D* aux entiers (index 0-based). */
+function syncArrayIndexInputChecks(block: Blockly.Block): void {
+  const dim = parseInt(block.getFieldValue("dim") || "1", 10);
+  const checks = getArrayIndexBlocklyChecks();
+  for (let i = 0; i < dim; i++) {
+    const inp = block.getInput("D" + i);
+    if (inp?.connection) {
+      inp.connection.setCheck(checks);
+    }
+  }
+}
+
+/** Restreint l'entrée « value » au type élément du tableau sélectionné. */
+function syncArrayListAssignValueInputCheck(block: Blockly.Block): void {
+  const elementType = inferArrayGetIndexElementType(block);
+  const checks =
+    elementType && elementType !== "__NO_TYPE__"
+      ? getDeclareElementBlocklyChecks(elementType)
+      : null;
+  const valueInput = block.getInput("value");
+  if (valueInput?.connection) {
+    valueInput.connection.setCheck(checks);
+  }
+}
+
+function arrayListAssignAndIndexSyncOnChange(
+  this: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  if (event.isUiEvent) {
+    return;
+  }
+  const workspace = this.workspace as Blockly.WorkspaceSvg | null;
+  if (workspace?.isDragging?.()) {
+    return;
+  }
+  if (
+    event.type !== Blockly.Events.BLOCK_CHANGE &&
+    event.type !== Blockly.Events.BLOCK_MOVE &&
+    event.type !== Blockly.Events.BLOCK_CREATE &&
+    event.type !== Blockly.Events.BLOCK_DELETE
+  ) {
+    return;
+  }
+  syncArrayIndexInputChecks(this);
+  if (this.type === "Array_fix" || this.type === "Array_modify") {
+    syncArrayListAssignValueInputCheck(this);
+  }
+}
+
+/** Restreint l'entrée « value » au type élément du tableau sélectionné. */
+function arrayModifyValueCheckSyncOnChange(
+  this: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  arrayListAssignAndIndexSyncOnChange.call(this, event);
+}
+
+function handleArrayModifyOnChange(
+  block: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  handleArrayListVariableSync(block, event);
+  arrayModifyValueCheckSyncOnChange.call(block, event);
+}
+
+function handleArrayGetIndexOnChange(
+  block: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  handleArrayListVariableSync(block, event);
+  arrayGetIndexOutputSyncOnChange.call(block, event);
+  if (block.type === "Array_getIndex_in_array") {
+    arrayListAssignAndIndexSyncOnChange.call(block, event);
+  }
+}
+
+function handleArrayFixOnChange(
+  block: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  handleArrayListVariableSync(block, event);
+  arrayListAssignAndIndexSyncOnChange.call(block, event);
+}
+
 /**
- * Infers the list block's element type: from parent (define list/array) when connected, otherwise from first ADD input.
- * Uses strict checks when type comes from parent so e.g. int does not accept float.
+ * Met à jour les checks des entrées ADD d'un bloc liste (littéral ou define).
  */
-function arrayWithTypeFromInputsOnChange(this: Blockly.Block, event: Blockly.Events.Abstract): void {
+function syncArrayListAddInputChecks(
+  block: Blockly.Block,
+  checks: string[] | null,
+): void {
+  for (let j = 0; ; j++) {
+    const inp = block.getInput("ADD" + j);
+    if (!inp?.connection) break;
+    inp.connection.setCheck(checks);
+  }
+}
+
+/**
+ * Bloc valeur `Array_list_literal` : type depuis le parent (declare/create) ou inféré.
+ */
+function arrayListLiteralTypeFromInputsOnChange(
+  this: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
   if (event.isUiEvent) return;
   const workspace = this.workspace as Blockly.WorkspaceSvg | null;
   if (workspace?.isDragging?.()) return;
@@ -56,8 +292,8 @@ function arrayWithTypeFromInputsOnChange(this: Blockly.Block, event: Blockly.Eve
   ) {
     return;
   }
-  let firstType: string | null = null;
-  let strict = false;
+  let elementInternalType: string | null = null;
+  let typeFromParent = false;
   const parent = this.outputConnection?.targetBlock?.() ?? null;
   const parentChoice = parent?.getFieldValue?.("choix");
   if (
@@ -67,71 +303,86 @@ function arrayWithTypeFromInputsOnChange(this: Blockly.Block, event: Blockly.Eve
   ) {
     const declaredType = parent.getFieldValue?.("type");
     if (declaredType && declaredType !== "__NO_TYPE__") {
-      firstType = declaredType;
-      strict = true;
+      elementInternalType = getInternalTypeForArduinoType(declaredType);
+      typeFromParent = true;
     }
   }
-  if (firstType === null) {
-    let i = 0;
-    for (;;) {
-      const input = this.getInput("ADD" + i);
-      if (!input) break;
-      const target = input.connection?.targetBlock();
-      const t = inferConnectedValueType(target ?? null);
-      if (t && t !== "__NO_TYPE__") {
-        firstType = t;
-        break;
-      }
-      i++;
+  if (!typeFromParent) {
+    const inferred = inferArrayElementTypeFromBlock(this);
+    if (inferred && inferred !== "__NO_TYPE__") {
+      elementInternalType = inferred;
     }
   }
-  const checks = firstType ? getBlocklyCompatibleChecks(firstType, strict) : null;
+  const checks = elementInternalType
+    ? getDeclareElementBlocklyChecks(elementInternalType)
+    : null;
   const blocklyOutputType =
-    firstType === "bool"
+    elementInternalType === "bool"
       ? "Boolean"
-      : firstType === "int" || firstType === "float"
+      : elementInternalType === "int" || elementInternalType === "float"
         ? "Number"
-        : firstType === "string"
+        : elementInternalType === "string"
           ? "String"
-          : firstType || null;
-  for (let j = 0; ; j++) {
-    const inp = this.getInput("ADD" + j);
-    if (!inp?.connection) break;
-    inp.connection.setCheck(checks);
+          : elementInternalType || null;
+  syncArrayListAddInputChecks(this, checks);
+  if (this.outputConnection) {
+    if (checks) {
+      this.outputConnection.setCheck(checks);
+    } else {
+      this.outputConnection.setCheck(null);
+    }
+  } else {
+    this.setOutput(true, blocklyOutputType);
   }
-  this.setOutput(true, blocklyOutputType);
 }
 
 /**
- * Registers S4e-style array blocks (Array_create_with, Array_declare, Array_create,
- * Array_getIndex_in_list, Array_getIndex_in_array, Array_modify, Array_fix).
+ * Bloc instruction `Array_with` : infère le type des entrées ADD, sans sortie ni chaînage.
  */
-export const defineArrayBlocks = (): void => {
-  if (arrayBlocksRegistered) {
+function arrayWithDeclareTypeFromInputsOnChange(
+  this: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  if (event.isUiEvent) return;
+  const workspace = this.workspace as Blockly.WorkspaceSvg | null;
+  if (workspace?.isDragging?.()) return;
+  if (
+    event.type !== Blockly.Events.BLOCK_CHANGE &&
+    event.type !== Blockly.Events.BLOCK_MOVE &&
+    event.type !== Blockly.Events.BLOCK_CREATE &&
+    event.type !== Blockly.Events.BLOCK_DELETE
+  ) {
     return;
   }
-  arrayBlocksRegistered = true;
-  const typeOptions = getVariableTypeDropdownOptions();
+  if (
+    event.type === Blockly.Events.BLOCK_CREATE &&
+    (event as Blockly.Events.BlockCreate).blockId === this.id
+  ) {
+    if (this.outputConnection) {
+      this.setOutput(false);
+    }
+    if (this.previousConnection) {
+      this.setPreviousStatement(false);
+    }
+    if (this.nextConnection) {
+      this.setNextStatement(false);
+    }
+  }
+  const inferred = inferArrayElementTypeFromBlock(this);
+  const checks =
+    inferred && inferred !== "__NO_TYPE__"
+      ? getDeclareElementBlocklyChecks(inferred)
+      : null;
+  syncArrayListAddInputChecks(this, checks);
+  handleArrayListVariableSync(this, event);
+  const varId = this.getFieldValue("VAR");
+  if (varId && this.workspace) {
+    revalidateGetIndexBlocksForVariable(this.workspace, varId, event);
+  }
+}
 
-  Blockly.defineBlocksWithJsonArray([
-    {
-      type: "Array_with",
-      message0: "%1",
-      args0: [
-        {
-          type: "input_dummy",
-          name: "EMPTY",
-        },
-      ],
-      output: "Array",
-      style: "list_blocks",
-      tooltip: "%{BKY_ARRAY_WITH_TOOLTIP}",
-      helpUrl: "%{BKY_ARRAY_WITH_HELPURL}",
-      mutator: "array_with_plus_minus_mutator",
-    },
-  ]);
-
-  const arrayWithMutator = {
+function createArrayListMutator(listLabel: () => string) {
+  return {
     itemCount_: 0,
     topInput_: null as Blockly.Input | null,
     mutationToDom: function (this: Blockly.Block & { itemCount_: number }): Element {
@@ -176,10 +427,11 @@ export const defineArrayBlocks = (): void => {
           this.removeInput("EMPTY");
         }
         this.topInput_ = this.appendValueInput("ADD" + this.itemCount_)
+          .setAlign(Blockly.inputs.Align.RIGHT)
           .appendField(createPlusField(), "PLUS")
-          .appendField(getBlocklyMsgOr("ARRAY_UNE_LISTE", "une liste constituée de"));
+          .appendField(listLabel());
       } else {
-        this.appendValueInput("ADD" + this.itemCount_);
+        this.appendValueInput("ADD" + this.itemCount_).setAlign(Blockly.inputs.Align.RIGHT);
       }
       this.itemCount_++;
     },
@@ -189,7 +441,7 @@ export const defineArrayBlocks = (): void => {
       if (this.itemCount_ === 0) {
         this.topInput_ = this.appendDummyInput("EMPTY")
           .appendField(createPlusField(), "PLUS")
-          .appendField(getBlocklyMsgOr("ARRAY_UNE_LISTE", "une liste constituée de"));
+          .appendField(listLabel());
       }
     },
     updateMinus_: function (this: ArrayWithMutatorBlock) {
@@ -201,55 +453,148 @@ export const defineArrayBlocks = (): void => {
       }
     },
   };
+}
 
-  const arrayWithHelper = function (this: ArrayWithMutatorBlock) {
+function registerArrayListMutator(
+  mutatorName: string,
+  listLabel: () => string,
+): void {
+  const mutator = createArrayListMutator(listLabel);
+  const helper = function (this: ArrayWithMutatorBlock) {
     this.getInput("EMPTY")?.insertFieldAt(0, createPlusField(), "PLUS");
     this.updateShape_(2);
   };
+  Blockly.Extensions.registerMutator(mutatorName, mutator, helper);
+}
 
-  Blockly.Extensions.registerMutator(
-    "array_with_plus_minus_mutator",
-    arrayWithMutator,
-    arrayWithHelper,
-  );
+/**
+ * Registers S4e-style array blocks (Array_create_with, Array_declare, Array_create,
+ * Array_getIndex_in_list, Array_getIndex_in_array, Array_modify, Array_fix).
+ */
+export const defineArrayBlocks = (): void => {
+  if (arrayBlocksRegistered) {
+    return;
+  }
+  arrayBlocksRegistered = true;
+  const getTypeOptions = (): Blockly.MenuOption[] =>
+    getVariableTypeDropdownOptions();
 
-  (Blockly.Blocks["Array_with"] as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange =
-    arrayWithTypeFromInputsOnChange;
+  registerArrayListMutator("array_with_plus_minus_mutator", ARRAY_WITH_CONTAINING_LABEL);
+  registerArrayListMutator("array_list_literal_mutator", ARRAY_LIST_LITERAL_LABEL);
 
-  type ArrayWithMutatorBlock = Blockly.Block & {
-    itemCount_: number;
-    topInput_: Blockly.Input | null;
-    updateShape_: (targetCount: number) => void;
-    addPart_: () => void;
-    removePart_: () => void;
-    updateMinus_: () => void;
-    plus: () => void;
-    minus: () => void;
+  Blockly.Blocks["Array_with"] = {
+    init: function (this: ArrayWithMutatorBlock) {
+      this.appendDummyInput("HEADER")
+        .appendField(getBlocklyMsgOr("ARRAY_CREATE", "define"))
+        .appendField(
+          new Blockly.FieldVariable(
+            ARRAY_DEFAULT_VAR_NAME,
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        )
+        .appendField(getBlocklyMsgOr("ARRAY_WITH_AS_LIST", "as a list"));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
+      bindArrayWithDefaultVariable(this);
+      this.setInputsInline(false);
+      this.setOutput(false);
+      this.setPreviousStatement(false);
+      this.setNextStatement(false);
+      this.setStyle("list_blocks");
+      this.setTooltip(getBlocklyMsgOr("ARRAY_WITH_TOOLTIP", ""));
+      this.setHelpUrl(getBlocklyMsgOr("ARRAY_WITH_HELPURL", ""));
+      this.appendDummyInput("EMPTY");
+      Blockly.Extensions.apply("array_with_plus_minus_mutator", this, true);
+    },
   };
 
-  // Legacy alias for saved workspaces that still use Array_list_3.
-  Blockly.Blocks["Array_list_3"] = Blockly.Blocks["Array_with"];
+  Blockly.defineBlocksWithJsonArray([
+    {
+      type: "Array_list_literal",
+      message0: "%1",
+      args0: [
+        {
+          type: "input_dummy",
+          name: "EMPTY",
+        },
+      ],
+      output: "Array",
+      style: "list_blocks",
+      tooltip: "%{BKY_ARRAY_WITH_TOOLTIP}",
+      helpUrl: "%{BKY_ARRAY_WITH_HELPURL}",
+      mutator: "array_list_literal_mutator",
+    },
+  ]);
 
-  // Array_getIndex_in_list - element at index of list value (variable or array expression)
-  // Accept any typed list (String, Number, etc.), not only "Array".
+  (Blockly.Blocks["Array_with"] as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange =
+    arrayWithDeclareTypeFromInputsOnChange;
+  (Blockly.Blocks["Array_list_literal"] as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange =
+    arrayListLiteralTypeFromInputsOnChange;
+
+  Blockly.Blocks["Array_list_3"] = Blockly.Blocks["Array_list_literal"];
+
+  // Array_getIndex_in_list - element at index of a list variable (1D)
   Blockly.Blocks["Array_getIndex_in_list"] = {
     init: function (this: Blockly.Block) {
-      this.appendValueInput("AT").setCheck("Number").appendField(getBlocklyMsgOr("ARRAY_GETINDEX_AT", "element at"));
-      this.appendValueInput("VAR").setCheck(null).appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "in list"));
+      this.appendValueInput("AT")
+        .setCheck("Number")
+        .appendField(getBlocklyMsgOr("ARRAY_GETINDEX_AT", "element at"));
+      this.appendDummyInput()
+        .appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "in list"))
+        .appendField(
+          new Blockly.FieldVariable(
+            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        );
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
       this.setInputsInline(true);
       this.setOutput(true);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP", "Get element at index"));
       this.setHelpUrl(getBlocklyMsgOr("ARRAY_GETINDEX_HELPURL", ""));
     },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      handleArrayGetIndexOnChange(this, event);
+    },
   };
 
   // Array_modify - assign value to list[index]
   Blockly.Blocks["Array_modify"] = {
     init: function (this: Blockly.Block) {
-      this.appendValueInput("indice").setCheck("Number").appendField(getBlocklyMsgOr("ARRAY_MODIFY_INDICE", "element at index"));
-      this.appendValueInput("name").setCheck(null).setAlign(Blockly.inputs.Align.RIGHT).appendField(getBlocklyMsgOr("ARRAY_MODIFY_NAME", "in array"));
-      this.appendValueInput("value").setCheck(null).setAlign(Blockly.inputs.Align.RIGHT).appendField(getBlocklyMsgOr("ARRAY_MODIFY_VALUE", "value"));
+      this.appendValueInput("indice")
+        .setCheck("Number")
+        .appendField(getBlocklyMsgOr("ARRAY_MODIFY_INDICE", "element at index"));
+      this.appendDummyInput()
+        .appendField(getBlocklyMsgOr("ARRAY_MODIFY_NAME", "in array"))
+        .appendField(
+          new Blockly.FieldVariable(
+            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        );
+      this.appendValueInput("value")
+        .setCheck(null)
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsgOr("ARRAY_MODIFY_VALUE", "value"));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
       this.setInputsInline(false);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -257,34 +602,103 @@ export const defineArrayBlocks = (): void => {
       this.setTooltip(getBlocklyMsgOr("ARRAY_MODIFY_TOOLTIP", "Assign value to array element"));
       this.setHelpUrl(getBlocklyMsgOr("ARRAY_MODIFY_HELPURL", ""));
     },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      handleArrayModifyOnChange(this, event);
+    },
   };
 
-  /** Notify connected list block (Array_with) to refresh its type from this define block. */
+  /** Notify connected list blocks to refresh type from parent define/create block. */
+  function getArrayCreateDimensionInputNames(block: Blockly.Block): string[] {
+    const dim = parseInt(block.getFieldValue("dim") || "1", 10);
+    const names: string[] = [];
+    for (let i = 0; i < dim; i++) {
+      if (block.getInput("D" + i)) {
+        names.push("D" + i);
+      }
+    }
+    return names;
+  }
+
   function notifyListBlockTypeFromParent(block: Blockly.Block): void {
-    const inputName = block.type === "Array_declare" ? "contenu" : "D0";
-    const listBlock = block.getInputTargetBlock(inputName);
-    if (listBlock?.type === "Array_with" || listBlock?.type === "Array_list_3") {
-      (listBlock as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange?.(
-        { type: Blockly.Events.BLOCK_CHANGE, isUiEvent: false } as Blockly.Events.Abstract,
-      );
+    const inputNames =
+      block.type === "Array_declare"
+        ? ["contenu", "contenu2"]
+        : getArrayCreateDimensionInputNames(block);
+    for (const inputName of inputNames) {
+      const listBlock = block.getInputTargetBlock(inputName);
+      if (
+        listBlock?.type === "Array_list_literal" ||
+        listBlock?.type === "Array_list_3"
+      ) {
+        (listBlock as Blockly.Block & { onchange?: (e: Blockly.Events.Abstract) => void }).onchange?.(
+          { type: Blockly.Events.BLOCK_CHANGE, isUiEvent: false } as Blockly.Events.Abstract,
+        );
+      }
     }
   }
 
   // Array_declare - int arr[size]; or int arr[] = {...};
+  type ArrayDeclareBlock = Blockly.Block & {
+    updateDeclareShape_?: (dim: string) => void;
+  };
+
+  function syncArrayDeclareContenuCheck(block: Blockly.Block): void {
+    const choix = block.getFieldValue("choix");
+    const typeField = block.getFieldValue("type") || "int";
+    const checks = getDeclareContenuBlocklyChecks(choix, typeField);
+    for (const inputName of ["contenu", "contenu2"]) {
+      const contenuInput = block.getInput(inputName);
+      if (contenuInput?.connection) {
+        contenuInput.connection.setCheck(checks);
+      }
+    }
+  }
+
+  function syncArrayCreateInputsCheck(block: Blockly.Block): void {
+    const choix = block.getFieldValue("choix");
+    const typeField = block.getFieldValue("type") || "int";
+    const checks = getDeclareContenuBlocklyChecks(choix, typeField);
+    for (const inputName of getArrayCreateDimensionInputNames(block)) {
+      const dimInput = block.getInput(inputName);
+      if (dimInput?.connection) {
+        dimInput.connection.setCheck(checks);
+      }
+    }
+  }
+
   Blockly.Blocks["Array_declare"] = {
-    init: function (this: Blockly.Block) {
+    init: function (this: ArrayDeclareBlock) {
       this.appendDummyInput()
         .appendField(getBlocklyMsgOr("ARRAY_CREATE", "define"))
         .appendField(
-          new Blockly.FieldDropdown([
-            [getBlocklyMsgOr("ARRAY_LIST", "list"), "d1"],
-            [getBlocklyMsgOr("ARRAY_ARRAY", "array"), "d2"],
-          ]),
-          "dim",
+          new Blockly.FieldVariable(
+            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
         )
-        .appendField(new Blockly.FieldVariable(getBlocklyMsgOr("VARIABLES_GET_ITEM", "item")), "VAR")
         .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"))
-        .appendField(new Blockly.FieldDropdown(typeOptions), "type");
+        .appendField(new Blockly.FieldDropdown(getTypeOptions), "type")
+        .appendField(
+          new Blockly.FieldDropdown(
+            [
+              [getBlocklyMsgOr("ARRAY_LIST", "list"), "d1"],
+              [getBlocklyMsgOr("ARRAY_ARRAY", "array"), "d2"],
+            ],
+            function (this: Blockly.FieldDropdown, option: string) {
+              const block = this.getSourceBlock() as ArrayDeclareBlock;
+              block.updateDeclareShape_?.(option);
+              return option;
+            },
+          ),
+          "dim",
+        );
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
       this.appendValueInput("contenu")
         .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(
@@ -293,43 +707,88 @@ export const defineArrayBlocks = (): void => {
             [getBlocklyMsgOr("ARRAY_CONTIENT", "contains"), "c2"],
           ]),
           "choix",
-        )
-        .setCheck(getBlocklyCompatibleChecks("int", true));
+        );
+      this.updateDeclareShape_?.(this.getFieldValue("dim") || "d1");
       this.setInputsInline(false);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP2", "Declare array"));
       this.setHelpUrl(getBlocklyMsgOr("HELPURL", ""));
     },
-    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+    updateDeclareShape_: function (this: ArrayDeclareBlock, dim: string) {
+      if (dim === "d2") {
+        if (!this.getInput("contenu2")) {
+          this.appendValueInput("contenu2").setAlign(Blockly.inputs.Align.RIGHT);
+        }
+      } else if (this.getInput("contenu2")) {
+        this.removeInput("contenu2");
+      }
+      syncArrayDeclareContenuCheck(this);
+    },
+    mutationToDom: function (this: Blockly.Block) {
+      const container = Blockly.utils.xml.createElement("mutation");
+      container.setAttribute("dim", this.getFieldValue("dim"));
+      return container;
+    },
+    domToMutation: function (this: ArrayDeclareBlock, xmlElement: Element) {
+      this.updateDeclareShape_?.(xmlElement.getAttribute("dim") ?? "d1");
+    },
+    onchange: function (this: ArrayDeclareBlock, event: Blockly.Events.Abstract) {
+      if (event.isUiEvent) {
+        return;
+      }
+      const workspace = this.workspace as Blockly.WorkspaceSvg | null;
+      if (workspace?.isDragging?.()) {
+        return;
+      }
       if (
         event.type === Blockly.Events.BLOCK_CHANGE &&
-        (event as Blockly.Events.BlockChange).element === "field" &&
-        ((event as Blockly.Events.BlockChange).name === "type" ||
-          (event as Blockly.Events.BlockChange).name === "choix")
+        (event as Blockly.Events.BlockChange).element === "field"
       ) {
-        const contenuInput = this.getInput("contenu");
-        if (contenuInput?.connection) {
-          if (this.getFieldValue("choix") === "c1") {
-            contenuInput.connection.setCheck(getBlocklyCompatibleChecks("int", true));
-          } else {
-            contenuInput.connection.setCheck(null);
+        const fieldName = (event as Blockly.Events.BlockChange).name;
+        if (fieldName === "dim") {
+          this.updateDeclareShape_?.(this.getFieldValue("dim"));
+        }
+        if (fieldName === "type" || fieldName === "choix" || fieldName === "dim") {
+          syncArrayDeclareContenuCheck(this);
+          if (fieldName === "type" || fieldName === "choix") {
+            notifyListBlockTypeFromParent(this);
+          }
+          if (fieldName === "type") {
+            const varId = this.getFieldValue("VAR");
+            if (varId) {
+              revalidateGetIndexBlocksForVariable(this.workspace, varId, event);
+            }
           }
         }
-        notifyListBlockTypeFromParent(this);
       }
+      handleArrayListVariableSync(this, event);
     },
   };
 
   // Array_create - create typed array 1D-5D (variable with FieldVariable)
+  type ArrayCreateBlock = Blockly.Block & {
+    updateShape_?: (opt: string) => void;
+  };
+
   Blockly.Blocks["Array_create"] = {
-    init: function (this: Blockly.Block) {
+    init: function (this: ArrayCreateBlock) {
       this.appendDummyInput()
         .appendField(getBlocklyMsgOr("ARRAY_CREATE", "define") + getBlocklyMsgOr("ARRAY_ARRAY", "array"))
-        .appendField(new Blockly.FieldVariable(getBlocklyMsgOr("VARIABLES_GET_ITEM", "item")), "VAR")
+        .appendField(
+          new Blockly.FieldVariable(
+            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        )
         .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"))
-        .appendField(new Blockly.FieldDropdown(typeOptions), "type");
+        .appendField(new Blockly.FieldDropdown(getTypeOptions), "type");
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
       this.appendDummyInput()
         .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(getBlocklyMsgOr("ARRAY_dim", "dimensions"))
@@ -337,8 +796,8 @@ export const defineArrayBlocks = (): void => {
           new Blockly.FieldDropdown(
             [["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"]],
             function (this: Blockly.FieldDropdown, option: string) {
-              const block = this.getSourceBlock() as Blockly.Block & { updateShape_?: (opt: string) => void };
-              block?.updateShape_?.(option);
+              const block = this.getSourceBlock() as ArrayCreateBlock;
+              block.updateShape_?.(option);
               return option;
             },
           ),
@@ -352,36 +811,50 @@ export const defineArrayBlocks = (): void => {
             [getBlocklyMsgOr("ARRAY_contenu", "contains"), "c2"],
           ]),
           "choix",
-        )
-        .setCheck(getBlocklyCompatibleChecks("int", true));
+        );
+      this.updateShape_?.(this.getFieldValue("dim") || "1");
+      syncArrayCreateInputsCheck(this);
       this.setInputsInline(false);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP2", "Create array"));
       this.setHelpUrl(getBlocklyMsgOr("HELPURL", ""));
     },
-    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+    onchange: function (this: ArrayCreateBlock, event: Blockly.Events.Abstract) {
+      if (event.isUiEvent) {
+        return;
+      }
+      const workspace = this.workspace as Blockly.WorkspaceSvg | null;
+      if (workspace?.isDragging?.()) {
+        return;
+      }
       if (
         event.type === Blockly.Events.BLOCK_CHANGE &&
-        (event as Blockly.Events.BlockChange).element === "field" &&
-        ((event as Blockly.Events.BlockChange).name === "type" ||
-          (event as Blockly.Events.BlockChange).name === "choix")
+        (event as Blockly.Events.BlockChange).element === "field"
       ) {
-        const d0Input = this.getInput("D0");
-        if (d0Input?.connection) {
-          if (this.getFieldValue("choix") === "c1") {
-            d0Input.connection.setCheck(getBlocklyCompatibleChecks("int", true));
-          } else {
-            d0Input.connection.setCheck(null);
+        const fieldName = (event as Blockly.Events.BlockChange).name;
+        if (fieldName === "dim") {
+          this.updateShape_?.(this.getFieldValue("dim"));
+        }
+        if (fieldName === "type" || fieldName === "choix" || fieldName === "dim") {
+          syncArrayCreateInputsCheck(this);
+          if (fieldName === "type" || fieldName === "choix") {
+            notifyListBlockTypeFromParent(this);
+          }
+          if (fieldName === "type") {
+            const varId = this.getFieldValue("VAR");
+            if (varId) {
+              revalidateGetIndexBlocksForVariable(this.workspace, varId, event);
+            }
           }
         }
-        notifyListBlockTypeFromParent(this);
       }
+      handleArrayListVariableSync(this, event);
     },
-    updateShape_: function (this: Blockly.Block, option: string) {
+    updateShape_: function (this: ArrayCreateBlock, option: string) {
       for (let i = 1; i < 7; i++) {
-        if (this.getInput("D" + i)) this.removeInput("D" + i);
+        if (this.getInput("D" + i)) {
+          this.removeInput("D" + i);
+        }
       }
       switch (option) {
         case "2": this.appendValueInput("D1"); break;
@@ -389,13 +862,14 @@ export const defineArrayBlocks = (): void => {
         case "4": this.appendValueInput("D1"); this.appendValueInput("D2"); this.appendValueInput("D3"); break;
         case "5": this.appendValueInput("D1"); this.appendValueInput("D2"); this.appendValueInput("D3"); this.appendValueInput("D4"); break;
       }
+      syncArrayCreateInputsCheck(this);
     },
     mutationToDom: function (this: Blockly.Block) {
       const container = document.createElement("mutation");
       container.setAttribute("dim", this.getFieldValue("dim"));
       return container;
     },
-    domToMutation: function (this: Blockly.Block & { updateShape_?: (opt: string) => void }, xmlElement: Element) {
+    domToMutation: function (this: ArrayCreateBlock, xmlElement: Element) {
       this.updateShape_?.(xmlElement.getAttribute("dim") ?? "1");
     },
   };
@@ -405,7 +879,15 @@ export const defineArrayBlocks = (): void => {
     init: function (this: Blockly.Block) {
       this.appendDummyInput()
         .appendField(getBlocklyMsgOr("ARRAY_FIX", "set element"))
-        .appendField(new Blockly.FieldVariable(getBlocklyMsgOr("VARIABLES_GET_ITEM", "item")), "VAR")
+        .appendField(
+          new Blockly.FieldVariable(
+            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        )
         .appendField(getBlocklyMsgOr("ARRAY_dim", "dimensions"))
         .appendField(
           new Blockly.FieldDropdown(
@@ -418,14 +900,27 @@ export const defineArrayBlocks = (): void => {
           ),
           "dim",
         );
-      this.appendValueInput("value").setAlign(Blockly.inputs.Align.RIGHT).appendField(getBlocklyMsgOr("_AT", "to"));
-      this.appendValueInput("D0").setCheck("Number").setAlign(Blockly.inputs.Align.RIGHT).appendField(getBlocklyMsgOr("ARRAY_index", "index"));
+      this.appendValueInput("value")
+        .setCheck(null)
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsgOr("_AT", "to"));
+      this.appendValueInput("D0")
+        .setCheck(getArrayIndexBlocklyChecks())
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsgOr("ARRAY_index", "index"));
       this.setInputsInline(false);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP3", "Set array element"));
       this.setHelpUrl(getBlocklyMsgOr("HELPURL", ""));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      handleArrayFixOnChange(this, event);
     },
     updateShape_: function (this: Blockly.Block, option: string) {
       for (let i = 1; i < 7; i++) {
@@ -437,6 +932,8 @@ export const defineArrayBlocks = (): void => {
         case "4": this.appendValueInput("D1"); this.appendValueInput("D2"); this.appendValueInput("D3"); break;
         case "5": this.appendValueInput("D1"); this.appendValueInput("D2"); this.appendValueInput("D3"); this.appendValueInput("D4"); break;
       }
+      syncArrayIndexInputChecks(this);
+      syncArrayListAssignValueInputCheck(this);
     },
     mutationToDom: function (this: Blockly.Block) {
       const container = document.createElement("mutation");
@@ -453,7 +950,15 @@ export const defineArrayBlocks = (): void => {
     init: function (this: Blockly.Block) {
       this.appendDummyInput()
         .appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "element of"))
-        .appendField(new Blockly.FieldVariable(getBlocklyMsgOr("VARIABLES_GET_ITEM", "item")), "VAR")
+        .appendField(
+          new Blockly.FieldVariable(
+            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        )
         .appendField(getBlocklyMsgOr("ARRAY_dim", "dimensions"))
         .appendField(
           new Blockly.FieldDropdown(
@@ -466,12 +971,22 @@ export const defineArrayBlocks = (): void => {
           ),
           "dim",
         );
-      this.appendValueInput("D0").setCheck("Number").setAlign(Blockly.inputs.Align.RIGHT).appendField(getBlocklyMsgOr("ARRAY_index", "index"));
+      this.appendValueInput("D0")
+        .setCheck(getArrayIndexBlocklyChecks())
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(getBlocklyMsgOr("ARRAY_index", "index"));
       this.setOutput(true);
       this.setInputsInline(false);
       this.setStyle("list_blocks");
       this.setTooltip(getBlocklyMsgOr("ARRAY_GETINDEX_TOOLTIP1", "Get array element"));
       this.setHelpUrl(getBlocklyMsgOr("HELPURL", ""));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      handleArrayGetIndexOnChange(this, event);
     },
     updateShape_: function (this: Blockly.Block, option: string) {
       for (let i = 1; i < 7; i++) {
@@ -483,6 +998,7 @@ export const defineArrayBlocks = (): void => {
         case "4": this.appendValueInput("D1"); this.appendValueInput("D2"); this.appendValueInput("D3"); break;
         case "5": this.appendValueInput("D1"); this.appendValueInput("D2"); this.appendValueInput("D3"); this.appendValueInput("D4"); break;
       }
+      syncArrayIndexInputChecks(this);
     },
     mutationToDom: function (this: Blockly.Block) {
       const container = document.createElement("mutation");

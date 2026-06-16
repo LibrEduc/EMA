@@ -35,12 +35,13 @@
  * Array_with has no fixed type: it is typed by its first connected input (__DYNAMIC__arrayFromInputs).
  */
 export const ARRAY_BLOCK_TYPES = {
-  Array_with: "__DYNAMIC__arrayFromInputs",
+  Array_with: "null",
+  Array_list_literal: "__DYNAMIC__arrayFromInputs",
   Array_list_3: "__DYNAMIC__arrayFromInputs", // legacy alias
-  Array_getIndex_in_list: "null", // dynamic: element type
+  Array_getIndex_in_list: "__DYNAMIC__arrayGetIndexElement",
   Array_modify: "null",
   Array_declare: "null",
   Array_create: "null",
   Array_fix: "null",
-  Array_getIndex_in_array: "null", // dynamic: element type
+  Array_getIndex_in_array: "__DYNAMIC__arrayGetIndexElement",
 } as const;

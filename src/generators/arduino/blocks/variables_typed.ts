@@ -19,6 +19,24 @@
 import * as Blockly from "blockly";
 import { ArduinoGenerator, Order } from "../arduino_generator";
 import { getCppTypeName } from "../block_types";
+import { getArduinoType } from "../arduino_types";
+import { inferArrayElementTypeFromBlock } from "../block_types_registry";
+import {
+  emitLocalDeclaration,
+  isArrayValueBlock,
+  localDeclarationTag,
+  resolveLocalVariableScope,
+  unwrapValueBlock,
+} from "../variable_scope";
+
+const getArrayElementCppType = (arrayBlock: Blockly.Block): string => {
+  let elementType = inferArrayElementTypeFromBlock(arrayBlock);
+  if (!elementType || elementType === "__NO_TYPE__") {
+    elementType = "int";
+  }
+  const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
+  return getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
+};
 
 /**
  * Generator for variables_set_dynamic block.
@@ -38,41 +56,47 @@ export const variables_set_dynamic = function (
   generator: ArduinoGenerator,
 ): string | [string, number] {
   const valueBlock = block.getInputTargetBlock("VALUE");
-  if (
-    valueBlock?.type === "Array_with" ||
-    valueBlock?.type === "Array_list_3"
-  ) {
+  const innerValueBlock = unwrapValueBlock(valueBlock);
+
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+
+  if (!varName || varName === "variable") {
+    console.warn("variables_set_dynamic: Invalid variable name");
+    return "// Error: Invalid variable name\n";
+  }
+
+  if (isArrayValueBlock(innerValueBlock)) {
+    const scope = resolveLocalVariableScope(block);
+    const tag = localDeclarationTag(scope, varName);
+    const listCode =
+      generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "{}";
+    const cppType = getArrayElementCppType(innerValueBlock!);
+    emitLocalDeclaration(
+      generator,
+      scope,
+      tag,
+      `${cppType} ${varName}[] = ${listCode};`,
+    );
     return "";
   }
-  const varName = generator.getVariableName(block.getFieldValue('VAR'));
-  const value = generator.valueToCode(block, 'VALUE', Order.ASSIGNMENT) || '0';
-  const localWrapper = valueBlock;
-  const isLocal = localWrapper?.type === "variables_local";
 
-  if (!varName || varName === 'variable') {
-    console.warn('variables_set_dynamic: Invalid variable name');
-    return '// Error: Invalid variable name\n';
-  }
-
-  if (isLocal) {
+  if (valueBlock?.type === "variables_local") {
+    const scope = resolveLocalVariableScope(block);
+    const tag = localDeclarationTag(scope, varName);
     const typeName = getDeclarationType(block, "int");
-    const declaration = `${typeName} ${varName};`;
-    const root = block.getRootBlock();
-    const scopeId =
-      root &&
-        (root.type === "procedures_defnoreturn" ||
-          root.type === "procedures_defreturn")
-        ? root.id
-        : "loop";
-    const tag = `local_${scopeId}_${varName}`;
-    if (scopeId === "loop") {
-      generator.addLoop(tag, declaration);
-    } else {
-      generator.addLocalVariable(scopeId, tag, declaration);
-    }
+    const value =
+      generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
+    emitLocalDeclaration(
+      generator,
+      scope,
+      tag,
+      `${typeName} ${varName} = ${value};`,
+    );
+    return "";
   }
 
-  return varName + ' = ' + value + ';\n';
+  const value = generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
+  return varName + " = " + value + ";\n";
 };
 
 /**
@@ -186,16 +210,17 @@ const normalizeValueType = (type: string | null | undefined): string | null => {
 };
 
 const inferValueBlockType = (valueBlock: Blockly.Block | null): string | null => {
-  if (!valueBlock) {
+  const inner = unwrapValueBlock(valueBlock);
+  if (!inner) {
     return null;
   }
-  const typed = valueBlock as Blockly.Block & { getBlockType?: () => string | null };
+  const typed = inner as Blockly.Block & { getBlockType?: () => string | null };
   const rawType = typed.getBlockType ? typed.getBlockType() : null;
   const normalized = normalizeValueType(rawType);
   if (normalized) {
     return normalized;
   }
-  const check = valueBlock.outputConnection?.getCheck();
+  const check = inner.outputConnection?.getCheck();
   const checkType = Array.isArray(check) ? check[0] : check;
   return normalizeValueType(checkType);
 };

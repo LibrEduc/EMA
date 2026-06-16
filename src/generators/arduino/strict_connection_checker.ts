@@ -34,7 +34,12 @@
  */
 
 import * as Blockly from 'blockly/core';
-import { checkTypeCompatibility as sharedCheckTypeCompatibility } from "./block_types_registry";
+import {
+  checkTypeCompatibility as sharedCheckTypeCompatibility,
+  inferArrayElementTypeFromBlock,
+  inferListVariableElementType,
+} from "./block_types_registry";
+import { isDeclareContainsTypeCompatible } from "./block_types";
 import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
 import { debugLog } from "./debug";
 
@@ -60,6 +65,34 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return Blockly.Connection.CAN_CONNECT;
     }
     if (a && b) {
+      const listAdd = this.checkArrayListLiteralAddInputConnection_(a, b);
+      if (listAdd === true) {
+        return this.finishArrayDeclareConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (listAdd === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
+      const arrayDefine = this.checkArrayDefineInputConnection_(a, b);
+      if (arrayDefine === true) {
+        return this.finishArrayDeclareConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (arrayDefine === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
+      const arrayAssign = this.checkArrayListAssignValueInputConnection_(a, b);
+      if (arrayAssign === true) {
+        return this.finishArrayDeclareConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (arrayAssign === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
+      const arrayIndex = this.checkArrayIndexInputConnection_(a, b);
+      if (arrayIndex === true) {
+        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (arrayIndex === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
       const switchCase = this.checkSwitchCaseIntConnection_(a, b);
       if (switchCase === true) {
         return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
@@ -84,6 +117,34 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return true;
     }
     if (a && b) {
+      const listAdd = this.checkArrayListLiteralAddInputConnection_(a, b);
+      if (listAdd === true) {
+        return this.finishArrayDeclareConnect_(a, b, isDragging, opt_distance);
+      }
+      if (listAdd === false) {
+        return false;
+      }
+      const arrayDefine = this.checkArrayDefineInputConnection_(a, b);
+      if (arrayDefine === true) {
+        return this.finishArrayDeclareConnect_(a, b, isDragging, opt_distance);
+      }
+      if (arrayDefine === false) {
+        return false;
+      }
+      const arrayAssign = this.checkArrayListAssignValueInputConnection_(a, b);
+      if (arrayAssign === true) {
+        return this.finishArrayDeclareConnect_(a, b, isDragging, opt_distance);
+      }
+      if (arrayAssign === false) {
+        return false;
+      }
+      const arrayIndex = this.checkArrayIndexInputConnection_(a, b);
+      if (arrayIndex === true) {
+        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+      }
+      if (arrayIndex === false) {
+        return false;
+      }
       const switchCase = this.checkSwitchCaseIntConnection_(a, b);
       if (switchCase === true) {
         return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
@@ -116,7 +177,11 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       result === Blockly.Connection.REASON_DIFFERENT_WORKSPACES &&
       a &&
       b &&
-      this.checkSwitchCaseIntConnection_(a, b) === true
+      (this.checkSwitchCaseIntConnection_(a, b) === true ||
+        this.checkArrayDefineInputConnection_(a, b) === true ||
+        this.checkArrayListLiteralAddInputConnection_(a, b) === true ||
+        this.checkArrayListAssignValueInputConnection_(a, b) === true ||
+        this.checkArrayIndexInputConnection_(a, b) === true)
     ) {
       return Blockly.Connection.CAN_CONNECT;
     }
@@ -160,6 +225,322 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       }
     }
     return null;
+  }
+
+  private resolveArrayDefineInputContext_(
+    inputConnection: Blockly.Connection,
+  ): { choix: string; typeField: string } | null {
+    const targetBlock = inputConnection.getSourceBlock();
+    if (!targetBlock) {
+      return null;
+    }
+    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    if (!inputName) {
+      return null;
+    }
+
+    if (targetBlock.type === "Array_declare") {
+      if (inputName !== "contenu" && inputName !== "contenu2") {
+        return null;
+      }
+      return {
+        choix: targetBlock.getFieldValue("choix"),
+        typeField: targetBlock.getFieldValue("type") || "int",
+      };
+    }
+
+    if (targetBlock.type === "Array_create") {
+      const match = /^D(\d+)$/.exec(inputName);
+      if (!match) {
+        return null;
+      }
+      const index = parseInt(match[1], 10);
+      const dim = parseInt(targetBlock.getFieldValue("dim") || "1", 10);
+      if (index >= dim) {
+        return null;
+      }
+      return {
+        choix: targetBlock.getFieldValue("choix"),
+        typeField: targetBlock.getFieldValue("type") || "int",
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Entrées « value » de Array_modify / Array_fix : type imposé par le tableau (VAR).
+   */
+  private checkArrayListAssignValueInputConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair) {
+      return null;
+    }
+
+    const targetBlock = pair.inp.getSourceBlock();
+    if (
+      !targetBlock ||
+      (targetBlock.type !== "Array_modify" && targetBlock.type !== "Array_fix")
+    ) {
+      return null;
+    }
+    const inputName = this.getInputNameForConnection_(targetBlock, pair.inp);
+    if (inputName !== "value") {
+      return null;
+    }
+
+    const varId = targetBlock.getFieldValue("VAR");
+    const elementType = inferListVariableElementType(targetBlock.workspace, varId);
+    if (!elementType || elementType === "__NO_TYPE__") {
+      return null;
+    }
+
+    const sourceBlock = pair.out.getSourceBlock();
+    if (!sourceBlock) {
+      return false;
+    }
+
+    if (sourceBlock.type === "math_number") {
+      const numType = resolveMathNumberBlockType(sourceBlock);
+      return this.isDeclareElementTypeCompatible_(numType, elementType);
+    }
+
+    const rawSourceType = this.resolveSourceBlockType_(sourceBlock);
+    if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
+      return false;
+    }
+    const sourceType = this.normalizeDeclareSourceType_(rawSourceType);
+    return this.isDeclareElementTypeCompatible_(sourceType, elementType);
+  }
+
+  /**
+   * Entrées d'index D* de Array_fix / Array_getIndex_in_array : entiers uniquement.
+   */
+  private isArrayIndexInput_(inputConnection: Blockly.Connection): boolean {
+    const targetBlock = inputConnection.getSourceBlock();
+    if (!targetBlock) {
+      return false;
+    }
+    if (
+      targetBlock.type !== "Array_fix" &&
+      targetBlock.type !== "Array_getIndex_in_array"
+    ) {
+      return false;
+    }
+    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    return inputName !== null && /^D\d+$/.test(inputName);
+  }
+
+  private checkArrayIndexInputConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair || !this.isArrayIndexInput_(pair.inp)) {
+      return null;
+    }
+    const semanticType = this.resolveSwitchCaseSourceType_(pair.out.getSourceBlock());
+    return semanticType === "int";
+  }
+
+  /**
+   * Entrées valeur de Array_declare / Array_create : type imposé par le menu déroulant.
+   */
+  private checkArrayDefineInputConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair) {
+      return null;
+    }
+
+    const defineContext = this.resolveArrayDefineInputContext_(pair.inp);
+    if (!defineContext) {
+      return null;
+    }
+
+    const { choix, typeField } = defineContext;
+    const sourceBlock = pair.out.getSourceBlock();
+    if (!sourceBlock) {
+      return false;
+    }
+
+    if (choix === "c1") {
+      if (sourceBlock.type === "math_number") {
+        return resolveMathNumberBlockType(sourceBlock) === "int";
+      }
+      const sourceType = this.resolveSourceBlockType_(sourceBlock);
+      return sourceType === "int";
+    }
+
+    if (
+      sourceBlock.type === "Array_list_literal" ||
+      sourceBlock.type === "Array_list_3"
+    ) {
+      const inferred = inferArrayElementTypeFromBlock(sourceBlock);
+      if (!inferred || inferred === "__NO_TYPE__") {
+        return true;
+      }
+      return this.isDeclareElementTypeCompatible_(inferred, typeField);
+    }
+
+    if (sourceBlock.type === "math_number") {
+      const numType = resolveMathNumberBlockType(sourceBlock);
+      return this.isDeclareElementTypeCompatible_(numType, typeField);
+    }
+
+    const rawSourceType = this.resolveSourceBlockType_(sourceBlock);
+    if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
+      return false;
+    }
+    const sourceType = this.normalizeDeclareSourceType_(rawSourceType);
+    return this.isDeclareElementTypeCompatible_(sourceType, typeField);
+  }
+
+  private isArrayListElementAddInput_(inputConnection: Blockly.Connection): boolean {
+    const targetBlock = inputConnection.getSourceBlock();
+    if (!targetBlock) {
+      return false;
+    }
+    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    if (!inputName?.startsWith("ADD")) {
+      return false;
+    }
+    return (
+      targetBlock.type === "Array_with" ||
+      targetBlock.type === "Array_list_literal" ||
+      targetBlock.type === "Array_list_3"
+    );
+  }
+
+  private resolveArrayListElementTypeKey_(listBlock: Blockly.Block): string | null {
+    if (listBlock.type === "Array_with") {
+      const inferred = inferArrayElementTypeFromBlock(listBlock);
+      return inferred && inferred !== "__NO_TYPE__" ? inferred : null;
+    }
+    return this.getArrayListLiteralParentDeclareType_(listBlock);
+  }
+
+  private getArrayListLiteralParentDeclareType_(
+    listBlock: Blockly.Block,
+  ): string | null {
+    const parent = listBlock.outputConnection?.targetBlock?.() ?? null;
+    if (!parent || parent.getFieldValue("choix") !== "c2") {
+      return null;
+    }
+    if (parent.type !== "Array_declare" && parent.type !== "Array_create") {
+      return null;
+    }
+    const declaredType = parent.getFieldValue("type");
+    if (!declaredType || declaredType === "__NO_TYPE__") {
+      return null;
+    }
+    return declaredType;
+  }
+
+  /**
+   * Entrées ADD de Array_with / littéral de liste (type imposé ou inféré).
+   */
+  private checkArrayListLiteralAddInputConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair || !this.isArrayListElementAddInput_(pair.inp)) {
+      return null;
+    }
+
+    const listBlock = pair.inp.getSourceBlock()!;
+    const typeKey = this.resolveArrayListElementTypeKey_(listBlock);
+    if (!typeKey) {
+      return null;
+    }
+
+    const sourceBlock = pair.out.getSourceBlock();
+    if (!sourceBlock) {
+      return false;
+    }
+
+    if (sourceBlock.type === "math_number") {
+      const numType = resolveMathNumberBlockType(sourceBlock);
+      return isDeclareContainsTypeCompatible(numType, typeKey);
+    }
+
+    const rawSourceType = this.resolveSourceBlockType_(sourceBlock);
+    if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
+      return false;
+    }
+    return isDeclareContainsTypeCompatible(
+      this.normalizeDeclareSourceType_(rawSourceType),
+      typeKey,
+    );
+  }
+
+  private isDeclareElementTypeCompatible_(
+    sourceType: string,
+    arduinoTypeField: string,
+  ): boolean {
+    return isDeclareContainsTypeCompatible(sourceType, arduinoTypeField);
+  }
+
+  private normalizeDeclareSourceType_(sourceType: string): string {
+    if (sourceType === "Boolean") {
+      return "bool";
+    }
+    if (sourceType === "String") {
+      return "string";
+    }
+    if (sourceType === "Colour" || sourceType === "color" || sourceType === "colour") {
+      return "string";
+    }
+    return sourceType;
+  }
+
+  private finishArrayDeclareConnect_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+    isDragging: boolean,
+    opt_distance?: number,
+  ): boolean {
+    const safety = this.doSafetyChecks(a, b);
+    if (safety !== Blockly.Connection.CAN_CONNECT) {
+      return false;
+    }
+    if (isDragging) {
+      return this.doDragChecks(
+        a as Blockly.RenderedConnection,
+        b as Blockly.RenderedConnection,
+        opt_distance ?? 0,
+      );
+    }
+    return true;
+  }
+
+  private finishArrayDeclareConnectWithReason_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+    isDragging: boolean,
+    opt_distance?: number,
+  ): number {
+    const safety = this.doSafetyChecks(a, b);
+    if (safety !== Blockly.Connection.CAN_CONNECT) {
+      return safety;
+    }
+    if (
+      isDragging &&
+      !this.doDragChecks(
+        a as Blockly.RenderedConnection,
+        b as Blockly.RenderedConnection,
+        opt_distance ?? 0,
+      )
+    ) {
+      return Blockly.Connection.REASON_DRAG_CHECKS_FAILED;
+    }
+    return Blockly.Connection.CAN_CONNECT;
   }
 
   private isSwitchCaseInput_(inputConnection: Blockly.Connection): boolean {
@@ -340,7 +721,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       const sourceBlock = sourceConnection.getSourceBlock();
 
       // Skip strict checks for blocks that trigger Blockly edge cases (e.g. value block drag from flyout)
-      if (sourceBlock?.type === 'Array_list_3' || sourceBlock?.type === 'Array_with') {
+      if (sourceBlock?.type === 'Array_list_3' || sourceBlock?.type === 'Array_list_literal') {
         return super.doTypeChecks(a, b);
       }
 

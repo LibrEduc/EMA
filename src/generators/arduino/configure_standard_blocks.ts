@@ -47,6 +47,7 @@ import {
   revalidateTypedNumericBlocks,
 } from "../../categories/blockly/shared";
 import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
+import { isArduinoScalarType } from "./block_types";
 import { checkTypeCompatibility, getCompatibleTypesForCheck } from "./block_types_registry";
 import { debugLog } from "./debug";
 
@@ -444,7 +445,10 @@ export function configureStandardBlocks(): void {
           (elem) => elem.argId === argId,
         );
         const modelType = argDatum?.model?.getType?.() || "";
-        const currentType = modelType && modelType !== "__NO_TYPE__" ? modelType : "int";
+        const currentType =
+          modelType && modelType !== "__NO_TYPE__" && isArduinoScalarType(modelType)
+            ? modelType
+            : "int";
         dropdown.setValue(currentType);
       };
     }
@@ -475,7 +479,10 @@ export function configureStandardBlocks(): void {
         const insertIndex = nameIndex >= 0 ? nameIndex + 1 : input.fieldRow.length;
         input.insertFieldAt(insertIndex, dropdown, typeFieldName);
         const modelType = argDatum.model?.getType?.() || "";
-        const currentType = modelType && modelType !== "__NO_TYPE__" ? modelType : "int";
+        const currentType =
+          modelType && modelType !== "__NO_TYPE__" && isArduinoScalarType(modelType)
+            ? modelType
+            : "int";
         dropdown.setValue(currentType);
       }
     }

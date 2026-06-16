@@ -32,6 +32,8 @@
 
 import * as Blockly from "blockly";
 import { getBlocklyMsg } from "../../categories/blockly/shared";
+import { isArduinoScalarType } from "./block_types";
+import { isListVariable } from "./variable_utils";
 
 export const TYPED_VARIABLES_CATEGORY_ID = "TYPED_VARIABLES";
 const TYPED_VARIABLES_BUTTON_ID = "CREATE_TYPED_VARIABLE";
@@ -53,13 +55,15 @@ export function createTypedVariablesFlyout(
 
   const variables = workspace.getVariableMap().getAllVariables();
   const safeVariables = variables.filter(
-    (variable): variable is Blockly.VariableModel => Boolean(variable),
+    (variable): variable is Blockly.VariableModel =>
+      Boolean(variable) && !isListVariable(variable),
   );
   if (safeVariables.length === 0) {
     return xmlList;
   }
   const defaultVariable = safeVariables[0];
-  const defaultType = defaultVariable.getType() ?? "";
+  const rawDefaultType = defaultVariable.getType() ?? "";
+  const defaultType = isArduinoScalarType(rawDefaultType) ? rawDefaultType : "";
 
   const setBlock = document.createElement("block");
   setBlock.setAttribute("type", "variables_set_dynamic");

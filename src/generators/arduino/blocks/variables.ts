@@ -37,7 +37,7 @@ export const variables_set = function (
 ): string | [string, number] {
   const valueBlock = block.getInputTargetBlock?.("VALUE");
   if (
-    valueBlock?.type === "Array_with" ||
+    valueBlock?.type === "Array_list_literal" ||
     valueBlock?.type === "Array_list_3"
   ) {
     return "";

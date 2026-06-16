@@ -30,6 +30,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import '@blockly/field-angle';
+import { DEFAULT_BLOCK_LEVELS } from "./block_levels";
+
+/** Niveaux par défaut pour les entrées bloc de la toolbox. */
+export { DEFAULT_BLOCK_LEVELS as DEFAULT_TOOLBOX_BLOCK_LEVELS } from "./block_levels";
 
 /**
  * Block entry in a toolbox category (flat block with type).
@@ -37,6 +41,8 @@ import '@blockly/field-angle';
 export type ToolboxBlockEntry = {
   kind: string,
   type: string,
+  /** Niveaux pédagogiques autorisés (ex. "1, 2, 3"). */
+  levels?: string,
   fields?: { [key: string]: number | string },
   inputs?: {
     [key: string]: {
@@ -45,6 +51,33 @@ export type ToolboxBlockEntry = {
     }
   },
 };
+
+/**
+ * Ajoute la propriété levels à chaque entrée kind:"block" (récursif).
+ */
+export function applyToolboxBlockLevels(
+  toolbox: ToolboxConfiguration,
+  levels: string = DEFAULT_BLOCK_LEVELS,
+): ToolboxConfiguration {
+  const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
+  const walk = (items: ToolboxCategoryContentEntry[] | undefined): void => {
+    if (!items) {
+      return;
+    }
+    for (const item of items) {
+      if (item.kind === "block" && "type" in item) {
+        (item as ToolboxBlockEntry).levels = levels;
+      }
+      if ("contents" in item && Array.isArray(item.contents)) {
+        walk(item.contents);
+      }
+    }
+  };
+  for (const category of clone.contents) {
+    walk(category.contents);
+  }
+  return clone;
+}
 
 /**
  * Category entry: can contain blocks or nested subcategories (submenus).
@@ -75,7 +108,7 @@ export type ToolboxConfiguration = {
 }
 
 /** Default toolbox: categories and block list (search, Libre, Logic, Loops, Math, etc.). */
-export const basic_toolbox: ToolboxConfiguration = {
+const basic_toolbox_source: ToolboxConfiguration = {
   'kind': 'categoryToolbox',
   'contents': [
     /*{
@@ -850,6 +883,9 @@ export const basic_toolbox: ToolboxConfiguration = {
     },
   ]
 };
+
+export const basic_toolbox: ToolboxConfiguration =
+  applyToolboxBlockLevels(basic_toolbox_source);
 
 const CAT_BOARD_NAME = 'CAT_BOARD';
 

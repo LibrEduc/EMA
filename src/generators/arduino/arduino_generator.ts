@@ -19,6 +19,12 @@
 import * as Blockly from "blockly";
 import { resolveMathChangeVariableId } from "../../categories/blockly/shared";
 import { getArduinoType } from "./arduino_types";
+import { getCppTypeName } from "./block_types";
+import { inferArrayElementTypeFromBlock } from "./block_types_registry";
+import {
+  unwrapValueBlock,
+  usesLocalVariableDeclaration,
+} from "./variable_scope";
 
 export enum Order {
   ATOMIC = 0, // 0 "" ...
@@ -278,8 +284,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         continue;
       }
       const valueBlock = block.getInputTargetBlock?.("VALUE");
-      const isLocal = valueBlock?.type === "variables_local";
-      if (isLocal) {
+      if (usesLocalVariableDeclaration(valueBlock)) {
         localVariableIds.add(blockVarId);
       } else {
         globalVariableIds.add(blockVarId);
@@ -323,7 +328,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         continue;
       }
       const valueBlock = block.getInputTargetBlock?.("VALUE");
-      const inferredType = getOutputBlockType(valueBlock);
+      const inferredType = getOutputBlockType(unwrapValueBlock(valueBlock));
       if (inferredType) {
         inferredTypesByVarId.set(varId, inferredType);
       }
@@ -370,10 +375,14 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         continue;
       }
       const valueBlock = block.getInputTargetBlock?.("VALUE");
+      const innerValueBlock = unwrapValueBlock(valueBlock);
       if (
-        valueBlock?.type !== "Array_with" &&
-        valueBlock?.type !== "Array_list_3"
+        innerValueBlock?.type !== "Array_list_literal" &&
+        innerValueBlock?.type !== "Array_list_3"
       ) {
+        continue;
+      }
+      if (usesLocalVariableDeclaration(valueBlock)) {
         continue;
       }
       const varId = block.getFieldValue?.("VAR");
@@ -381,13 +390,26 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       const varName = this.nameDB_!.getName(varId, Blockly.Names.NameType.VARIABLE);
       const listCode = this.valueToCode(block, "VALUE", Order.ASSIGNMENT);
       if (!listCode) continue;
-      const typedList = valueBlock as Blockly.Block & { getBlockType?: () => string | null };
-      let elementType = typedList.getBlockType?.() ?? null;
+      let elementType = inferArrayElementTypeFromBlock(innerValueBlock);
       if (!elementType || elementType === "__NO_TYPE__") elementType = "int";
       const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
       const cppType = getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
       this.addArrayDeclaration(cppType + " " + varName + "[] = " + listCode + ";");
       declaredAsArrayVariableIds.add(varId);
+    }
+
+    for (const block of workspace.getAllBlocks(false)) {
+      if (
+        block.type !== "Array_with" &&
+        block.type !== "Array_declare" &&
+        block.type !== "Array_create"
+      ) {
+        continue;
+      }
+      const varId = block.getFieldValue?.("VAR");
+      if (varId) {
+        declaredAsArrayVariableIds.add(varId);
+      }
     }
 
     const getProcedureParamNames = (block: Blockly.Block): Set<string> => {
@@ -511,7 +533,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       const varDeclarations: string[] = [];
       for (const [varType, varNames] of Object.entries(variableNamesByType)) {
         if (varNames.length > 0) {
-          varDeclarations.push(`${varType} ${varNames.join(', ')};`);
+          const cppType =
+            varType === "__NO_TYPE__" ? "int" : getCppTypeName(varType);
+          varDeclarations.push(`${cppType} ${varNames.join(", ")};`);
         }
       }
 

@@ -29,12 +29,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import '@blockly/field-angle';
+/** Niveaux par défaut pour les entrées bloc de la toolbox. */
+export { DEFAULT_BLOCK_LEVELS as DEFAULT_TOOLBOX_BLOCK_LEVELS } from "./block_levels";
 /**
  * Block entry in a toolbox category (flat block with type).
  */
 export type ToolboxBlockEntry = {
     kind: string;
     type: string;
+    /** Niveaux pédagogiques autorisés (ex. "1, 2, 3"). */
+    levels?: string;
     fields?: {
         [key: string]: number | string;
     };
@@ -52,6 +56,10 @@ export type ToolboxBlockEntry = {
         };
     };
 };
+/**
+ * Ajoute la propriété levels à chaque entrée kind:"block" (récursif).
+ */
+export declare function applyToolboxBlockLevels(toolbox: ToolboxConfiguration, levels?: string): ToolboxConfiguration;
 /**
  * Category entry: can contain blocks or nested subcategories (submenus).
  */
@@ -78,7 +86,6 @@ export type ToolboxConfiguration = {
         blockxml?: string;
     }>;
 };
-/** Default toolbox: categories and block list (search, Libre, Logic, Loops, Math, etc.). */
 export declare const basic_toolbox: ToolboxConfiguration;
 /**
  * Returns a deep clone of the toolbox with the board category (CAT_BOARD) removed.

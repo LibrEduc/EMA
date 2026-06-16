@@ -1,9 +1,12 @@
 /**
  * @packageDocumentation
  * @module ProgramStructureEnforcer
- * @description Désactive les blocs qui ne sont pas dans une structure de programme valide.
+ * @description Désactive les blocs empilables non raccordés à un bloc actif.
  * @remarks
- * Seuls les blocs racine setup/loop/procédure et leurs descendants restent actifs.
+ * - previousConnection : actif seulement s'il est connecté à un bloc actif.
+ * - outputConnection seul (sans previous) : actif seulement s'il est branché
+ *   dans un bloc actif.
+ * - Chapeaux / conteneurs (ni previous ni output) : actifs à la racine.
  * @license GPL-3.0-or-later
  */
 
@@ -11,28 +14,14 @@
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import * as Blockly from "blockly";
 import { isBlockOnMainWorkspace } from "./categories/blockly/shared";
 
-/** Identifiant Blockly pour le motif « hors programme ». */
+/** Identifiant Blockly pour le motif « non raccordé ». */
 export const NOT_IN_PROGRAM_DISABLED_REASON = "ucb_not_in_program";
-
-/** Blocs autorisés comme racine d'un programme sur le workspace. */
-const PROGRAM_ROOT_BLOCK_TYPES = new Set([
-  "board_base_setup",
-  "board_base_loop",
-  "board_base_setup_loop",
-  "procedures_defreturn",
-  "procedures_defnoreturn",
-]);
 
 type WorkspaceListener = (e: Blockly.Events.Abstract) => void;
 
@@ -45,14 +34,25 @@ const isRelevantEvent = (e: Blockly.Events.Abstract): boolean =>
   e.type === Blockly.Events.FINISHED_LOADING;
 
 /**
- * Indique si le bloc est une racine de programme Arduino / procédure.
+ * Évalue l'activité d'une pile d'instructions à partir de son sommet.
+ * @remarks
+ * getSurroundParent() ignore les empilements next-only (ex. début → si) ;
+ * on remonte d'abord via getTopStackBlock().
  */
-export function isProgramRootBlock(block: Blockly.Block): boolean {
-  return PROGRAM_ROOT_BLOCK_TYPES.has(block.type);
+function isStatementStackActive(block: Blockly.Block): boolean {
+  const anchor = block.getTopStackBlock();
+  if (anchor.previousConnection?.isConnected()) {
+    const container = anchor.getSurroundParent();
+    return container ? isInActiveProgram(container) : false;
+  }
+  if (!anchor.previousConnection) {
+    return isInActiveProgram(anchor);
+  }
+  return false;
 }
 
 /**
- * Indique si le bloc participe à un programme (racine autorisée ou descendant connecté).
+ * Indique si le bloc doit rester actif sur le workspace.
  */
 export function isInActiveProgram(block: Blockly.Block): boolean {
   if (block.isShadow()) {
@@ -62,23 +62,25 @@ export function isInActiveProgram(block: Blockly.Block): boolean {
     return true;
   }
 
-  const root = block.getRootBlock();
-  if (!isProgramRootBlock(root)) {
-    return false;
-  }
-  if (block.id === root.id) {
-    return true;
+  if (block.previousConnection) {
+    if (!block.previousConnection.isConnected()) {
+      return false;
+    }
+    return isStatementStackActive(block);
   }
 
-  let current: Blockly.Block | null = block;
-  while (current && current.id !== root.id) {
-    const parent = current.getParent();
+  if (block.outputConnection) {
+    if (!block.outputConnection.isConnected()) {
+      return false;
+    }
+    const parent = block.getParent();
     if (!parent) {
       return false;
     }
-    current = parent;
+    return isInActiveProgram(parent);
   }
-  return current?.id === root.id;
+
+  return true;
 }
 
 /**
@@ -121,7 +123,7 @@ export function uninstallProgramStructureEnforcer(
 }
 
 /**
- * Installe l'enforceur : blocs orphelins ou hors setup/loop/procédure → inactifs.
+ * Installe l'enforceur : blocs non raccordés (previous ou output seul) → inactifs.
  */
 export function installProgramStructureEnforcer(
   workspace: Blockly.Workspace,

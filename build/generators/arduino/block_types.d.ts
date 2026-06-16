@@ -19,25 +19,6 @@
  * @since 1.0.0
  */
 /**
- * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-/**
  * Registry version 2026-01-11
  */
 export declare const BLOCK_TYPES_VERSION = "1.0.0";
@@ -56,16 +37,16 @@ export declare const BLOCK_TYPES_VERSION = "1.0.0";
  */
 export declare const TYPE_COMPATIBILITY: Record<string, string[]>;
 /** Arduino type keys for all type dropdowns (variables, cast, procedures, lists). @see docs/TYPES_ET_COMPATIBILITES.md */
-export declare const ARDUINO_TYPE_KEYS: readonly ["char", "string", "bool", "byte", "int", "uint", "vint", "long", "ulong", "float", "char_array"];
+export declare const ARDUINO_TYPE_KEYS: readonly ["char", "string", "bool", "byte", "int", "uint", "vint", "long", "ulong", "float"];
 /** @deprecated Use {@link ARDUINO_TYPE_KEYS} */
-export declare const VARIABLE_CAST_TYPE_KEYS: readonly ["char", "string", "bool", "byte", "int", "uint", "vint", "long", "ulong", "float", "char_array"];
+export declare const VARIABLE_CAST_TYPE_KEYS: readonly ["char", "string", "bool", "byte", "int", "uint", "vint", "long", "ulong", "float"];
 export type ArduinoTypeKey = (typeof ARDUINO_TYPE_KEYS)[number];
 /** @deprecated Use {@link ArduinoTypeKey} */
 export type VariableCastTypeKey = ArduinoTypeKey;
 /** Maps dropdown type key → internal µcBlockly type for connections. */
 export declare const ARDUINO_TYPE_TO_INTERNAL: Record<ArduinoTypeKey, string>;
 /** @deprecated Use {@link ARDUINO_TYPE_TO_INTERNAL} */
-export declare const CAST_TYPE_TO_INTERNAL: Record<"string" | "long" | "float" | "uint" | "char" | "bool" | "byte" | "int" | "vint" | "ulong" | "char_array", string>;
+export declare const CAST_TYPE_TO_INTERNAL: Record<"string" | "long" | "float" | "uint" | "char" | "bool" | "byte" | "int" | "vint" | "ulong", string>;
 /** Maps dropdown type key → C++ type name in generated code. */
 export declare const ARDUINO_TYPE_TO_CPP: Record<ArduinoTypeKey, string>;
 /** Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`). */
@@ -81,9 +62,21 @@ export declare const getInternalTypeForCast: typeof getInternalTypeForArduinoTyp
  */
 export declare function getCppTypeName(typeKey: string): string;
 /**
+ * Vérifie qu'une valeur connectée en mode « contains » correspond au type du menu Array_declare.
+ * @param sourceInternalType - Type interne µcBlockly du bloc source (int, float, bool, …).
+ * @param arduinoTypeField - Clé du menu déroulant (int, float, uint, string, …).
+ */
+export declare function isDeclareContainsTypeCompatible(sourceInternalType: string, arduinoTypeField: string): boolean;
+/**
+ * Compatibilité stricte pour les entrées des blocs liste (sans char ↔ string).
+ */
+export declare function isArrayElementTypeCompatible(sourceInternalType: string, expectedInternalType: string): boolean;
+/**
  * Returns the ordered list of Arduino types for Blockly dropdown menus.
  */
 export declare function getVariableTypeOptions(): string[];
+/** True when the type can appear in Arduino scalar type dropdowns (excludes `list`). */
+export declare function isArduinoScalarType(type: string | null | undefined): type is ArduinoTypeKey;
 /**
  * Returns compatible types for a target type.
  * @param targetType - Target type to match.

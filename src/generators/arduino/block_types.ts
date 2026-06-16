@@ -39,6 +39,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { LIST_VARIABLE_TYPE } from "./variable_utils";
+
 /**
  * Registry version 2026-01-11
  */
@@ -89,7 +91,6 @@ export const ARDUINO_TYPE_KEYS = [
   'long',
   'ulong',
   'float',
-  'char_array',
 ] as const;
 
 /** @deprecated Use {@link ARDUINO_TYPE_KEYS} */
@@ -112,7 +113,6 @@ export const ARDUINO_TYPE_TO_INTERNAL: Record<ArduinoTypeKey, string> = {
   long: 'long',
   ulong: 'int',
   float: 'float',
-  char_array: 'string',
 };
 
 /** @deprecated Use {@link ARDUINO_TYPE_TO_INTERNAL} */
@@ -130,7 +130,6 @@ export const ARDUINO_TYPE_TO_CPP: Record<ArduinoTypeKey, string> = {
   long: 'long',
   ulong: 'unsigned long',
   float: 'float',
-  char_array: 'char*',
 };
 
 /** Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`). */
@@ -142,6 +141,9 @@ export function getArduinoTypeLabelKey(typeKey: string): string {
  * Internal µcBlockly type for connection checking.
  */
 export function getInternalTypeForArduinoType(typeKey: string): string {
+  if (typeKey === LIST_VARIABLE_TYPE) {
+    return LIST_VARIABLE_TYPE;
+  }
   return ARDUINO_TYPE_TO_INTERNAL[typeKey as ArduinoTypeKey] ?? typeKey;
 }
 
@@ -156,10 +158,47 @@ export function getCppTypeName(typeKey: string): string {
 }
 
 /**
+ * Vérifie qu'une valeur connectée en mode « contains » correspond au type du menu Array_declare.
+ * @param sourceInternalType - Type interne µcBlockly du bloc source (int, float, bool, …).
+ * @param arduinoTypeField - Clé du menu déroulant (int, float, uint, string, …).
+ */
+export function isDeclareContainsTypeCompatible(
+  sourceInternalType: string,
+  arduinoTypeField: string,
+): boolean {
+  const expected = getInternalTypeForArduinoType(arduinoTypeField);
+  return isArrayElementTypeCompatible(sourceInternalType, expected);
+}
+
+/**
+ * Compatibilité stricte pour les entrées des blocs liste (sans char ↔ string).
+ */
+export function isArrayElementTypeCompatible(
+  sourceInternalType: string,
+  expectedInternalType: string,
+): boolean {
+  if (sourceInternalType === expectedInternalType) {
+    return true;
+  }
+  if (expectedInternalType === "float" && sourceInternalType === "int") {
+    return true;
+  }
+  if (expectedInternalType === "long" && sourceInternalType === "int") {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Returns the ordered list of Arduino types for Blockly dropdown menus.
  */
 export function getVariableTypeOptions(): string[] {
   return [...ARDUINO_TYPE_KEYS];
+}
+
+/** True when the type can appear in Arduino scalar type dropdowns (excludes `list`). */
+export function isArduinoScalarType(type: string | null | undefined): type is ArduinoTypeKey {
+  return Boolean(type) && (ARDUINO_TYPE_KEYS as readonly string[]).includes(type as string);
 }
 
 /**

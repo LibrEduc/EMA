@@ -32,8 +32,21 @@
 
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
-import { getCompatibleTypesForCheck, checkTypeCompatibility, identifyMathNumberType } from "../../generators/arduino/block_types_registry";
-import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
+import {
+  checkTypeCompatibility,
+  getCompatibleTypesForCheck,
+  identifyMathNumberType,
+} from "../../generators/arduino/block_types_registry";
+import {
+  ARDUINO_TYPE_KEYS,
+  getInternalTypeForArduinoType,
+} from "../../generators/arduino/block_types";
+import {
+  clearVariableType,
+  LIST_VARIABLE_TYPE,
+  setVariableType,
+  tagVariableAsList,
+} from "../../generators/arduino/variable_utils";
 
 export type VariableWithMutableType = Blockly.VariableModel & {
   setType?: (type: string) => void;
@@ -184,10 +197,113 @@ export const getBlocklyCompatibleChecks = (
 };
 
 /**
+ * Checks Blockly pour les entrées des blocs Array_with / Array_declare / Array_create.
+ * Pas de compatibilité char ↔ string.
+ */
+function buildArrayElementBlocklyChecks(
+  internalType: string,
+  options?: { includeArray?: boolean },
+): string[] {
+  let checks: string[];
+  if (internalType === "char") {
+    checks = ["char"];
+  } else if (internalType === "string") {
+    checks = ["string", "String", "Colour"];
+  } else {
+    const base = getBlocklyCompatibleChecks(internalType, true) ?? [internalType];
+    checks = base.filter((check) => check !== "char");
+    if (
+      (internalType === "int" || internalType === "float" || internalType === "long") &&
+      !checks.includes("Number")
+    ) {
+      checks.push("Number");
+    }
+  }
+  if (options?.includeArray && !checks.includes("Array")) {
+    checks.push("Array");
+  }
+  return checks;
+}
+
+/**
+ * Checks Blockly pour l'entrée contenu d'Array_declare (size ou contains).
+ * Le filtrage sémantique int/float/etc. est complété par StrictConnectionChecker.
+ */
+export const getDeclareContenuBlocklyChecks = (
+  choix: string,
+  arduinoTypeField: string,
+): string[] => {
+  if (choix === "c1") {
+    return ["int", "Number"];
+  }
+  const internal = getInternalTypeForArduinoType(arduinoTypeField);
+  return buildArrayElementBlocklyChecks(internal, { includeArray: true });
+};
+
+/**
+ * Checks Blockly pour les éléments d'un littéral de liste ou de Array_with.
+ */
+export const getDeclareElementBlocklyChecks = (internalType: string): string[] => {
+  return buildArrayElementBlocklyChecks(internalType);
+};
+
+/** Checks Blockly pour les entrées d'index de tableau (entiers uniquement). */
+export const getArrayIndexBlocklyChecks = (): string[] => ["int", "Number"];
+
+/**
+ * Configures a FieldVariable for scalar variables (excludes list/array variables).
+ * @param field - FieldVariable instance to configure.
+ */
+export const configureScalarVariableField = (field: Blockly.FieldVariable): void => {
+  const fieldWithTypes = field as unknown as {
+    variableTypes?: string[] | null;
+    defaultType?: string;
+  };
+  fieldWithTypes.variableTypes = ["", ...ARDUINO_TYPE_KEYS];
+  fieldWithTypes.defaultType = "";
+};
+
+/**
+ * Configures a FieldVariable for list/array variables only.
+ */
+export const configureListVariableField = (field: Blockly.FieldVariable): void => {
+  const fieldWithTypes = field as unknown as {
+    variableTypes?: string[] | null;
+    defaultType?: string;
+  };
+  fieldWithTypes.variableTypes = [LIST_VARIABLE_TYPE];
+  fieldWithTypes.defaultType = LIST_VARIABLE_TYPE;
+};
+
+/**
+ * @deprecated Alias of {@link configureScalarVariableField}.
+ */
+export const configureTypedVariableField = configureScalarVariableField;
+
+/**
+ * Ensures the variable selected on a list-category block has Blockly type `list`.
+ */
+export const syncListVariableFromBlock = (block: Blockly.Block): void => {
+  const variableId = block.getFieldValue("VAR");
+  if (!variableId || !block.workspace) {
+    return;
+  }
+  const variable = block.workspace.getVariableMap().getVariableById(variableId);
+  if (variable && variable.getType() !== LIST_VARIABLE_TYPE) {
+    tagVariableAsList(variable);
+  }
+};
+
+/**
+ * Output check for variables_get / variables_get_dynamic when VAR is a list.
+ */
+export const getListVariableOutputCheck = (): null => null;
+
+/**
  * Configures a FieldVariable to accept any type.
  * @param field - FieldVariable instance to configure.
  */
-export const configureTypedVariableField = (field: Blockly.FieldVariable): void => {
+export const configureUntypedVariableField = (field: Blockly.FieldVariable): void => {
   const fieldWithTypes = field as unknown as {
     variableTypes?: string[] | null;
     defaultType?: string;
@@ -666,8 +782,28 @@ export const handleVariablesSetChange = (
       variableId,
     );
 
+    if (varType === LIST_VARIABLE_TYPE) {
+      if (connectedType) {
+        block.setWarningText(
+          getTypeMismatchWarningText(LIST_VARIABLE_TYPE, connectedType),
+        );
+        if (valueInput?.connection?.targetBlock()) {
+          valueInput.connection.disconnect();
+        }
+        return;
+      }
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(null);
+      }
+      block.setWarningText(null);
+      return;
+    }
+
     if (connectedType) {
-      const canAutoRetype = !typedVariable.__ucbManualType && !requiredNumericType;
+      const canAutoRetype =
+        !typedVariable.__ucbManualType &&
+        !requiredNumericType &&
+        varType !== LIST_VARIABLE_TYPE;
       if (requiredNumericType) {
         syncNumericVariableType(variable, requiredNumericType);
         varType = variable.getType();
@@ -705,7 +841,7 @@ export const handleVariablesSetChange = (
           block.workspace,
           variableId,
         );
-        if (!hasAssignments) {
+        if (!hasAssignments && varType !== LIST_VARIABLE_TYPE) {
           clearVariableType(variable);
         }
       }

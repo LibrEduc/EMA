@@ -33,6 +33,25 @@ export declare const BLOCK_TYPE_REGISTRY: Record<string, BlockTypeDefinition>;
 /** Infers int/float from a math_number field value. */
 export declare function identifyMathNumberType(numString: string | number | null | undefined): "int" | "float";
 /**
+ * Infers element type from named value inputs (e.g. Array_declare contenu/contenu2).
+ * Numeric types unify (int + float → float); float literals promote to float.
+ */
+export declare function inferArrayElementTypeFromInputs(block: Blockly.Block, inputNames: string[]): string;
+/**
+ * Infers the element type of an Array_with block from all connected inputs.
+ * Numeric types unify (int + float → float); float literals promote to float.
+ */
+export declare function inferArrayElementTypeFromBlock(block: Blockly.Block): string;
+/**
+ * Finds the list declaration block for a workspace variable id.
+ */
+export declare function findListDeclarationBlock(workspace: Blockly.Workspace, variableId: string): Blockly.Block | null;
+/**
+ * Element type (int, char, …) of a list variable from its declaration block.
+ */
+export declare function inferListVariableElementType(workspace: Blockly.Workspace | null, variableId: string | null | undefined): string;
+export declare function inferArrayGetIndexElementType(block: Blockly.Block): string;
+/**
  * Get compatible types for a given type (for use with setCheck)
  * @param type - The target type
  * @returns Array of compatible types (including the type itself)

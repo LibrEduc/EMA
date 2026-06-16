@@ -159,6 +159,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
       [
         "VARIABLES_GET_ITEM",
         "ARRAY_UNE_LISTE",
+        "ARRAY_WITH_AS_LIST",
+        "ARRAY_WITH_CONTAINING",
         "ARRAY_WITH_TOOLTIP",
         "ARRAY_WITH_HELPURL",
         "LIBRE_TOOLTIP",
@@ -1507,7 +1509,6 @@ export class BlocklyApplication implements BlocklyApplicationType {
         "VAR_CAST_TYPE_LONG",
         "VAR_CAST_TYPE_ULONG",
         "VAR_CAST_TYPE_FLOAT",
-        "VAR_CAST_TYPE_CHAR_ARRAY",
         "COLOUR_HSV_HUE_LABEL",
         "COLOUR_HSV_SATURATION_LABEL",
         "COLOUR_HSV_BRIGHTNESS_LABEL",
@@ -1523,6 +1524,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
       const arrayAndListKeys = [
         "VARIABLES_GET_ITEM",
         "ARRAY_UNE_LISTE",
+        "ARRAY_WITH_AS_LIST",
+        "ARRAY_WITH_CONTAINING",
         "ARRAY_WITH_TOOLTIP",
         "ARRAY_WITH_HELPURL",
         "LIBRE_TOOLTIP",

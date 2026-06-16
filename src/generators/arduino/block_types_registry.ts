@@ -24,6 +24,7 @@
 import * as Blockly from "blockly";
 import { BLOCK_TYPES } from "./block_types/index";
 import { getCompatibleTypes, getInternalTypeForArduinoType, isTypeCompatible } from "./block_types";
+import { LIST_VARIABLE_TYPE } from "./variable_utils";
 import { debugLog } from "./debug";
 
 /**
@@ -98,6 +99,147 @@ const normalizeBlocklyType = (blocklyType: string | string[] | null): string | n
 /**
  * Dynamic type functions map
  */
+const inferArrayInputBlockType = (b: Blockly.Block | null): string | null => {
+  if (!b) {
+    return null;
+  }
+  const typed = b as Blockly.Block & { getBlockType?: () => string | null };
+  const raw = typed.getBlockType?.() ?? null;
+  const norm = normalizeBlocklyType(raw);
+  if (norm && norm !== "__NO_TYPE__") {
+    return norm;
+  }
+  const check = b.outputConnection?.getCheck() ?? null;
+  const checkNorm = normalizeBlocklyType(
+    Array.isArray(check) ? (check[0] ?? null) : check,
+  );
+  return checkNorm && checkNorm !== "__NO_TYPE__" ? checkNorm : null;
+};
+
+/**
+ * Infers element type from named value inputs (e.g. Array_declare contenu/contenu2).
+ * Numeric types unify (int + float → float); float literals promote to float.
+ */
+export function inferArrayElementTypeFromInputs(
+  block: Blockly.Block,
+  inputNames: string[],
+): string {
+  const types: Array<string | null> = [];
+  let hasFloatLiteral = false;
+  for (const inputName of inputNames) {
+    const target = block.getInputTargetBlock(inputName);
+    if (!target) {
+      continue;
+    }
+    if (target.type === "math_number") {
+      if (identifyMathNumberType(target.getFieldValue("NUM")) === "float") {
+        hasFloatLiteral = true;
+      }
+    }
+    if (
+      target.type === "Array_list_literal" ||
+      target.type === "Array_list_3" ||
+      target.type === "Array_with"
+    ) {
+      const listType = inferArrayElementTypeFromBlock(target);
+      types.push(listType !== "__NO_TYPE__" ? listType : null);
+      continue;
+    }
+    types.push(inferArrayInputBlockType(target));
+  }
+
+  const presentTypes = types.filter(
+    (t): t is string => Boolean(t) && t !== "__NO_TYPE__",
+  );
+  if (presentTypes.length === 0) {
+    return "__NO_TYPE__";
+  }
+
+  const allNumeric = presentTypes.every((t) => t === "int" || t === "float");
+  if (allNumeric) {
+    const hasFloat =
+      hasFloatLiteral || presentTypes.some((t) => t === "float");
+    return hasFloat ? "float" : "int";
+  }
+
+  const first = presentTypes[0];
+  if (presentTypes.every((t) => t === first)) {
+    return first;
+  }
+  return first;
+}
+
+/**
+ * Infers the element type of an Array_with block from all connected inputs.
+ * Numeric types unify (int + float → float); float literals promote to float.
+ */
+export function inferArrayElementTypeFromBlock(block: Blockly.Block): string {
+  const inputNames: string[] = [];
+  let i = 0;
+  for (;;) {
+    if (!block.getInput("ADD" + i)) {
+      break;
+    }
+    inputNames.push("ADD" + i);
+    i++;
+  }
+  return inferArrayElementTypeFromInputs(block, inputNames);
+}
+
+const LIST_DECLARE_BLOCK_TYPES = [
+  "Array_declare",
+  "Array_create",
+  "Array_with",
+] as const;
+
+/**
+ * Finds the list declaration block for a workspace variable id.
+ */
+export function findListDeclarationBlock(
+  workspace: Blockly.Workspace,
+  variableId: string,
+): Blockly.Block | null {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (
+      !(LIST_DECLARE_BLOCK_TYPES as readonly string[]).includes(block.type)
+    ) {
+      continue;
+    }
+    if (block.getFieldValue("VAR") === variableId) {
+      return block;
+    }
+  }
+  return null;
+}
+
+/**
+ * Element type (int, char, …) of a list variable from its declaration block.
+ */
+export function inferListVariableElementType(
+  workspace: Blockly.Workspace | null,
+  variableId: string | null | undefined,
+): string {
+  if (!workspace || !variableId) {
+    return "__NO_TYPE__";
+  }
+  const declareBlock = findListDeclarationBlock(workspace, variableId);
+  if (!declareBlock) {
+    return "__NO_TYPE__";
+  }
+  if (declareBlock.type === "Array_with") {
+    const inferred = inferArrayElementTypeFromBlock(declareBlock);
+    return inferred !== "__NO_TYPE__" ? inferred : "int";
+  }
+  const typeField = declareBlock.getFieldValue("type") || "int";
+  return getInternalTypeForArduinoType(typeField);
+}
+
+export function inferArrayGetIndexElementType(block: Blockly.Block): string {
+  const variableId = block.getFieldValue("VAR");
+  const elementType = inferListVariableElementType(block.workspace, variableId);
+  return elementType !== "__NO_TYPE__" ? elementType : "int";
+}
+
 const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
   'ternary': (block: Blockly.Block): string => {
     // Infer from both branches without forcing input checks.
@@ -183,38 +325,25 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
       const variable = block.workspace.getVariableMap().getVariableById(variableId);
       if (variable) {
         const varType = variable.getType();
-        return varType ? getInternalTypeForArduinoType(varType) : '__NO_TYPE__';
+        if (!varType) {
+          return '__NO_TYPE__';
+        }
+        if (varType === LIST_VARIABLE_TYPE) {
+          return LIST_VARIABLE_TYPE;
+        }
+        return getInternalTypeForArduinoType(varType);
       }
     } catch (error) {
       debugLog('Variable not found:', variableId, error);
     }
     return '__NO_TYPE__';
   },
-  /** List block: type is the type of the first connected element (no standalone "array" type). */
-  'arrayFromInputs': (block: Blockly.Block): string => {
-    const inferOne = (b: Blockly.Block | null): string | null => {
-      if (!b) return null;
-      const typed = b as Blockly.Block & { getBlockType?: () => string | null };
-      const raw = typed.getBlockType?.() ?? null;
-      const norm = normalizeBlocklyType(raw);
-      if (norm && norm !== "__NO_TYPE__") return norm;
-      const check = b.outputConnection?.getCheck() ?? null;
-      const checkNorm = normalizeBlocklyType(
-        Array.isArray(check) ? (check[0] ?? null) : check,
-      );
-      return checkNorm && checkNorm !== "__NO_TYPE__" ? checkNorm : null;
-    };
-    let i = 0;
-    for (;;) {
-      const input = block.getInput("ADD" + i);
-      if (!input) break;
-      const target = input.connection?.targetBlock();
-      const t = inferOne(target ?? null);
-      if (t) return t;
-      i++;
-    }
-    return "__NO_TYPE__";
-  },
+  /** List block: unified type of all connected elements. */
+  'arrayFromInputs': (block: Blockly.Block): string =>
+    inferArrayElementTypeFromBlock(block),
+  /** Element type read from a declared list variable (Array_declare / create / with). */
+  'arrayGetIndexElement': (block: Blockly.Block): string =>
+    inferArrayGetIndexElementType(block),
   'procedureReturn': (block: Blockly.Block): string => {
     if (block.type !== "procedures_callreturn" || !block.workspace) {
       return 'int';

@@ -32,15 +32,17 @@
 
 import * as Blockly from "blockly";
 import { ArduinoGenerator, Order } from "../arduino_generator";
+import { getCppTypeName, getInternalTypeForArduinoType } from "../block_types";
 import { getArduinoType, getDefaultValueForType } from "../arduino_types";
+import {
+  inferArrayElementTypeFromBlock,
+  inferArrayElementTypeFromInputs,
+} from "../block_types_registry";
 
-/**
- * Array_with - list literal; type comes from first connected input. Empty slots use type default (no "null").
- */
-export const Array_with = function (
+function buildArrayListLiteralCode(
   block: Blockly.Block,
   generator: ArduinoGenerator,
-): [string, number] {
+): string {
   const typedBlock = block as Blockly.Block & { itemCount_?: number };
   let itemCount = typedBlock.itemCount_ ?? 0;
 
@@ -66,39 +68,127 @@ export const Array_with = function (
     const value = generator.valueToCode(block, "ADD" + i, Order.ATOMIC) || defaultVal;
     parts.push(value);
   }
-  return ["{" + parts.join(", ") + "}", Order.ATOMIC];
+  return "{" + parts.join(", ") + "}";
+}
+
+/**
+ * Valeur « contient » : littéral `{...}` ou scalaire enveloppé `{123}`.
+ */
+function formatArrayInitializer(
+  generator: ArduinoGenerator,
+  block: Blockly.Block,
+  inputName: string,
+): string {
+  const valueBlock = block.getInputTargetBlock(inputName);
+  const code = generator.valueToCode(block, inputName, Order.ASSIGNMENT);
+  if (!code) {
+    return "{}";
+  }
+  const trimmed = code.trim();
+  if (trimmed.startsWith("{")) {
+    return trimmed;
+  }
+  if (
+    valueBlock?.type === "Array_list_literal" ||
+    valueBlock?.type === "Array_list_3"
+  ) {
+    return trimmed;
+  }
+  return "{" + trimmed + "}";
+}
+
+/** Retire les accolades externes d'un littéral `{a, b}`. */
+function stripArrayBraces(code: string): string {
+  const trimmed = code.trim();
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function resolveDeclareCppType(
+  typeField: string,
+  choice: string,
+  block: Blockly.Block,
+): string {
+  if (choice !== "c2") {
+    return getCppTypeName(typeField);
+  }
+  const inferred = inferArrayElementTypeFromInputs(block, ["contenu", "contenu2"]);
+  if (!inferred || inferred === "__NO_TYPE__") {
+    return getCppTypeName(typeField);
+  }
+  const baseInternal = getInternalTypeForArduinoType(typeField);
+  if (inferred === "float" && baseInternal === "int") {
+    return getCppTypeName("float");
+  }
+  if (inferred === baseInternal) {
+    return getCppTypeName(typeField);
+  }
+  return getCppTypeName(inferred);
+}
+
+/**
+ * Array_list_literal - list literal value for Array_declare / Array_create.
+ */
+export const Array_list_literal = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): [string, number] {
+  return [buildArrayListLiteralCode(block, generator), Order.ATOMIC];
 };
 
 /**
  * Legacy alias for saved workspaces using Array_list_3.
  */
-export const Array_list_3 = Array_with;
+export const Array_list_3 = Array_list_literal;
 
 /**
- * Array_getIndex_in_list - list[index] (1-based in s4e → 0-based)
+ * Array_with - define [variable] as global list (declaration before setup()).
+ */
+export const Array_with = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  if (!varName || varName === "variable") {
+    return "// Error: Invalid variable name\n";
+  }
+  const listCode = buildArrayListLiteralCode(block, generator);
+  let elementType = inferArrayElementTypeFromBlock(block);
+  if (!elementType || elementType === "__NO_TYPE__") {
+    elementType = "int";
+  }
+  const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
+  const cppType = getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
+  const declaration = `${cppType} ${varName}[] = ${listCode};`;
+  generator.addArrayDeclaration(declaration);
+  generator.addVariable(varName, declaration);
+  return "";
+};
+
+/**
+ * Array_getIndex_in_list - list[index] (index 0-based, comme en C/Arduino)
  */
 export const Array_getIndex_in_list = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): [string, number] {
-  let at = generator.valueToCode(block, "AT", Order.UNARY_NEGATION) || "1";
-  const list = generator.valueToCode(block, "VAR", Order.MEMBER) || "{}";
-  if (at && !Number.isNaN(parseFloat(at)) && Number.isFinite(parseFloat(at))) {
-    at = String(parseFloat(at) - 1);
-  }
+  const at = generator.valueToCode(block, "AT", Order.UNARY_NEGATION) || "0";
+  const list = generator.getVariableName(block.getFieldValue("VAR"));
   const code = list + "[" + at + "]";
   return [code, Order.MEMBER];
 };
 
 /**
- * Array_modify - name[indice] = value;
+ * Array_modify - listVar[indice] = value;
  */
 export const Array_modify = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
   const indice = generator.valueToCode(block, "indice", Order.ATOMIC) || "0";
-  const name = generator.valueToCode(block, "name", Order.ATOMIC) || "{}";
+  const name = generator.getVariableName(block.getFieldValue("VAR"));
   const value = generator.valueToCode(block, "value", Order.ATOMIC) || "0";
   return name + "[" + indice + "] = " + value + ";\n";
 };
@@ -110,34 +200,42 @@ export const Array_declare = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
-  const argument0 = generator.valueToCode(block, "contenu", Order.ASSIGNMENT) || "0";
-  const varName = generator.getVariableName(block.getFieldValue("VAR"));
-  const typeField = block.getFieldValue("type") || "int";
-  const typeInfo = getArduinoType(typeField);
-  const typeBlock = typeInfo?.cppName ?? typeField;
   const choice = block.getFieldValue("choix");
   const dimension = block.getFieldValue("dim");
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  const typeField = block.getFieldValue("type") || "int";
+  const typeBlock = resolveDeclareCppType(typeField, choice, block);
 
   let declaration = "";
   switch (choice) {
-    case "c1":
+    case "c1": {
+      const size0 = generator.valueToCode(block, "contenu", Order.ASSIGNMENT) || "0";
       if (dimension === "d2") {
-        declaration = typeBlock + " " + varName + "[" + argument0 + "][" + argument0 + "];";
+        const size1 = generator.valueToCode(block, "contenu2", Order.ASSIGNMENT) || "0";
+        declaration = `${typeBlock} ${varName}[${size0}][${size1}];`;
       } else {
-        declaration = typeBlock + " " + varName + "[" + argument0 + "];";
+        declaration = `${typeBlock} ${varName}[${size0}];`;
       }
       break;
-    case "c2":
+    }
+    case "c2": {
       if (dimension === "d2") {
-        const parts = argument0.split("{");
-        const nb1 = parts.length - 2;
-        const arg = (parts[2] || "").split(",");
-        const nb2 = arg.length - 1;
-        declaration = typeBlock + " " + varName + "[" + nb1 + "][" + nb2 + "] = " + argument0 + ";";
+        const row0 = formatArrayInitializer(generator, block, "contenu");
+        const row1 = formatArrayInitializer(generator, block, "contenu2");
+        const inner0 = stripArrayBraces(row0);
+        const inner1 = stripArrayBraces(row1);
+        const cols =
+          inner0.length > 0
+            ? inner0.split(",").filter((part) => part.trim()).length
+            : 1;
+        declaration =
+          `${typeBlock} ${varName}[][${cols}] = { {${inner0}}, {${inner1}} };`;
       } else {
-        declaration = typeBlock + " " + varName + "[] = " + argument0 + ";";
+        const values = formatArrayInitializer(generator, block, "contenu");
+        declaration = `${typeBlock} ${varName}[] = ${values};`;
       }
       break;
+    }
     default:
       return "";
   }
@@ -155,14 +253,12 @@ export const Array_create = function (
 ): string {
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
   const typeField = block.getFieldValue("type") || "int";
-  const typeInfo = getArduinoType(typeField);
-  const typeBlock = typeInfo?.cppName ?? typeField;
+  const typeBlock = getCppTypeName(typeField);
   const menu = block.getFieldValue("choix");
   const dimension = block.getFieldValue("dim");
 
   let declaration = "";
   let k = "";
-  let l = "";
 
   switch (menu) {
     case "c1":
@@ -174,18 +270,24 @@ export const Array_create = function (
       break;
     case "c2":
       if (dimension === "1") {
-        const j = generator.valueToCode(block, "D0", Order.ASSIGNMENT);
-        declaration = typeBlock + " " + varName + "[] = " + (j || "{}") + ";";
+        const j = formatArrayInitializer(generator, block, "D0");
+        declaration = typeBlock + " " + varName + "[] = " + j + ";";
       } else {
-        k = "{";
-        for (let i = 0; i < parseInt(dimension, 10); i++) {
+        const dimCount = parseInt(dimension, 10);
+        const initParts: string[] = [];
+        let bracketSizes = "";
+        for (let i = 0; i < dimCount; i++) {
           const j = generator.valueToCode(block, "D" + i, Order.ASSIGNMENT) || "";
-          const nb = j.split(",");
-          k += j + ",";
-          l += "[" + nb.length + "]";
+          const nb = j.split(",").filter((part) => part.trim());
+          initParts.push(j);
+          if (i === 0) {
+            bracketSizes += "[]";
+          } else {
+            bracketSizes += "[" + (nb.length > 0 ? nb.length : 1) + "]";
+          }
         }
-        k = k.substring(0, k.length - 1) + "}";
-        declaration = typeBlock + " " + varName + l + " = " + k + ";";
+        k = "{" + initParts.join(",") + "}";
+        declaration = typeBlock + " " + varName + bracketSizes + " = " + k + ";";
       }
       break;
     default:

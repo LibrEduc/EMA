@@ -143,7 +143,6 @@ Fichiers : définition `categories/blockly/variables.ts`, génération `generato
 | `long` | `VAR_CAST_TYPE_LONG` | `long` | `long` |
 | `ulong` | `VAR_CAST_TYPE_ULONG` | `unsigned long` | `int` |
 | `float` | `VAR_CAST_TYPE_FLOAT` | `float` | `float` |
-| `char_array` | `VAR_CAST_TYPE_CHAR_ARRAY` | `char*` | `string` |
 
 Constantes : `ARDUINO_TYPE_KEYS`, `ARDUINO_TYPE_TO_INTERNAL`, `ARDUINO_TYPE_TO_CPP`, `getInternalTypeForArduinoType()` dans `block_types.ts`.  
 Registre dynamique : `variables_cast: "__DYNAMIC__castType"` → fonction `castType` dans `block_types_registry.ts`.

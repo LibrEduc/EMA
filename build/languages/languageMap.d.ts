@@ -121,7 +121,6 @@ export interface LanguageItem {
     VAR_CAST_TYPE_LONG: string;
     VAR_CAST_TYPE_ULONG: string;
     VAR_CAST_TYPE_FLOAT: string;
-    VAR_CAST_TYPE_CHAR_ARRAY: string;
     CONTROLS_SWITCH_HELPURL: string;
     CONTROLS_SWITCH_VAR_TITLE: string;
     CONTROLS_SWITCH_VAR_TAIL: string;
@@ -158,6 +157,8 @@ export interface LanguageItem {
     VARIABLES_GET_ITEM: string;
     VARIABLES_DEFINE: string;
     ARRAY_UNE_LISTE: string;
+    ARRAY_WITH_AS_LIST: string;
+    ARRAY_WITH_CONTAINING: string;
     ARRAY_WITH_TOOLTIP: string;
     ARRAY_WITH_HELPURL: string;
     LIBRE_TOOLTIP: string;
