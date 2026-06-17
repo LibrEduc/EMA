@@ -8,15 +8,20 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <!-- CSP via meta: frame-ancestors is NOT supported in meta (browser warning) — set it on the server if needed. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https: ws: wss:; frame-src 'self' https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <% const faviconSvg = publicAsset("favicon.svg"); if (faviconSvg) { %>
-  <link rel="icon" type="image/svg+xml" href="<%= faviconSvg %>">
-  <% } %>
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png?v=2">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?v=2">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48x48.png?v=2">
+  <link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=2">
 </head>
 
 <body>
   <flex id="container_page" class="wrapper_global">
     <div class="divTableCell">
-      <div class="lang" key="HOME" id="title">µcBlockly</div>
+      <div id="title" class="app-title">
+        <img class="app-title__logo" src="assets/favicon-32x32.png?v=2" alt="" width="32" height="32" decoding="async">
+        <span class="lang" key="HOME">µcBlockly</span>
+      </div>
       <a href="https://github.com/A-S-T-U-C-E/ucBlockly" target="_blank">
         <div class="lang" key="ABOUT" data-title-key="ABOUT_TOOLTIP">About</div>
       </a>

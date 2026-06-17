@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import * as Blockly from "blockly";
 import { ArduinoGenerator } from "../src/generators/arduino/arduino_generator";
 import { controls_forEach } from "../src/generators/arduino/blocks/loops";
+import { controls_switch } from "../src/generators/arduino/blocks/logic";
 import { Array_with } from "../src/generators/arduino/blocks/array";
 import { math_number } from "../src/generators/arduino/blocks/math";
 import { resolveArduinoScalarVariableType } from "../src/generators/arduino/block_types";
@@ -24,6 +25,41 @@ import {
   tagVariableAsList,
 } from "../src/generators/arduino/variable_utils";
 import type { Block } from "blockly/core";
+
+test("controls_switch sans branche default ne génère pas default:", () => {
+  const generator = new ArduinoGenerator();
+  generator.getVariableName = (name: string) => name;
+  generator.valueToCode = (_block, name) => (name === "CASE0" ? "1" : "");
+  generator.statementToCode = (block, name) =>
+    name === "DO0" ? "  pinMode(LED_BUILTIN, OUTPUT);\n" : "";
+  const block = {
+    casebreakCount_: 0,
+    getFieldValue: (name: string) => (name === "SWVAR" ? "mode" : ""),
+    getInputTargetBlock: () => null,
+  } as unknown as Block;
+  const code = controls_switch(block, generator);
+  assert.match(code, /switch \(mode\)/);
+  assert.match(code, /case 1:/);
+  assert.doesNotMatch(code, /default:/);
+});
+
+test("controls_switch avec branche default génère default:", () => {
+  const generator = new ArduinoGenerator();
+  generator.getVariableName = (name: string) => name;
+  generator.valueToCode = (_block, name) => (name === "CASE0" ? "0" : "");
+  generator.statementToCode = (block, name) => {
+    if (name === "DO0") return "  digitalWrite(LED_BUILTIN, HIGH);\n";
+    if (name === "DEFAULT") return "  digitalWrite(LED_BUILTIN, LOW);\n";
+    return "";
+  };
+  const block = {
+    casebreakCount_: 0,
+    getFieldValue: (name: string) => (name === "SWVAR" ? "valeur" : ""),
+    getInputTargetBlock: (name: string) => (name === "DEFAULT" ? {} : null),
+  } as unknown as Block;
+  const code = controls_switch(block, generator);
+  assert.match(code, /default:\n  digitalWrite\(LED_BUILTIN, LOW\)/);
+});
 
 test("Array_with sans éléments ne génère pas int item[] = {0, 0}", () => {
   const generator = new ArduinoGenerator();

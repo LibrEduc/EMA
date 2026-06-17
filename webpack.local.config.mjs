@@ -105,7 +105,7 @@ const config = {
         },
         {
           from: path.resolve(__dirname, "public/assets"),
-          to: "assets/[path][name].[contenthash][ext]",
+          to: "assets/[name][ext]",
           noErrorOnMissing: true,
         },
         {

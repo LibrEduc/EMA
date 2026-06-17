@@ -48,10 +48,25 @@ flex>flex-resizer {
 
 .divTableCell div {
   display: inline-block;
-  padding: 10px;
+  padding: 5px;
   text-align: center;
   color: var(--topbar-fg);
   font-family: arial, sans-serif;
+}
+
+#title.app-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  vertical-align: middle;
+}
+
+#title.app-title .app-title__logo {
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 /* Group plugin options (text + checkbox) so they stay together

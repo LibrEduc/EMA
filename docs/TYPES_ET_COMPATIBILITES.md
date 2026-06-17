@@ -1,4 +1,10 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # Types et compatibilités — µcBlockly
+
+</div>
 
 Ce document décrit le système de typage des blocs : types internes, règles de connexion, pont avec les checks Blockly, et bloc de cast `variables_cast`.
 
@@ -53,6 +59,12 @@ La cible inclut toujours elle-même. Une connexion est valide si le type **sourc
 | `null` | `null` | Blocs sans valeur typée |
 
 **Types exclus des menus variables** : `null`, `array` (les listes sont typées par leur contenu).
+
+### Sentinelle `__NO_TYPE__` et listes vides
+
+- **`__NO_TYPE__`** : type Blockly interne pour « pas encore typé » (variable non initialisée, liste vide, sortie de bloc sans inférence). Les connexions typées sont bloquées tant que le type n’est pas résolu.
+- **Listes vides** : pas de valeurs `{0, 0}` par défaut ; avertissement utilisateur via `ARRAY_LIST_UNTYPED_WARNING` (`array_messages.ts`, `shared.ts`).
+- **Génération** : si le type d’élément reste `__NO_TYPE__`, le générateur retombe sur `int` pour le C++ (`arduino_generator.ts`, `blocks/array.ts`).
 
 Fonctions associées :
 
@@ -181,6 +193,7 @@ Après modification, vérifier :
 ```bash
 npm run build:lib
 npm run lint
+npm run test
 ```
 
 Et tester manuellement les connexions dans l’éditeur (flyout variables, cast, nombres, comparaisons).

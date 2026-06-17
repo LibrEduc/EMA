@@ -1,46 +1,46 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # Répartition des fonctions entre fichiers – Analyse et améliorations
 
-## 1. Duplications identifiées
+</div>
 
-### 1.1 `getBlocklyMsg` / `getBlocklyMsgOr`
+## 1. Duplications identifiées (historique — corrigées en 2.1.5)
+
+Les sections ci-dessous décrivent d’anciennes duplications **déjà résolues**. Voir §4 « Plan d’action ».
+
+### 1.1 `getBlocklyMsg` / `getBlocklyMsgOr` ✅
 
 | Fichier | Rôle |
 |--------|------|
 | **`categories/blockly/shared.ts`** | Source canonique (exportée). |
-| **`generators/arduino/configure_standard_blocks.ts`** | Copies locales (l.70–94), utilisées pour tooltips et dropdown procédures. |
-| **`generators/arduino/typed_variables_flyout.ts`** | Copie locale de `getBlocklyMsg` (l.18–22), pour "NEW_VARIABLE". |
-
-**Recommandation :** Faire importer `getBlocklyMsg` et `getBlocklyMsgOr` depuis `shared` dans `configure_standard_blocks` et `typed_variables_flyout`, et supprimer les copies locales.
+| **`generators/arduino/configure_standard_blocks.ts`** | Importe depuis `shared`. |
+| **`generators/arduino/typed_variables_flyout.ts`** | Importe depuis `shared`. |
 
 ---
 
-### 1.2 `getVariableTypeLabel` / options de dropdown type variable
+### 1.2 `getVariableTypeLabel` / options de dropdown type variable ✅
 
 | Fichier | Rôle |
 |--------|------|
-| **`categories/blockly/variables.ts`** | `getVariableTypeLabel`, `getVariableTypeDropdownOptions` (locaux), utilisés pour `variables_set_type` et `variables_define`. |
-| **`generators/arduino/configure_standard_blocks.ts`** | Même logique en local : `getVariableTypeLabel`, `getTypeDropdownOptions` (l.95–103), pour les types d’arguments de procédures. |
-
-**Recommandation :** Exporter `getVariableTypeLabel` et `getVariableTypeDropdownOptions` depuis `variables.ts`, les réutiliser dans `configure_standard_blocks` et supprimer les doublons.
+| **`categories/blockly/variables.ts`** | `getVariableTypeLabel`, `getVariableTypeDropdownOptions` (exportés). |
+| **`generators/arduino/configure_standard_blocks.ts`** | Importe `getVariableTypeDropdownOptions` depuis `variables.ts`. |
 
 ---
 
-### 1.3 Type `VariableWithMutableType`
+### 1.3 Type `VariableWithMutableType` ✅
 
 | Fichier | Rôle |
 |--------|------|
 | **`categories/blockly/shared.ts`** | Type exporté (avec `__ucbManualType`, etc.). |
-| **`generators/arduino/configure_standard_blocks.ts`** | Définition locale équivalente (l.75–80). |
-
-**Recommandation :** Importer `VariableWithMutableType` depuis `shared` dans `configure_standard_blocks` et supprimer la définition locale.
+| **`generators/arduino/configure_standard_blocks.ts`** | Import depuis `shared`. |
 
 ---
 
-### 1.4 Wrapper « set type + manuel »
+### 1.4 Wrapper « set type + manuel » ✅
 
-Dans `configure_standard_blocks`, un wrapper appelle `variable_utils.setVariableType` puis fixe `__ucbManualType = true` (l.81–88). La même idée apparaît dans `variables_set_type` (onchange) et dans `handleVariablesSetChange` (shared).
-
-**Recommandation :** Introduire un helper partagé, par ex. `setVariableTypeAndMarkManual(variable, type)` dans `shared` (ou `variable_utils` si on y centralise `__ucbManualType`), et l’utiliser dans `configure_standard_blocks`, `variables_set_type` et éventuellement `handleVariablesSetChange` pour éviter la duplication de logique.
+Helper **`setVariableTypeAndMarkManual`** dans `shared`, utilisé dans `configure_standard_blocks` et `variables_set_type`.
 
 ---
 
@@ -102,6 +102,12 @@ Beaucoup de définitions de blocs (get, set, local, const, init, define, set_typ
 ## 5. Dépendances actuelles (grosses lignes)
 
 - **`categories/blockly`** → `generators/arduino` (shared utilise block_types_registry, variable_utils, debug).  
-- **`generators/arduino`** → `categories/blockly` : uniquement si on fait importer `shared` / `variables` depuis `configure_standard_blocks` et `typed_variables_flyout`. Boucle évitée : pas d’import categories → generators dans les mêmes chaînes que generators → categories.
+- **`generators/arduino`** → **`categories/blockly`** : imports limités et explicites (`shared`, `variables`) depuis `configure_standard_blocks` et `typed_variables_flyout`. Documenté dans [ARCHITECTURE.md](./ARCHITECTURE.md) et [README.md](../README.md).
 
-Souhaitable de documenter dans le README ou l’architecture que **`generators/arduino` peut dépendre de `categories/blockly`** pour i18n et helpers variables, de façon limitée et explicite.
+---
+
+## Voir aussi
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — organisation du dépôt et scripts npm ;
+- [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) — typage des blocs ;
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — guide contributeur.

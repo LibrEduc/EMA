@@ -1,7 +1,14 @@
 # CHANGELOG.md
 ## 2.1.5, 2026-06-13
-- aupdate with Blockly v12.5
+- update with Blockly v12.5
 - meilleure prise en charge LTR / RTL pour les libellés des options
+- favicon et icônes dérivées du logo (`npm run generate-favicon`)
+- script de conversion Blockly@rduino (`npm run convert-rduino`) — voir `docs/CONVERT_RDUINO.md`
+- tests de génération (`npm test`) et vérification des traductions (`npm run check-translations`)
+- `controls_switch` : mutateur block-plus-minus ; `default:` émis seulement si le cas a du contenu
+- listes vides : plus de `{0,0}` ; type `__NO_TYPE__` et avertissement `ARRAY_LIST_UNTYPED_WARNING`
+- déduplication i18n / types variables (`shared`, `variables` → `configure_standard_blocks`)
+- documentation mise à jour (README et tous les fichiers `docs/`)
 
 ## 2.1.1, 2026-03-13
 - amélioration de la barre d’options (groupement des plugins, spans/checkbox alignés)

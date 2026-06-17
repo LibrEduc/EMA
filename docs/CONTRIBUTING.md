@@ -1,4 +1,10 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # Contributing to µcBlockly
+
+</div>
 
 Thank you for considering contributing. This short guide will help you get started.
 
@@ -16,10 +22,15 @@ Thank you for considering contributing. This short guide will help you get start
    - `npm run build` for production build  
    - `npm run docs` to generate API documentation (TypeDoc) in `docs/api/` — see [TYPEDOC.md](./TYPEDOC.md)
 
-3. **Code style**  
+3. **Quality checks before a PR**  
+   - `npm run lint` — ESLint (including `eslint-plugin-tsdoc` for comment syntax)  
+   - `npm run test` — Arduino generator and Blockly@rduino converter tests  
+   - `npm run check-translations` — after editing `src/languages/`  
+   - `npm run build:lib` — ensure TypeScript compiles  
+
+4. **Code style**  
    - Documentation comments (**TSDoc**, consumed by [TypeDoc](https://typedoc.org/)) in **English**  
    - Use `@packageDocumentation`, `@description`, `@remarks`, `@param`, `@returns` for public APIs (see [TYPEDOC.md](./TYPEDOC.md))  
-   - Run `npm run lint` and fix reported issues (`eslint-plugin-tsdoc` validates comment syntax)  
 
 ## Common tasks
 
@@ -30,7 +41,9 @@ Thank you for considering contributing. This short guide will help you get start
 | Add block types / compatibility | `src/generators/arduino/block_types/`, `block_types.ts`, `block_types_registry.ts` — [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Change toolbox or categories | `src/toolbox.ts` |
 | Add a board or change pins | `src/boards.ts` |
-| Add or edit a language | `src/languages/` |
+| Add or edit a language | `src/languages/` — then `npm run check-translations` |
+| Convert Blockly@rduino project | `npm run convert-rduino` — see [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) |
+| Regenerate functions inventory | `npm run extract-functions` → `docs/functions-list.md` |
 
 ## Reporting issues and pull requests
 

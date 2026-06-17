@@ -1,4 +1,10 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # µcBlockly – Project architecture and contributor guide
+
+</div>
 
 This document helps new contributors understand the codebase layout, conventions, and where to change things.
 
@@ -64,6 +70,23 @@ src/
     └── board_messages.ts       # Board block messages (mergeBoardMessages)
 ```
 
+Hors `src/` :
+
+```
+scripts/                        # Outils CLI (maintenance, conversion, assets)
+├── check-translations.cjs      # Cohérence des clés i18n
+├── convert-rduino-workspace.mjs # Blockly@rduino XML → JSON µcBlockly
+├── generate-favicon.mjs        # Favicon depuis logo_µcBlockly.png
+├── extract-functions.js        # Régénère docs/functions-list.md
+└── lib/                        # Modules partagés (rduino-block-map, rduino-xml-to-ucb-json)
+
+tests/                          # Tests Node (tsx --test)
+├── generators.test.ts          # Génération Arduino (switch, listes, etc.)
+└── rduino-convert.test.ts      # Convertisseur Blockly@rduino
+```
+
+Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Blockly@rduino.
+
 ## Conventions
 
 - **Comments (TSDoc / TypeDoc)**: In English. Use `@description`, `@remarks`, `@param`, `@returns` for public APIs. File-level `@packageDocumentation` (with optional `@module`) describes the module for the generated API site. Avoid legacy **`@fileoverview`** (JSDoc); fold that text into `@remarks` or `@description`.
@@ -94,10 +117,25 @@ src/
 | Theme / colours | `options.ts`, `theme_black_and_white.ts`, `theme_seshat.ts` |
 | Patches to Blockly core | `blockly_patches.ts` |
 
-## Build and docs
+## Build, quality, and docs
 
-- `npm run build` – compile TypeScript and bundle (Webpack).
-- `npm run docs` – generate API documentation with **TypeDoc** into `docs/api/` (landing page config: [TYPEDOC.md](./TYPEDOC.md), [typedoc.json](../typedoc.json)).
-- `npm run dev` – development server with hot reload.
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Development server with hot reload (Webpack) |
+| `npm run build` | Production build (TypeScript + Webpack) |
+| `npm run build:lib` | TypeScript compile only → `build/` |
+| `npm run lint` | ESLint on `src/` (auto-fix) |
+| `npm run test` | Generator and Blockly@rduino converter tests (`tests/`) |
+| `npm run check-translations` | Validate language files consistency |
+| `npm run convert-rduino` | Convert Blockly@rduino workspace XML to µcBlockly JSON |
+| `npm run generate-favicon` | Regenerate favicons from `public/assets/logo_µcBlockly.png` |
+| `npm run extract-functions` | Regenerate `docs/functions-list.md` from exported symbols |
+| `npm run docs` | Generate **TypeDoc** API site in `docs/api/` ([TYPEDOC.md](./TYPEDOC.md), [typedoc.json](../typedoc.json)) |
+
+### Static assets (`public/`)
+
+- **`public/assets/logo_µcBlockly.png`** — application logo (also favicon source).
+- **`public/index.html`** — shell page; favicon links point to 48×48 PNG and ICO in `public/assets/`.
+- Other assets (CSS, fonts, Blockly media) live under `public/` and are copied or referenced by Webpack.
 
 Keeping comments, headers, and this architecture doc up to date will help new contributors navigate and improve the project.

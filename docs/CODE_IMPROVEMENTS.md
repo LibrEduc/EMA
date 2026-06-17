@@ -1,4 +1,10 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # Analyse du code source – pistes d’amélioration et d’optimisation
+
+</div>
 
 Ce document résume les points identifiés lors d’une revue du code (commentaires, structure, typage, URL, dépendances). Les corrections déjà appliquées sont indiquées.
 
@@ -123,4 +129,11 @@ Tous les anciens appels directs ont été remplacés par `pushStateReplaceSearch
 | Moyenne | Extraire `syncUiPaletteTheme` (et éventuellement d’autres gros blocs) de `index.ts` pour alléger le fichier. |
 | Basse | Regrouper les feature flags dans un module de config. |
 | Basse | Remplacer le `as any` par un type plus précis si l’API Blockly le permet. |
-| Basse | Introduire des tests ciblés (URL, types, générateurs). |
+| ~~Basse~~ ✓ | ~~Introduire des tests ciblés (URL, types, générateurs)~~ — `npm run test` (`tests/generators.test.ts`, `tests/rduino-convert.test.ts`). Étendre la couverture si besoin (URL, etc.). |
+
+---
+
+## Voir aussi
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) — structure du projet ;
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — contrôles qualité avant PR (`lint`, `test`, `check-translations`).

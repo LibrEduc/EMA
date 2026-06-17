@@ -182,7 +182,18 @@ function main() {
   });
   
   // Generate markdown output
-  let markdown = '# Liste des fonctions exportées\n\n';
+  const header = `<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
+# Liste des fonctions exportées
+
+</div>
+
+> **Note :** inventaire généré par \`npm run extract-functions\`. La documentation API interactive : \`npm run docs\` → [TYPEDOC.md](./TYPEDOC.md).
+
+`;
+  let markdown = header;
   markdown += `Total: ${allFunctions.length} fonctions\n\n`;
   markdown += '---\n\n';
   

@@ -1,4 +1,10 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # Documentation API — µcBlockly
+
+</div>
 
 Ce site est généré avec **[TypeDoc](https://typedoc.org/)** à partir des sources TypeScript dans `src/`.
 

@@ -82,7 +82,15 @@ let config = {
   },
   // Enable webpack-dev-server to get hot refresh of the app.
   devServer: {
-    static: "./build",
+    static: [
+      {
+        directory: path.resolve(__dirname, "build"),
+      },
+      {
+        directory: path.resolve(__dirname, "public/assets"),
+        publicPath: "/assets",
+      },
+    ],
     compress: true,
   },
   module: {
@@ -197,7 +205,7 @@ let config = {
         },
         {
           from: path.resolve(__dirname, "public/assets"),
-          to: "assets/[path][name].[contenthash][ext]",
+          to: "assets/[name][ext]",
           noErrorOnMissing: true,
         },
         {

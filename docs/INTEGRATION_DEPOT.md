@@ -1,4 +1,10 @@
+<div align="center">
+
+![µcBlockly](../public/assets/logo_µcBlockly.png)
+
 # Intégrer le dépôt µcBlockly dans un autre projet
+
+</div>
 
 Ce document décrit **comment intégrer le dépôt µcBlockly** (tel quel, sans tout dupliquer) dans un autre projet qui s’appuierait dessus — par exemple une application qui embarque l’éditeur Blockly Arduino dans une page ou un onglet.
 

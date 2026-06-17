@@ -228,7 +228,11 @@ export function controls_switch(
     code += "case " + argument + ":\n" + branch + "  break;\n";
   }
   const defaultBranch = generator.statementToCode(block, "DEFAULT");
-  code += "default:\n" + defaultBranch + "  break;\n";
+  const hasDefaultBranch =
+    !!block.getInputTargetBlock?.("DEFAULT") || defaultBranch.trim().length > 0;
+  if (hasDefaultBranch) {
+    code += "default:\n" + defaultBranch + "  break;\n";
+  }
   code += "}\n";
   return code;
 }
