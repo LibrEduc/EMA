@@ -171,7 +171,6 @@ const basic_toolbox_source: ToolboxConfiguration = {
             { 'kind': 'block', 'type': 'board_base_inout_analog_read' },
             { 'kind': 'block', 'type': 'board_base_inout_highlow' },
             { 'kind': 'block', 'type': 'board_base_inout_map' },
-            { 'kind': 'block', 'type': 'board_base_inout_angle' },
             { 'kind': 'block', 'type': 'board_base_inout_pin_mode' },
             { 'kind': 'block', 'type': 'board_base_inout_pulsein' },
             { 'kind': 'block', 'type': 'board_base_inout_pulsein_timeout', 'inputs': { 'TIMEOUT': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 1000000 } } } } },

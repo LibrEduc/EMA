@@ -133,11 +133,6 @@ export function board_base_inout_map(block: Block, generator: ArduinoGenerator):
   return [code, Order.NONE];
 }
 
-export function board_base_inout_angle(block: Block, _generator: ArduinoGenerator): [string, Order] {
-  const angle = block.getFieldValue("ANGLE") || "90";
-  return [angle, Order.ATOMIC];
-}
-
 export function board_base_inout_tone(block: Block, generator: ArduinoGenerator): string {
   const pin = block.getFieldValue("PIN");
   const valueNum = generator.valueToCode(block, "NUM", Order.ATOMIC);

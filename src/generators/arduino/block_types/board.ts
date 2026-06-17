@@ -30,7 +30,6 @@ export const BOARD_BLOCK_TYPES = {
   board_base_inout_highlow: "bool",
   board_base_inout_analog_read: "int",
   board_base_inout_map: "int",
-  board_base_inout_angle: "int",
   board_base_time_millis: "int",
   board_base_inout_pulsein: "int",
   board_base_inout_pulsein_timeout: "int",

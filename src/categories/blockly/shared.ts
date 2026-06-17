@@ -519,6 +519,69 @@ export const revalidateProcedureCallBlocks = (
   }
 };
 
+/** Value inputs on board blocks that accept integers only. */
+const BOARD_INT_ONLY_VALUE_INPUTS: Readonly<Record<string, readonly string[]>> = {
+  board_base_inout_analog_write: ["PWM"],
+  board_base_inout_map: ["NUM", "DMAX"],
+  board_base_inout_tone: ["NUM"],
+};
+
+const isBoardIntInputChangeEvent = (event: Blockly.Events.Abstract): boolean =>
+  event.type === Blockly.Events.BLOCK_CHANGE ||
+  event.type === Blockly.Events.BLOCK_CREATE ||
+  event.type === Blockly.Events.BLOCK_MOVE ||
+  event.type === Blockly.Events.BLOCK_FIELD_INTERMEDIATE_CHANGE;
+
+/**
+ * Enforces integer-only values on board block inputs (PWM, map, tone frequency).
+ */
+export const handleBoardIntInputBlockChange = (
+  block: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void => {
+  const inputNames = BOARD_INT_ONLY_VALUE_INPUTS[block.type];
+  if (!inputNames || !isBoardIntInputChangeEvent(event)) {
+    return;
+  }
+  const blockEvent = event as Blockly.Events.Abstract & { blockId?: string };
+  if (
+    event.type === Blockly.Events.BLOCK_CREATE &&
+    blockEvent.blockId != null &&
+    blockEvent.blockId !== block.id
+  ) {
+    return;
+  }
+  let warning: string | null = null;
+  for (const inputName of inputNames) {
+    const input = block.getInput(inputName);
+    if (input?.connection) {
+      input.connection.setCheck(getBlocklyCompatibleChecks("int"));
+    }
+    const connected = input?.connection?.targetBlock() || null;
+    if (!connected) {
+      continue;
+    }
+    const sourceType = inferProcedureCallArgSourceType(connected);
+    if (sourceType && !checkTypeCompatibility(sourceType, "int")) {
+      warning = getTypeMismatchWarningText("int", sourceType);
+      input?.connection?.disconnect();
+    }
+  }
+  block.setWarningText(warning);
+};
+
+/** Revalidates integer-only inputs on board blocks after workspace changes. */
+export const revalidateBoardIntInputBlocks = (
+  workspace: Blockly.Workspace,
+  event: Blockly.Events.Abstract,
+): void => {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (BOARD_INT_ONLY_VALUE_INPUTS[block.type]) {
+      handleBoardIntInputBlockChange(block, event);
+    }
+  }
+};
+
 /** True when the block is in setup/loop/global scope (not inside a procedure body). */
 export const isVariableUseOutsideProcedureBody = (block: Blockly.Block): boolean => {
   return resolveLocalVariableScope(block).kind !== "procedure";

@@ -28,12 +28,18 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldAngle } from "@blockly/field-angle";
 import { FieldSlider } from "@blockly/field-slider";
 import { DEFAULT_BOARD_ID, getBoardDropdownOptions } from "../../boards";
-import { getBlocklyMsgOr } from "./shared";
+import { getBlocklyMsgOr, getBlocklyCompatibleChecks, handleBoardIntInputBlockChange } from "./shared";
 
 const BOARD_STYLE = "board_blocks";
+
+const boardIntInputOnchange = function (
+  this: Blockly.Block,
+  event: Blockly.Events.Abstract,
+): void {
+  handleBoardIntInputBlockChange(this, event);
+};
 
 const FALLBACK_BOARD_FOR_DROPDOWNS = "arduino_uno";
 
@@ -186,13 +192,14 @@ export const defineBoardBlocks = (): void => {
         .appendField(new Blockly.FieldDropdown(() => getPinDropdown("dropdownPWM")), "PIN");
       this.appendValueInput("PWM")
         .appendField(getBlocklyMsgOr("ARDUINO_INOUT_ANALOG_WRITE_INPUT2", "value"))
-        .setCheck("Number");
+        .setCheck(getBlocklyCompatibleChecks("int"));
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setTooltip(getBlocklyMsgOr("ARDUINO_INOUT_ANALOG_WRITE_TOOLTIP", "Write a PWM value (0-255) to a pin."));
       this.setStyle(BOARD_STYLE);
     },
+    onchange: boardIntInputOnchange,
   };
 
   Blockly.Blocks["board_base_inout_analog_write_slider"] = {
@@ -307,30 +314,20 @@ export const defineBoardBlocks = (): void => {
     },
   };
 
-  Blockly.Blocks["board_base_inout_angle"] = {
-    init(this: Blockly.Block) {
-      this.appendDummyInput()
-        .appendField(getBlocklyMsgOr("ARDUINO_BASE_ANGLE", "angle"))
-        .appendField(new FieldAngle(90), "ANGLE");
-      this.setOutput(true, "Number");
-      this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_ANGLE_TOOLTIP", "Angle value (0-360 degrees)."));
-      this.setStyle(BOARD_STYLE);
-    },
-  };
-
   Blockly.Blocks["board_base_inout_map"] = {
     init(this: Blockly.Block) {
       this.appendValueInput("NUM")
         .appendField(getBlocklyMsgOr("ARDUINO_BASE_MAP1", "map [ value , 0 , 1024 , 0 , "))
-        .setCheck("Number");
+        .setCheck(getBlocklyCompatibleChecks("int"));
       this.appendValueInput("DMAX")
         .appendField(getBlocklyMsgOr("ARDUINO_BASE_MAP2", "max ]"))
-        .setCheck("Number");
+        .setCheck(getBlocklyCompatibleChecks("int"));
       this.setInputsInline(true);
       this.setOutput(true);
       this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_MAP_TOOLTIP", "Map a value from one range to another (e.g. 0-1023 to 0-180)."));
       this.setStyle(BOARD_STYLE);
     },
+    onchange: boardIntInputOnchange,
   };
 
   Blockly.Blocks["board_base_inout_tone"] = {
@@ -341,13 +338,14 @@ export const defineBoardBlocks = (): void => {
       this.appendValueInput("NUM")
         .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(getBlocklyMsgOr("ARDUINO_TONE_INPUT2", "frequency (Hz)"))
-        .setCheck("Number");
+        .setCheck(getBlocklyCompatibleChecks("int"));
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setTooltip(getBlocklyMsgOr("ARDUINO_TONE_TOOLTIP", "Play a tone at the given frequency on the pin."));
       this.setStyle(BOARD_STYLE);
     },
+    onchange: boardIntInputOnchange,
   };
 
   Blockly.Blocks["board_base_inout_notone"] = {

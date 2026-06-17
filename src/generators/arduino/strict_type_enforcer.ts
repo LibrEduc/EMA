@@ -30,6 +30,7 @@
 import * as Blockly from "blockly";
 import {
   handleVariablesSetChange,
+  revalidateBoardIntInputBlocks,
   revalidateLocalWrapperBlocks,
   revalidateProcedureCallBlocks,
   revalidateTypedNumericBlocks,
@@ -99,6 +100,7 @@ export function installStrictTypeEnforcer(
       revalidateLocalWrapperBlocks(workspace, e);
       revalidateTypedNumericBlocks(workspace, e);
       revalidateProcedureCallBlocks(workspace, e);
+      revalidateBoardIntInputBlocks(workspace, e);
       const all = workspace.getAllBlocks(false);
       for (const block of all) {
         if (block.type === "variables_set" || block.type === "variables_set_dynamic") {
