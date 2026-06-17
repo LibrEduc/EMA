@@ -1,7 +1,6 @@
 <div align="center">
 
-<img src="public/assets/logo_µcBlockly.png" alt="µcBlockly" width="32" height="32" style="vertical-align: middle;">
-
+<img src="public/assets/logo_µcBlockly.png" alt="µcBlockly" width="128" height="128" style="vertical-align: middle;">
 # µcBlockly
 
 **Programmation visuelle de microcontrôleurs avec Blockly**
