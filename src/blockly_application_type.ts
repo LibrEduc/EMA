@@ -56,6 +56,7 @@ import { registerTypedVariablesCategory } from "./generators/arduino/typed_varia
 import { debugLog } from "./generators/arduino/debug";
 import { normalizeVariableType } from "./generators/arduino/variable_utils";
 import {
+  patchBlockChangeForProcedureCompat,
   patchBlocklyDefensive,
   patchConnectionCheckerForConstBlock,
   patchFieldVariableValidation,
@@ -77,6 +78,7 @@ if (ENABLE_STRICT_CONNECTION_CHECKER) {
   registerStrictConnectionCheckerInRegistry();
 }
 patchConnectionCheckerForConstBlock();
+patchBlockChangeForProcedureCompat();
 patchBlocklyDefensive();
 
 import { µcB_codeEditor } from "./code_editor";

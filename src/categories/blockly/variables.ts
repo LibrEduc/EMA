@@ -55,6 +55,7 @@ import {
   getUntypedWarningText,
   handleVariablesSetChange,
   inferConnectedValueType,
+  resolveVariableTypeForBlock,
   setVariableTypeAndMarkManual,
   shouldSkipVariableChange,
   VariableWithMutableType,
@@ -186,24 +187,16 @@ export const defineVariablesGetDynamicBlock = (): void => {
       }
 
       try {
-        const variable = this.workspace.getVariableMap().getVariableById(variableId);
-        if (variable) {
-          const varType = variable.getType();
-          if (!varType) {
-            // Variable has no type - block all typed connections
-            // Use '__NO_TYPE__' to prevent connections to typed inputs (like Boolean)
-            this.setOutput(true, "__NO_TYPE__");
-          } else if (varType === LIST_VARIABLE_TYPE) {
-            this.setOutput(true, getListVariableOutputCheck());
-          } else {
-            const checks = getBlocklyCompatibleChecks(
-              getInternalTypeForArduinoType(varType),
-            );
-            this.setOutput(true, checks);
-          }
-        } else {
-          // Variable not found - block all typed connections
+        const varType = resolveVariableTypeForBlock(this, variableId);
+        if (!varType) {
           this.setOutput(true, "__NO_TYPE__");
+        } else if (varType === LIST_VARIABLE_TYPE) {
+          this.setOutput(true, getListVariableOutputCheck());
+        } else {
+          const checks = getBlocklyCompatibleChecks(
+            getInternalTypeForArduinoType(varType),
+          );
+          this.setOutput(true, checks);
         }
       } catch (error) {
         debugLog("Error updating variable type check:", error);
@@ -336,9 +329,19 @@ export const defineVariablesLocalBlock = (): void => {
         this.getInputTargetBlock("VALUE"),
       );
       if (connectedType) {
-        this.setOutput(true, connectedType);
+        this.setOutput(true, getBlocklyCompatibleChecks(connectedType));
       } else {
         this.setOutput(true, null);
+      }
+      const parent = this.getParent();
+      if (
+        parent &&
+        (parent.type === "variables_set_dynamic" || parent.type === "variables_set")
+      ) {
+        const parentOnchange = Blockly.Blocks[parent.type]?.onchange;
+        if (typeof parentOnchange === "function") {
+          parentOnchange.call(parent, event);
+        }
       }
     },
     getBlockType: function (this: Blockly.Block): string | null {

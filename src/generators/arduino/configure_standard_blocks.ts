@@ -41,10 +41,16 @@ import {
   unifyLoopBoundTypes,
   isLoopCounterVariableCompatible,
   syncNumericVariableType,
+  getBlocklyCompatibleChecks,
+  isVariableUsedOutsideProcedureBodies,
+  revalidateVariableBlocksForId,
   getTypeMismatchWarningText,
   isBlockOnMainWorkspace,
   resolveMathNumberBlockType,
   revalidateTypedNumericBlocks,
+  revalidateLocalWrapperBlocks,
+  revalidateProcedureCallBlocks,
+  syncProcedureCallArgInputChecks,
 } from "../../categories/blockly/shared";
 import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
 import { isArduinoScalarType } from "./block_types";
@@ -97,6 +103,7 @@ export function configureStandardBlocks(): void {
       if (!isBlockOnMainWorkspace(this) || !this.workspace) {
         return;
       }
+      revalidateLocalWrapperBlocks(this.workspace, event);
       revalidateTypedNumericBlocks(this.workspace, event);
     };
   }
@@ -404,6 +411,60 @@ export function configureStandardBlocks(): void {
     addVarInput_?: (name: string, argId: string) => void;
   };
 
+  const attachProcedureParameterTypeDropdown = (
+    block: Blockly.Block,
+    argId: string,
+    options?: { fireEvents?: boolean },
+  ): void => {
+    const proc = block as ProcedureBlockWithArgs;
+    const input = block.getInput(argId);
+    if (!input) {
+      return;
+    }
+    const typeFieldName = `${argId}_TYPE`;
+    const fireEvents = options?.fireEvents ?? true;
+    let dropdown = input.fieldRow.find(
+      (field) => field.name === typeFieldName,
+    ) as Blockly.FieldDropdown | undefined;
+    if (!dropdown) {
+      dropdown = new Blockly.FieldDropdown(
+        getVariableTypeDropdownOptions,
+        (value) => {
+          const selectedType = value || "int";
+          const argDatum = proc.argData_?.find((elem) => elem.argId === argId);
+          if (argDatum?.model) {
+            if (
+              !isVariableUsedOutsideProcedureBodies(
+                block.workspace,
+                argDatum.model.getId(),
+              )
+            ) {
+              setVariableTypeAndMarkManual(argDatum.model, selectedType);
+            }
+            Blockly.Procedures.mutateCallers(block);
+            revalidateProcedureCallBlocks(block.workspace);
+            revalidateVariableBlocksForId(block.workspace, argDatum.model.getId());
+          }
+          return selectedType;
+        },
+      );
+      const nameIndex = input.fieldRow.findIndex((field) => field.name === argId);
+      const insertIndex = nameIndex >= 0 ? nameIndex + 1 : input.fieldRow.length;
+      input.insertFieldAt(insertIndex, dropdown, typeFieldName);
+    }
+
+    const argDatum = proc.argData_?.find((elem) => elem.argId === argId);
+    const modelType = argDatum?.model?.getType?.() || "";
+    const currentType =
+      modelType && modelType !== "__NO_TYPE__" && isArduinoScalarType(modelType)
+        ? modelType
+        : "int";
+    dropdown.setValue(currentType, fireEvents);
+    if (argDatum?.model && !isVariableUsedOutsideProcedureBodies(block.workspace, argDatum.model.getId())) {
+      setVariableTypeAndMarkManual(argDatum.model, currentType);
+    }
+  };
+
   const patchProcedurePlusMinusTypes = function (this: Blockly.Block) {
     const typed = this as ProcedureBlockWithArgs;
     if (typed.__typedPlusMinus) {
@@ -414,76 +475,19 @@ export function configureStandardBlocks(): void {
     const originalAddVarInput = typed.addVarInput_;
     if (typeof originalAddVarInput === "function") {
       typed.addVarInput_ = function (name: string, argId: string) {
-        originalAddVarInput.call(this, name, argId);
-        const input = this.getInput(argId);
-        if (!input) {
-          return;
+        Blockly.Events.disable();
+        try {
+          originalAddVarInput.call(this, name, argId);
+          attachProcedureParameterTypeDropdown(this, argId, { fireEvents: false });
+        } finally {
+          Blockly.Events.enable();
         }
-        const typeFieldName = `${argId}_TYPE`;
-        if (input.fieldRow.some((field) => field.name === typeFieldName)) {
-          return;
-        }
-        const dropdown = new Blockly.FieldDropdown(
-          getVariableTypeDropdownOptions,
-          (value) => {
-            const selectedType = value || "int";
-            const argDatum = (this as ProcedureBlockWithArgs).argData_?.find(
-              (elem) => elem.argId === argId,
-            );
-            if (argDatum?.model) {
-              setVariableTypeAndMarkManual(argDatum.model, selectedType);
-              Blockly.Procedures.mutateCallers(this);
-            }
-            return selectedType;
-          },
-        );
-        const nameIndex = input.fieldRow.findIndex((field) => field.name === argId);
-        const insertIndex = nameIndex >= 0 ? nameIndex + 1 : input.fieldRow.length;
-        input.insertFieldAt(insertIndex, dropdown, typeFieldName);
-
-        const argDatum = (this as ProcedureBlockWithArgs).argData_?.find(
-          (elem) => elem.argId === argId,
-        );
-        const modelType = argDatum?.model?.getType?.() || "";
-        const currentType =
-          modelType && modelType !== "__NO_TYPE__" && isArduinoScalarType(modelType)
-            ? modelType
-            : "int";
-        dropdown.setValue(currentType);
       };
     }
 
     if (typed.argData_ && typed.argData_.length > 0) {
       for (const argDatum of typed.argData_) {
-        const argId = argDatum.argId;
-        const input = this.getInput(argId);
-        if (!input) {
-          continue;
-        }
-        const typeFieldName = `${argId}_TYPE`;
-        if (input.fieldRow.some((field) => field.name === typeFieldName)) {
-          continue;
-        }
-        const dropdown = new Blockly.FieldDropdown(
-          getVariableTypeDropdownOptions,
-          (value) => {
-            const selectedType = value || "int";
-            if (argDatum.model) {
-              setVariableTypeAndMarkManual(argDatum.model, selectedType);
-              Blockly.Procedures.mutateCallers(this);
-            }
-            return selectedType;
-          },
-        );
-        const nameIndex = input.fieldRow.findIndex((field) => field.name === argId);
-        const insertIndex = nameIndex >= 0 ? nameIndex + 1 : input.fieldRow.length;
-        input.insertFieldAt(insertIndex, dropdown, typeFieldName);
-        const modelType = argDatum.model?.getType?.() || "";
-        const currentType =
-          modelType && modelType !== "__NO_TYPE__" && isArduinoScalarType(modelType)
-            ? modelType
-            : "int";
-        dropdown.setValue(currentType);
+        attachProcedureParameterTypeDropdown(this, argDatum.argId, { fireEvents: false });
       }
     }
   };
@@ -595,6 +599,12 @@ export function configureStandardBlocks(): void {
         if (!argModels || argModels.length === 0) {
           return;
         }
+        const proc = this as ProcedureBlockWithArgs;
+        for (const argDatum of proc.argData_ || []) {
+          attachProcedureParameterTypeDropdown(this, argDatum.argId, {
+            fireEvents: false,
+          });
+        }
         const typeByName = new Map<string, string>();
         let argBlock = container.getInputTargetBlock("STACK");
         while (argBlock && !argBlock.isInsertionMarker()) {
@@ -609,7 +619,12 @@ export function configureStandardBlocks(): void {
         for (const model of argModels) {
           const argType = typeByName.get(model.getName());
           if (argType && model.getType() !== argType) {
-            setVariableTypeAndMarkManual(model, argType);
+            if (
+              !isVariableUsedOutsideProcedureBodies(this.workspace, model.getId())
+            ) {
+              setVariableTypeAndMarkManual(model, argType);
+            }
+            revalidateVariableBlocksForId(this.workspace, model.getId());
           }
         }
       };
@@ -735,6 +750,12 @@ export function configureStandardBlocks(): void {
         if (!argModels || argModels.length === 0) {
           return;
         }
+        const proc = this as ProcedureBlockWithArgs;
+        for (const argDatum of proc.argData_ || []) {
+          attachProcedureParameterTypeDropdown(this, argDatum.argId, {
+            fireEvents: false,
+          });
+        }
         const typeByName = new Map<string, string>();
         let argBlock = container.getInputTargetBlock("STACK");
         while (argBlock && !argBlock.isInsertionMarker()) {
@@ -749,7 +770,12 @@ export function configureStandardBlocks(): void {
         for (const model of argModels) {
           const argType = typeByName.get(model.getName());
           if (argType && model.getType() !== argType) {
-            setVariableTypeAndMarkManual(model, argType);
+            if (
+              !isVariableUsedOutsideProcedureBodies(this.workspace, model.getId())
+            ) {
+              setVariableTypeAndMarkManual(model, argType);
+            }
+            revalidateVariableBlocksForId(this.workspace, model.getId());
           }
         }
       };
@@ -776,22 +802,7 @@ export function configureStandardBlocks(): void {
       if (originalUpdateShape) {
         originalUpdateShape.call(this);
       }
-      const defName = (this as ProcedureBlockWithArgs).getProcedureCall?.();
-      if (!defName || !this.workspace) {
-        return;
-      }
-      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as ProcedureBlockWithArgs | null;
-      const argModels = defBlock?.getVarModels?.() || defBlock?.argumentVarModels_;
-      if (!argModels || argModels.length === 0) {
-        return;
-      }
-      for (let i = 0; i < argModels.length; i += 1) {
-        const input = this.getInput(`ARG${i}`);
-        const argType = argModels[i]?.getType?.();
-        if (input?.connection) {
-          input.connection.setCheck(getCompatibleTypesForCheck(argType));
-        }
-      }
+      syncProcedureCallArgInputChecks(this);
     };
   }
 
@@ -803,22 +814,7 @@ export function configureStandardBlocks(): void {
       if (originalUpdateShape) {
         originalUpdateShape.call(this);
       }
-      const defName = (this as ProcedureBlockWithArgs).getProcedureCall?.();
-      if (!defName || !this.workspace) {
-        return;
-      }
-      const defBlock = Blockly.Procedures.getDefinition(defName, this.workspace) as ProcedureBlockWithArgs | null;
-      const argModels = defBlock?.getVarModels?.() || defBlock?.argumentVarModels_;
-      if (!argModels || argModels.length === 0) {
-        return;
-      }
-      for (let i = 0; i < argModels.length; i += 1) {
-        const input = this.getInput(`ARG${i}`);
-        const argType = argModels[i]?.getType?.();
-        if (input?.connection) {
-          input.connection.setCheck(getCompatibleTypesForCheck(argType));
-        }
-      }
+      syncProcedureCallArgInputChecks(this);
     };
   }
 

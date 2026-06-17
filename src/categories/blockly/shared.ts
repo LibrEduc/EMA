@@ -32,6 +32,7 @@
 
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
+import { resolveLocalVariableScope, usesLocalVariableDeclaration } from "../../generators/arduino/variable_scope";
 import {
   checkTypeCompatibility,
   getCompatibleTypesForCheck,
@@ -40,6 +41,8 @@ import {
 import {
   ARDUINO_TYPE_KEYS,
   getInternalTypeForArduinoType,
+  isArduinoScalarType,
+  normalizeBlocklyCheckToInternalType,
 } from "../../generators/arduino/block_types";
 import {
   clearVariableType,
@@ -204,16 +207,18 @@ function buildArrayElementBlocklyChecks(
   internalType: string,
   options?: { includeArray?: boolean },
 ): string[] {
+  const normalized =
+    normalizeBlocklyCheckToInternalType(internalType) ?? internalType;
   let checks: string[];
-  if (internalType === "char") {
+  if (normalized === "char") {
     checks = ["char"];
-  } else if (internalType === "string") {
+  } else if (normalized === "string") {
     checks = ["string", "String", "Colour"];
   } else {
-    const base = getBlocklyCompatibleChecks(internalType, true) ?? [internalType];
+    const base = getBlocklyCompatibleChecks(normalized, true) ?? [normalized];
     checks = base.filter((check) => check !== "char");
     if (
-      (internalType === "int" || internalType === "float" || internalType === "long") &&
+      (normalized === "int" || normalized === "float" || normalized === "long") &&
       !checks.includes("Number")
     ) {
       checks.push("Number");
@@ -318,19 +323,466 @@ export const configureUntypedVariableField = (field: Blockly.FieldVariable): voi
  * @returns Normalized µcBlockly variable type.
  */
 export const normalizeBlocklyTypeToVariableType = (type: string): string => {
-  if (type === "Boolean") return "bool";
-  if (type === "Number") return "int";
-  if (type === "String") return "string";
-  if (type === "Colour") return "string";
-  if (type === "Array") return "array";
+  const normalized = normalizeBlocklyCheckToInternalType(type);
+  if (normalized) {
+    return normalized;
+  }
+  if (type === "Array") {
+    return "array";
+  }
   return type;
+};
+
+type ProcedureDefBlock = Blockly.Block & {
+  argumentVarModels_?: Blockly.VariableModel[];
+  argData_?: { argId: string; model: Blockly.VariableModel }[];
+  getVarModels?: () => Blockly.VariableModel[];
+};
+
+/** True when `block` is nested inside `ancestor` (statement stack). */
+const isBlockDescendantOf = (
+  block: Blockly.Block,
+  ancestor: Blockly.Block,
+): boolean => {
+  let current: Blockly.Block | null = block;
+  while (current) {
+    if (current.id === ancestor.id) {
+      return true;
+    }
+    current = current.getParent();
+  }
+  return false;
+};
+
+/**
+ * Returns the type declared on a procedure parameter (menu on procedures_def*), if any.
+ * @param contextBlock - When set, only matches if this block lies inside that procedure.
+ */
+export const getProcedureParameterDeclaredType = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+  contextBlock?: Blockly.Block,
+): string | null => {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (
+      block.type !== "procedures_defreturn" &&
+      block.type !== "procedures_defnoreturn"
+    ) {
+      continue;
+    }
+    const proc = block as ProcedureDefBlock;
+    const models = proc.getVarModels?.() || proc.argumentVarModels_ || [];
+    const argData = proc.argData_ || [];
+    for (let i = 0; i < models.length; i++) {
+      if (models[i]?.getId() !== variableId) {
+        continue;
+      }
+      if (contextBlock && !isBlockDescendantOf(contextBlock, block)) {
+        return null;
+      }
+      const argId = argData[i]?.argId;
+      if (argId) {
+        const fromField = block.getFieldValue(`${argId}_TYPE`);
+        if (fromField && isArduinoScalarType(fromField)) {
+          return fromField;
+        }
+      }
+      if (!isVariableUsedOutsideProcedureBodies(workspace, variableId)) {
+        const fromModel = models[i]?.getType?.();
+        if (fromModel && isArduinoScalarType(fromModel)) {
+          return fromModel;
+        }
+      }
+      return "int";
+    }
+  }
+  return null;
+};
+
+type ProcedureCallBlock = Blockly.Block & {
+  getProcedureCall?: () => string;
+};
+
+/**
+ * Declared type of a procedure definition argument (reads `${argId}_TYPE` on procedures_def*).
+ */
+export const getProcedureDefArgumentType = (
+  defBlock: Blockly.Block,
+  argIndex: number,
+): string => {
+  const proc = defBlock as ProcedureDefBlock;
+  const argModels = proc.getVarModels?.() || proc.argumentVarModels_ || [];
+  let argType = argModels[argIndex]?.getType?.() || "int";
+  const argDatum = proc.argData_?.[argIndex];
+  if (argDatum?.argId) {
+    const fromField = defBlock.getFieldValue(`${argDatum.argId}_TYPE`);
+    if (fromField && isArduinoScalarType(fromField)) {
+      argType = fromField;
+    }
+  }
+  if (!argType || argType === "__NO_TYPE__") {
+    return "int";
+  }
+  return argType;
+};
+
+/**
+ * Infers the source type of a value plugged into a procedure call argument.
+ */
+export const inferProcedureCallArgSourceType = (
+  sourceBlock: Blockly.Block | null,
+): string | null => {
+  if (!sourceBlock) {
+    return null;
+  }
+  if (sourceBlock.type === "math_number") {
+    return resolveMathNumberBlockType(sourceBlock);
+  }
+  return inferConnectedValueType(sourceBlock);
+};
+
+/**
+ * Applies setCheck on each ARG input from the procedure definition parameter types.
+ */
+export const syncProcedureCallArgInputChecks = (callBlock: Blockly.Block): void => {
+  if (
+    callBlock.type !== "procedures_callreturn" &&
+    callBlock.type !== "procedures_callnoreturn"
+  ) {
+    return;
+  }
+  const defName =
+    (callBlock as ProcedureCallBlock).getProcedureCall?.() ||
+    callBlock.getFieldValue?.("NAME");
+  if (!defName || !callBlock.workspace) {
+    return;
+  }
+  const defBlock = Blockly.Procedures.getDefinition(defName, callBlock.workspace);
+  if (!defBlock) {
+    return;
+  }
+  const proc = defBlock as ProcedureDefBlock;
+  const argModels = proc.getVarModels?.() || proc.argumentVarModels_ || [];
+  for (let i = 0; i < argModels.length; i++) {
+    const input = callBlock.getInput(`ARG${i}`);
+    if (!input?.connection) {
+      continue;
+    }
+    const argType = getProcedureDefArgumentType(defBlock, i);
+    // Non-strict : autorise math_number (Number) ; le rejet float→int reste dans revalidateProcedureCallBlocks.
+    input.connection.setCheck(getBlocklyCompatibleChecks(argType));
+  }
+};
+
+/**
+ * Disconnects incompatible values on procedure call blocks and refreshes ARG input checks.
+ */
+export const revalidateProcedureCallBlocks = (
+  workspace: Blockly.Workspace,
+  _event?: Blockly.Events.Abstract,
+): void => {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (
+      block.type !== "procedures_callreturn" &&
+      block.type !== "procedures_callnoreturn"
+    ) {
+      continue;
+    }
+    syncProcedureCallArgInputChecks(block);
+    const defName =
+      (block as ProcedureCallBlock).getProcedureCall?.() ||
+      block.getFieldValue?.("NAME");
+    if (!defName || !block.workspace) {
+      continue;
+    }
+    const defBlock = Blockly.Procedures.getDefinition(defName, block.workspace);
+    if (!defBlock) {
+      continue;
+    }
+    const proc = defBlock as ProcedureDefBlock;
+    const argModels = proc.getVarModels?.() || proc.argumentVarModels_ || [];
+    let warning: string | null = null;
+    for (let i = 0; i < argModels.length; i++) {
+      const input = block.getInput(`ARG${i}`);
+      const connected = input?.connection?.targetBlock() || null;
+      if (!connected) {
+        continue;
+      }
+      const declaredType = getProcedureDefArgumentType(defBlock, i);
+      const sourceType = inferProcedureCallArgSourceType(connected);
+      if (sourceType && !checkTypeCompatibility(sourceType, declaredType)) {
+        warning = getTypeMismatchWarningText(declaredType, sourceType);
+        input?.connection?.disconnect();
+      }
+    }
+    block.setWarningText(warning);
+  }
+};
+
+/** True when the block is in setup/loop/global scope (not inside a procedure body). */
+export const isVariableUseOutsideProcedureBody = (block: Blockly.Block): boolean => {
+  return resolveLocalVariableScope(block).kind !== "procedure";
+};
+
+/** True when the variable appears in setup, loop, or global scope (not only as a procedure parameter). */
+export const isVariableUsedOutsideProcedureBodies = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): boolean => hasRealGlobalVariableUse(workspace, variableId);
+
+/** True when the variable is declared as a parameter on any procedure definition. */
+export const isVariableProcedureParameter = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): boolean => {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (
+      block.type !== "procedures_defreturn" &&
+      block.type !== "procedures_defnoreturn"
+    ) {
+      continue;
+    }
+    const proc = block as ProcedureDefBlock;
+    const models = proc.getVarModels?.() || proc.argumentVarModels_ || [];
+    if (models.some((model) => model?.getId() === variableId)) {
+      return true;
+    }
+    const argData = proc.argData_ || [];
+    if (argData.some((datum) => datum.model?.getId() === variableId)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Procedure def header / call shell: binds a parameter name without a global read/write.
+ */
+export const isProcedureParameterBindingUse = (
+  block: Blockly.Block,
+  variableId: string,
+): boolean => {
+  if (
+    block.type === "procedures_callreturn" ||
+    block.type === "procedures_callnoreturn"
+  ) {
+    return true;
+  }
+  if (
+    block.type === "procedures_defreturn" ||
+    block.type === "procedures_defnoreturn"
+  ) {
+    const proc = block as ProcedureDefBlock;
+    const models = proc.getVarModels?.() || proc.argumentVarModels_ || [];
+    if (models.some((model) => model?.getId() === variableId)) {
+      return true;
+    }
+    const argData = proc.argData_ || [];
+    return argData.some((datum) => datum.model?.getId() === variableId);
+  }
+  return false;
+};
+
+/** True when the variable is genuinely read/written in setup, loop, or global scope. */
+export const hasRealGlobalVariableUse = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): boolean => {
+  const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
+  for (const block of uses) {
+    if (isProcedureParameterBindingUse(block, variableId)) {
+      continue;
+    }
+    if (!isVariableUseOutsideProcedureBody(block)) {
+      continue;
+    }
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Returns true when a workspace variable must not receive a global declaration.
+ * Procedure parameters are omitted unless they are also used as real globals.
+ */
+export const shouldOmitGlobalVariableDeclaration = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+  varName: string,
+  procedureArgIds: Set<string>,
+  normalizedProcedureArgNames: Set<string>,
+): boolean => {
+  const isParameter =
+    procedureArgIds.has(variableId) ||
+    isVariableProcedureParameter(workspace, variableId) ||
+    normalizedProcedureArgNames.has(varName);
+  if (!isParameter) {
+    return false;
+  }
+  return !hasRealGlobalVariableUse(workspace, variableId);
+};
+
+const shouldIncludeUseForVariableTyping = (
+  contextBlock: Blockly.Block,
+  useBlock: Blockly.Block,
+): boolean => {
+  return (
+    isVariableUseOutsideProcedureBody(contextBlock) ===
+    isVariableUseOutsideProcedureBody(useBlock)
+  );
+};
+
+const isVariableSetBlock = (block: Blockly.Block): boolean =>
+  block.type === "variables_set_dynamic" || block.type === "variables_set";
+
+/** True when a set block assigns a global variable (no `local` wrapper). */
+export const isGlobalVariableAssignment = (block: Blockly.Block): boolean => {
+  if (!isVariableSetBlock(block)) {
+    return false;
+  }
+  return !usesLocalVariableDeclaration(block.getInputTargetBlock("VALUE"));
+};
+
+/** Infers the value type inside a `variables_local` wrapper (or null). */
+export const inferLocalAssignmentValueType = (
+  valueBlock: Blockly.Block | null,
+): string | null => {
+  if (!valueBlock) {
+    return null;
+  }
+  if (valueBlock.type === "variables_local") {
+    return inferConnectedValueType(valueBlock.getInputTargetBlock("VALUE"));
+  }
+  return inferConnectedValueType(valueBlock);
+};
+
+const inferTypeFromScopedAssignments = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+  contextBlock: Blockly.Block,
+): string | null => {
+  const contextIsLocal = usesLocalVariableDeclaration(
+    contextBlock.getInputTargetBlock("VALUE"),
+  );
+  for (const block of workspace.getAllBlocks(false)) {
+    if (!isVariableSetBlock(block)) {
+      continue;
+    }
+    if (block.getFieldValue("VAR") !== variableId) {
+      continue;
+    }
+    if (!shouldIncludeUseForVariableTyping(contextBlock, block)) {
+      continue;
+    }
+    const valueBlock = block.getInputTargetBlock("VALUE");
+    const blockIsLocal = usesLocalVariableDeclaration(valueBlock);
+    if (blockIsLocal !== contextIsLocal) {
+      continue;
+    }
+    const connectedType = blockIsLocal
+      ? inferLocalAssignmentValueType(valueBlock)
+      : inferConnectedValueType(valueBlock);
+    if (connectedType) {
+      return connectedType;
+    }
+  }
+  return null;
+};
+
+/**
+ * Resolves the effective type of a variable for a specific block (scope-aware).
+ */
+export const resolveVariableTypeForBlock = (
+  block: Blockly.Block,
+  variableId: string,
+): string | null => {
+  const paramType = getProcedureParameterDeclaredType(
+    block.workspace,
+    variableId,
+    block,
+  );
+  if (paramType) {
+    return paramType;
+  }
+  if (usesLocalVariableDeclaration(block.getInputTargetBlock("VALUE"))) {
+    return inferLocalAssignmentValueType(block.getInputTargetBlock("VALUE"));
+  }
+  const variable = block.workspace.getVariableMap().getVariableById(variableId);
+  if (!variable) {
+    return null;
+  }
+  const inferred = inferTypeFromScopedAssignments(
+    block.workspace,
+    variableId,
+    block,
+  );
+  if (inferred) {
+    return inferred;
+  }
+  const modelType = variable.getType();
+  if (!modelType || modelType === "__NO_TYPE__") {
+    return null;
+  }
+  if (
+    isVariableProcedureParameter(block.workspace, variableId) &&
+    isVariableUseOutsideProcedureBody(block)
+  ) {
+    return null;
+  }
+  return modelType;
+};
+
+/** Resolves global variable type from global assignments only (ignores `local` wrappers). */
+export const resolveGlobalVariableType = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): string | null => {
+  let result: string | null = null;
+  for (const block of workspace.getAllBlocks(false)) {
+    if (!isGlobalVariableAssignment(block)) {
+      continue;
+    }
+    if (block.getFieldValue("VAR") !== variableId) {
+      continue;
+    }
+    if (!isVariableUseOutsideProcedureBody(block)) {
+      continue;
+    }
+    const type = inferConnectedValueType(block.getInputTargetBlock("VALUE"));
+    if (type) {
+      result = type;
+    }
+  }
+  return result;
+};
+
+/** Re-runs onchange on variable get/set blocks referencing a variable. */
+export const revalidateVariableBlocksForId = (
+  workspace: Blockly.Workspace,
+  variableId: string,
+): void => {
+  const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
+  for (const block of uses) {
+    if (
+      block.type !== "variables_get" &&
+      block.type !== "variables_get_dynamic" &&
+      block.type !== "variables_set" &&
+      block.type !== "variables_set_dynamic"
+    ) {
+      continue;
+    }
+    const onchange = Blockly.Blocks[block.type]?.onchange;
+    if (typeof onchange === "function") {
+      onchange.call(block, {
+        type: Blockly.Events.BLOCK_MOVE,
+        isUiEvent: false,
+      } as Blockly.Events.Abstract);
+    }
+  }
 };
 
 /**
  * Determines whether a variable change event should be ignored.
- * @param block - Block receiving the event.
- * @param event - Blockly change event.
- * @returns True when the event should be skipped.
  */
 export const shouldSkipVariableChange = (
   block: Blockly.Block,
@@ -548,11 +1000,15 @@ export const inferLoopCounterTypeFromForBlock = (
 export const inferLoopCounterType = (
   workspace: Blockly.Workspace,
   variableId: string,
+  contextBlock?: Blockly.Block,
 ): "int" | "float" | null => {
   const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
   let result: "int" | "float" | null = null;
   for (const block of uses) {
     if (block.type !== "controls_for" || block.getFieldValue("VAR") !== variableId) {
+      continue;
+    }
+    if (contextBlock && !shouldIncludeUseForVariableTyping(contextBlock, block)) {
       continue;
     }
     const loopType = inferLoopCounterTypeFromForBlock(block);
@@ -602,11 +1058,15 @@ export const inferChangeByRequiredTypeFromBlock = (
 export const inferChangeByRequiredType = (
   workspace: Blockly.Workspace,
   variableId: string,
+  contextBlock?: Blockly.Block,
 ): "int" | "float" | null => {
   const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
   let result: "int" | "float" | null = null;
   for (const block of uses) {
     if (block.type !== "math_change") {
+      continue;
+    }
+    if (contextBlock && !shouldIncludeUseForVariableTyping(contextBlock, block)) {
       continue;
     }
     const blockVarId = resolveMathChangeVariableId(block);
@@ -630,12 +1090,13 @@ export const inferChangeByRequiredType = (
 export const inferRequiredNumericTypeForVariable = (
   workspace: Blockly.Workspace,
   variableId: string,
+  contextBlock?: Blockly.Block,
 ): "int" | "float" | null => {
-  const loopType = inferLoopCounterType(workspace, variableId);
+  const loopType = inferLoopCounterType(workspace, variableId, contextBlock);
   if (loopType === "float") {
     return "float";
   }
-  const changeType = inferChangeByRequiredType(workspace, variableId);
+  const changeType = inferChangeByRequiredType(workspace, variableId, contextBlock);
   if (changeType === "float") {
     return "float";
   }
@@ -685,6 +1146,7 @@ export const inferConnectedValueType = (block: Blockly.Block | null): string | n
 export const hasConnectedAssignmentForVariable = (
   workspace: Blockly.Workspace,
   variableId: string,
+  contextBlock?: Blockly.Block,
 ): boolean => {
   const uses = Blockly.Variables.getVariableUsesById(workspace, variableId);
   for (const block of uses) {
@@ -692,6 +1154,20 @@ export const hasConnectedAssignmentForVariable = (
       block.type === "variables_set_dynamic" ||
       block.type === "variables_set"
     ) {
+      if (contextBlock && !shouldIncludeUseForVariableTyping(contextBlock, block)) {
+        continue;
+      }
+      if (contextBlock) {
+        const contextIsLocal = usesLocalVariableDeclaration(
+          contextBlock.getInputTargetBlock("VALUE"),
+        );
+        const blockIsLocal = usesLocalVariableDeclaration(
+          block.getInputTargetBlock("VALUE"),
+        );
+        if (contextIsLocal !== blockIsLocal) {
+          continue;
+        }
+      }
       const valueInput = block.getInput("VALUE");
       if (valueInput?.connection?.targetBlock()) {
         return true;
@@ -699,6 +1175,24 @@ export const hasConnectedAssignmentForVariable = (
     }
   }
   return false;
+};
+
+/**
+ * Re-runs onchange on `variables_local` wrappers so their output type tracks inner values.
+ */
+export const revalidateLocalWrapperBlocks = (
+  workspace: Blockly.Workspace,
+  event: Blockly.Events.Abstract,
+): void => {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (block.type !== "variables_local") {
+      continue;
+    }
+    const onchange = Blockly.Blocks.variables_local?.onchange;
+    if (typeof onchange === "function") {
+      onchange.call(block, event);
+    }
+  }
 };
 
 /**
@@ -765,6 +1259,57 @@ export const handleVariablesSetChange = (
     }
     const typedVariable = variable as VariableWithMutableType;
     const valueInput = block.getInput("VALUE");
+    const connectedBlock = valueInput?.connection?.targetBlock() || null;
+
+    if (usesLocalVariableDeclaration(connectedBlock)) {
+      const innerType = inferLocalAssignmentValueType(connectedBlock);
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(null);
+      }
+      block.setWarningText(innerType ? null : getUntypedWarningText());
+      return;
+    }
+
+    const declaredParamType = getProcedureParameterDeclaredType(
+      block.workspace,
+      variableId,
+      block,
+    );
+    if (declaredParamType) {
+      const usedGlobally = isVariableUsedOutsideProcedureBodies(
+        block.workspace,
+        variableId,
+      );
+      if (!usedGlobally) {
+        typedVariable.__ucbManualType = true;
+        if (variable.getType() !== declaredParamType) {
+          setVariableType(variable, declaredParamType);
+        }
+      }
+      const connectedType = inferConnectedValueType(
+        valueInput?.connection?.targetBlock() || null,
+      );
+      if (connectedType) {
+        if (!checkTypeCompatibility(connectedType, declaredParamType)) {
+          block.setWarningText(
+            getTypeMismatchWarningText(declaredParamType, connectedType),
+          );
+          if (valueInput?.connection?.targetBlock()) {
+            valueInput.connection.disconnect();
+          }
+          return;
+        }
+        block.setWarningText(null);
+      } else {
+        block.setWarningText(null);
+      }
+      if (valueInput?.connection) {
+        // Non-strict : autorise math_number (Number) ; le rejet float→int reste dans onchange.
+        valueInput.connection.setCheck(getBlocklyCompatibleChecks(declaredParamType));
+      }
+      return;
+    }
+
     if (typedVariable.__ucbConst) {
       block.setWarningText(getConstWarningText());
       if (valueInput?.connection?.targetBlock()) {
@@ -773,13 +1318,13 @@ export const handleVariablesSetChange = (
       return;
     }
 
-    let varType = variable.getType();
+    let varType = resolveVariableTypeForBlock(block, variableId);
     let isNoType = !varType || varType === "__NO_TYPE__";
-    const connectedBlock = valueInput?.connection?.targetBlock() || null;
     const connectedType = inferConnectedValueType(connectedBlock);
     const requiredNumericType = inferRequiredNumericTypeForVariable(
       block.workspace,
       variableId,
+      block,
     );
 
     if (varType === LIST_VARIABLE_TYPE) {
@@ -809,13 +1354,18 @@ export const handleVariablesSetChange = (
         varType = variable.getType();
         isNoType = !varType || varType === "__NO_TYPE__";
       } else if (isNoType || (canAutoRetype && varType !== connectedType)) {
-        setVariableType(variable, connectedType);
-        typedVariable.__ucbManualType = false;
-        varType = variable.getType();
-        isNoType = !varType || varType === "__NO_TYPE__";
+        if (
+          !isVariableProcedureParameter(block.workspace, variableId) ||
+          isVariableUseOutsideProcedureBody(block)
+        ) {
+          setVariableType(variable, connectedType);
+          typedVariable.__ucbManualType = false;
+          varType = connectedType;
+          isNoType = false;
+        }
       }
 
-      const typeForCheck = requiredNumericType ?? varType;
+      const typeForCheck = requiredNumericType ?? connectedType ?? varType;
       if (typeForCheck && !checkTypeCompatibility(connectedType, typeForCheck)) {
         block.setWarningText(getTypeMismatchWarningText(typeForCheck, connectedType));
         if (valueInput?.connection?.targetBlock()) {
@@ -824,7 +1374,9 @@ export const handleVariablesSetChange = (
         return;
       }
       if (valueInput?.connection) {
-        valueInput.connection.setCheck(getBlocklyCompatibleChecks(variable.getType()));
+        valueInput.connection.setCheck(
+          getBlocklyCompatibleChecks(varType ?? variable.getType()),
+        );
       }
     } else if (valueInput?.connection) {
       valueInput.connection.setCheck(getBlocklyCompatibleChecks(varType));
@@ -840,6 +1392,7 @@ export const handleVariablesSetChange = (
         const hasAssignments = hasConnectedAssignmentForVariable(
           block.workspace,
           variableId,
+          block,
         );
         if (!hasAssignments && varType !== LIST_VARIABLE_TYPE) {
           clearVariableType(variable);

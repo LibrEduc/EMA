@@ -31,6 +31,8 @@ type ProcedureBlockLike = Block & {
   getProcedureModel?: () => ProcedureModelLike | null;
   getVars?: () => string[] | null;
   getVarModels?: () => Blockly.VariableModel[] | null;
+  argumentVarModels_?: Blockly.VariableModel[];
+  argData_?: { argId: string; model: Blockly.VariableModel }[];
 };
 
 function getProcedureName(
@@ -53,20 +55,40 @@ type ProcedureParamInfo = {
   type: string;
 };
 
+function mapBlocklyTypeToArduino(type: string): string {
+  if (type === "Boolean" || type === "bool") return "bool";
+  if (type === "String" || type === "string") return "String";
+  if (type === "Number" || type === "number") return "int";
+  return type;
+}
+
+function resolveProcedureParamArduinoType(
+  procBlock: ProcedureBlockLike,
+  index: number,
+  modelVar: Blockly.IVariableModel<Blockly.IVariableState>,
+): string {
+  const argDatum = procBlock.argData_?.[index];
+  if (argDatum?.argId) {
+    const fieldType = procBlock.getFieldValue(`${argDatum.argId}_TYPE`);
+    if (fieldType) {
+      return mapBlocklyTypeToArduino(fieldType);
+    }
+  }
+  return mapBlocklyTypeToArduino(modelVar.getType() || "int");
+}
+
 function getProcedureParams(block: Block, generator: ArduinoGenerator): ProcedureParamInfo[] {
   const params: ProcedureParamInfo[] = [];
-  const procBlock = block as ProcedureBlockLike & {
-    argumentVarModels_?: Blockly.VariableModel[];
-  };
+  const procBlock = block as ProcedureBlockLike;
   const model = procBlock.getProcedureModel?.();
 
   const varModels = procBlock.getVarModels?.();
   if (Array.isArray(varModels) && varModels.length > 0) {
-    for (const modelVar of varModels) {
-      const resolvedType = mapBlocklyTypeToArduino(modelVar.getType() || "int");
+    for (let i = 0; i < varModels.length; i++) {
+      const modelVar = varModels[i];
       params.push({
         name: modelVar.getName(),
-        type: resolvedType || "int",
+        type: resolveProcedureParamArduinoType(procBlock, i, modelVar) || "int",
       });
     }
   } else if (model?.getParameters) {
@@ -115,13 +137,6 @@ function getProcedureParams(block: Block, generator: ArduinoGenerator): Procedur
     }));
   }
   return params;
-}
-
-function mapBlocklyTypeToArduino(type: string): string {
-  if (type === "Boolean" || type === "bool") return "bool";
-  if (type === "String" || type === "string") return "String";
-  if (type === "Number" || type === "number") return "int";
-  return type;
 }
 
 function getReturnType(block: Block): string {

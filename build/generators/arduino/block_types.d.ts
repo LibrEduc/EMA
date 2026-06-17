@@ -58,6 +58,11 @@ export declare function getInternalTypeForArduinoType(typeKey: string): string;
 /** @deprecated Use {@link getInternalTypeForArduinoType} */
 export declare const getInternalTypeForCast: typeof getInternalTypeForArduinoType;
 /**
+ * Maps Blockly output/check types to internal µcBlockly types.
+ * Colour blocks use Blockly check `Colour` but variables and arrays use `string`.
+ */
+export declare function normalizeBlocklyCheckToInternalType(type: string | null | undefined): string | null;
+/**
  * C++ type name emitted in generated Arduino code.
  */
 export declare function getCppTypeName(typeKey: string): string;

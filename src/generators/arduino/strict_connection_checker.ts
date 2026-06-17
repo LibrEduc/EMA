@@ -39,7 +39,7 @@ import {
   inferArrayElementTypeFromBlock,
   inferListVariableElementType,
 } from "./block_types_registry";
-import { isDeclareContainsTypeCompatible } from "./block_types";
+import { isDeclareContainsTypeCompatible, isTypeCompatible } from "./block_types";
 import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
 import { debugLog } from "./debug";
 
@@ -91,6 +91,13 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
         return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (arrayIndex === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
+      const procedureArg = this.checkProcedureCallArgConnection_(a, b);
+      if (procedureArg === true) {
+        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (procedureArg === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
       const switchCase = this.checkSwitchCaseIntConnection_(a, b);
@@ -145,6 +152,13 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       if (arrayIndex === false) {
         return false;
       }
+      const procedureArg = this.checkProcedureCallArgConnection_(a, b);
+      if (procedureArg === true) {
+        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+      }
+      if (procedureArg === false) {
+        return false;
+      }
       const switchCase = this.checkSwitchCaseIntConnection_(a, b);
       if (switchCase === true) {
         return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
@@ -181,7 +195,8 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
         this.checkArrayDefineInputConnection_(a, b) === true ||
         this.checkArrayListLiteralAddInputConnection_(a, b) === true ||
         this.checkArrayListAssignValueInputConnection_(a, b) === true ||
-        this.checkArrayIndexInputConnection_(a, b) === true)
+        this.checkArrayIndexInputConnection_(a, b) === true ||
+        this.checkProcedureCallArgConnection_(a, b) === true)
     ) {
       return Blockly.Connection.CAN_CONNECT;
     }
@@ -344,6 +359,105 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     }
     const semanticType = this.resolveSwitchCaseSourceType_(pair.out.getSourceBlock());
     return semanticType === "int";
+  }
+
+  private isProcedureCallArgInput_(inputConnection: Blockly.Connection): boolean {
+    const targetBlock = inputConnection.getSourceBlock();
+    if (
+      !targetBlock ||
+      (targetBlock.type !== "procedures_callreturn" &&
+        targetBlock.type !== "procedures_callnoreturn")
+    ) {
+      return false;
+    }
+    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    return inputName !== null && /^ARG\d+$/.test(inputName);
+  }
+
+  private resolveProcedureCallArgSourceType_(
+    sourceBlock: Blockly.Block | null,
+  ): string | null {
+    if (!sourceBlock) {
+      return null;
+    }
+    if (sourceBlock.type === "math_number") {
+      return resolveMathNumberBlockType(sourceBlock);
+    }
+    const typed = sourceBlock as Blockly.Block & { getBlockType?: () => string | null };
+    const rawType = typed.getBlockType?.() ?? null;
+    const normalized = this.normalizeDeclareSourceType_(rawType || "");
+    if (normalized && normalized !== "__NO_TYPE__") {
+      return normalized;
+    }
+    const check = sourceBlock.outputConnection?.getCheck();
+    const checkNorm = this.normalizeDeclareSourceType_(
+      Array.isArray(check) ? (check[0] ?? "") : (check ?? ""),
+    );
+    return checkNorm && checkNorm !== "__NO_TYPE__" ? checkNorm : null;
+  }
+
+  /**
+   * Entrées ARG* des appels de procédure : int n'accepte que int, float accepte int+float.
+   */
+  private checkProcedureCallArgConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair || !this.isProcedureCallArgInput_(pair.inp)) {
+      return null;
+    }
+
+    const callBlock = pair.inp.getSourceBlock();
+    if (!callBlock?.workspace) {
+      return null;
+    }
+
+    const inputName = this.getInputNameForConnection_(callBlock, pair.inp);
+    const argIndex = inputName ? parseInt(inputName.replace("ARG", ""), 10) : -1;
+    if (argIndex < 0 || Number.isNaN(argIndex)) {
+      return null;
+    }
+
+    type CallBlock = Blockly.Block & {
+      getProcedureCall?: () => string;
+      getVarModels?: () => Blockly.VariableModel[];
+      argumentVarModels_?: Blockly.VariableModel[];
+      argData_?: { argId: string; model: Blockly.VariableModel }[];
+    };
+    const typedCall = callBlock as CallBlock;
+    const defName = typedCall.getProcedureCall?.();
+    if (!defName) {
+      return null;
+    }
+
+    const defBlock = Blockly.Procedures.getDefinition(
+      defName,
+      callBlock.workspace,
+    ) as CallBlock | null;
+    if (!defBlock) {
+      return null;
+    }
+
+    const argModels =
+      defBlock.getVarModels?.() || defBlock.argumentVarModels_ || [];
+    const argDatum = defBlock.argData_?.[argIndex];
+    let argType = argModels[argIndex]?.getType?.() || "int";
+    if (argDatum?.argId) {
+      const fromField = defBlock.getFieldValue(`${argDatum.argId}_TYPE`);
+      if (fromField) {
+        argType = fromField;
+      }
+    }
+
+    const sourceType = this.resolveProcedureCallArgSourceType_(
+      pair.out.getSourceBlock(),
+    );
+    if (!sourceType || sourceType === "__NO_TYPE__") {
+      return false;
+    }
+
+    return isTypeCompatible(sourceType, argType);
   }
 
   /**

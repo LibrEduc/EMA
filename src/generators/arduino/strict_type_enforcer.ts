@@ -28,7 +28,12 @@
  */
 
 import * as Blockly from "blockly";
-import { handleVariablesSetChange, revalidateTypedNumericBlocks } from "../../categories/blockly/shared";
+import {
+  handleVariablesSetChange,
+  revalidateLocalWrapperBlocks,
+  revalidateProcedureCallBlocks,
+  revalidateTypedNumericBlocks,
+} from "../../categories/blockly/shared";
 
 export type StrictTypeEnforcerMode = "warn" | "disconnect";
 export type StrictTypeEnforcerScope = "variables-only" | "extended";
@@ -91,7 +96,9 @@ export function installStrictTypeEnforcer(
     // Defer until Blockly finishes endDrag/applyConnections/render cycle.
     timer = window.setTimeout(() => {
       timer = null;
+      revalidateLocalWrapperBlocks(workspace, e);
       revalidateTypedNumericBlocks(workspace, e);
+      revalidateProcedureCallBlocks(workspace, e);
       const all = workspace.getAllBlocks(false);
       for (const block of all) {
         if (block.type === "variables_set" || block.type === "variables_set_dynamic") {

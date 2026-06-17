@@ -17,9 +17,15 @@
  */
 
 import * as Blockly from "blockly";
-import { resolveMathChangeVariableId } from "../../categories/blockly/shared";
+import {
+  isVariableProcedureParameter,
+  isVariableUseOutsideProcedureBody,
+  resolveGlobalVariableType,
+  resolveMathChangeVariableId,
+  shouldOmitGlobalVariableDeclaration,
+} from "../../categories/blockly/shared";
 import { getArduinoType } from "./arduino_types";
-import { getCppTypeName } from "./block_types";
+import { getCppTypeName, normalizeBlocklyCheckToInternalType } from "./block_types";
 import { inferArrayElementTypeFromBlock } from "./block_types_registry";
 import {
   unwrapValueBlock,
@@ -212,12 +218,22 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       }
       const argModels = (block as Blockly.Block & {
         argumentVarModels_?: Blockly.VariableModel[];
+        argData_?: { model: Blockly.VariableModel; argId: string }[];
         getProcedureModel?: () =>
           | (Blockly.Procedures.IProcedureModel & {
             getParameters?: () => { getId?: () => string }[];
           })
           | null;
       }).argumentVarModels_;
+      const procBlock = block as Blockly.Block & {
+        argumentVarModels_?: Blockly.VariableModel[];
+        argData_?: { model: Blockly.VariableModel; argId: string }[];
+        getProcedureModel?: () =>
+          | (Blockly.Procedures.IProcedureModel & {
+            getParameters?: () => { getId?: () => string; getName?: () => string }[];
+          })
+          | null;
+      };
       if (argModels && argModels.length > 0) {
         for (const model of argModels) {
           if (model?.getId) {
@@ -229,13 +245,18 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
           }
         }
       }
-      const procModel = (block as Blockly.Block & {
-        getProcedureModel?: () =>
-          | (Blockly.Procedures.IProcedureModel & {
-            getParameters?: () => { getId?: () => string; getName?: () => string }[];
-          })
-          | null;
-      }).getProcedureModel?.();
+      const argData = procBlock.argData_ || [];
+      for (const datum of argData) {
+        const id = datum.model?.getId?.();
+        if (id) {
+          procedureArgIds.add(id);
+        }
+        const name = datum.model?.getName?.();
+        if (name) {
+          procedureArgNames.add(name);
+        }
+      }
+      const procModel = procBlock.getProcedureModel?.();
       const procParams = procModel?.getParameters?.() || [];
       for (const param of procParams) {
         const paramId = param?.getId?.();
@@ -291,16 +312,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       }
     }
 
-    const normalizeBlocklyType = (rawType: string | null | undefined): string | null => {
-      if (!rawType) return null;
-      if (rawType === "__NO_TYPE__" || rawType === "null" || rawType === "undefined") {
-        return null;
-      }
-      if (rawType === "Boolean") return "bool";
-      if (rawType === "Number") return "int";
-      if (rawType === "String") return "string";
-      return rawType;
-    };
+    const normalizeBlocklyType = (rawType: string | null | undefined): string | null =>
+      normalizeBlocklyCheckToInternalType(rawType);
 
     const getOutputBlockType = (valueBlock: Blockly.Block | null): string | null => {
       if (!valueBlock) return null;
@@ -327,8 +340,14 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       if (!varId) {
         continue;
       }
+      if (!isVariableUseOutsideProcedureBody(block)) {
+        continue;
+      }
       const valueBlock = block.getInputTargetBlock?.("VALUE");
-      const inferredType = getOutputBlockType(unwrapValueBlock(valueBlock));
+      if (usesLocalVariableDeclaration(valueBlock)) {
+        continue;
+      }
+      const inferredType = getOutputBlockType(valueBlock);
       if (inferredType) {
         inferredTypesByVarId.set(varId, inferredType);
       }
@@ -352,6 +371,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       }
       const varId = resolveMathChangeVariableId(block);
       if (!varId) {
+        continue;
+      }
+      if (!isVariableUseOutsideProcedureBody(block)) {
         continue;
       }
       const deltaType = inferMathChangeDeltaType(block.getInputTargetBlock("DELTA"));
@@ -489,9 +511,6 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       ) {
         continue;
       }
-      if (procedureArgIds.has(variable.getId())) {
-        continue;
-      }
       if (declaredVariableIds.has(variable.getId())) {
         continue;
       }
@@ -508,14 +527,29 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         variable.getId(),
         Blockly.Names.NameType.VARIABLE,
       );
-      if (normalizedProcedureArgNames.has(varName)) {
+      if (
+        shouldOmitGlobalVariableDeclaration(
+          workspace,
+          variable.getId(),
+          varName,
+          procedureArgIds,
+          normalizedProcedureArgNames,
+        )
+      ) {
         continue;
       }
 
-      // Normalize variable type to avoid emitting 'undefined' in declarations.
-      const rawType = variable.getType();
+      const globalType = resolveGlobalVariableType(workspace, variable.getId());
       const inferredType = inferredTypesByVarId.get(variable.getId());
-      let typeKey = normalizeBlocklyType(rawType || "") || inferredType || "__NO_TYPE__";
+      const rawType = variable.getType();
+      const sharedWithProcedureParam =
+        isVariableProcedureParameter(workspace, variable.getId()) &&
+        procedureArgIds.has(variable.getId());
+      let typeKey =
+        normalizeBlocklyType(globalType || "") ||
+        normalizeBlocklyType(inferredType || "") ||
+        (!sharedWithProcedureParam ? normalizeBlocklyType(rawType || "") : null) ||
+        "__NO_TYPE__";
       if (inferredType === "float" && typeKey === "int") {
         typeKey = "float";
       } else if (inferredType === "int" && typeKey === "float") {

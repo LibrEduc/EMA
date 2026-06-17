@@ -83,7 +83,8 @@ export const variables_set_dynamic = function (
   if (valueBlock?.type === "variables_local") {
     const scope = resolveLocalVariableScope(block);
     const tag = localDeclarationTag(scope, varName);
-    const typeName = getDeclarationType(block, "int");
+    const innerType = inferValueBlockType(valueBlock);
+    const typeName = getCppTypeName(innerType || "int");
     const value =
       generator.valueToCode(block, "VALUE", Order.ASSIGNMENT) || "0";
     emitLocalDeclaration(

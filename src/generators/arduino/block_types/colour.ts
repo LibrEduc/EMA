@@ -33,6 +33,7 @@
 /**
  * Use "Colour" (not "string") so Blockly connection checks succeed.
  * colour_picker etc. use setCheck("Colour"); getBlockType must match.
+ * Internal inference maps Colour → string (see normalizeBlocklyCheckToInternalType).
  * The Arduino generator still emits string literals.
  */
 export const COLOUR_BLOCK_TYPES = {

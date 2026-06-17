@@ -22,8 +22,9 @@
  */
 
 import * as Blockly from "blockly";
+import { resolveVariableTypeForBlock } from "../../categories/blockly/shared";
 import { BLOCK_TYPES } from "./block_types/index";
-import { getCompatibleTypes, getInternalTypeForArduinoType, isTypeCompatible } from "./block_types";
+import { getCompatibleTypes, getInternalTypeForArduinoType, isTypeCompatible, normalizeBlocklyCheckToInternalType } from "./block_types";
 import { LIST_VARIABLE_TYPE } from "./variable_utils";
 import { debugLog } from "./debug";
 
@@ -90,10 +91,7 @@ const normalizeBlocklyType = (blocklyType: string | string[] | null): string | n
   if (Array.isArray(blocklyType)) {
     return blocklyType.length > 0 ? normalizeBlocklyType(blocklyType[0]) : null;
   }
-  if (blocklyType === "Boolean") return "bool";
-  if (blocklyType === "Number") return "int";
-  if (blocklyType === "String") return "string";
-  return blocklyType;
+  return normalizeBlocklyCheckToInternalType(blocklyType);
 };
 
 /**
@@ -322,17 +320,14 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
       return '__NO_TYPE__';
     }
     try {
-      const variable = block.workspace.getVariableMap().getVariableById(variableId);
-      if (variable) {
-        const varType = variable.getType();
-        if (!varType) {
-          return '__NO_TYPE__';
-        }
-        if (varType === LIST_VARIABLE_TYPE) {
-          return LIST_VARIABLE_TYPE;
-        }
-        return getInternalTypeForArduinoType(varType);
+      const varType = resolveVariableTypeForBlock(block, variableId);
+      if (!varType) {
+        return '__NO_TYPE__';
       }
+      if (varType === LIST_VARIABLE_TYPE) {
+        return LIST_VARIABLE_TYPE;
+      }
+      return getInternalTypeForArduinoType(varType);
     } catch (error) {
       debugLog('Variable not found:', variableId, error);
     }
