@@ -1,6 +1,6 @@
 <div align="center">
 
-![µcBlockly](public/assets/logo_µcBlockly.png)
+<img src="public/assets/logo_µcBlockly.png" alt="µcBlockly" width="32" height="32" style="vertical-align: middle;">
 
 # µcBlockly
 
