@@ -4,7 +4,10 @@
  * @description Block type mappings for « libre » (free) blocks.
  * @remarks
  * libre_in outputs Number → int; statement blocks have no output type.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

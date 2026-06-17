@@ -148,6 +148,14 @@ export const frLang: LanguageMap = {
     CONTROLS_SWITCH_TOOLTIP_2: "Switch avec un cas par défaut.",
     CONTROLS_SWITCH_TOOLTIP_3: "Switch avec des cas.",
     CONTROLS_SWITCH_TOOLTIP_4: "Switch avec des cas et un défaut.",
+    CONTROLS_FOREACH_LIST_EMPTY:
+      "Créez d'abord une liste avec un bloc de la catégorie Listes.",
+    UCB_FOREACH_EACH: "pour chaque élément",
+    UCB_FOREACH_IN: "dans la liste",
+    UCB_FOREACH_DO: "faire",
+    UCB_FOREACH_TOOLTIP:
+      "Pour chaque élément d'une liste déclarée sur le workspace.",
+    UCB_FOREACH_HELPURL: "",
     MATH_CHANGE_LABEL: "changer",
     MATH_CHANGE_BY: "de",
     MATH_CHANGE_VAR_WARNING: "Connecte une variable.",

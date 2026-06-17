@@ -42,4 +42,11 @@ export const TEXT_BLOCK_TYPES = {
   text_isEmpty: "bool",
   text_charAt: "char",
   text_prompt_ext: "__DYNAMIC__textPromptType",
+  text_indexOf: "int",
+  text_getSubstring: "string",
+  text_changeCase: "string",
+  text_trim: "string",
+  text_count: "int",
+  text_replace: "string",
+  text_reverse: "string",
 } as const;

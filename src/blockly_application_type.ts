@@ -170,6 +170,12 @@ export class BlocklyApplication implements BlocklyApplicationType {
         "TOOLBOX_SEARCH_PLACEHOLDER",
         "TOOLBOX_SEARCH_HINT",
         "TOOLBOX_SEARCH_NO_MATCH",
+        "CONTROLS_FOREACH_LIST_EMPTY",
+        "UCB_FOREACH_EACH",
+        "UCB_FOREACH_IN",
+        "UCB_FOREACH_DO",
+        "UCB_FOREACH_TOOLTIP",
+        "UCB_FOREACH_HELPURL",
       ].forEach((key) => {
         const value = initialCustom[key as keyof typeof initialCustom];
         if (value !== undefined) msg[key] = value;
@@ -1478,6 +1484,20 @@ export class BlocklyApplication implements BlocklyApplicationType {
       switchKeys.forEach((key) => {
         const value = customMessages[key];
         if (value) {
+          msg[key] = value;
+        }
+      });
+      const foreachKeys = [
+        "CONTROLS_FOREACH_LIST_EMPTY",
+        "UCB_FOREACH_EACH",
+        "UCB_FOREACH_IN",
+        "UCB_FOREACH_DO",
+        "UCB_FOREACH_TOOLTIP",
+        "UCB_FOREACH_HELPURL",
+      ] as const;
+      foreachKeys.forEach((key) => {
+        const value = customMessages[key];
+        if (value !== undefined) {
           msg[key] = value;
         }
       });

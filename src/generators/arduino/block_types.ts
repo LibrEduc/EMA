@@ -227,6 +227,19 @@ export function isArduinoScalarType(type: string | null | undefined): type is Ar
 }
 
 /**
+ * Returns an Arduino scalar type for Blockly UI / generators, or null (= {@link __NO_TYPE__}).
+ * Blockly-only types such as `list` are not Arduino types.
+ */
+export function resolveArduinoScalarVariableType(
+  type: string | null | undefined,
+): string | null {
+  if (!type || type === "__NO_TYPE__" || type === LIST_VARIABLE_TYPE) {
+    return null;
+  }
+  return isArduinoScalarType(type) ? type : null;
+}
+
+/**
  * Returns compatible types for a target type.
  * @param targetType - Target type to match.
  * @returns List of compatible types (includes the target type).
@@ -260,5 +273,5 @@ export function isTypeCompatible(sourceType: string | null | undefined, targetTy
 
 /**
  * Block type registry.
- * Based on information extracted from BlocklyArduino in src/types/
+ * Based on the centralized `block_types/` modules.
  */

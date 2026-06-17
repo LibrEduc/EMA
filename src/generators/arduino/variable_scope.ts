@@ -2,12 +2,29 @@
  * @packageDocumentation
  * @module Arduino.VariableScope
  * @description Résolution du périmètre des variables locales (setup / loop / procédure).
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -25,6 +42,20 @@ export function isArrayValueBlock(block: Block | null): boolean {
     block?.type === "Array_list_literal" ||
     block?.type === "Array_list_3"
   );
+}
+
+/** Valeur de liste connectée à un bloc set (littéral ou local enveloppant un littéral). */
+export function isArrayAssignmentValueBlock(block: Block | null): boolean {
+  if (!block) {
+    return false;
+  }
+  if (isArrayValueBlock(block)) {
+    return true;
+  }
+  if (block.type === "variables_local") {
+    return isArrayValueBlock(block.getInputTargetBlock("VALUE"));
+  }
+  return false;
 }
 
 /** Bloc instruction « define variable as list » (déclaration globale). */

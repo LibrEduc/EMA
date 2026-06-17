@@ -83,6 +83,11 @@ export declare function getVariableTypeOptions(): string[];
 /** True when the type can appear in Arduino scalar type dropdowns (excludes `list`). */
 export declare function isArduinoScalarType(type: string | null | undefined): type is ArduinoTypeKey;
 /**
+ * Returns an Arduino scalar type for Blockly UI / generators, or null (= {@link __NO_TYPE__}).
+ * Blockly-only types such as `list` are not Arduino types.
+ */
+export declare function resolveArduinoScalarVariableType(type: string | null | undefined): string | null;
+/**
  * Returns compatible types for a target type.
  * @param targetType - Target type to match.
  * @returns List of compatible types (includes the target type).
@@ -97,6 +102,6 @@ export declare function getCompatibleTypes(targetType: string | null | undefined
 export declare function isTypeCompatible(sourceType: string | null | undefined, targetType: string | null | undefined): boolean;
 /**
  * Block type registry.
- * Based on information extracted from BlocklyArduino in src/types/
+ * Based on the centralized `block_types/` modules.
  */
 //# sourceMappingURL=block_types.d.ts.map

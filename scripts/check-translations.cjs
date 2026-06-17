@@ -1,8 +1,29 @@
 #!/usr/bin/env node
 
 /**
- * Script pour vérifier que toutes les clés de traduction utilisées dans les blocs
- * sont présentes dans les 4 fichiers de langues (fr, en, es, ar).
+ * Vérification des traductions µcBlockly (fr, en, es, ar).
+ *
+ * Usage : `npm run check-translations` (ou `node scripts/check-translations.cjs`)
+ *
+ * ## Périmètre vérifié
+ *
+ * 1. **Clés personnalisées** (`CUSTOM_KEYS`) dans `src/languages/{fr,en,es,ar}.ts`
+ *    — messages µcBlockly hors catalogue Blockly standard (variables typées, cast,
+ *    boucles personnalisées, couleurs HSV, etc.).
+ *
+ * 2. **`array_messages.ts`** — messages des blocs listes/tableaux S4e (`ARRAY_*`).
+ *
+ * 3. **`board_messages.ts`** — parité des clés `ARDUINO_*` / `SERIAL_*` entre les
+ *    4 langues (référence = anglais).
+ *
+ * ## Hors périmètre (non vérifié par ce script)
+ *
+ * - Messages Blockly natifs fournis par la bibliothèque `blockly` (ex. `CONTROLS_IF_MSG_IF`).
+ * - Clés fusionnées dynamiquement dans `blockly_application_type.ts` sans être listées ici.
+ * - Fichiers HTML / UI hors `src/languages/`.
+ *
+ * Pour ajouter une nouvelle clé : l'inscrire dans les 4 fichiers de langue concernés
+ * **et** dans `CUSTOM_KEYS` ou `ARRAY_MESSAGES_KEYS` ci-dessous.
  */
 
 const fs = require('fs');
@@ -12,6 +33,7 @@ const LANGUAGES = ['fr', 'en', 'es', 'ar'];
 const LANG_DIR = path.join(__dirname, '../src/languages');
 const CATEGORIES_DIR = path.join(__dirname, '../src/categories/blockly');
 const ARRAY_MESSAGES_FILE = path.join(__dirname, '../src/languages/array_messages.ts');
+const BOARD_MESSAGES_FILE = path.join(__dirname, '../src/languages/board_messages.ts');
 
 // Clés personnalisées qui doivent être dans nos fichiers de langues (pas dans Blockly.Msg standard)
 const CUSTOM_KEYS = new Set([
@@ -80,6 +102,14 @@ const CUSTOM_KEYS = new Set([
   'CONTROLS_SWITCH_TOOLTIP_2',
   'CONTROLS_SWITCH_TOOLTIP_3',
   'CONTROLS_SWITCH_TOOLTIP_4',
+
+  // Boucle for-each (libellés sans %1/%2 Blockly)
+  'CONTROLS_FOREACH_LIST_EMPTY',
+  'UCB_FOREACH_EACH',
+  'UCB_FOREACH_IN',
+  'UCB_FOREACH_DO',
+  'UCB_FOREACH_TOOLTIP',
+  'UCB_FOREACH_HELPURL',
   
   // Arduino
   'ARDUINO_BASE_DEFINE_CONST_TOOLTIP',
@@ -114,6 +144,7 @@ const ARRAY_MESSAGES_KEYS = new Set([
   'ARRAY_MODIFY_HELPURL',
   'ARRAY_CREATE',
   'ARRAY_LIST',
+  'ARRAY_LIST_UNTYPED_WARNING',
   'ARRAY_ARRAY',
   'ARRAY_TAILLE',
   'ARRAY_CONTIENT',
@@ -148,39 +179,59 @@ function extractKeysFromLangFile(filePath) {
 }
 
 /**
- * Lit array_messages.ts et extrait les clés pour chaque langue
+ * Lit un fichier de messages (array_messages.ts, board_messages.ts) et extrait les clés par langue.
  */
-function extractArrayMessagesKeys() {
-  const content = fs.readFileSync(ARRAY_MESSAGES_FILE, 'utf8');
+function extractMessagesKeysFromFile(filePath) {
+  const content = fs.readFileSync(filePath, 'utf8');
   const result = {};
-  
+
   for (const lang of LANGUAGES) {
     result[lang] = new Set();
-    // Recherche le bloc de langue: lang: { ... }
-    const langRegex = new RegExp(`${lang}:\\s*\\{([^}]+)\\}`, 's');
+    const langRegex = new RegExp(`\\n  ${lang}:\\s*\\{([\\s\\S]*?)\\n  \\},`, 'm');
     const langMatch = content.match(langRegex);
     if (langMatch) {
       const langContent = langMatch[1];
-      const keyRegex = /(\w+):\s*["'`][^"'`]*["'`]/g;
+      const keyRegex = /^\s+(\w+):/gm;
       let match;
       while ((match = keyRegex.exec(langContent)) !== null) {
         result[lang].add(match[1]);
       }
     }
   }
-  
+
   return result;
+}
+
+/**
+ * Lit array_messages.ts et extrait les clés pour chaque langue
+ */
+function extractArrayMessagesKeys() {
+  return extractMessagesKeysFromFile(ARRAY_MESSAGES_FILE);
+}
+
+/**
+ * Lit board_messages.ts et extrait les clés pour chaque langue
+ */
+function extractBoardMessagesKeys() {
+  return extractMessagesKeysFromFile(BOARD_MESSAGES_FILE);
 }
 
 /**
  * Vérifie les traductions
  */
 function checkTranslations() {
-  console.log('🔍 Vérification des traductions...\n');
+  console.log('🔍 Vérification des traductions µcBlockly (fr, en, es, ar)\n');
+  console.log('Périmètre :');
+  console.log(`  • ${CUSTOM_KEYS.size} clés personnalisées (src/languages/*.ts)`);
+  console.log(`  • ${ARRAY_MESSAGES_KEYS.size} clés array_messages.ts`);
+  console.log('  • Parité board_messages.ts (ARDUINO_* / SERIAL_*)');
+  console.log('  • Hors périmètre : messages Blockly natifs (bibliothèque blockly)\n');
   
   const langKeys = {};
   const missingKeys = {};
   const arrayMessagesKeys = extractArrayMessagesKeys();
+  const boardMessagesKeys = extractBoardMessagesKeys();
+  const boardReferenceKeys = boardMessagesKeys.en || new Set();
   
   // Charger les clés de chaque fichier de langue
   for (const lang of LANGUAGES) {
@@ -189,6 +240,7 @@ function checkTranslations() {
     missingKeys[lang] = {
       main: [],
       array: [],
+      board: [],
     };
   }
   
@@ -211,14 +263,30 @@ function checkTranslations() {
       }
     }
   }
+
+  // Vérifier la parité des clés board_messages (référence = en)
+  console.log('📋 Vérification des clés board_messages...');
+  for (const lang of LANGUAGES) {
+    for (const key of boardReferenceKeys) {
+      if (!boardMessagesKeys[lang].has(key)) {
+        missingKeys[lang].board.push(key);
+      }
+    }
+    for (const key of boardMessagesKeys[lang]) {
+      if (!boardReferenceKeys.has(key)) {
+        missingKeys[lang].board.push(`+${key} (extra vs en)`);
+      }
+    }
+  }
   
   // Afficher les résultats
   let hasErrors = false;
   for (const lang of LANGUAGES) {
     const mainMissing = missingKeys[lang].main.length;
     const arrayMissing = missingKeys[lang].array.length;
+    const boardMissing = missingKeys[lang].board.length;
     
-    if (mainMissing > 0 || arrayMissing > 0) {
+    if (mainMissing > 0 || arrayMissing > 0 || boardMissing > 0) {
       hasErrors = true;
       console.log(`\n❌ ${lang.toUpperCase()}:`);
       if (mainMissing > 0) {
@@ -230,6 +298,12 @@ function checkTranslations() {
       if (arrayMissing > 0) {
         console.log(`   Clés array_messages manquantes (${arrayMissing}):`);
         missingKeys[lang].array.forEach(key => {
+          console.log(`     - ${key}`);
+        });
+      }
+      if (boardMissing > 0) {
+        console.log(`   Clés board_messages manquantes ou en trop (${boardMissing}):`);
+        missingKeys[lang].board.forEach(key => {
           console.log(`     - ${key}`);
         });
       }

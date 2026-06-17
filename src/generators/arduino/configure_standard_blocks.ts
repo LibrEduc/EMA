@@ -41,7 +41,6 @@ import {
   unifyLoopBoundTypes,
   isLoopCounterVariableCompatible,
   syncNumericVariableType,
-  getBlocklyCompatibleChecks,
   isVariableUsedOutsideProcedureBodies,
   revalidateVariableBlocksForId,
   getTypeMismatchWarningText,

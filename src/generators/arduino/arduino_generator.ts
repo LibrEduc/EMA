@@ -12,7 +12,21 @@
 
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -25,12 +39,17 @@ import {
   shouldOmitGlobalVariableDeclaration,
 } from "../../categories/blockly/shared";
 import { getArduinoType } from "./arduino_types";
-import { getCppTypeName, normalizeBlocklyCheckToInternalType } from "./block_types";
+import {
+  getCppTypeName,
+  isArduinoScalarType,
+  normalizeBlocklyCheckToInternalType,
+} from "./block_types";
 import { inferArrayElementTypeFromBlock } from "./block_types_registry";
 import {
   unwrapValueBlock,
   usesLocalVariableDeclaration,
 } from "./variable_scope";
+import { isVariablesDefineBlock, LIST_VARIABLE_TYPE } from "./variable_utils";
 
 export enum Order {
   ATOMIC = 0, // 0 "" ...
@@ -197,8 +216,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       if (
         block.type === "variables_const" ||
         block.type === "variables_set_init" ||
-        block.type === "variables_define" ||
-        block.type === "variable_define"
+        isVariablesDefineBlock(block.type)
       ) {
         const varId = block.getFieldValue?.("VAR");
         if (varId) {
@@ -517,6 +535,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
       if (declaredAsArrayVariableIds.has(variable.getId())) {
         continue;
       }
+      if (variable.getType() === LIST_VARIABLE_TYPE) {
+        continue;
+      }
       if (
         localVariableIds.has(variable.getId()) &&
         !globalVariableIds.has(variable.getId())
@@ -554,6 +575,9 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
         typeKey = "float";
       } else if (inferredType === "int" && typeKey === "float") {
         typeKey = "int";
+      }
+      if (typeKey !== "__NO_TYPE__" && !isArduinoScalarType(typeKey)) {
+        typeKey = "__NO_TYPE__";
       }
       if (!variableNamesByType[typeKey]) {
         variableNamesByType[typeKey] = [];

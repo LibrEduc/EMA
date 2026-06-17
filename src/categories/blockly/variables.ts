@@ -43,12 +43,13 @@ import {
   clearVariableType,
   LIST_VARIABLE_TYPE,
   setVariableType,
+  VARIABLES_DEFINE_BLOCK_TYPE,
+  VARIABLES_DEFINE_LEGACY_BLOCK_TYPE,
 } from "../../generators/arduino/variable_utils";
 import {
   configureScalarVariableField,
   configureTypedVariableField,
   getBlocklyCompatibleChecks,
-  getListVariableOutputCheck,
   getBlocklyMsg,
   getBlocklyMsgOr,
   getConstWarningText,
@@ -190,8 +191,6 @@ export const defineVariablesGetDynamicBlock = (): void => {
         const varType = resolveVariableTypeForBlock(this, variableId);
         if (!varType) {
           this.setOutput(true, "__NO_TYPE__");
-        } else if (varType === LIST_VARIABLE_TYPE) {
-          this.setOutput(true, getListVariableOutputCheck());
         } else {
           const checks = getBlocklyCompatibleChecks(
             getInternalTypeForArduinoType(varType),
@@ -741,9 +740,9 @@ export const defineVariablesDefineBlock = (): void => {
     onchange: onchangeDefine,
   };
 
-  Blockly.Blocks["variables_define"] = defineBlockDef;
-
-  Blockly.Blocks["variable_define"] = defineBlockDef;
+  Blockly.Blocks[VARIABLES_DEFINE_BLOCK_TYPE] = defineBlockDef;
+  // Alias legacy : anciens XML de workspace utilisent le singulier « variable_define ».
+  Blockly.Blocks[VARIABLES_DEFINE_LEGACY_BLOCK_TYPE] = defineBlockDef;
 };
 
 /**
@@ -804,19 +803,14 @@ export const extendStandardVariablesGetBlock = (): void => {
       }
 
       try {
-        const variable = this.workspace.getVariableMap().getVariableById(variableId);
-        if (variable) {
-          const varType = variable.getType();
-          if (!varType) {
-            this.setOutput(true, "__NO_TYPE__");
-          } else if (varType === LIST_VARIABLE_TYPE) {
-            this.setOutput(true, getListVariableOutputCheck());
-          } else {
-            const blocklyType = varType === "bool" ? "Boolean" : varType;
-            this.setOutput(true, blocklyType);
-          }
-        } else {
+        const varType = resolveVariableTypeForBlock(this, variableId);
+        if (!varType) {
           this.setOutput(true, "__NO_TYPE__");
+        } else {
+          const checks = getBlocklyCompatibleChecks(
+            getInternalTypeForArduinoType(varType),
+          );
+          this.setOutput(true, checks);
         }
       } catch (error) {
         debugLog("Error updating variable type check:", error);

@@ -44,4 +44,7 @@ export const MATH_BLOCK_TYPES = {
   math_modulo: "int",
   math_random_int: "int",
   math_random_float: "float",
+  math_on_list: "__DYNAMIC__mathOnListType",
+  math_constrain: "int",
+  math_atan2: "float",
 } as const;

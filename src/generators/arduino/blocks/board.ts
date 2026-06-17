@@ -4,7 +4,10 @@
  * @description Arduino code generators for board (s4e) blocks.
  * @remarks
  * Matches exemples/s4e/S4E/categories/board/board_base.arduino.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -48,7 +51,7 @@ export function board_base_setup_loop(block: Block, generator: ArduinoGenerator)
 }
 
 export function board_base_loop(block: Block, generator: ArduinoGenerator): string {
-  let code = generator.statementToCode(block, "LOOP") || "";
+  const code = generator.statementToCode(block, "LOOP") || "";
   return generator.scrubArduino_(block, code);
 }
 

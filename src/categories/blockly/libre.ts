@@ -1,10 +1,13 @@
 /**
  * @packageDocumentation
  * @module BlocklyCategories.Libre
- * @description "Libre" blocks (category from Blockly@rduino "null" category).
+ * @description "Libre" blocks (legacy rduino null category).
  * @remarks
  * Blocks with free-text field for comments or custom code.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -48,7 +51,7 @@ type LibreLoopMutatorBlock = Blockly.Block & {
 let libreBlocksRegistered = false;
 
 /**
- * Registers the Libre category blocks (formerly Blockly@rduino "null" category).
+ * Registers the Libre category blocks (legacy rduino null category).
  */
 export const defineLibreBlocks = (): void => {
   if (libreBlocksRegistered) return;

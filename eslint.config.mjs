@@ -32,6 +32,14 @@ export default [...compat.extends("plugin:@typescript-eslint/recommended"), {
 
     rules: {
         "tsdoc/syntax": "warn",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                argsIgnorePattern: "^_",
+                varsIgnorePattern: "^_",
+                caughtErrorsIgnorePattern: "^_",
+            },
+        ],
     },
 
     ignores: [

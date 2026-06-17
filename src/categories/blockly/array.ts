@@ -40,12 +40,14 @@ import {
   getBlocklyMsgOr,
   getDeclareContenuBlocklyChecks,
   getDeclareElementBlocklyChecks,
+  getArrayListUntypedWarningText,
   handleVariablesSetChange,
   syncListVariableFromBlock,
 } from "./shared";
 import { getVariableTypeDropdownOptions } from "./variables";
 import { getInternalTypeForArduinoType } from "../../generators/arduino/block_types";
 import {
+  hasArrayListConnectedElements,
   inferArrayElementTypeFromBlock,
   inferArrayGetIndexElementType,
 } from "../../generators/arduino/block_types_registry";
@@ -274,6 +276,15 @@ function syncArrayListAddInputChecks(
   }
 }
 
+function syncArrayListUntypedWarning(block: Blockly.Block): void {
+  const inferred = inferArrayElementTypeFromBlock(block);
+  const incomplete =
+    !hasArrayListConnectedElements(block) ||
+    !inferred ||
+    inferred === "__NO_TYPE__";
+  block.setWarningText(incomplete ? getArrayListUntypedWarningText() : null);
+}
+
 /**
  * Bloc valeur `Array_list_literal` : type depuis le parent (declare/create) ou inféré.
  */
@@ -325,14 +336,24 @@ function arrayListLiteralTypeFromInputsOnChange(
           ? "String"
           : elementInternalType || null;
   syncArrayListAddInputChecks(this, checks);
+  syncArrayListUntypedWarning(this);
   if (this.outputConnection) {
+    const incomplete =
+      !hasArrayListConnectedElements(this) ||
+      !elementInternalType;
+    if (incomplete) {
+      this.setOutput(true, "__NO_TYPE__");
+      return;
+    }
     if (checks) {
       this.outputConnection.setCheck(checks);
     } else {
       this.outputConnection.setCheck(null);
     }
-  } else {
+  } else if (elementInternalType) {
     this.setOutput(true, blocklyOutputType);
+  } else {
+    this.setOutput(true, "__NO_TYPE__");
   }
 }
 
@@ -374,6 +395,7 @@ function arrayWithDeclareTypeFromInputsOnChange(
       ? getDeclareElementBlocklyChecks(inferred)
       : null;
   syncArrayListAddInputChecks(this, checks);
+  syncArrayListUntypedWarning(this);
   handleArrayListVariableSync(this, event);
   const varId = this.getFieldValue("VAR");
   if (varId && this.workspace) {
@@ -462,7 +484,7 @@ function registerArrayListMutator(
   const mutator = createArrayListMutator(listLabel);
   const helper = function (this: ArrayWithMutatorBlock) {
     this.getInput("EMPTY")?.insertFieldAt(0, createPlusField(), "PLUS");
-    this.updateShape_(2);
+    this.updateShape_(0);
   };
   Blockly.Extensions.registerMutator(mutatorName, mutator, helper);
 }

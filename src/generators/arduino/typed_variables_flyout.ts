@@ -33,7 +33,7 @@
 import * as Blockly from "blockly";
 import { getBlocklyMsg } from "../../categories/blockly/shared";
 import { isArduinoScalarType } from "./block_types";
-import { isListVariable } from "./variable_utils";
+import { isListVariable, VARIABLES_DEFINE_BLOCK_TYPE } from "./variable_utils";
 
 export const TYPED_VARIABLES_CATEGORY_ID = "TYPED_VARIABLES";
 const TYPED_VARIABLES_BUTTON_ID = "CREATE_TYPED_VARIABLE";
@@ -148,7 +148,7 @@ export function createTypedVariablesFlyout(
   xmlList.push(initBlock);
 
   const defineBlock = document.createElement("block");
-  defineBlock.setAttribute("type", "variables_define");
+  defineBlock.setAttribute("type", VARIABLES_DEFINE_BLOCK_TYPE);
   const defineVarField = document.createElement("field");
   defineVarField.setAttribute("name", "VAR");
   defineVarField.setAttribute("id", defaultVariable.getId());

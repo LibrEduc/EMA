@@ -4,7 +4,10 @@
  * @description Board (s4e) block definitions – setup, loop, digital/analog I/O, delay, tone.
  * @remarks
  * Blocs issus de exemples/s4e/S4E/categories/board (board_base.blocks / board_base.arduino).
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -87,7 +90,7 @@ const BLOCK_PIN_DROPDOWN: Record<string, "digital" | "pwm" | "analog"> = {
 };
 
 /**
- * Registers board (s4e) blocks: setup, loop, digital/analog I/O, delay, map, angle, tone.
+ * Registers board (s4e) blocks: setup, loop, digital/analog I/O, delay, map, tone.
  */
 export const defineBoardBlocks = (): void => {
   if (boardBlocksRegistered) return;

@@ -5,6 +5,10 @@
  * @remarks
  * Runs after Blockly events settle (no drag/preview interception) to avoid
  * ghost blocks and gesture/preview instability seen with global strict checkers.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -99,7 +103,7 @@ export function installStrictTypeEnforcer(
       timer = null;
       revalidateLocalWrapperBlocks(workspace, e);
       revalidateTypedNumericBlocks(workspace, e);
-      revalidateProcedureCallBlocks(workspace, e);
+      revalidateProcedureCallBlocks(workspace);
       revalidateBoardIntInputBlocks(workspace, e);
       const all = workspace.getAllBlocks(false);
       for (const block of all) {

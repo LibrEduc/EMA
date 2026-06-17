@@ -30,4 +30,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export const LOOPS_BLOCK_TYPES = {} as const;
+export const LOOPS_BLOCK_TYPES = {
+  controls_repeat_ext: "null",
+  controls_whileUntil: "null",
+  controls_for: "null",
+  controls_forEach: "null",
+  controls_flow_statements: "null",
+} as const;

@@ -37,4 +37,9 @@ export const VARIABLES_BLOCK_TYPES = {
   variables_const: "null",
   variables_set_init: "null",
   variables_set_type: "null",
+  variables_set_dynamic: "null",
+  variables_local: "__DYNAMIC__localWrapper",
+  variables_define: "null",
+  /** @deprecated Alias legacy — voir `variables_define`. */
+  variable_define: "null",
 } as const;

@@ -33,8 +33,9 @@
 import * as Blockly from "blockly";
 import { ArduinoGenerator, Order } from "../arduino_generator";
 import { getCppTypeName, getInternalTypeForArduinoType } from "../block_types";
-import { getArduinoType, getDefaultValueForType } from "../arduino_types";
+import { getArduinoType } from "../arduino_types";
 import {
+  hasArrayListConnectedElements,
   inferArrayElementTypeFromBlock,
   inferArrayElementTypeFromInputs,
 } from "../block_types_registry";
@@ -52,20 +53,15 @@ function buildArrayListLiteralCode(
     itemCount = i;
   }
 
-  const blockWithType = block as Blockly.Block & { getBlockType?: () => string | null };
-  const elementType = blockWithType.getBlockType?.() ?? null;
-  const safeType =
-    elementType && elementType !== "__NO_TYPE__"
-      ? elementType === "bool"
-        ? "boolean"
-        : elementType
-      : "int";
-  const defaultVal =
-    getArduinoType(safeType)?.defaultValue ?? getDefaultValueForType("int") ?? "0";
-
   const parts: string[] = [];
   for (let i = 0; i < itemCount; i++) {
-    const value = generator.valueToCode(block, "ADD" + i, Order.ATOMIC) || defaultVal;
+    if (!block.getInputTargetBlock("ADD" + i)) {
+      continue;
+    }
+    const value = generator.valueToCode(block, "ADD" + i, Order.ATOMIC);
+    if (!value) {
+      continue;
+    }
     parts.push(value);
   }
   return "{" + parts.join(", ") + "}";
@@ -135,7 +131,11 @@ export const Array_list_literal = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): [string, number] {
-  return [buildArrayListLiteralCode(block, generator), Order.ATOMIC];
+  if (!hasArrayListConnectedElements(block)) {
+    return ["{}", Order.ATOMIC];
+  }
+  const code = buildArrayListLiteralCode(block, generator);
+  return [code === "{}" ? "{}" : code, Order.ATOMIC];
 };
 
 /**
@@ -154,10 +154,16 @@ export const Array_with = function (
   if (!varName || varName === "variable") {
     return "// Error: Invalid variable name\n";
   }
+  if (!hasArrayListConnectedElements(block)) {
+    return "// Error: connect values to determine list type\n";
+  }
   const listCode = buildArrayListLiteralCode(block, generator);
-  let elementType = inferArrayElementTypeFromBlock(block);
+  if (listCode === "{}") {
+    return "// Error: connect values to determine list type\n";
+  }
+  const elementType = inferArrayElementTypeFromBlock(block);
   if (!elementType || elementType === "__NO_TYPE__") {
-    elementType = "int";
+    return "// Error: connect values to determine list type\n";
   }
   const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
   const cppType = getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
@@ -219,6 +225,16 @@ export const Array_declare = function (
       break;
     }
     case "c2": {
+      const values = formatArrayInitializer(generator, block, "contenu");
+      const inferred = inferArrayElementTypeFromInputs(block, ["contenu", "contenu2"]);
+      if (
+        typeField === "__NO_TYPE__" ||
+        !inferred ||
+        inferred === "__NO_TYPE__" ||
+        values === "{}"
+      ) {
+        return "// Error: connect values to determine list type\n";
+      }
       if (dimension === "d2") {
         const row0 = formatArrayInitializer(generator, block, "contenu");
         const row1 = formatArrayInitializer(generator, block, "contenu2");
@@ -271,6 +287,15 @@ export const Array_create = function (
     case "c2":
       if (dimension === "1") {
         const j = formatArrayInitializer(generator, block, "D0");
+        const inferred = inferArrayElementTypeFromInputs(block, ["D0"]);
+        if (
+          typeField === "__NO_TYPE__" ||
+          !inferred ||
+          inferred === "__NO_TYPE__" ||
+          j === "{}"
+        ) {
+          return "// Error: connect values to determine list type\n";
+        }
         declaration = typeBlock + " " + varName + "[] = " + j + ";";
       } else {
         const dimCount = parseInt(dimension, 10);

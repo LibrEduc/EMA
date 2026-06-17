@@ -13,7 +13,21 @@
 
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -22,16 +36,10 @@ import { esLang } from './es';
 import { enLang } from './en';
 import { frLang } from './fr';
 
-/* The `export interface LanguageMap` is defining an interface called `LanguageMap`. This interface
-represents a mapping of language codes (string keys) to language items (values of type
-`LanguageItem`). The `LanguageItem` interface defines the structure of each language item,
-specifying the properties and their types. */
 export interface LanguageMap {
   [key: string]: LanguageItem;
 }
 
-/* The code is creating a constant variable `languagesMap` of type `LanguageMap`. `LanguageMap` is an
-interface that defines an object with string keys and values of type `LanguageItem`. */
 export const languagesMap: LanguageMap = {
   'ar': arLang["ar"],
   'es': esLang["es"],
@@ -64,9 +72,6 @@ export const languagesMapBlockly: LanguageMapBlockly = {
   'fr': unwrapBlocklyMessages(fr),
 };
 
-/* The `export interface LanguageItem` is defining an interface called `LanguageItem`. This interface
-specifies the structure of each language item, specifying the properties and their types. In this
-case, the `LanguageItem` interface has the following properties: */
 export interface LanguageItem {
   HOME: string;
   ABOUT: string;
@@ -182,6 +187,12 @@ export interface LanguageItem {
   CONTROLS_SWITCH_TOOLTIP_2: string;
   CONTROLS_SWITCH_TOOLTIP_3: string;
   CONTROLS_SWITCH_TOOLTIP_4: string;
+  CONTROLS_FOREACH_LIST_EMPTY: string;
+  UCB_FOREACH_EACH: string;
+  UCB_FOREACH_IN: string;
+  UCB_FOREACH_DO: string;
+  UCB_FOREACH_TOOLTIP: string;
+  UCB_FOREACH_HELPURL: string;
   MATH_CHANGE_LABEL: string;
   MATH_CHANGE_BY: string;
   MATH_CHANGE_VAR_WARNING: string;

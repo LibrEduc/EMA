@@ -32,7 +32,7 @@
 
 import * as Blockly from "blockly";
 import { debugLog } from "../../generators/arduino/debug";
-import { resolveLocalVariableScope, usesLocalVariableDeclaration } from "../../generators/arduino/variable_scope";
+import { resolveLocalVariableScope, usesLocalVariableDeclaration, isArrayAssignmentValueBlock } from "../../generators/arduino/variable_scope";
 import {
   checkTypeCompatibility,
   getCompatibleTypesForCheck,
@@ -43,6 +43,7 @@ import {
   getInternalTypeForArduinoType,
   isArduinoScalarType,
   normalizeBlocklyCheckToInternalType,
+  resolveArduinoScalarVariableType,
 } from "../../generators/arduino/block_types";
 import {
   clearVariableType,
@@ -96,6 +97,15 @@ export const validateSingleChar = (value: string): string => {
  * Returns the warning text for untyped variables.
  */
 export const getUntypedWarningText = (): string => getBlocklyMsg("TYPED_VAR_UNTYPED_WARNING");
+
+/**
+ * Warning when a list block has no connected element values yet.
+ */
+export const getArrayListUntypedWarningText = (): string =>
+  getBlocklyMsgOr(
+    "ARRAY_LIST_UNTYPED_WARNING",
+    "Untyped list. Connect values to determine the type.",
+  );
 
 /**
  * Builds the warning text for type mismatches.
@@ -155,9 +165,6 @@ export const syncNumericVariableType = (
     setVariableType(variable, requiredType);
   }
 };
-
-/** @deprecated Use {@link syncNumericVariableType}. */
-export const syncLoopCounterVariableType = syncNumericVariableType;
 
 /**
  * Converts a variable type into Blockly connection checks.
@@ -288,8 +295,11 @@ export const configureTypedVariableField = configureScalarVariableField;
 /**
  * Ensures the variable selected on a list-category block has Blockly type `list`.
  */
-export const syncListVariableFromBlock = (block: Blockly.Block): void => {
-  const variableId = block.getFieldValue("VAR");
+export const syncListVariableFromField = (
+  block: Blockly.Block,
+  fieldName: string,
+): void => {
+  const variableId = block.getFieldValue(fieldName);
   if (!variableId || !block.workspace) {
     return;
   }
@@ -300,22 +310,16 @@ export const syncListVariableFromBlock = (block: Blockly.Block): void => {
 };
 
 /**
- * Output check for variables_get / variables_get_dynamic when VAR is a list.
+ * @deprecated Use {@link syncListVariableFromField} with `"VAR"`.
  */
-export const getListVariableOutputCheck = (): null => null;
+export const syncListVariableFromBlock = (block: Blockly.Block): void => {
+  syncListVariableFromField(block, "VAR");
+};
 
 /**
- * Configures a FieldVariable to accept any type.
- * @param field - FieldVariable instance to configure.
+ * Output check for variables_get when VAR is Blockly-only (`list`), not an Arduino type.
  */
-export const configureUntypedVariableField = (field: Blockly.FieldVariable): void => {
-  const fieldWithTypes = field as unknown as {
-    variableTypes?: string[] | null;
-    defaultType?: string;
-  };
-  fieldWithTypes.variableTypes = null;
-  fieldWithTypes.defaultType = "";
-};
+export const getListVariableOutputCheck = (): string => "__NO_TYPE__";
 
 /**
  * Normalizes Blockly check types to µcBlockly variable types.
@@ -479,7 +483,6 @@ export const syncProcedureCallArgInputChecks = (callBlock: Blockly.Block): void 
  */
 export const revalidateProcedureCallBlocks = (
   workspace: Blockly.Workspace,
-  _event?: Blockly.Events.Abstract,
 ): void => {
   for (const block of workspace.getAllBlocks(false)) {
     if (
@@ -765,10 +768,12 @@ export const resolveVariableTypeForBlock = (
     block,
   );
   if (paramType) {
-    return paramType;
+    return resolveArduinoScalarVariableType(paramType);
   }
   if (usesLocalVariableDeclaration(block.getInputTargetBlock("VALUE"))) {
-    return inferLocalAssignmentValueType(block.getInputTargetBlock("VALUE"));
+    return resolveArduinoScalarVariableType(
+      inferLocalAssignmentValueType(block.getInputTargetBlock("VALUE")),
+    );
   }
   const variable = block.workspace.getVariableMap().getVariableById(variableId);
   if (!variable) {
@@ -780,7 +785,7 @@ export const resolveVariableTypeForBlock = (
     block,
   );
   if (inferred) {
-    return inferred;
+    return resolveArduinoScalarVariableType(inferred);
   }
   const modelType = variable.getType();
   if (!modelType || modelType === "__NO_TYPE__") {
@@ -792,7 +797,7 @@ export const resolveVariableTypeForBlock = (
   ) {
     return null;
   }
-  return modelType;
+  return resolveArduinoScalarVariableType(modelType);
 };
 
 /** Resolves global variable type from global assignments only (ignores `local` wrappers). */
@@ -813,7 +818,7 @@ export const resolveGlobalVariableType = (
     }
     const type = inferConnectedValueType(block.getInputTargetBlock("VALUE"));
     if (type) {
-      result = type;
+      result = resolveArduinoScalarVariableType(type);
     }
   }
   return result;
@@ -1175,6 +1180,9 @@ export const inferConnectedValueType = (block: Blockly.Block | null): string | n
   if (!block) {
     return null;
   }
+  if (isArrayAssignmentValueBlock(block)) {
+    return LIST_VARIABLE_TYPE;
+  }
   const typedBlock = block as Blockly.Block & { getBlockType?: () => string | null };
   const rawType = typedBlock.getBlockType ? typedBlock.getBlockType() : null;
   const normalized = rawType ? normalizeBlocklyTypeToVariableType(rawType) : null;
@@ -1330,6 +1338,17 @@ export const handleVariablesSetChange = (
         valueInput.connection.setCheck(null);
       }
       block.setWarningText(innerType ? null : getUntypedWarningText());
+      return;
+    }
+
+    if (isArrayAssignmentValueBlock(connectedBlock)) {
+      tagVariableAsList(variable);
+      typedVariable.__ucbManualType = false;
+      if (valueInput?.connection) {
+        valueInput.connection.setCheck(["Array"]);
+      }
+      block.setWarningText(null);
+      revalidateVariableBlocksForId(block.workspace, variableId);
       return;
     }
 

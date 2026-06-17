@@ -9,7 +9,7 @@
  * @version 1.0.0
  * @since 1.0.0
  *
- * This module loads block type definitions from block_types.json and applies them to Blockly blocks.
+ * This module loads block type definitions from `block_types/` and applies them to Blockly blocks.
  *
  * Runtime compatibility checks (including Blockly aliases) are documented in
  * `docs/TYPES_ET_COMPATIBILITES.md`.
@@ -17,7 +17,21 @@
 
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -29,14 +43,13 @@ import { LIST_VARIABLE_TYPE } from "./variable_utils";
 import { debugLog } from "./debug";
 
 /**
- * Type mapping from BlocklyArduino types to Arduino types
- * Based on the types defined in src/types/ folder (extracted from BlocklyArduino)
+ * Type mapping from Blockly check types to µcBlockly internal types.
  */
 export type BlockTypeFunction = (block: Blockly.Block) => string;
 export type BlockTypeDefinition = string | BlockTypeFunction;
 
 /**
- * Registry of block types loaded from block_types.json
+ * Registry of block types loaded from `block_types/`.
  */
 export const BLOCK_TYPE_REGISTRY: Record<string, BlockTypeDefinition> = {};
 
@@ -184,6 +197,18 @@ export function inferArrayElementTypeFromBlock(block: Blockly.Block): string {
   return inferArrayElementTypeFromInputs(block, inputNames);
 }
 
+/** True when at least one ADD input has a connected value block. */
+export function hasArrayListConnectedElements(block: Blockly.Block): boolean {
+  let i = 0;
+  while (block.getInput("ADD" + i)) {
+    if (block.getInputTargetBlock("ADD" + i)) {
+      return true;
+    }
+    i++;
+  }
+  return false;
+}
+
 const LIST_DECLARE_BLOCK_TYPES = [
   "Array_declare",
   "Array_create",
@@ -225,8 +250,10 @@ export function inferListVariableElementType(
     return "__NO_TYPE__";
   }
   if (declareBlock.type === "Array_with") {
-    const inferred = inferArrayElementTypeFromBlock(declareBlock);
-    return inferred !== "__NO_TYPE__" ? inferred : "int";
+    if (!hasArrayListConnectedElements(declareBlock)) {
+      return "__NO_TYPE__";
+    }
+    return inferArrayElementTypeFromBlock(declareBlock);
   }
   const typeField = declareBlock.getFieldValue("type") || "int";
   return getInternalTypeForArduinoType(typeField);
@@ -239,6 +266,26 @@ export function inferArrayGetIndexElementType(block: Blockly.Block): string {
 }
 
 const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
+  'mathOnListType': (block: Blockly.Block): string => {
+    const op = block.getFieldValue('OP');
+    if (op === 'STD_DEV' || op === 'AVERAGE') {
+      return 'float';
+    }
+    return 'int';
+  },
+  'localWrapper': (block: Blockly.Block): string => {
+    const typed = block as Blockly.Block & { getBlockType?: () => string | null };
+    const rawType = typed.getBlockType?.();
+    if (rawType && rawType !== '__NO_TYPE__') {
+      return rawType;
+    }
+    const connected = block.getInputTargetBlock('VALUE');
+    if (!connected) {
+      return '__NO_TYPE__';
+    }
+    const connectedTyped = connected as Blockly.Block & { getBlockType?: () => string | null };
+    return connectedTyped.getBlockType?.() || '__NO_TYPE__';
+  },
   'ternary': (block: Blockly.Block): string => {
     // Infer from both branches without forcing input checks.
     const thenBlock = block.getInputTargetBlock('THEN');
@@ -325,7 +372,7 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
         return '__NO_TYPE__';
       }
       if (varType === LIST_VARIABLE_TYPE) {
-        return LIST_VARIABLE_TYPE;
+        return '__NO_TYPE__';
       }
       return getInternalTypeForArduinoType(varType);
     } catch (error) {

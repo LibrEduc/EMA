@@ -135,6 +135,12 @@ export interface LanguageItem {
     CONTROLS_SWITCH_TOOLTIP_2: string;
     CONTROLS_SWITCH_TOOLTIP_3: string;
     CONTROLS_SWITCH_TOOLTIP_4: string;
+    CONTROLS_FOREACH_LIST_EMPTY: string;
+    UCB_FOREACH_EACH: string;
+    UCB_FOREACH_IN: string;
+    UCB_FOREACH_DO: string;
+    UCB_FOREACH_TOOLTIP: string;
+    UCB_FOREACH_HELPURL: string;
     MATH_CHANGE_LABEL: string;
     MATH_CHANGE_BY: string;
     MATH_CHANGE_VAR_WARNING: string;

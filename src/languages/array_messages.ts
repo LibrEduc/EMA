@@ -2,10 +2,12 @@
  * @packageDocumentation
  * @module Languages.ArrayMessages
  * @description ARRAY_* messages for S4e-style array blocks.
- * @license GPL-3.0-or-later
  * @remarks
  * Merged into Blockly.Msg after setLocale so array blocks display correctly.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -54,6 +56,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_MODIFY_HELPURL: "",
     ARRAY_CREATE: "define ",
     ARRAY_LIST: "list",
+    ARRAY_LIST_UNTYPED_WARNING:
+      "Untyped list. Connect values to determine the type.",
     ARRAY_ARRAY: "array",
     ARRAY_TAILLE: "size",
     ARRAY_CONTIENT: "contains",
@@ -89,6 +93,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_MODIFY_HELPURL: "",
     ARRAY_CREATE: "définir ",
     ARRAY_LIST: "la liste",
+    ARRAY_LIST_UNTYPED_WARNING:
+      "Liste non typée. Connectez des valeurs pour déterminer le type.",
     ARRAY_ARRAY: "le tableau",
     ARRAY_TAILLE: "taille",
     ARRAY_CONTIENT: "qui contient",
@@ -122,6 +128,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_MODIFY_TOOLTIP: "Asignar valor a elemento del array",
     ARRAY_CREATE: "definir ",
     ARRAY_LIST: "lista",
+    ARRAY_LIST_UNTYPED_WARNING:
+      "Lista sin tipo. Conecte valores para determinar el tipo.",
     ARRAY_ARRAY: "tabla",
     ARRAY_TAILLE: "tamaño",
     ARRAY_CONTIENT: "contiene",
@@ -159,6 +167,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_MODIFY_HELPURL: "",
     ARRAY_CREATE: "تعريف ",
     ARRAY_LIST: "القائمة",
+    ARRAY_LIST_UNTYPED_WARNING:
+      "قائمة غير مُحددة النوع. صِل قيماً لتحديد النوع.",
     ARRAY_ARRAY: "المصفوفة",
     ARRAY_TAILLE: "الحجم",
     ARRAY_CONTIENT: "يحتوي",

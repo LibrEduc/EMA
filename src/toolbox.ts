@@ -336,6 +336,10 @@ const basic_toolbox_source: ToolboxConfiguration = {
         },
         {
           'kind': 'block',
+          'type': 'controls_forEach',
+        },
+        {
+          'kind': 'block',
           'type': 'controls_flow_statements',
         },
       ],

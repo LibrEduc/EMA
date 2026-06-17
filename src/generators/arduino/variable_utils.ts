@@ -12,7 +12,21 @@
 
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -20,6 +34,25 @@ import * as Blockly from "blockly";
 
 /** Type Blockly des variables déclarées par les blocs Listes (tableaux). */
 export const LIST_VARIABLE_TYPE = "list";
+
+/** Type canonique du bloc « définir une variable globale typée ». */
+export const VARIABLES_DEFINE_BLOCK_TYPE = "variables_define";
+
+/**
+ * Alias historique (singulier) conservé pour les projets sauvegardés avant l'unification.
+ * @see VARIABLES_DEFINE_BLOCK_TYPE
+ */
+export const VARIABLES_DEFINE_LEGACY_BLOCK_TYPE = "variable_define";
+
+/** Indique si le type de bloc correspond à une déclaration globale typée. */
+export function isVariablesDefineBlock(
+  blockType: string | null | undefined,
+): boolean {
+  return (
+    blockType === VARIABLES_DEFINE_BLOCK_TYPE ||
+    blockType === VARIABLES_DEFINE_LEGACY_BLOCK_TYPE
+  );
+}
 
 export type MutableVariableModel = Blockly.IVariableModel<Blockly.IVariableState> & {
   setType?: (type: string) => void;

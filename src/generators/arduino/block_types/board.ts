@@ -2,7 +2,10 @@
  * @packageDocumentation
  * @module Arduino.BlockTypes.Board
  * @description Block type mappings for board (s4e) blocks.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

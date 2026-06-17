@@ -3,9 +3,12 @@
  * @module ToolboxSearchI18n
  * @description Registers an i18n subclass of the toolbox-search plugin without modifying its code.
  * @remarks
- * After loading @blockly/toolbox-search, the registered category is replaced by a subclass that
+ * After loading `\@blockly/toolbox-search`, the registered category is replaced by a subclass that
  * reads strings from Blockly.Msg. Resilient to plugin version upgrades.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -44,7 +47,7 @@ function getMsg(key: string, fallback: string): string {
 
 /**
  * Registers the multilingual toolbox-search category.
- * Call once after importing @blockly/toolbox-search.
+ * Call once after importing `\@blockly/toolbox-search`.
  */
 export function registerToolboxSearchI18n(): void {
   const Base = Blockly.registry.getClass(

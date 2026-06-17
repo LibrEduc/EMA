@@ -148,6 +148,13 @@ export const arLang: LanguageMap = {
     CONTROLS_SWITCH_TOOLTIP_2: "تبديل مع حالة افتراضية.",
     CONTROLS_SWITCH_TOOLTIP_3: "تبديل مع حالات.",
     CONTROLS_SWITCH_TOOLTIP_4: "تبديل مع حالات وافتراضي.",
+    CONTROLS_FOREACH_LIST_EMPTY:
+      "أنشئ قائمة أولاً باستخدام كتلة من فئة القوائم.",
+    UCB_FOREACH_EACH: "لكل عنصر",
+    UCB_FOREACH_IN: "في القائمة",
+    UCB_FOREACH_DO: "نفّذ",
+    UCB_FOREACH_TOOLTIP: "لكل عنصر في قائمة مُعرَّفة على مساحة العمل.",
+    UCB_FOREACH_HELPURL: "",
     MATH_CHANGE_LABEL: "غيّر",
     MATH_CHANGE_BY: "بمقدار",
     MATH_CHANGE_VAR_WARNING: "صِل متغيرًا.",

@@ -9,25 +9,38 @@
  * @version 1.0.0
  * @since 1.0.0
  *
- * This module loads block type definitions from block_types.json and applies them to Blockly blocks.
+ * This module loads block type definitions from `block_types/` and applies them to Blockly blocks.
  *
  * Runtime compatibility checks (including Blockly aliases) are documented in
  * `docs/TYPES_ET_COMPATIBILITES.md`.
  */
 /**
  * @license
- * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 import * as Blockly from "blockly";
 /**
- * Type mapping from BlocklyArduino types to Arduino types
- * Based on the types defined in src/types/ folder (extracted from BlocklyArduino)
+ * Type mapping from Blockly check types to µcBlockly internal types.
  */
 export type BlockTypeFunction = (block: Blockly.Block) => string;
 export type BlockTypeDefinition = string | BlockTypeFunction;
 /**
- * Registry of block types loaded from block_types.json
+ * Registry of block types loaded from `block_types/`.
  */
 export declare const BLOCK_TYPE_REGISTRY: Record<string, BlockTypeDefinition>;
 /** Infers int/float from a math_number field value. */
@@ -42,6 +55,8 @@ export declare function inferArrayElementTypeFromInputs(block: Blockly.Block, in
  * Numeric types unify (int + float → float); float literals promote to float.
  */
 export declare function inferArrayElementTypeFromBlock(block: Blockly.Block): string;
+/** True when at least one ADD input has a connected value block. */
+export declare function hasArrayListConnectedElements(block: Blockly.Block): boolean;
 /**
  * Finds the list declaration block for a workspace variable id.
  */

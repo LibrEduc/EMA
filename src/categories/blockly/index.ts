@@ -32,6 +32,7 @@
 
 import { debugLog } from "../../generators/arduino/debug";
 import { defineControlsSwitchBlocks } from "./logic";
+import { defineLoopsBlocks } from "./loops";
 import { defineMathCompatBlocks } from "./math";
 import { defineTextCompatBlocks } from "./text";
 import { defineArrayBlocks } from "./array";
@@ -57,6 +58,7 @@ let typedVariableBlocksRegistered = false;
  * Registers BlocklyArduino compatibility blocks.
  */
 export const defineBlocklyArduinoCompatBlocks = (): void => {
+  defineLoopsBlocks();
   defineMathCompatBlocks();
   defineTextCompatBlocks();
   defineArrayBlocks();
@@ -95,6 +97,7 @@ export {
   defineArrayBlocks,
   defineLibreBlocks,
   defineBoardBlocks,
+  defineLoopsBlocks,
   refreshBoardPinDropdowns,
   defineControlsSwitchBlocks,
   defineColourBlocks,

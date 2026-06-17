@@ -5,7 +5,10 @@
  * @remarks
  * This local implementation avoids the deprecated external package
  * peer-dependency constraint on old Blockly versions.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**

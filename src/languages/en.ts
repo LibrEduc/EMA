@@ -148,6 +148,14 @@ export const enLang: LanguageMap = {
     CONTROLS_SWITCH_TOOLTIP_2: "Switch with a default case.",
     CONTROLS_SWITCH_TOOLTIP_3: "Switch with cases.",
     CONTROLS_SWITCH_TOOLTIP_4: "Switch with cases and default.",
+    CONTROLS_FOREACH_LIST_EMPTY:
+      "Create a list with a block from the Lists category first.",
+    UCB_FOREACH_EACH: "for each item",
+    UCB_FOREACH_IN: "in list",
+    UCB_FOREACH_DO: "do",
+    UCB_FOREACH_TOOLTIP:
+      "For each element in a list declared on the workspace.",
+    UCB_FOREACH_HELPURL: "",
     MATH_CHANGE_LABEL: "change",
     MATH_CHANGE_BY: "by",
     MATH_CHANGE_VAR_WARNING: "Connect a variable.",

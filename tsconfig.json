@@ -12,5 +12,7 @@
     "types": [
       "node"
     ]
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["tests/**/*", "build/**/*", "node_modules/**/*"]
 }

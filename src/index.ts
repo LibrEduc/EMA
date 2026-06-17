@@ -145,7 +145,6 @@ import { getA11yLabel } from "./a11y_labels";
 import { µcB_codeEditor } from "./code_editor";
 import { registerWorkspaceForSvgResize, µcB_workspaceOnResize } from "./workspace_resize";
 import {
-  µcB_addFlexResizerEvents,
   initializeBottomPanelToggleButton,
   initializeRightPanelToggleButton,
   saveLayoutToSessionStorage,

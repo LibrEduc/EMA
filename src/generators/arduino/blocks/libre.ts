@@ -1,10 +1,13 @@
 /**
  * @packageDocumentation
  * @module Arduino.Generators.Libre
- * @description Arduino generators for "libre" blocks (formerly Blockly@rduino null category).
+ * @description Arduino generators for "libre" blocks (legacy rduino null category).
  * @remarks
  * Libre blocks do not emit code by default; the text is used as a comment or marker.
+ * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
  */
 
 /**
@@ -45,7 +48,7 @@ export function libre_in(_block: Block, _generator: ArduinoGenerator): [string, 
   return ["0", Order.ATOMIC];
 }
 
-export function libre_out(block: Block, generator: ArduinoGenerator): string {
+export function libre_out(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
@@ -53,11 +56,11 @@ export function libre_in_out(block: Block, _generator: ArduinoGenerator): string
   return commentFromField(block, "TEXT");
 }
 
-export function libre_start(block: Block, generator: ArduinoGenerator): string {
+export function libre_start(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
-export function libre_end(block: Block, generator: ArduinoGenerator): string {
+export function libre_end(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
