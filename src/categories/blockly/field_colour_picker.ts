@@ -3,7 +3,7 @@
  * @module BlocklyFields.ColourPicker
  * @description Custom iro.js-based color picker field for Blockly.
  * @remarks
- * Provides dropdown UI and value handling for color selection.
+ * Provides dropdown UI, value handling, and Blockly v13 ARIA helpers.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -32,6 +32,11 @@
 
 import * as Blockly from "blockly";
 import * as iro from "@jaames/iro";
+import {
+  formatColourAriaValue,
+  getColourAriaTypeName,
+  getColourPickerEditorLabel,
+} from "./field_colour_a11y";
 
 type IroColor = { hexString: string };
 type IroColorPicker = {
@@ -128,6 +133,13 @@ const getIroPicker = (): (new (
   ) => IroColorPicker;
 };
 
+const hideColourPickerDropdown = (): void => {
+  const dropDownDiv = Blockly.DropDownDiv as unknown as { hide?: () => void };
+  if (typeof dropDownDiv.hide === "function") {
+    dropDownDiv.hide();
+  }
+};
+
 /**
  * Custom Blockly field that renders an iro.js color picker.
  */
@@ -135,6 +147,8 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
   static readonly DEFAULT_VALUE = "#FF00FF";
 
   protected textEditEnabled_ = false;
+
+  private editorDispose_: (() => void) | null = null;
 
   /**
    * Creates the field with a default value and optional validator.
@@ -146,6 +160,25 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     opt_validator?: Blockly.FieldValidator,
   ) {
     super(opt_value ?? FieldColorPicker.DEFAULT_VALUE, opt_validator);
+  }
+
+  /**
+   * ARIA type for Blockly v13 keyboard / screen reader navigation.
+   */
+  getAriaTypeName(): string {
+    return getColourAriaTypeName();
+  }
+
+  /**
+   * Spoken colour value (hex + RGB).
+   */
+  getAriaValue(): string {
+    return formatColourAriaValue(this.getValue());
+  }
+
+  /** {@inheritdoc} */
+  override getText(): string {
+    return formatColourAriaValue(this.getValue());
   }
 
   /**
@@ -162,6 +195,7 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
       borderRect_?: SVGRectElement;
       clickTarget_?: SVGElement;
       sourceBlock_?: Blockly.BlockSvg;
+      fieldGroup_?: SVGGElement;
     };
     self.size_ = new Blockly.utils.Size(
       constants.FIELD_COLOUR_DEFAULT_WIDTH,
@@ -175,83 +209,18 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     } else if (self.sourceBlock_) {
       self.clickTarget_ = self.sourceBlock_.getSvgRoot();
     }
-  }
-
-  /**
-   * Shows the dropdown color picker editor.
-   */
-  protected override showEditor_(): void {
-    const Picker = getIroPicker();
-    if (!Picker) {
-      super.showEditor_();
-      return;
+    const clickTarget = this.getClickTarget_();
+    if (clickTarget) {
+      clickTarget.setAttribute("role", "button");
+      clickTarget.setAttribute(
+        "aria-label",
+        `${getColourAriaTypeName()}: ${formatColourAriaValue(this.getValue())}`,
+      );
     }
-    ensureIsTargetInputPatch();
-    ensureHideChaffPatch();
-    const editor = document.createElement("div");
-    editor.id = "color-picker";
-    editor.setAttribute("spellcheck", "false");
-    const contentDiv = Blockly.DropDownDiv.getContentDiv();
-    const markIgnoreHideChaff = () => {
-      ignoreHideChaffUntil = Date.now() + 250;
-    };
-    const keepIgnoreHideChaff = (event: Event) => {
-      const pointerEvent = event as PointerEvent;
-      if (typeof pointerEvent.buttons === "number" && pointerEvent.buttons === 0) {
-        return;
-      }
-      markIgnoreHideChaff();
-    };
-    editor.addEventListener("pointerdown", markIgnoreHideChaff, { capture: true });
-    editor.addEventListener("mousedown", markIgnoreHideChaff, { capture: true });
-    editor.addEventListener("touchstart", markIgnoreHideChaff, { capture: true });
-    editor.addEventListener("pointermove", keepIgnoreHideChaff, { capture: true });
-    contentDiv.appendChild(editor);
-    let attempts = 0;
-    const tryShow = () => {
-      const sourceBlock = this.getSourceBlock() as Blockly.BlockSvg | null;
-      if (!sourceBlock || !sourceBlock.getSvgRoot()) {
-        return false;
-      }
-      try {
-        Blockly.DropDownDiv.showPositionedByBlock(this, sourceBlock, () => editor.remove());
-        return true;
-      } catch {
-        return false;
-      }
-    };
-    const showWithRetry = () => {
-      attempts += 1;
-      if (tryShow()) {
-        return;
-      }
-      if (attempts < 3) {
-        window.setTimeout(showWithRetry, 0);
-        return;
-      }
-      editor.remove();
-      super.showEditor_();
-    };
-    showWithRetry();
-    const colorPicker = new Picker("#color-picker", {
-      width: 150,
-      height: 150,
-      color: this.getValue() || FieldColorPicker.DEFAULT_VALUE,
-    });
-    const observer = new MutationObserver(() => {
-      markInputTargets(editor);
-    });
-    observer.observe(editor, { childList: true, subtree: true });
-    markInputTargets(editor);
-    window.setTimeout(() => markInputTargets(editor), 0);
-    colorPicker.on("color:change", (color) => {
-      this.setEditorValue_(color.hexString);
-    });
   }
 
   /**
-   * Applies the new color to the field UI.
-   * @param newValue - New color value.
+   * Updates the on-block ARIA label when the colour changes.
    */
   protected override doValueUpdate_(newValue: string): void {
     const self = this as unknown as {
@@ -267,6 +236,124 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
       pathObject?.svgPath?.setAttribute("fill", newValue);
       pathObject?.svgPath?.setAttribute("stroke", "#fff");
     }
+    const clickTarget = this.getClickTarget_();
+    if (clickTarget) {
+      clickTarget.setAttribute(
+        "aria-label",
+        `${getColourAriaTypeName()}: ${formatColourAriaValue(newValue)}`,
+      );
+    }
+  }
+
+  /**
+   * Shows the dropdown color picker editor.
+   */
+  protected override showEditor_(): void {
+    const Picker = getIroPicker();
+    if (!Picker) {
+      super.showEditor_();
+      return;
+    }
+    ensureIsTargetInputPatch();
+    ensureHideChaffPatch();
+
+    const editorRoot = document.createElement("div");
+    editorRoot.className = "ucb-colour-picker-editor";
+    editorRoot.setAttribute("role", "group");
+    editorRoot.setAttribute("aria-label", getColourPickerEditorLabel());
+    editorRoot.setAttribute("tabindex", "-1");
+
+    const mountId = `ucb-colour-picker-${Blockly.utils.idGenerator.genUid()}`;
+    const mount = document.createElement("div");
+    mount.id = mountId;
+    mount.setAttribute("aria-hidden", "true");
+    editorRoot.appendChild(mount);
+
+    const contentDiv = Blockly.DropDownDiv.getContentDiv();
+    const boundEvents: Blockly.browserEvents.Data[] = [];
+    let observer: MutationObserver | null = null;
+
+    const disposeEditor = (): void => {
+      for (const binding of boundEvents) {
+        Blockly.browserEvents.unbind(binding);
+      }
+      boundEvents.length = 0;
+      observer?.disconnect();
+      observer = null;
+      editorRoot.remove();
+      this.editorDispose_ = null;
+    };
+    this.editorDispose_ = disposeEditor;
+
+    const markIgnoreHideChaff = (): void => {
+      ignoreHideChaffUntil = Date.now() + 250;
+    };
+    const keepIgnoreHideChaff = (event: Event): void => {
+      const pointerEvent = event as PointerEvent;
+      if (typeof pointerEvent.buttons === "number" && pointerEvent.buttons === 0) {
+        return;
+      }
+      markIgnoreHideChaff();
+    };
+    editorRoot.addEventListener("pointerdown", markIgnoreHideChaff, { capture: true });
+    editorRoot.addEventListener("mousedown", markIgnoreHideChaff, { capture: true });
+    editorRoot.addEventListener("touchstart", markIgnoreHideChaff, { capture: true });
+    editorRoot.addEventListener("pointermove", keepIgnoreHideChaff, { capture: true });
+
+    boundEvents.push(
+      Blockly.browserEvents.conditionalBind(document, "keydown", this, (event: Event) => {
+        const keyboardEvent = event as KeyboardEvent;
+        if (keyboardEvent.key === "Escape") {
+          keyboardEvent.preventDefault();
+          hideColourPickerDropdown();
+        }
+      }),
+    );
+
+    contentDiv.appendChild(editorRoot);
+
+    let attempts = 0;
+    const tryShow = (): boolean => {
+      const sourceBlock = this.getSourceBlock() as Blockly.BlockSvg | null;
+      if (!sourceBlock || !sourceBlock.getSvgRoot()) {
+        return false;
+      }
+      try {
+        Blockly.DropDownDiv.showPositionedByBlock(this, sourceBlock, disposeEditor);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+    const showWithRetry = (): void => {
+      attempts += 1;
+      if (tryShow()) {
+        editorRoot.focus({ preventScroll: true });
+        return;
+      }
+      if (attempts < 3) {
+        window.setTimeout(showWithRetry, 0);
+        return;
+      }
+      disposeEditor();
+      super.showEditor_();
+    };
+    showWithRetry();
+
+    const colorPicker = new Picker(`#${mountId}`, {
+      width: 150,
+      height: 150,
+      color: this.getValue() || FieldColorPicker.DEFAULT_VALUE,
+    });
+    observer = new MutationObserver(() => {
+      markInputTargets(mount);
+    });
+    observer.observe(mount, { childList: true, subtree: true });
+    markInputTargets(mount);
+    window.setTimeout(() => markInputTargets(mount), 0);
+    colorPicker.on("color:change", (color) => {
+      this.setEditorValue_(color.hexString);
+    });
   }
 
   public override applyColour(): void {
@@ -292,6 +379,12 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
 
   protected override setEditorValue_(newValue: string): void {
     this.setValue(newValue);
+  }
+
+  /** {@inheritdoc} */
+  override dispose(): void {
+    this.editorDispose_?.();
+    super.dispose();
   }
 }
 

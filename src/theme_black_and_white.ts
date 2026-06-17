@@ -137,7 +137,16 @@ export default Blockly.Theme.defineTheme('black_and_white', {
       'colour': '#000000',
     },
   },
-  'componentStyles': {},
+  'componentStyles': {
+    workspaceBackgroundColour: '#ffffff',
+    toolboxBackgroundColour: '#f0f0f0',
+    toolboxForegroundColour: '#000000',
+    flyoutBackgroundColour: '#f0f0f0',
+    flyoutForegroundColour: '#000000',
+    scrollbarColour: '#404040',
+    markerColour: '#000000',
+    cursorColour: '#000000',
+  },
   'fontStyle': {},
   'startHats': undefined,
 });

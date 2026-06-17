@@ -16,23 +16,29 @@
 </head>
 
 <body>
+  <a href="#blockly-workspace-main" class="skip-link lang" key="A11Y_SKIP_TO_WORKSPACE"
+    id="skip-to-workspace">Aller au workspace Blockly</a>
   <flex id="container_page" class="wrapper_global">
-    <div class="divTableCell">
+    <header id="app_topbar" class="divTableCell">
       <div id="title" class="app-title">
         <img class="app-title__logo" src="assets/favicon-32x32.png?v=2" alt="" width="32" height="32" decoding="async">
         <span class="lang" key="HOME">µcBlockly</span>
       </div>
       <a href="https://github.com/A-S-T-U-C-E/ucBlockly" target="_blank">
-        <div class="lang" key="ABOUT" data-title-key="ABOUT_TOOLTIP">About</div>
+        <span class="lang" key="ABOUT" data-title-key="ABOUT_TOOLTIP">About</span>
       </a>
       <a href="https://www.linkedin.com/in/sebcanet/" target="_blank">
-        <div class="lang" key="CONTACT" data-title-key="CONTACT_TOOLTIP">Contact</div>
+        <span class="lang" key="CONTACT" data-title-key="CONTACT_TOOLTIP">Contact</span>
       </a>
-      <div id="saveButton" class="lang" key="SAVE" data-title-key="SAVE_TOOLTIP">save</div>
-      <div id="loadButton" class="lang" key="LOAD" data-title-key="LOAD_TOOLTIP">load</div>
+      <button type="button" id="saveButton" class="toolbar-btn lang" key="SAVE"
+        data-title-key="SAVE_TOOLTIP">save</button>
+      <button type="button" id="loadButton" class="toolbar-btn lang" key="LOAD"
+        data-title-key="LOAD_TOOLTIP">load</button>
       <input type="file" id="loadFileInput" accept=".json" style="display: none;">
-      <div id="undoButton" class="lang" key="UNDO" data-title-key="UNDO_TOOLTIP">undo</div>
-      <div id="redoButton" class="lang" key="REDO" data-title-key="REDO_TOOLTIP">redo</div>
+      <button type="button" id="undoButton" class="toolbar-btn lang" key="UNDO"
+        data-title-key="UNDO_TOOLTIP">undo</button>
+      <button type="button" id="redoButton" class="toolbar-btn lang" key="REDO"
+        data-title-key="REDO_TOOLTIP">redo</button>
       <select id="languageMenu" data-title-key="LANGUAGE_MENU_TOOLTIP"></select>
       <select name="themeMenu" id="themeMenu" data-title-key="THEME_MENU_TOOLTIP">
         <option class="lang" value="classic" id="themeClassicSpan" key="THEME_CLASSIC">classic</option>
@@ -78,12 +84,14 @@
           <span class="lang" key="PLUGIN_DEBUG" data-title-key="PLUGIN_DEBUG_TOOLTIP">debug</span>
         </label>
       </div>
-    </div>
+    </header>
     <flex id="flex_container_up" class="wrapper_element" style="flex: 1;">
       <flex-item id="flex_container_up_left" style="flex: 1;">
-        <div id="shortcuts"></div>
-        <div id="div_workspace_content_area"></div>
-        <div id="div_workspace_content_blockly" style="position: absolute"></div>
+        <div id="shortcuts" hidden></div>
+        <main id="blockly-workspace-main">
+          <div id="div_workspace_content_area"></div>
+          <div id="div_workspace_content_blockly" style="position: absolute"></div>
+        </main>
       </flex-item>
       <flex-resizer id="flex_resizer_horizontal"></flex-resizer>
       <flex-item id="flex_container_up_right" style="flex-basis: 0px;">
@@ -95,7 +103,7 @@
     </flex>
     <flex-resizer id="flex_resizer_vertical"></flex-resizer>
     <flex id="flex_container_bottom" class="wrapper_element" style="flex-basis: 0px;">
-      <flex-item id="flex_container_bottom_down" style="flex: 1;">
+      <flex-item id="flex_container_bottom_down" style="flex: 1;" role="presentation">
         <pre id="content_console"><code></code></pre>
       </flex-item>
     </flex>

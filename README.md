@@ -53,6 +53,7 @@ Ouvrez l’URL affichée par Webpack (ou `public/index.html` après build) pour 
 | Document | Contenu |
 |----------|---------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Structure du code, conventions, flux principaux |
+| [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) | Coque UI, raccourcis clavier, repères ARIA |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide pour les contributeurs |
 | [docs/TYPEDOC.md](docs/TYPEDOC.md) | Génération et conventions de la doc API |
 | [docs/TYPES_ET_COMPATIBILITES.md](docs/TYPES_ET_COMPATIBILITES.md) | Typage des blocs et règles de compatibilité |

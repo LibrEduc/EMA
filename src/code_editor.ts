@@ -37,6 +37,20 @@ export class LazyMonacoEditor {
   private editor?: Monaco.editor.IStandaloneCodeEditor;
   private pendingValue: string | null = null;
   private initializing: Promise<void> | null = null;
+  private monacoTheme: "vs" | "vs-dark" | "hc-black" = "vs";
+
+  /**
+   * Aligns Monaco with the application shell theme.
+   */
+  applyTheme(mode: "light" | "dark" | "high-contrast"): void {
+    this.monacoTheme =
+      mode === "dark" ? "vs-dark" : mode === "high-contrast" ? "hc-black" : "vs";
+    if (this.editor) {
+      void import("monaco-editor").then((monaco) => {
+        monaco.editor.setTheme(this.monacoTheme);
+      });
+    }
+  }
 
   /**
    * Initializes the Monaco editor if it is not already created.
@@ -61,6 +75,7 @@ export class LazyMonacoEditor {
         lineNumbers: "on",
         readOnly: false,
         scrollBeyondLastLine: false,
+        theme: this.monacoTheme,
       });
       if (this.pendingValue !== null) {
         this.editor.setValue(this.pendingValue);

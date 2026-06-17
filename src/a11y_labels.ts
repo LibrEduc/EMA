@@ -46,6 +46,9 @@ const getSupportedLang = (): SupportedLang => {
 };
 
 export type A11yLabelKey =
+  | "A11Y_SKIP_TO_WORKSPACE"
+  | "A11Y_AREA_MENU_HINT"
+  | "A11Y_WORKSPACE_MAIN"
   | "A11Y_GENERATED_CODE_REGION"
   | "A11Y_CONSOLE_REGION"
   | "A11Y_HORIZONTAL_RESIZER"

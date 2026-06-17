@@ -53,7 +53,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-ui-theme]) {
     --resizer-color: #cbd5e1;
     --resizer-focus: #93c5fd;
     --resizer-bg: #0f172a;
@@ -138,6 +138,7 @@
 html,
 body,
 #container_page,
+#blockly-workspace-main,
 #div_workspace_content_area {
   height: 100%;
   margin: 0;

@@ -54,6 +54,148 @@ flex>flex-resizer {
   font-family: arial, sans-serif;
 }
 
+/* Barre d'outils : liens, boutons et listes au même rendu texte que « ouvrir » */
+.divTableCell a,
+.divTableCell button.toolbar-btn,
+.divTableCell select,
+label.plugin-option {
+  display: inline-block;
+  min-height: 2rem;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  color: var(--topbar-fg);
+  font-family: arial, sans-serif;
+  font-size: inherit;
+  line-height: 1.25;
+  text-transform: lowercase;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.divTableCell button.toolbar-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Listes : texte harmonisé + affordance « menu déroulant » (soulignement + chevron) */
+.divTableCell select {
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 1.75rem;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, currentColor 35%, transparent);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) 50%, calc(100% - 5px) 50%;
+  background-size: 6px 6px, 6px 6px;
+}
+
+.divTableCell a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.divTableCell a:hover,
+.divTableCell button.toolbar-btn:hover,
+label.plugin-option:hover {
+  background-color: var(--topbar-control-hover);
+  border-radius: 4px;
+}
+
+.divTableCell select:hover {
+  background-color: var(--topbar-control-hover);
+  border-radius: 4px;
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+
+.divTableCell button.toolbar-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.divTableCell select:focus-visible {
+  background-color: var(--topbar-control-hover);
+  box-shadow: inset 0 -2px 0 currentColor;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+label.plugin-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+}
+
+label.plugin-option input[type="checkbox"] {
+  width: 0.85em;
+  height: 0.85em;
+  margin: 0;
+  accent-color: var(--topbar-fg);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 10000;
+  padding: 0.5rem 1rem;
+  background: var(--topbar-bg);
+  color: var(--topbar-fg);
+  font-family: arial, sans-serif;
+  text-decoration: none;
+  border: 2px solid var(--focus-ring);
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  position: fixed;
+  left: 0.5rem;
+  top: 0.5rem;
+  width: auto;
+  height: auto;
+  overflow: visible;
+}
+
+#shortcuts {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#shortcuts:not([hidden]) {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--topbar-fg);
+  background: var(--topbar-bg);
+}
+
 #title.app-title {
   display: inline-flex;
   align-items: center;
@@ -75,67 +217,6 @@ flex>flex-resizer {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-}
-
-label.plugin-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0;
-}
-
-#saveButton,
-#loadButton,
-#undoButton,
-#redoButton {
-  cursor: pointer;
-}
-
-.divTableCell a {
-  text-decoration: none;
-  color: inherit;
-}
-
-#languageMenu,
-#themeMenu,
-#rendererMenu,
-#boardMenu {
-  background-color: var(--topbar-control-bg);
-  color: var(--topbar-control-fg);
-  border: 1px solid var(--topbar-control-border);
-}
-
-#languageMenu:hover,
-#themeMenu:hover,
-#rendererMenu:hover,
-#boardMenu:hover {
-  background-color: var(--topbar-control-hover);
-}
-
-#saveButton,
-#loadButton,
-#undoButton,
-#redoButton {
-  border-radius: 4px;
-}
-
-#saveButton:hover,
-#loadButton:hover,
-#undoButton:hover,
-#redoButton:hover {
-  background-color: var(--topbar-control-hover);
-}
-
-#languageMenu:focus-visible,
-#themeMenu:focus-visible,
-#rendererMenu:focus-visible,
-#boardMenu:focus-visible,
-#saveButton:focus-visible,
-#loadButton:focus-visible,
-#undoButton:focus-visible,
-#redoButton:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 1px;
 }
 
 #boardMenu optgroup {

@@ -31,6 +31,8 @@ src/
 ├── workspace_flex.ts           # Flex resizers, panel toggles, saveLayoutToSessionStorage, µcB_addFlexResizerEvents
 ├── workspace_layout_utils.ts   # Flex helpers (parsePositiveFlex, snapNearZeroFlex, layout keys)
 ├── a11y_labels.ts              # getA11yLabel for layout UI (avoids importing language.ts from flex stack)
+├── shell_a11y.ts               # Skip link, menu zones Ctrl+B, landmarks coque HTML
+├── ui_palette_theme.ts         # syncUiPaletteTheme: coque CSS + Monaco depuis thème Blockly
 │
 ├── categories/blockly/         # Block *definitions* (UI blocks, fields, mutators)
 │   ├── index.ts                # Entry: defineBlocklyArduinoCompatBlocks, defineAllTypedVariableBlocks
@@ -114,7 +116,8 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 | Change toolbox structure | `toolbox.ts` (basic_toolbox, getToolboxForCurrentBoard) |
 | Add a board | `boards.ts` (BOARD_PROFILES + helpers) |
 | New UI language | `languages/languageMap.ts` + new file `languages/<code>.ts`, merge messages |
-| Theme / colours | `options.ts`, `theme_black_and_white.ts`, `theme_seshat.ts` |
+| Theme / colours | `options.ts`, `theme_black_and_white.ts`, `theme_seshat.ts`, `ui_palette_theme.ts` |
+| Accessibility (shell) | `shell_a11y.ts`, `a11y_labels.ts`, [ACCESSIBILITY.md](./ACCESSIBILITY.md) |
 | Patches to Blockly core | `blockly_patches.ts` |
 
 ## Build, quality, and docs

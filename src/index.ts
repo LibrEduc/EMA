@@ -111,7 +111,7 @@ import {
 } from "./language";
 import { languagesMap } from "./languages/languageMap";
 import { BOARD_PROFILES, DEFAULT_BOARD_ID } from "./boards";
-import { themeMappings } from "./options";
+import { syncUiPaletteTheme } from "./ui_palette_theme";
 
 // Expose arduinoGenerator globally IMMEDIATELY after import
 if (typeof window !== 'undefined') {
@@ -142,6 +142,7 @@ import "./css/index.css";
 import "./css/µcBlockly.css";
 
 import { getA11yLabel } from "./a11y_labels";
+import { applyShellLandmarks, registerShellAreaNavigation } from "./shell_a11y";
 import { µcB_codeEditor } from "./code_editor";
 import { registerWorkspaceForSvgResize, µcB_workspaceOnResize } from "./workspace_resize";
 import {
@@ -190,131 +191,6 @@ const elements = {
     "codeEditorSwitch",
   ) as HTMLInputElement,
   debugSwitch: document.getElementById("debugSwitch") as HTMLInputElement,
-};
-
-const syncUiPaletteTheme = (): void => {
-  const clamp = (value: number): number => Math.max(0, Math.min(255, Math.round(value)));
-  const toHex = (r: number, g: number, b: number): string =>
-    `#${[r, g, b].map((v) => clamp(v).toString(16).padStart(2, "0")).join("")}`;
-  type Rgb = { r: number; g: number; b: number };
-  const parseColor = (raw: string | undefined): Rgb | null => {
-    if (!raw) return null;
-    const value = raw.trim().toLowerCase();
-    if (value.startsWith("#")) {
-      const hex = value.slice(1);
-      if (hex.length === 3) {
-        return {
-          r: parseInt(hex[0] + hex[0], 16),
-          g: parseInt(hex[1] + hex[1], 16),
-          b: parseInt(hex[2] + hex[2], 16),
-        };
-      }
-      if (hex.length === 6) {
-        return {
-          r: parseInt(hex.slice(0, 2), 16),
-          g: parseInt(hex.slice(2, 4), 16),
-          b: parseInt(hex.slice(4, 6), 16),
-        };
-      }
-      return null;
-    }
-    const rgb = value.match(/^rgba?\(([^)]+)\)$/);
-    if (!rgb) return null;
-    const parts = rgb[1].split(",").map((p) => Number(p.trim()));
-    if (parts.length < 3 || parts.some((p) => !Number.isFinite(p))) return null;
-    return { r: clamp(parts[0]), g: clamp(parts[1]), b: clamp(parts[2]) };
-  };
-  const mix = (a: Rgb, b: Rgb, ratio: number): Rgb => ({
-    r: clamp(a.r + (b.r - a.r) * ratio),
-    g: clamp(a.g + (b.g - a.g) * ratio),
-    b: clamp(a.b + (b.b - a.b) * ratio),
-  });
-  const relativeLuminance = (c: Rgb): number => {
-    const channel = (x: number): number => {
-      const value = x / 255;
-      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-    };
-    return 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
-  };
-  const contrastRatio = (a: Rgb, b: Rgb): number => {
-    const l1 = relativeLuminance(a);
-    const l2 = relativeLuminance(b);
-    const light = Math.max(l1, l2);
-    const dark = Math.min(l1, l2);
-    return (light + 0.05) / (dark + 0.05);
-  };
-  const textOn = (bg: Rgb): Rgb => {
-    const white = { r: 248, g: 250, b: 252 };
-    const black = { r: 17, g: 24, b: 39 };
-    return contrastRatio(white, bg) >= contrastRatio(black, bg) ? white : black;
-  };
-  const ensureContrast = (
-    candidate: Rgb,
-    against: Rgb,
-    minRatio: number,
-    preferLighten: boolean,
-  ): Rgb => {
-    let out = candidate;
-    if (contrastRatio(out, against) >= minRatio) {
-      return out;
-    }
-    const toward = preferLighten ? { r: 255, g: 255, b: 255 } : { r: 0, g: 0, b: 0 };
-    for (let i = 1; i <= 10; i += 1) {
-      const mixed = mix(out, toward, i * 0.08);
-      if (contrastRatio(mixed, against) >= minRatio) {
-        out = mixed;
-        break;
-      }
-      out = mixed;
-    }
-    return out;
-  };
-
-  const selectedThemeKey = (elements.themeMenu?.value || "classic") as keyof typeof themeMappings;
-  const selectedTheme = themeMappings[selectedThemeKey] ?? themeMappings.classic;
-  const styles = selectedTheme.componentStyles ?? {};
-  const workspace = parseColor(styles.workspaceBackgroundColour) ?? { r: 248, g: 250, b: 252 };
-  const toolbox = parseColor(styles.toolboxBackgroundColour) ?? mix(workspace, { r: 226, g: 232, b: 240 }, 0.45);
-  const flyout = parseColor(styles.flyoutBackgroundColour) ?? mix(toolbox, workspace, 0.4);
-  const accent = parseColor(styles.markerColour) ?? parseColor(styles.cursorColour) ?? { r: 11, g: 87, b: 208 };
-  const scrollbar = parseColor(styles.scrollbarColour) ?? mix(toolbox, textOn(toolbox), 0.45);
-  const isDark = relativeLuminance(workspace) < 0.35;
-
-  const panelCodeBg = mix(workspace, flyout, isDark ? 0.35 : 0.15);
-  const panelConsoleBg = mix(toolbox, flyout, isDark ? 0.5 : 0.35);
-  const panelRightBg = mix(workspace, toolbox, isDark ? 0.45 : 0.3);
-  const panelBottomBg = mix(flyout, toolbox, isDark ? 0.55 : 0.45);
-  const resizerBg = mix(workspace, toolbox, isDark ? 0.6 : 0.5);
-  // Derive button colors from each Blockly theme, then enforce readability.
-  const toggleBase = mix(resizerBg, accent, isDark ? 0.22 : 0.14);
-  const toggleBg = ensureContrast(toggleBase, resizerBg, 1.35, isDark);
-  const toggleFg = textOn(toggleBg);
-  const toggleHoverCandidate = mix(toggleBg, toggleFg, isDark ? 0.22 : 0.1);
-  const toggleHover = ensureContrast(toggleHoverCandidate, resizerBg, 1.45, isDark);
-  const toggleBorderCandidate = mix(toggleBg, accent, isDark ? 0.45 : 0.35);
-  const toggleBorder = ensureContrast(toggleBorderCandidate, toggleBg, 1.3, !isDark);
-
-  const rootStyle = document.documentElement.style;
-  rootStyle.setProperty("--panel-code-bg", toHex(panelCodeBg.r, panelCodeBg.g, panelCodeBg.b));
-  {
-    const fg = textOn(panelCodeBg);
-    rootStyle.setProperty("--panel-code-fg", toHex(fg.r, fg.g, fg.b));
-  }
-  rootStyle.setProperty("--panel-console-bg", toHex(panelConsoleBg.r, panelConsoleBg.g, panelConsoleBg.b));
-  {
-    const fg = textOn(panelConsoleBg);
-    rootStyle.setProperty("--panel-console-fg", toHex(fg.r, fg.g, fg.b));
-  }
-  rootStyle.setProperty("--panel-right-bg", toHex(panelRightBg.r, panelRightBg.g, panelRightBg.b));
-  rootStyle.setProperty("--panel-bottom-bg", toHex(panelBottomBg.r, panelBottomBg.g, panelBottomBg.b));
-  rootStyle.setProperty("--resizer-bg", toHex(resizerBg.r, resizerBg.g, resizerBg.b));
-  rootStyle.setProperty("--resizer-color", toHex(scrollbar.r, scrollbar.g, scrollbar.b));
-  rootStyle.setProperty("--resizer-focus", toHex(accent.r, accent.g, accent.b));
-  rootStyle.setProperty("--focus-ring", toHex(accent.r, accent.g, accent.b));
-  rootStyle.setProperty("--toggle-bg", toHex(toggleBg.r, toggleBg.g, toggleBg.b));
-  rootStyle.setProperty("--toggle-bg-hover", toHex(toggleHover.r, toggleHover.g, toggleHover.b));
-  rootStyle.setProperty("--toggle-border", toHex(toggleBorder.r, toggleBorder.g, toggleBorder.b));
-  rootStyle.setProperty("--toggle-fg", toHex(toggleFg.r, toggleFg.g, toggleFg.b));
 };
 
 /**
@@ -589,6 +465,7 @@ const applyA11yAttributes = (): void => {
   }
   updateRightPanelToggleButton();
   updateBottomPanelToggleButton();
+  applyShellLandmarks();
 };
 
 /**
@@ -1032,6 +909,7 @@ DomIsLoaded((): void => {
   syncUiPaletteTheme();
   initializeRightPanelToggleButton();
   initializeBottomPanelToggleButton();
+  registerShellAreaNavigation();
   applyA11yAttributes();
   µcB.changeLanguage(false);
   µcB.workspaceInit();
