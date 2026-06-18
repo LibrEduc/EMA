@@ -87,6 +87,7 @@ export const arLang: LanguageMap = {
     THEME_ZELOS: "zelos",
     THEME_HIGHCONTRAST: "high contrast",
     THEME_DARK: "dark",
+    THEME_HACKER: "hacker",
     THEME_BLACKWHITE: "black and white",
     RENDERER_GERAS: "geras",
     RENDERER_THRASOS: "thrasos",

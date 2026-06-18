@@ -38,6 +38,10 @@ import HighContrastTheme from '@blockly/theme-highcontrast';
 import DeuteranopiaTheme from '@blockly/theme-deuteranopia';
 import TritanopiaTheme from '@blockly/theme-tritanopia';
 import BandWTheme from './theme_black_and_white';
+import HackerModeTheme, {
+  HACKER_LIBRE_BOARD_BLOCK_STYLE,
+  HACKER_LIBRE_BOARD_CATEGORY_STYLE,
+} from './theme_hackermode';
 import SeshatTheme from './theme_seshat';
 
 /** Styles for the Libre category and blocks (Arduino colour #00979D). */
@@ -58,10 +62,27 @@ const LIBRE_BLACK = { colour: '#000000', colourPrimary: '#000000' };
  */
 function extendThemeWithLibre(key: string, base: Blockly.Theme): Blockly.Theme {
   const isBlackWhite = key === 'blackWhite';
-  const categoryStyle = isBlackWhite ? { colour: LIBRE_BLACK.colour } : LIBRE_CATEGORY_STYLE;
-  const blockStyle = isBlackWhite ? { colourPrimary: LIBRE_BLACK.colourPrimary } : LIBRE_BLOCK_STYLE;
-  const boardCategoryStyle = isBlackWhite ? { colour: LIBRE_BLACK.colour } : BOARD_CATEGORY_STYLE;
-  const boardBlockStyle = isBlackWhite ? { colourPrimary: LIBRE_BLACK.colourPrimary } : BOARD_BLOCK_STYLE;
+  const isHacker = key === 'hacker';
+  const categoryStyle = isBlackWhite
+    ? { colour: LIBRE_BLACK.colour }
+    : isHacker
+      ? HACKER_LIBRE_BOARD_CATEGORY_STYLE
+      : LIBRE_CATEGORY_STYLE;
+  const blockStyle = isBlackWhite
+    ? { colourPrimary: LIBRE_BLACK.colourPrimary }
+    : isHacker
+      ? HACKER_LIBRE_BOARD_BLOCK_STYLE
+      : LIBRE_BLOCK_STYLE;
+  const boardCategoryStyle = isBlackWhite
+    ? { colour: LIBRE_BLACK.colour }
+    : isHacker
+      ? HACKER_LIBRE_BOARD_CATEGORY_STYLE
+      : BOARD_CATEGORY_STYLE;
+  const boardBlockStyle = isBlackWhite
+    ? { colourPrimary: LIBRE_BLACK.colourPrimary }
+    : isHacker
+      ? HACKER_LIBRE_BOARD_BLOCK_STYLE
+      : BOARD_BLOCK_STYLE;
   return Blockly.Theme.defineTheme(`${key}_libre`, {
     name: `${key}_libre`,
     base,
@@ -82,6 +103,7 @@ export const themeMappings: { [key: string]: Blockly.Theme } = {
   zelos: extendThemeWithLibre('zelos', Blockly.Themes.Zelos),
   high_contrast: extendThemeWithLibre('high_contrast', HighContrastTheme),
   dark: extendThemeWithLibre('dark', DarkTheme),
+  hacker: extendThemeWithLibre('hacker', HackerModeTheme),
   seshat: extendThemeWithLibre('seshat', SeshatTheme),
   blackWhite: extendThemeWithLibre('blackWhite', BandWTheme),
 };

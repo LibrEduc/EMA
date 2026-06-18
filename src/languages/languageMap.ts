@@ -126,6 +126,7 @@ export interface LanguageItem {
   THEME_ZELOS: string;
   THEME_HIGHCONTRAST: string;
   THEME_DARK: string;
+  THEME_HACKER: string;
   THEME_BLACKWHITE: string;
   RENDERER_GERAS: string;
   RENDERER_THRASOS: string;

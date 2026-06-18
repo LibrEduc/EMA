@@ -87,6 +87,7 @@ export const frLang: LanguageMap = {
     THEME_ZELOS: "zelos",
     THEME_HIGHCONTRAST: "contraste élevé",
     THEME_DARK: "sombre",
+    THEME_HACKER: "hacker",
     THEME_BLACKWHITE: "noir et blanc",
     RENDERER_GERAS: "geras",
     RENDERER_THRASOS: "thrasos",
