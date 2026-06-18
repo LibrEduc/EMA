@@ -19,7 +19,7 @@
 | Lot | Contenu | État |
 |-----|---------|------|
 | P0 — Champs custom | `getAriaValue()` sur sélecteurs couleur, éditeurs iro accessibles | Fait |
-| P1 — Coque UI | Skip link, landmarks, boutons sémantiques, menu zones Ctrl+B | Fait |
+| P1 — Coque UI | Skip link, landmarks, boutons sémantiques, menu zones Ctrl+B, raccourcis fichier | Fait |
 | P1 — Doc | Cette page, raccourcis, conformité | Fait |
 | P2 — Thèmes | Sync coque + Monaco, contraste, persistance thème | Fait |
 | P0 — Blockly v13 | Navigation clavier cœur, migration paquets | À venir |
@@ -58,7 +58,11 @@ Implémentation : `src/shell_a11y.ts`, `src/a11y_labels.ts`, `src/index.ts` (`ap
 
 ### Barre d’outils
 
-Enregistrer, Charger, Annuler et Rétablir sont des `<button type="button">` focusables, avec infobulles i18n (`data-title-key`).
+Enregistrer, Charger, Annuler et Rétablir sont des `<button type="button">` focusables, avec `aria-label` et infobulles i18n incluant les raccourcis fichier le cas échéant.
+
+Les listes déroulantes (langue, thème, rendu, carte) portent un `aria-label` localisé. Le groupe d’options plugins est un `role="group"`. Les liens externes annoncent l’ouverture dans un nouvel onglet.
+
+`lang`, `xml:lang` et `dir` sur `<html>` sont synchronisés à chaque changement de langue (RTL pour l’arabe).
 
 ---
 
@@ -70,6 +74,8 @@ Enregistrer, Charger, Annuler et Rétablir sont des `<button type="button">` foc
 |-----------|--------|
 | **Tab** (premier focus) | Lien d’évitement vers le workspace |
 | **Ctrl+B** / **Cmd+B** | Menu de navigation par zones |
+| **Ctrl+S** / **Cmd+S** | Enregistrer le workspace (hors champs de saisie texte) |
+| **Ctrl+O** / **Cmd+O** | Ouvrir un fichier (hors champs de saisie texte) |
 | **1** – **5** (après Ctrl+B) | Focus zone 1 à 5 |
 | **Échap** (menu zones ouvert) | Fermer le menu zones |
 
@@ -157,7 +163,7 @@ Les **blocs Arduino custom** ajoutés par des tiers doivent implémenter les mê
 
 - Navigation clavier **dans les blocs** : en attente de Blockly **v13** et résolution du conflit copier/coller.
 - **Tutoriel clavier** interactif : non implémenté (public adulte — documentation statique fournie ici).
-- **Annonces** du code généré à chaque modification : non activées (risque de spam lecteur d’écran).
+- **Annonces** du code généré à chaque modification : non activées (risque de spam lecteur d’écran). Une annonce brève suit l’enregistrement fichier (Ctrl+S).
 - Éléments layout **`<flex>`** custom : peu sémantiques ; les repères ARIA compensent partiellement.
 - **RTL** : arabe supporté pour l’UI ; vérifier manuellement la cohérence toolbox + coque.
 
@@ -165,7 +171,7 @@ Les **blocs Arduino custom** ajoutés par des tiers doivent implémenter les mê
 
 ## Tests manuels suggérés
 
-1. Clavier seul : skip link → Ctrl+B → zone 3 → créer un bloc → ouvrir sélecteur couleur → générer du code.
+1. Clavier seul : skip link → Ctrl+B → zone 3 → créer un bloc → Ctrl+S → ouvrir sélecteur couleur → générer du code.
 2. Lecteur d’écran (NVDA, Narrator, VoiceOver) sur menu zones et champs couleur.
 3. Chaque thème d’accessibilité : lisibilité barre d’outils, panneau code (pré + Monaco), workspace.
 4. Zoom navigateur 200 % : pas de chevauchement bloquant des panneaux.

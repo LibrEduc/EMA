@@ -101,10 +101,6 @@ import {
 import { mergeArrayMessages } from './languages/array_messages';
 import { mergeBoardMessages } from './languages/board_messages';
 import { refreshBoardPinDropdowns } from './categories/blockly';
-
-/* import {blocks, unregisterProcedureBlocks} from '@blockly/block-shareable-procedures';
-unregisterProcedureBlocks();
-Blockly.common.defineBlocks(blocks);*/
 import { Backpack } from "@blockly/workspace-backpack";
 import { ContentHighlight } from "@blockly/workspace-content-highlight";
 //import { KeyboardNavigation } from '@blockly/keyboard-navigation';
@@ -1437,7 +1433,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const newLang: string = menuOrUrl ? getLangParamFromDropdown() : getLangParamFromUrl();
     // Set the HTML's language and direction for the *new* language.
     const rtl: boolean = this.LANGUAGE_RTL.indexOf(newLang) !== -1;
-    HTML_changeLanguage(newLang);
+    HTML_changeLanguage(newLang, rtl);
     Blockly.setLocale(languagesMapBlockly[newLang]);
     mergeArrayMessages(newLang);
     mergeBoardMessages(newLang);

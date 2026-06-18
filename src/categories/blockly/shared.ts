@@ -455,13 +455,35 @@ export const syncProcedureCallArgInputChecks = (callBlock: Blockly.Block): void 
   ) {
     return;
   }
-  const defName =
-    (callBlock as ProcedureCallBlock).getProcedureCall?.() ||
-    callBlock.getFieldValue?.("NAME");
-  if (!defName || !callBlock.workspace) {
+  if (!callBlock.workspace) {
     return;
   }
-  const defBlock = Blockly.Procedures.getDefinition(defName, callBlock.workspace);
+  const callLike = callBlock as ProcedureCallBlock & {
+    getProcedureModel?: () => Blockly.Procedures.IProcedureModel | null;
+    isProcedureDef?: () => boolean;
+  };
+  let defBlock: Blockly.Block | null = null;
+  const callModel = callLike.getProcedureModel?.();
+  if (callModel) {
+    for (const block of callBlock.workspace.getAllBlocks(false)) {
+      const candidate = block as Blockly.Block & {
+        isProcedureDef?: () => boolean;
+        getProcedureModel?: () => Blockly.Procedures.IProcedureModel | null;
+      };
+      if (
+        candidate.isProcedureDef?.() &&
+        candidate.getProcedureModel?.()?.getId() === callModel.getId()
+      ) {
+        defBlock = block;
+        break;
+      }
+    }
+  }
+  const defName =
+    callLike.getProcedureCall?.() || callBlock.getFieldValue?.("NAME");
+  if (!defBlock && defName) {
+    defBlock = Blockly.Procedures.getDefinition(defName, callBlock.workspace);
+  }
   if (!defBlock) {
     return;
   }

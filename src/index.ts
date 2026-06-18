@@ -34,7 +34,7 @@ declare const __UCB_BUILD_FINGERPRINT__: string | undefined;
  */
 
 import * as Blockly from "blockly";
-import "@blockly/block-plus-minus";
+import "./block_plus_minus_init";
 import "@blockly/toolbox-search";
 import { registerToolboxSearchI18n } from "./toolbox_search_i18n";
 registerToolboxSearchI18n();
@@ -142,7 +142,8 @@ import "./css/index.css";
 import "./css/µcBlockly.css";
 
 import { getA11yLabel } from "./a11y_labels";
-import { applyShellLandmarks, registerShellAreaNavigation } from "./shell_a11y";
+import { applyShellLandmarks, applyToolbarA11y, announceShellMessage, registerShellAreaNavigation } from "./shell_a11y";
+import { registerShellFileShortcuts } from "./shell_shortcuts";
 import { µcB_codeEditor } from "./code_editor";
 import { registerWorkspaceForSvgResize, µcB_workspaceOnResize } from "./workspace_resize";
 import {
@@ -191,6 +192,14 @@ const elements = {
     "codeEditorSwitch",
   ) as HTMLInputElement,
   debugSwitch: document.getElementById("debugSwitch") as HTMLInputElement,
+};
+
+let shellFileShortcutsRegistered = false;
+
+const triggerWorkspaceSave = (): void => {
+  const filename = `workspace_${new Date().toISOString().slice(0, 10)}.json`;
+  µcB.workspaceSaveToFile(filename);
+  announceShellMessage(getA11yLabel("A11Y_SAVE_ANNOUNCED"));
 };
 
 /**
@@ -466,6 +475,7 @@ const applyA11yAttributes = (): void => {
   updateRightPanelToggleButton();
   updateBottomPanelToggleButton();
   applyShellLandmarks();
+  applyToolbarA11y();
 };
 
 /**
@@ -712,8 +722,7 @@ const HTML_onChange = (): void => {
   // Save/Load file handlers
   if (elements.saveButton) {
     elements.saveButton.onclick = () => {
-      const filename = `workspace_${new Date().toISOString().slice(0, 10)}.json`;
-      µcB.workspaceSaveToFile(filename);
+      triggerWorkspaceSave();
     };
   }
 
@@ -812,6 +821,16 @@ const HTML_onChange = (): void => {
   };
   (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ =
     elements.debugSwitch.checked;
+
+  if (!shellFileShortcutsRegistered) {
+    shellFileShortcutsRegistered = true;
+    registerShellFileShortcuts({
+      onSave: triggerWorkspaceSave,
+      onLoad: () => {
+        elements.loadButton?.click();
+      },
+    });
+  }
 };
 
 /**

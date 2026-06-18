@@ -56,7 +56,12 @@ export type A11yLabelKey =
   | "A11Y_COLLAPSE_CODE_PANEL"
   | "A11Y_OPEN_CODE_PANEL"
   | "A11Y_COLLAPSE_CONSOLE_PANEL"
-  | "A11Y_OPEN_CONSOLE_PANEL";
+  | "A11Y_OPEN_CONSOLE_PANEL"
+  | "A11Y_TOPBAR"
+  | "A11Y_PLUGIN_OPTIONS_GROUP"
+  | "A11Y_EXTERNAL_LINK_SUFFIX"
+  | "A11Y_SHORTCUT_SUFFIX"
+  | "A11Y_SAVE_ANNOUNCED";
 
 /**
  * Returns a localized accessibility label for layout controls.

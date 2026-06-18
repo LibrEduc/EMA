@@ -55,6 +55,7 @@ import { getVariableTypeDropdownOptions } from "../../categories/blockly/variabl
 import { isArduinoScalarType } from "./block_types";
 import { checkTypeCompatibility, getCompatibleTypesForCheck } from "./block_types_registry";
 import { debugLog } from "./debug";
+import { isShareableProceduresEnabled } from "../../shareable_procedures";
 
 /**
  * Configure standard Blockly blocks to work with our type system
@@ -551,7 +552,7 @@ export function configureStandardBlocks(): void {
   };
 
   const defReturn = Blockly.Blocks["procedures_defreturn"] as ProcedureBlockDef | undefined;
-  if (defReturn && !defReturn.__typedConfigured) {
+  if (defReturn && !defReturn.__typedConfigured && !isShareableProceduresEnabled()) {
     defReturn.__typedConfigured = true;
     const originalInit = defReturn.init;
     defReturn.init = function (this: Blockly.Block) {
@@ -702,7 +703,7 @@ export function configureStandardBlocks(): void {
   }
 
   const defNoReturn = Blockly.Blocks["procedures_defnoreturn"] as ProcedureBlockDef | undefined;
-  if (defNoReturn && !defNoReturn.__typedConfigured) {
+  if (defNoReturn && !defNoReturn.__typedConfigured && !isShareableProceduresEnabled()) {
     defNoReturn.__typedConfigured = true;
     const originalInit = defNoReturn.init;
     defNoReturn.init = function (this: Blockly.Block) {
@@ -794,7 +795,7 @@ export function configureStandardBlocks(): void {
   }
 
   const callReturn = Blockly.Blocks["procedures_callreturn"] as ProcedureBlockDef | undefined;
-  if (callReturn && !callReturn.__typedConfigured) {
+  if (callReturn && !callReturn.__typedConfigured && !isShareableProceduresEnabled()) {
     callReturn.__typedConfigured = true;
     const originalUpdateShape = callReturn.updateShape_;
     callReturn.updateShape_ = function (this: Blockly.Block) {
@@ -806,7 +807,7 @@ export function configureStandardBlocks(): void {
   }
 
   const callNoReturn = Blockly.Blocks["procedures_callnoreturn"] as ProcedureBlockDef | undefined;
-  if (callNoReturn && !callNoReturn.__typedConfigured) {
+  if (callNoReturn && !callNoReturn.__typedConfigured && !isShareableProceduresEnabled()) {
     callNoReturn.__typedConfigured = true;
     const originalUpdateShape = callNoReturn.updateShape_;
     callNoReturn.updateShape_ = function (this: Blockly.Block) {
@@ -817,7 +818,7 @@ export function configureStandardBlocks(): void {
     };
   }
 
-  // procedures_mutatorarg is not used with block-plus-minus procedure blocks.
+  // procedures_mutatorarg : mutateur legacy ; procédures via block-plus-minus (+/-).
 
   debugLog("✅ Standard blocks configured (logic_compare restricted to int/float)");
 }

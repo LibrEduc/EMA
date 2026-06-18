@@ -5,6 +5,8 @@
  */
 
 import { getA11yLabel } from "./a11y_labels";
+import { languagesMap, type LanguageItem } from "./languages/languageMap";
+import { getModifierKeyLabel, getModifierKeyToken } from "./shell_shortcuts";
 
 const AREA_MENU_TIMEOUT_MS = 5000;
 
@@ -20,6 +22,23 @@ const clearAreaMenuTimeout = (): void => {
 
 const getShortcutsEl = (): HTMLElement | null =>
   document.getElementById("shortcuts");
+
+const getAnnouncerEl = (): HTMLElement | null =>
+  document.getElementById("a11y-announcer");
+
+const getShellMessages = (): LanguageItem => {
+  const menu = document.getElementById("languageMenu") as HTMLSelectElement | null;
+  const lang = (menu?.value || new URLSearchParams(window.location.search).get("lang") || "en").toLowerCase();
+  if (lang === "fr" || lang === "es" || lang === "ar") {
+    return languagesMap[lang];
+  }
+  return languagesMap.en;
+};
+
+const appendShortcutToLabel = (label: string, shortcut: string): string => {
+  const suffix = getA11yLabel("A11Y_SHORTCUT_SUFFIX").replace("%1", shortcut);
+  return `${label} ${suffix}`;
+};
 
 const showAreaMenuMessage = (message: string): void => {
   const el = getShortcutsEl();
@@ -168,6 +187,116 @@ export const applyShellLandmarks = (): void => {
   const logo = document.querySelector<HTMLImageElement>(".app-title__logo");
   if (logo) {
     logo.setAttribute("aria-hidden", "true");
+  }
+
+  const announcer = getAnnouncerEl();
+  if (announcer) {
+    announcer.setAttribute("role", "status");
+    announcer.setAttribute("aria-live", "polite");
+    announcer.setAttribute("aria-atomic", "true");
+  }
+};
+
+/**
+ * Met à jour `lang`, `xml:lang` et `dir` sur `<html>` lors d'un changement de langue.
+ */
+export const applyDocumentLanguage = (lang: string, rtl: boolean): void => {
+  const html = document.documentElement;
+  html.lang = lang;
+  html.setAttribute("xml:lang", lang);
+  html.dir = rtl ? "rtl" : "ltr";
+};
+
+/**
+ * Annonce un message bref aux lecteurs d'écran (région live dédiée).
+ */
+export const announceShellMessage = (message: string, timeoutMs = 3000): void => {
+  const el = getAnnouncerEl();
+  if (!el) {
+    return;
+  }
+  el.hidden = false;
+  el.textContent = message;
+  window.setTimeout(() => {
+    el.hidden = true;
+    el.textContent = "";
+  }, timeoutMs);
+};
+
+/**
+ * Applique aria-label, aria-keyshortcuts et infobulles sur la barre d'outils.
+ */
+export const applyToolbarA11y = (): void => {
+  const messages = getShellMessages();
+  const modLabel = getModifierKeyLabel();
+  const modToken = getModifierKeyToken();
+
+  const toolbarButtons: Array<{
+    id: string;
+    tooltipKey: keyof LanguageItem;
+    shortcutKey?: string;
+  }> = [
+    { id: "saveButton", tooltipKey: "SAVE_TOOLTIP", shortcutKey: "S" },
+    { id: "loadButton", tooltipKey: "LOAD_TOOLTIP", shortcutKey: "O" },
+    { id: "undoButton", tooltipKey: "UNDO_TOOLTIP" },
+    { id: "redoButton", tooltipKey: "REDO_TOOLTIP" },
+  ];
+
+  toolbarButtons.forEach(({ id, tooltipKey, shortcutKey }) => {
+    const button = document.getElementById(id) as HTMLButtonElement | null;
+    if (!button) {
+      return;
+    }
+    let label = messages[tooltipKey] ?? String(tooltipKey);
+    if (shortcutKey) {
+      const displayShortcut = `${modLabel}+${shortcutKey}`;
+      label = appendShortcutToLabel(label, displayShortcut);
+      button.setAttribute("aria-keyshortcuts", `${modToken}+${shortcutKey}`);
+    }
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+  });
+
+  const selects: Array<{ id: string; tooltipKey: keyof LanguageItem }> = [
+    { id: "languageMenu", tooltipKey: "LANGUAGE_MENU_TOOLTIP" },
+    { id: "themeMenu", tooltipKey: "THEME_MENU_TOOLTIP" },
+    { id: "rendererMenu", tooltipKey: "RENDERER_MENU_TOOLTIP" },
+    { id: "boardMenu", tooltipKey: "BOARD_MENU_TOOLTIP" },
+  ];
+
+  selects.forEach(({ id, tooltipKey }) => {
+    const select = document.getElementById(id) as HTMLSelectElement | null;
+    if (!select) {
+      return;
+    }
+    const label = messages[tooltipKey] ?? String(tooltipKey);
+    select.setAttribute("aria-label", label);
+    select.setAttribute("title", label);
+  });
+
+  const pluginOptions = document.getElementById("pluginOptions");
+  if (pluginOptions) {
+    pluginOptions.setAttribute("role", "group");
+    pluginOptions.setAttribute("aria-label", getA11yLabel("A11Y_PLUGIN_OPTIONS_GROUP"));
+  }
+
+  const topbar = document.getElementById("app_topbar");
+  if (topbar) {
+    topbar.setAttribute("aria-label", getA11yLabel("A11Y_TOPBAR"));
+  }
+
+  const externalSuffix = getA11yLabel("A11Y_EXTERNAL_LINK_SUFFIX");
+  document.querySelectorAll("#app_topbar a[target='_blank']").forEach((link) => {
+    const anchor = link as HTMLAnchorElement;
+    const text = anchor.textContent?.trim() ?? "";
+    anchor.setAttribute("aria-label", `${text} ${externalSuffix}`);
+    anchor.setAttribute("rel", "noopener noreferrer");
+  });
+
+  const loadInput = document.getElementById("loadFileInput");
+  if (loadInput) {
+    loadInput.setAttribute("aria-hidden", "true");
+    loadInput.setAttribute("tabindex", "-1");
   }
 };
 

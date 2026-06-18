@@ -92,6 +92,12 @@ export interface LanguageItem {
     A11Y_OPEN_CODE_PANEL: string;
     A11Y_COLLAPSE_CONSOLE_PANEL: string;
     A11Y_OPEN_CONSOLE_PANEL: string;
+    A11Y_TOPBAR: string;
+    A11Y_PLUGIN_OPTIONS_GROUP: string;
+    A11Y_EXTERNAL_LINK_SUFFIX: string;
+    A11Y_SHORTCUT_SUFFIX: string;
+    A11Y_SAVE_ANNOUNCED: string;
+    BOARD_MENU_TOOLTIP: string;
     EMPTY_BACKPACK: string;
     REMOVE_FROM_BACKPACK: string;
     COPY_TO_BACKPACK: string;

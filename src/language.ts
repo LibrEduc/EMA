@@ -33,6 +33,9 @@
 import { BlocklyApplicationType } from './blockly_application_type';
 import { pushStateReplaceSearchParam } from './tools';
 import { languagesMap, LanguageItem } from './languages/languageMap';
+import { applyDocumentLanguage, applyToolbarA11y } from './shell_a11y';
+
+const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'lki']);
 import { ToolboxConfiguration } from "./toolbox";
 
 const toolboxTranslationCache = new WeakMap<
@@ -198,7 +201,7 @@ export const getLangParamFromDropdown = (): string => {
  * Applies translations to DOM elements with language keys.
  * @param newLang - Target language code.
  */
-export const HTML_changeLanguage = (newLang: string): void => {
+export const HTML_changeLanguage = (newLang: string, rtl?: boolean): void => {
   const selectedLangItem = languagesMap[newLang];
   if (!selectedLangItem) return;
 
@@ -250,6 +253,9 @@ export const HTML_changeLanguage = (newLang: string): void => {
       }
     }
   });
+
+  applyDocumentLanguage(newLang, rtl ?? RTL_LANGUAGES.has(newLang));
+  applyToolbarA11y();
 }
 
 /**

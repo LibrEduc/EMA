@@ -44,7 +44,7 @@ export declare const getLangParamFromDropdown: () => string;
  * Applies translations to DOM elements with language keys.
  * @param newLang - Target language code.
  */
-export declare const HTML_changeLanguage: (newLang: string) => void;
+export declare const HTML_changeLanguage: (newLang: string, rtl?: boolean) => void;
 /**
  * Populates the language dropdown from the application language map.
  * @param blocklyObject - Blockly application instance with language metadata.

@@ -46,7 +46,7 @@ export type VariableCastTypeKey = ArduinoTypeKey;
 /** Maps dropdown type key → internal µcBlockly type for connections. */
 export declare const ARDUINO_TYPE_TO_INTERNAL: Record<ArduinoTypeKey, string>;
 /** @deprecated Use {@link ARDUINO_TYPE_TO_INTERNAL} */
-export declare const CAST_TYPE_TO_INTERNAL: Record<"string" | "long" | "float" | "uint" | "char" | "bool" | "byte" | "int" | "vint" | "ulong", string>;
+export declare const CAST_TYPE_TO_INTERNAL: Record<"string" | "int" | "float" | "bool" | "char" | "long" | "byte" | "uint" | "vint" | "ulong", string>;
 /** Maps dropdown type key → C++ type name in generated code. */
 export declare const ARDUINO_TYPE_TO_CPP: Record<ArduinoTypeKey, string>;
 /** Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`). */

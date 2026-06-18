@@ -34,7 +34,7 @@
         data-title-key="SAVE_TOOLTIP">save</button>
       <button type="button" id="loadButton" class="toolbar-btn lang" key="LOAD"
         data-title-key="LOAD_TOOLTIP">load</button>
-      <input type="file" id="loadFileInput" accept=".json" style="display: none;">
+      <input type="file" id="loadFileInput" accept=".json" hidden aria-hidden="true" tabindex="-1">
       <button type="button" id="undoButton" class="toolbar-btn lang" key="UNDO"
         data-title-key="UNDO_TOOLTIP">undo</button>
       <button type="button" id="redoButton" class="toolbar-btn lang" key="REDO"
@@ -58,7 +58,7 @@
         <option class="lang" value="zelos" id="rendererZelos" key="RENDERER_ZELOS">zelos</option>
         <option class="lang" value="minimalist" id="rendererMinimalist" key="RENDERER_MINI">minimalist</option>
       </select>
-      <select name="boardMenu" id="boardMenu"></select>
+      <select name="boardMenu" id="boardMenu" data-title-key="BOARD_MENU_TOOLTIP"></select>
       <div id="pluginOptions">
         <label id="pluginOptionMinimap" class="plugin-option">
           <input type="checkbox" id="pluginMinimap" data-title-key="PLUGIN_MINIMAP_TOOLTIP" />
@@ -89,6 +89,7 @@
     <flex id="flex_container_up" class="wrapper_element" style="flex: 1;">
       <flex-item id="flex_container_up_left" style="flex: 1;">
         <div id="shortcuts" hidden></div>
+        <div id="a11y-announcer" hidden></div>
         <main id="blockly-workspace-main">
           <div id="div_workspace_content_area"></div>
           <div id="div_workspace_content_blockly" style="position: absolute"></div>
