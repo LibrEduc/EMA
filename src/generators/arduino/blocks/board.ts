@@ -74,6 +74,31 @@ export function board_base_inout_digital_read(block: Block, generator: ArduinoGe
   return [`digitalRead(${pin})`, Order.ATOMIC];
 }
 
+export function board_base_inout_digital_read_pin(
+  block: Block,
+  generator: ArduinoGenerator,
+): [string, Order] {
+  const pin = generator.valueToCode(block, "PIN", Order.ATOMIC) || "0";
+  generator.addSetup(`setup_input_${block.id}`, `pinMode(${pin}, INPUT);`);
+  return [`digitalRead(${pin})`, Order.ATOMIC];
+}
+
+export function board_base_inout_digital_read_grid(
+  block: Block,
+  generator: ArduinoGenerator,
+): [string, Order] {
+  return board_base_inout_digital_read(block, generator);
+}
+
+export function board_base_inout_digital_read_board(
+  block: Block,
+  generator: ArduinoGenerator,
+): string {
+  const pin = block.getFieldValue("PIN");
+  generator.addSetup(`setup_input_${pin}`, `pinMode(${pin}, INPUT);`);
+  return `(void)digitalRead(${pin});\n`;
+}
+
 export function board_base_inout_highlow(block: Block, _generator: ArduinoGenerator): [string, Order] {
   const code = block.getFieldValue("BOOL") === "HIGH" ? "HIGH" : "LOW";
   return [code, Order.ATOMIC];

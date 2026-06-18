@@ -76,6 +76,8 @@
     "@blockly/field-colour": "^6.0.12",
     "@blockly/field-colour-hsv-sliders": "^6.0.12",
     "@blockly/field-date": "^10.0.9",
+    "@blockly/field-dependent-dropdown": "^5.0.10",
+    "@blockly/field-grid-dropdown": "^6.0.10",
     "@blockly/field-multilineinput": "^6.0.9",
     "@blockly/field-slider": "^8.0.9",
     "@blockly/plugin-modal": "^8.0.9",

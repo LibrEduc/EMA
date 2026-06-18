@@ -31,8 +31,15 @@
  */
 
 import * as Blockly from "blockly";
+import { FieldDependentDropdown } from "@blockly/field-dependent-dropdown";
+import { FieldGridDropdown } from "@blockly/field-grid-dropdown";
 import { FieldSlider } from "@blockly/field-slider";
-import { DEFAULT_BOARD_ID, getBoardDropdownOptions } from "../../boards";
+import {
+  DEFAULT_BOARD_ID,
+  getBoardDigitalPinOptionMapping,
+  getBoardDropdownOptions,
+  getBoardProfileDropdownOptions,
+} from "../../boards";
 import { getBlocklyMsgOr, getBlocklyCompatibleChecks, handleBoardIntInputBlockChange } from "./shared";
 
 const BOARD_STYLE = "board_blocks";
@@ -79,6 +86,7 @@ function getHighLowDropdown(): [string, string][] {
 const BLOCK_PIN_DROPDOWN: Record<string, "digital" | "pwm" | "analog"> = {
   board_base_inout_digital_write: "digital",
   board_base_inout_digital_read: "digital",
+  board_base_inout_digital_read_grid: "digital",
   board_base_inout_analog_write: "pwm",
   board_base_inout_analog_write_slider: "pwm",
   board_base_inout_analog_read: "analog",
@@ -176,6 +184,74 @@ export const defineBoardBlocks = (): void => {
       this.setOutput(true, "Boolean");
       this.setTooltip(getBlocklyMsgOr("ARDUINO_INOUT_DIGITAL_READ_TOOLTIP", "Read the state (HIGH/LOW) of a digital pin."));
       this.setStyle(BOARD_STYLE);
+    },
+  };
+
+  Blockly.Blocks["board_base_inout_digital_read_pin"] = {
+    init(this: Blockly.Block) {
+      this.appendValueInput("PIN")
+        .appendField(getBlocklyMsgOr("ARDUINO_INOUT_DIGITAL_READ_INPUT", "digital read pin"))
+        .setCheck(getBlocklyCompatibleChecks("int"));
+      this.setInputsInline(true);
+      this.setOutput(true, "Boolean");
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARDUINO_INOUT_DIGITAL_READ_PIN_TOOLTIP",
+          "Read the state (HIGH/LOW) of a digital pin; connect an integer pin number.",
+        ),
+      );
+      this.setStyle(BOARD_STYLE);
+    },
+    onchange: boardIntInputOnchange,
+  };
+
+  Blockly.Blocks["board_base_inout_digital_read_grid"] = {
+    init(this: Blockly.Block) {
+      this.appendDummyInput()
+        .appendField(getBlocklyMsgOr("ARDUINO_INOUT_DIGITAL_READ_INPUT", "digital read pin"))
+        .appendField(
+          new FieldGridDropdown(() => getPinDropdown("dropdownDigital"), undefined, {
+            columns: 4,
+          }),
+          "PIN",
+        );
+      this.setOutput(true, "Boolean");
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARDUINO_INOUT_DIGITAL_READ_GRID_TOOLTIP",
+          "Read the state (HIGH/LOW) of a digital pin; choose the pin from a grid.",
+        ),
+      );
+      this.setStyle(BOARD_STYLE);
+    },
+  };
+
+  Blockly.Blocks["board_base_inout_digital_read_board"] = {
+    init(this: Blockly.Block) {
+      const boardFieldName = "BOARD";
+      const boardOptions = getBoardProfileDropdownOptions();
+      const pinMapping = getBoardDigitalPinOptionMapping();
+      const defaultPinOptions: [string, string][] = [["0", "0"]];
+
+      this.appendDummyInput()
+        .appendField(getBlocklyMsgOr("ARDUINO_INOUT_DIGITAL_READ_INPUT", "digital read pin"))
+        .appendField(getBlocklyMsgOr("ARDUINO_INOUT_DIGITAL_READ_BOARD_LABEL", "board"))
+        .appendField(new Blockly.FieldDropdown(boardOptions), boardFieldName)
+        .appendField(getBlocklyMsgOr("ARDUINO_INOUT_DIGITAL_READ_PIN_LABEL", "pin"))
+        .appendField(
+          new FieldDependentDropdown(boardFieldName, pinMapping, defaultPinOptions),
+          "PIN",
+        );
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARDUINO_INOUT_DIGITAL_READ_BOARD_TOOLTIP",
+          "Read a digital pin; choose the board then the pin (pin list depends on the board).",
+        ),
+      );
+      this.setStyle(BOARD_STYLE);
+      this.setFieldValue(getSelectedBoardId(), boardFieldName);
     },
   };
 

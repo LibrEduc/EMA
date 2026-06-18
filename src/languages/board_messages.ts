@@ -50,6 +50,14 @@ export const BOARD_MESSAGES: Record<string, Record<string, string>> = {
     ARDUINO_INOUT_DIGITAL_WRITE_TOOLTIP: "Write HIGH or LOW to a digital pin.",
     ARDUINO_INOUT_DIGITAL_READ_INPUT: "digital read pin",
     ARDUINO_INOUT_DIGITAL_READ_TOOLTIP: "Read the state (HIGH/LOW) of a digital pin.",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_TOOLTIP:
+      "Read the state (HIGH/LOW) of a digital pin; connect an integer pin number.",
+    ARDUINO_INOUT_DIGITAL_READ_GRID_TOOLTIP:
+      "Read the state (HIGH/LOW) of a digital pin; choose the pin from a grid.",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_LABEL: "board",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_LABEL: "pin",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_TOOLTIP:
+      "Read a digital pin; choose the board then the pin (pin list depends on the board).",
     LOGIC_BOOLEAN_TOOLTIP: "HIGH or LOW value.",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT1: "PWM pin",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT2: "value",
@@ -131,6 +139,14 @@ export const BOARD_MESSAGES: Record<string, Record<string, string>> = {
     ARDUINO_INOUT_DIGITAL_WRITE_TOOLTIP: "Écriture HIGH ou LOW sur une broche digitale.",
     ARDUINO_INOUT_DIGITAL_READ_INPUT: "lecture digitale broche",
     ARDUINO_INOUT_DIGITAL_READ_TOOLTIP: "Lit l'état (HIGH/LOW) d'une broche digitale.",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_TOOLTIP:
+      "Lit l'état (HIGH/LOW) d'une broche digitale ; connectez un numéro de broche entier.",
+    ARDUINO_INOUT_DIGITAL_READ_GRID_TOOLTIP:
+      "Lit l'état (HIGH/LOW) d'une broche digitale ; choisissez la broche dans une grille.",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_LABEL: "carte",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_LABEL: "broche",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_TOOLTIP:
+      "Lit une broche digitale ; choisissez la carte puis la broche (la liste dépend de la carte).",
     LOGIC_BOOLEAN_TOOLTIP: "Valeur HIGH ou LOW.",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT1: "PWM broche",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT2: "valeur",
@@ -212,6 +228,14 @@ export const BOARD_MESSAGES: Record<string, Record<string, string>> = {
     ARDUINO_INOUT_DIGITAL_WRITE_TOOLTIP: "Escribir HIGH o LOW en un pin digital.",
     ARDUINO_INOUT_DIGITAL_READ_INPUT: "lectura digital pin",
     ARDUINO_INOUT_DIGITAL_READ_TOOLTIP: "Lee el estado (HIGH/LOW) de un pin digital.",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_TOOLTIP:
+      "Lee el estado (HIGH/LOW) de un pin digital; conecta un número de pin entero.",
+    ARDUINO_INOUT_DIGITAL_READ_GRID_TOOLTIP:
+      "Lee el estado (HIGH/LOW) de un pin digital; elige el pin en una cuadrícula.",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_LABEL: "placa",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_LABEL: "pin",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_TOOLTIP:
+      "Lee un pin digital; elige la placa y luego el pin (la lista depende de la placa).",
     LOGIC_BOOLEAN_TOOLTIP: "Valor HIGH o LOW.",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT1: "PWM pin",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT2: "valor",
@@ -293,6 +317,14 @@ export const BOARD_MESSAGES: Record<string, Record<string, string>> = {
     ARDUINO_INOUT_DIGITAL_WRITE_TOOLTIP: "كتابة HIGH أو LOW على رجل رقمية.",
     ARDUINO_INOUT_DIGITAL_READ_INPUT: "قراءة رقمية رجل",
     ARDUINO_INOUT_DIGITAL_READ_TOOLTIP: "قراءة الحالة (HIGH/LOW) لرجل رقمية.",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_TOOLTIP:
+      "قراءة الحالة (HIGH/LOW) لرجل رقمية؛ صِل رقماً صحيحاً للرجل.",
+    ARDUINO_INOUT_DIGITAL_READ_GRID_TOOLTIP:
+      "قراءة الحالة (HIGH/LOW) لرجل رقمية؛ اختر الرجل من شبكة.",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_LABEL: "اللوحة",
+    ARDUINO_INOUT_DIGITAL_READ_PIN_LABEL: "الرجل",
+    ARDUINO_INOUT_DIGITAL_READ_BOARD_TOOLTIP:
+      "قراءة رجل رقمية؛ اختر اللوحة ثم الرجل (تعتمد القائمة على اللوحة).",
     LOGIC_BOOLEAN_TOOLTIP: "قيمة HIGH أو LOW.",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT1: "PWM رجل",
     ARDUINO_INOUT_ANALOG_WRITE_INPUT2: "القيمة",

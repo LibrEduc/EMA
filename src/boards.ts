@@ -1123,6 +1123,31 @@ function normalizeDropdownEntries(raw: unknown): [string, string][] {
   );
 }
 
+/** Board choices for embedded per-block board dropdowns (excludes "none"). */
+export function getBoardProfileDropdownOptions(): [string, string][] {
+  const options: [string, string][] = [];
+  for (const [boardId, profile] of Object.entries(BOARD_PROFILES)) {
+    if (boardId === DEFAULT_BOARD_ID) continue;
+    const label =
+      typeof profile.description === "string" && profile.description.trim().length > 0
+        ? profile.description
+        : boardId;
+    options.push([label, boardId]);
+  }
+  options.sort((a, b) => a[0].localeCompare(b[0], undefined, { sensitivity: "base" }));
+  return options;
+}
+
+/** Digital pin options per board id, for dependent-dropdown child menus. */
+export function getBoardDigitalPinOptionMapping(): Record<string, [string, string][]> {
+  const mapping: Record<string, [string, string][]> = {};
+  for (const boardId of Object.keys(BOARD_PROFILES)) {
+    if (boardId === DEFAULT_BOARD_ID) continue;
+    mapping[boardId] = getBoardDropdownOptions(boardId).digital;
+  }
+  return mapping;
+}
+
 /**
  * Returns dropdown options (digital, PWM, analog, serial baud) for a given board.
  * Used so block pin dropdowns match the selected board.

@@ -106,7 +106,7 @@ import { ContentHighlight } from "@blockly/workspace-content-highlight";
 //import { KeyboardNavigation } from '@blockly/keyboard-navigation';
 import { Modal } from "@blockly/plugin-modal";
 import { PositionedMinimap } from "@blockly/workspace-minimap";
-//import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
+import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
 
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ZoomToFitControl } from "@blockly/zoom-to-fit";
@@ -580,8 +580,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.pluginsWorkspace = null;
         return;
       }
-      // shadow-block-converter disabled: causes array blocks to disappear / not stay clipped
-      // this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
+      this.workspace.removeChangeListener(shadowBlockConversionChangeListener);
       // Dispose minimap first: it listens to workspace metrics; other plugins' dispose may fire
       // events that update the minimap SVG with NaN if minimap is still attached.
       try {
@@ -636,8 +635,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
         this.workspace as Blockly.WorkspaceSvg,
       );
       this.plugin_zoomToFit = new ZoomToFitControl(this.workspace);
-      // shadow-block-converter disabled: causes array blocks to disappear / not stay clipped
-      // this.workspace.addChangeListener(shadowBlockConversionChangeListener);
+      this.workspace.addChangeListener(shadowBlockConversionChangeListener);
       this.plugin_backpack.init();
       if (pluginHighlightCheck.checked) {
         this.plugin_contentHighlight = new ContentHighlight(this.workspace as Blockly.WorkspaceSvg);

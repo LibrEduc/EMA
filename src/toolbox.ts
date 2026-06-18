@@ -168,6 +168,15 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'categorystyle': 'board_category',
           'contents': [
             { 'kind': 'block', 'type': 'board_base_inout_digital_read' },
+            {
+              'kind': 'block',
+              'type': 'board_base_inout_digital_read_pin',
+              'inputs': {
+                'PIN': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } },
+              },
+            },
+            { 'kind': 'block', 'type': 'board_base_inout_digital_read_grid' },
+            { 'kind': 'block', 'type': 'board_base_inout_digital_read_board' },
             { 'kind': 'block', 'type': 'board_base_inout_analog_read' },
             { 'kind': 'block', 'type': 'board_base_inout_highlow' },
             { 'kind': 'block', 'type': 'board_base_inout_map' },

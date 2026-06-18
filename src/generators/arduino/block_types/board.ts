@@ -30,6 +30,8 @@
 
 export const BOARD_BLOCK_TYPES = {
   board_base_inout_digital_read: "bool",
+  board_base_inout_digital_read_pin: "bool",
+  board_base_inout_digital_read_grid: "bool",
   board_base_inout_highlow: "bool",
   board_base_inout_analog_read: "int",
   board_base_inout_map: "int",

@@ -547,6 +547,7 @@ export const revalidateProcedureCallBlocks = (
 /** Value inputs on board blocks that accept integers only. */
 const BOARD_INT_ONLY_VALUE_INPUTS: Readonly<Record<string, readonly string[]>> = {
   board_base_inout_analog_write: ["PWM"],
+  board_base_inout_digital_read_pin: ["PIN"],
   board_base_inout_map: ["NUM", "DMAX"],
   board_base_inout_tone: ["NUM"],
 };
