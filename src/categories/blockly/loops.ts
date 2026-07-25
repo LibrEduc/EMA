@@ -29,7 +29,7 @@
  */
 
 import * as Blockly from "blockly";
-import { LIST_VARIABLE_TYPE } from "../../generators/arduino/variable_utils";
+import { LIST_DEFAULT_VARIABLE_NAME, LIST_VARIABLE_TYPE } from "../../generators/arduino/variable_utils";
 import { findListDeclarationBlock, hasArrayListConnectedElements } from "../../generators/arduino/block_types_registry";
 import {
   configureListVariableField,
@@ -40,7 +40,7 @@ import {
 
 let loopsBlocksRegistered = false;
 
-const LIST_DEFAULT_VAR_NAME = "item";
+const LIST_DEFAULT_VAR_NAME = LIST_DEFAULT_VARIABLE_NAME;
 /** Variable de boucle (élément courant), distincte du tableau `item`. */
 const FOREACH_INDEX_VAR_NAME = "element";
 

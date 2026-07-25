@@ -803,6 +803,46 @@ const basic_toolbox_source: ToolboxConfiguration = {
         },
         {
           'kind': 'block',
+          'type': 'Array_bitmap',
+          'inputs': {
+            'COLS': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': { 'NUM': 8 },
+              },
+            },
+            'ROWS': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': { 'NUM': 8 },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_set',
+        },
+        {
+          'kind': 'block',
+          'type': 'Array_bitmap_get',
+          'inputs': {
+            'COLS': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': { 'NUM': 8 },
+              },
+            },
+            'ROWS': {
+              'shadow': {
+                'type': 'math_number',
+                'fields': { 'NUM': 8 },
+              },
+            },
+          },
+        },
+        {
+          'kind': 'block',
           'type': 'Array_declare',
         },
         {

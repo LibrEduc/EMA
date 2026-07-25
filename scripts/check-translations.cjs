@@ -16,6 +16,8 @@
  * 3. **`board_messages.ts`** — parité des clés `ARDUINO_*` / `SERIAL_*` entre les
  *    4 langues (référence = anglais).
  *
+ * 4. **`blockly_a11y_messages.ts`** — raccourcis et hints Blockly 13 (fr, en, es, ar).
+ *
  * ## Hors périmètre (non vérifié par ce script)
  *
  * - Messages Blockly natifs fournis par la bibliothèque `blockly` (ex. `CONTROLS_IF_MSG_IF`).
@@ -34,6 +36,7 @@ const LANG_DIR = path.join(__dirname, '../src/languages');
 const CATEGORIES_DIR = path.join(__dirname, '../src/categories/blockly');
 const ARRAY_MESSAGES_FILE = path.join(__dirname, '../src/languages/array_messages.ts');
 const BOARD_MESSAGES_FILE = path.join(__dirname, '../src/languages/board_messages.ts');
+const BLOCKLY_A11Y_MESSAGES_FILE = path.join(__dirname, '../src/languages/blockly_a11y_messages.ts');
 
 // Clés personnalisées qui doivent être dans nos fichiers de langues (pas dans Blockly.Msg standard)
 const CUSTOM_KEYS = new Set([
@@ -76,6 +79,17 @@ const CUSTOM_KEYS = new Set([
   'ARRAY_UNE_LISTE',
   'ARRAY_WITH_TOOLTIP',
   'ARRAY_WITH_HELPURL',
+  'ARRAY_BITMAP_AS_LIST',
+  'ARRAY_BITMAP_COLS',
+  'ARRAY_BITMAP_ROWS',
+  'ARRAY_BITMAP_TOOLTIP',
+  'ARRAY_BITMAP_HELPURL',
+  'ARRAY_SET',
+  'ARRAY_SET_TO',
+  'ARRAY_SET_TOOLTIP',
+  'ARRAY_SET_HELPURL',
+  'ARRAY_BITMAP_GET_TOOLTIP',
+  'ARRAY_BITMAP_GET_HELPURL',
   
   // Math personnalisées
   'MATH_CHANGE_LABEL',
@@ -114,9 +128,122 @@ const CUSTOM_KEYS = new Set([
   // Arduino
   'ARDUINO_BASE_DEFINE_CONST_TOOLTIP',
   'ARDUINO_BASE_DEFINE_CONST_HELPURL',
-  
+
+  // Couleur (icônes accessibilité)
+  'COLOUR_ICON_PALETTE',
+  'COLOUR_ICON_WHEEL',
+  'COLOUR_ICON_HSV',
+
   // Common
   '_AT',
+]);
+
+// Messages shell (alertes, familles de cartes) — src/languages/*.ts
+const SHELL_KEYS = new Set([
+  'LOAD_MERGE_CONFIRM',
+  'FILE_INVALID_FORMAT',
+  'FILE_LOAD_ERROR',
+  'FILE_READ_ERROR',
+  'FILE_SAVE_ERROR',
+  'BOARD_FAMILY_OTHER',
+  'BOARD_FAMILY_ARDUINO_AVR',
+  'BOARD_FAMILY_ESP8266',
+  'BOARD_FAMILY_ESP32',
+  'BOARD_FAMILY_FRANZININHO',
+  'BOARD_FAMILY_PI_PICO',
+  'BOARD_FAMILY_STM32_NUCLEO',
+  'BOARD_FAMILY_TEENSY',
+  'BOARD_FAMILY_MAKEBLOCK',
+  'BOARD_FAMILY_DFROBOT',
+  'BOARD_FAMILY_DAGU',
+  'BOARD_FAMILY_PEGUINO',
+  'BOARD_FAMILY_KITS',
+  'SHORTCUTS_HELP_BUTTON',
+  'SHORTCUTS_HELP_TOOLTIP',
+  'SHORTCUTS_HELP_TITLE',
+  'SHORTCUTS_HELP_CLOSE',
+  'SHORTCUTS_HELP_SECTION_SHELL',
+  'SHORTCUTS_HELP_SECTION_SCREENREADER',
+  'SHORTCUTS_HELP_COL_ACTION',
+  'SHORTCUTS_HELP_COL_KEYS',
+  'SHORTCUTS_HELP_SHELL_SKIP',
+  'SHORTCUTS_HELP_SHELL_AREAS',
+  'SHORTCUTS_HELP_SHELL_ZONES',
+  'SHORTCUTS_HELP_SHELL_SAVE',
+  'SHORTCUTS_HELP_SHELL_OPEN',
+  'SHORTCUTS_HELP_NAV_ARROWS',
+  'SHORTCUTS_HELP_EDIT_COPY',
+  'SHORTCUTS_HELP_EDIT_CUT',
+  'SHORTCUTS_HELP_EDIT_PASTE',
+  'SHORTCUTS_HELP_KEYS_DELETE',
+  'SHORTCUTS_HELP_KEYS_CONFIRM',
+  'SHORTCUTS_HELP_SECTION_NAV_ADVANCED',
+  'KEYBOARD_TUTORIAL_BUTTON',
+  'KEYBOARD_TUTORIAL_TOOLTIP',
+  'KEYBOARD_TUTORIAL_TITLE',
+  'KEYBOARD_TUTORIAL_CLOSE',
+  'KEYBOARD_TUTORIAL_SKIP',
+  'KEYBOARD_TUTORIAL_PREV',
+  'KEYBOARD_TUTORIAL_NEXT',
+  'KEYBOARD_TUTORIAL_DONT_SHOW',
+  'KEYBOARD_TUTORIAL_STEP_1_TITLE',
+  'KEYBOARD_TUTORIAL_STEP_1_BODY',
+  'KEYBOARD_TUTORIAL_STEP_2_TITLE',
+  'KEYBOARD_TUTORIAL_STEP_2_BODY',
+  'KEYBOARD_TUTORIAL_STEP_3_TITLE',
+  'KEYBOARD_TUTORIAL_STEP_3_BODY',
+  'KEYBOARD_TUTORIAL_STEP_4_TITLE',
+  'KEYBOARD_TUTORIAL_STEP_4_BODY',
+  'KEYBOARD_TUTORIAL_STEP_5_TITLE',
+  'KEYBOARD_TUTORIAL_STEP_5_BODY',
+]);
+
+// Clés dans blockly_a11y_messages.ts (Blockly 13 accessibilité)
+const BLOCKLY_A11Y_MESSAGES_KEYS = new Set([
+  'KEYBOARD_NAV_BLOCK_NAVIGATION_HINT',
+  'KEYBOARD_NAV_CONSTRAINED_MOVE_HINT',
+  'KEYBOARD_NAV_COPIED_HINT',
+  'KEYBOARD_NAV_CUT_HINT',
+  'KEYBOARD_NAV_FLYOUT_LABEL_HINT',
+  'KEYBOARD_NAV_UNCONSTRAINED_MOVE_HINT',
+  'KEYBOARD_NAV_WORKSPACE_NAVIGATION_HINT',
+  'SCREENREADER_HINT',
+  'SCREENREADER_MODE_DISABLED',
+  'SCREENREADER_MODE_ENABLED',
+  'SHORTCUTS_ABORT_MOVE',
+  'SHORTCUTS_CLEANUP',
+  'SHORTCUTS_CODE_NAVIGATION',
+  'SHORTCUTS_DELETE',
+  'SHORTCUTS_DISCONNECT',
+  'SHORTCUTS_DUPLICATE',
+  'SHORTCUTS_EDITING',
+  'SHORTCUTS_ESCAPE',
+  'SHORTCUTS_EXTENDED_INFORMATION',
+  'SHORTCUTS_FINISH_MOVE',
+  'SHORTCUTS_FOCUS_TOOLBOX',
+  'SHORTCUTS_FOCUS_WORKSPACE',
+  'SHORTCUTS_GENERAL',
+  'SHORTCUTS_INFORMATION',
+  'SHORTCUTS_JUMP_BLOCK_END',
+  'SHORTCUTS_JUMP_BLOCK_START',
+  'SHORTCUTS_JUMP_BOTTOM_STACK',
+  'SHORTCUTS_JUMP_FIRST_BLOCK',
+  'SHORTCUTS_JUMP_LAST_BLOCK',
+  'SHORTCUTS_JUMP_TOP_STACK',
+  'SHORTCUTS_MOVE_DOWN',
+  'SHORTCUTS_MOVE_LEFT',
+  'SHORTCUTS_MOVE_RIGHT',
+  'SHORTCUTS_MOVE_UP',
+  'SHORTCUTS_NEXT_HEADING',
+  'SHORTCUTS_NEXT_STACK',
+  'SHORTCUTS_PERFORM_ACTION',
+  'SHORTCUTS_PREVIOUS_HEADING',
+  'SHORTCUTS_PREVIOUS_STACK',
+  'SHORTCUTS_SHOW_CONTEXT_MENU',
+  'SHORTCUTS_SHOW_TOOLTIP',
+  'SHORTCUTS_START_MOVE',
+  'SHORTCUTS_START_MOVE_STACK',
+  'SHORTCUTS_TOGGLE_SCREENREADER_MODE',
 ]);
 
 // Clés dans array_messages.ts
@@ -145,6 +272,7 @@ const ARRAY_MESSAGES_KEYS = new Set([
   'ARRAY_CREATE',
   'ARRAY_LIST',
   'ARRAY_LIST_UNTYPED_WARNING',
+  'ARRAY_LIST_DUPLICATE_WARNING',
   'ARRAY_ARRAY',
   'ARRAY_TAILLE',
   'ARRAY_CONTIENT',
@@ -217,19 +345,39 @@ function extractBoardMessagesKeys() {
 }
 
 /**
+ * Lit blockly_a11y_messages.ts et extrait les clés pour chaque langue
+ */
+function extractBlocklyA11yMessagesKeys() {
+  const result = extractMessagesKeysFromFile(BLOCKLY_A11Y_MESSAGES_FILE);
+  const content = fs.readFileSync(BLOCKLY_A11Y_MESSAGES_FILE, 'utf8');
+  const enConstMatch = content.match(/const EN[^=]*=\s*\{([\s\S]*?)\n\};/);
+  if (enConstMatch) {
+    const keyRegex = /^\s+(\w+):/gm;
+    let match;
+    while ((match = keyRegex.exec(enConstMatch[1])) !== null) {
+      result.en.add(match[1]);
+    }
+  }
+  return result;
+}
+
+/**
  * Vérifie les traductions
  */
 function checkTranslations() {
   console.log('🔍 Vérification des traductions µcBlockly (fr, en, es, ar)\n');
   console.log('Périmètre :');
   console.log(`  • ${CUSTOM_KEYS.size} clés personnalisées (src/languages/*.ts)`);
+  console.log(`  • ${SHELL_KEYS.size} clés shell (alertes, familles cartes)`);
   console.log(`  • ${ARRAY_MESSAGES_KEYS.size} clés array_messages.ts`);
+  console.log(`  • ${BLOCKLY_A11Y_MESSAGES_KEYS.size} clés blockly_a11y_messages.ts`);
   console.log('  • Parité board_messages.ts (ARDUINO_* / SERIAL_*)');
   console.log('  • Hors périmètre : messages Blockly natifs (bibliothèque blockly)\n');
   
   const langKeys = {};
   const missingKeys = {};
   const arrayMessagesKeys = extractArrayMessagesKeys();
+  const blocklyA11yMessagesKeys = extractBlocklyA11yMessagesKeys();
   const boardMessagesKeys = extractBoardMessagesKeys();
   const boardReferenceKeys = boardMessagesKeys.en || new Set();
   
@@ -239,7 +387,9 @@ function checkTranslations() {
     langKeys[lang] = extractKeysFromLangFile(langFile);
     missingKeys[lang] = {
       main: [],
+      shell: [],
       array: [],
+      a11y: [],
       board: [],
     };
   }
@@ -253,6 +403,16 @@ function checkTranslations() {
       }
     }
   }
+
+  // Vérifier les messages shell (UI)
+  console.log('📋 Vérification des clés shell...');
+  for (const key of SHELL_KEYS) {
+    for (const lang of LANGUAGES) {
+      if (!langKeys[lang].has(key)) {
+        missingKeys[lang].shell.push(key);
+      }
+    }
+  }
   
   // Vérifier les clés d'array_messages
   console.log('📋 Vérification des clés array_messages...');
@@ -260,6 +420,16 @@ function checkTranslations() {
     for (const lang of LANGUAGES) {
       if (!arrayMessagesKeys[lang].has(key)) {
         missingKeys[lang].array.push(key);
+      }
+    }
+  }
+
+  // Vérifier les clés blockly_a11y_messages
+  console.log('📋 Vérification des clés blockly_a11y_messages...');
+  for (const key of BLOCKLY_A11Y_MESSAGES_KEYS) {
+    for (const lang of LANGUAGES) {
+      if (!blocklyA11yMessagesKeys[lang].has(key)) {
+        missingKeys[lang].a11y.push(key);
       }
     }
   }
@@ -283,10 +453,12 @@ function checkTranslations() {
   let hasErrors = false;
   for (const lang of LANGUAGES) {
     const mainMissing = missingKeys[lang].main.length;
+    const shellMissing = missingKeys[lang].shell.length;
     const arrayMissing = missingKeys[lang].array.length;
+    const a11yMissing = missingKeys[lang].a11y.length;
     const boardMissing = missingKeys[lang].board.length;
     
-    if (mainMissing > 0 || arrayMissing > 0 || boardMissing > 0) {
+    if (mainMissing > 0 || shellMissing > 0 || arrayMissing > 0 || a11yMissing > 0 || boardMissing > 0) {
       hasErrors = true;
       console.log(`\n❌ ${lang.toUpperCase()}:`);
       if (mainMissing > 0) {
@@ -295,9 +467,21 @@ function checkTranslations() {
           console.log(`     - ${key}`);
         });
       }
+      if (shellMissing > 0) {
+        console.log(`   Clés shell manquantes (${shellMissing}):`);
+        missingKeys[lang].shell.forEach(key => {
+          console.log(`     - ${key}`);
+        });
+      }
       if (arrayMissing > 0) {
         console.log(`   Clés array_messages manquantes (${arrayMissing}):`);
         missingKeys[lang].array.forEach(key => {
+          console.log(`     - ${key}`);
+        });
+      }
+      if (a11yMissing > 0) {
+        console.log(`   Clés blockly_a11y_messages manquantes (${a11yMissing}):`);
+        missingKeys[lang].a11y.forEach(key => {
           console.log(`     - ${key}`);
         });
       }

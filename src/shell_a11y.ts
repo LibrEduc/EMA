@@ -4,6 +4,7 @@
  * @description Accessibilité de la coque HTML (skip link, menu de zones, repères ARIA).
  */
 
+import { focusBlocklyToolbox, focusBlocklyWorkspace } from "./blockly_shell_focus";
 import { getA11yLabel } from "./a11y_labels";
 import { languagesMap, type LanguageItem } from "./languages/languageMap";
 import { getModifierKeyLabel, getModifierKeyToken } from "./shell_shortcuts";
@@ -84,17 +85,15 @@ const focusArea = (index: number): void => {
     case 1:
       focusFirstIn(document.getElementById("app_topbar"));
       break;
-    case 2: {
-      const toolbox =
-        document.querySelector(".blocklyToolboxDiv") ??
-        document.querySelector(".blocklyFlyout");
-      if (!focusFirstIn(toolbox)) {
+    case 2:
+      if (!focusBlocklyToolbox()) {
         focusFirstIn(document.getElementById("blockly-workspace-main"));
       }
       break;
-    }
     case 3:
-      focusFirstIn(document.getElementById("blockly-workspace-main"));
+      if (!focusBlocklyWorkspace()) {
+        focusFirstIn(document.getElementById("blockly-workspace-main"));
+      }
       break;
     case 4:
       focusFirstIn(document.getElementById("div_content_code"));
@@ -155,8 +154,10 @@ const initSkipLink = (): void => {
   }
   skipLink.addEventListener("click", (event) => {
     event.preventDefault();
-    main.focus({ preventScroll: true });
-    main.scrollIntoView({ block: "start" });
+    if (!focusBlocklyWorkspace()) {
+      main.focus({ preventScroll: true });
+      main.scrollIntoView({ block: "start" });
+    }
   });
 };
 
@@ -240,6 +241,8 @@ export const applyToolbarA11y = (): void => {
     { id: "loadButton", tooltipKey: "LOAD_TOOLTIP", shortcutKey: "O" },
     { id: "undoButton", tooltipKey: "UNDO_TOOLTIP" },
     { id: "redoButton", tooltipKey: "REDO_TOOLTIP" },
+    { id: "shortcutsHelpButton", tooltipKey: "SHORTCUTS_HELP_TOOLTIP" },
+    { id: "keyboardTutorialButton", tooltipKey: "KEYBOARD_TUTORIAL_TOOLTIP" },
   ];
 
   toolbarButtons.forEach(({ id, tooltipKey, shortcutKey }) => {
@@ -252,6 +255,8 @@ export const applyToolbarA11y = (): void => {
       const displayShortcut = `${modLabel}+${shortcutKey}`;
       label = appendShortcutToLabel(label, displayShortcut);
       button.setAttribute("aria-keyshortcuts", `${modToken}+${shortcutKey}`);
+    } else if (id === "shortcutsHelpButton") {
+      button.setAttribute("aria-keyshortcuts", "F1 ?");
     }
     button.setAttribute("aria-label", label);
     button.setAttribute("title", label);

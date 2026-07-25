@@ -38,6 +38,7 @@ import {
   hasArrayListConnectedElements,
   inferArrayElementTypeFromBlock,
   inferArrayElementTypeFromInputs,
+  isPrimaryListDeclarationBlock,
 } from "../block_types_registry";
 
 function buildArrayListLiteralCode(
@@ -150,6 +151,9 @@ export const Array_with = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
+  if (!isPrimaryListDeclarationBlock(block)) {
+    return "";
+  }
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
   if (!varName || varName === "variable") {
     return "// Error: Invalid variable name\n";
@@ -200,12 +204,212 @@ export const Array_modify = function (
 };
 
 /**
+ * Array_set - whole-list assignment: set list to [bitmap | list literal | text init].
+ */
+export const Array_set = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  const name = generator.getVariableName(block.getFieldValue("VAR"));
+  if (!name || name === "variable") {
+    return "// Error: Invalid variable name\n";
+  }
+  const valueBlock = block.getInputTargetBlock("VALUE");
+  if (valueBlock?.type === "Array_bitmap_get") {
+    return buildBitmapCopyIntoList(name, valueBlock, generator);
+  }
+  if (
+    valueBlock?.type === "Array_list_literal" ||
+    valueBlock?.type === "Array_list_3"
+  ) {
+    const typedBlock = valueBlock as Blockly.Block & { itemCount_?: number };
+    let itemCount = typedBlock.itemCount_ ?? 0;
+    if (itemCount <= 0) {
+      let i = 0;
+      while (valueBlock.getInput("ADD" + i)) i++;
+      itemCount = i;
+    }
+    const lines: string[] = [];
+    for (let i = 0; i < itemCount; i++) {
+      if (!valueBlock.getInputTargetBlock("ADD" + i)) {
+        continue;
+      }
+      const value =
+        generator.valueToCode(valueBlock, "ADD" + i, Order.ASSIGNMENT) || "0";
+      lines.push(name + "[" + i + "] = " + value + ";\n");
+    }
+    if (lines.length === 0) {
+      return "// Error: empty list literal\n";
+    }
+    return lines.join("");
+  }
+  if (isTextInitializerBlock(valueBlock)) {
+    const raw = String(valueBlock!.getFieldValue("TEXT") || "").trim();
+    return buildTextInitializerCopyIntoList(name, raw);
+  }
+  return (
+    "// Error: plug a bitmap, list literal, or text initializer into set " +
+    name +
+    "\n"
+  );
+};
+
+const TEXT_INITIALIZER_BLOCK_TYPES = new Set([
+  "text",
+  "text_multiline",
+  "text_no_quote",
+]);
+
+function isTextInitializerBlock(
+  block: Blockly.Block | null,
+): block is Blockly.Block {
+  return Boolean(block && TEXT_INITIALIZER_BLOCK_TYPES.has(block.type));
+}
+
+/** Top-level comma-separated items inside an outermost `{...}`. */
+function splitTopLevelBraceItems(init: string): string[] {
+  const s = init.trim();
+  if (!s.startsWith("{") || !s.endsWith("}")) {
+    return [];
+  }
+  const inner = s.slice(1, -1);
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < inner.length; i++) {
+    const ch = inner[i];
+    if (ch === "{") {
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+    } else if (ch === "," && depth === 0) {
+      const part = inner.slice(start, i).trim();
+      if (part) {
+        parts.push(part);
+      }
+      start = i + 1;
+    }
+  }
+  const last = inner.slice(start).trim();
+  if (last) {
+    parts.push(last);
+  }
+  return parts;
+}
+
+function resolveTextArrayInitializer(rawText: string): {
+  init: string;
+  dims: { rows: number; cols: number; rank: 1 | 2 };
+} | null {
+  let init = rawText.trim();
+  if (!init.startsWith("{") || !init.endsWith("}")) {
+    return null;
+  }
+  // Unwrap one 3D layer: {{{r0},{r1}},{...}} → first 2D frame
+  for (let guard = 0; guard < 3; guard++) {
+    const items = splitTopLevelBraceItems(init);
+    if (items.length === 0) {
+      return null;
+    }
+    if (!items[0].startsWith("{")) {
+      break;
+    }
+    const nested = splitTopLevelBraceItems(items[0]);
+    if (nested[0]?.startsWith("{")) {
+      init = items[0].trim();
+      continue;
+    }
+    break;
+  }
+  const dims = inferInitializerDims(init);
+  if (!dims) {
+    return null;
+  }
+  return { init, dims };
+}
+
+function inferInitializerDims(
+  init: string,
+): { rows: number; cols: number; rank: 1 | 2 } | null {
+  const items = splitTopLevelBraceItems(init);
+  if (items.length === 0) {
+    return null;
+  }
+  if (items[0].startsWith("{")) {
+    const cols = splitTopLevelBraceItems(items[0]).length;
+    if (cols === 0) {
+      return null;
+    }
+    return { rows: items.length, cols, rank: 2 };
+  }
+  return { rows: 1, cols: items.length, rank: 1 };
+}
+
+function buildTextInitializerCopyIntoList(
+  varName: string,
+  rawText: string,
+): string {
+  const resolved = resolveTextArrayInitializer(rawText);
+  if (!resolved) {
+    return (
+      "// Error: text for set " +
+      varName +
+      " must be a C initializer like {1, 2} or {{0,1},{1,0}}\n"
+    );
+  }
+  const { init, dims } = resolved;
+  if (dims.rank === 1) {
+    return (
+      "{\n" +
+      "  const byte _ucb_src[" +
+      dims.cols +
+      "] = " +
+      init +
+      ";\n" +
+      "  for (int _ucb_i = 0; _ucb_i < " +
+      dims.cols +
+      "; _ucb_i++) {\n" +
+      "    " +
+      varName +
+      "[_ucb_i] = _ucb_src[_ucb_i];\n" +
+      "  }\n" +
+      "}\n"
+    );
+  }
+  return (
+    "{\n" +
+    "  const byte _ucb_src[" +
+    dims.rows +
+    "][" +
+    dims.cols +
+    "] = " +
+    init +
+    ";\n" +
+    "  for (int _ucb_r = 0; _ucb_r < " +
+    dims.rows +
+    "; _ucb_r++) {\n" +
+    "    for (int _ucb_c = 0; _ucb_c < " +
+    dims.cols +
+    "; _ucb_c++) {\n" +
+    "      " +
+    varName +
+    "[_ucb_r][_ucb_c] = _ucb_src[_ucb_r][_ucb_c];\n" +
+    "    }\n" +
+    "  }\n" +
+    "}\n"
+  );
+}
+
+/**
  * Array_declare - int arr[size]; or int arr[] = \{...\};
  */
 export const Array_declare = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
+  if (!isPrimaryListDeclarationBlock(block)) {
+    return "";
+  }
   const choice = block.getFieldValue("choix");
   const dimension = block.getFieldValue("dim");
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
@@ -267,6 +471,9 @@ export const Array_create = function (
   block: Blockly.Block,
   generator: ArduinoGenerator,
 ): string {
+  if (!isPrimaryListDeclarationBlock(block)) {
+    return "";
+  }
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
   const typeField = block.getFieldValue("type") || "int";
   const typeBlock = getCppTypeName(typeField);
@@ -355,4 +562,98 @@ export const Array_getIndex_in_array = function (
     code += "[" + (j || "0") + "]";
   }
   return [code, Order.ATOMIC];
+};
+
+function readBitmapGrid(
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): { cols: number; rows: number; rowsCode: string } {
+  const colsRaw = generator.valueToCode(block, "COLS", Order.ATOMIC);
+  const rowsRaw = generator.valueToCode(block, "ROWS", Order.ATOMIC);
+  const cols = Math.max(1, Math.min(32, Number(colsRaw) || 8));
+  const rows = Math.max(1, Math.min(32, Number(rowsRaw) || 8));
+  const raw = block.getFieldValue("BITMAP") as number[][] | null;
+  const grid: number[][] = [];
+  for (let r = 0; r < rows; r++) {
+    const row: number[] = [];
+    for (let c = 0; c < cols; c++) {
+      row.push(raw?.[r]?.[c] ? 1 : 0);
+    }
+    grid.push(row);
+  }
+  const rowsCode = grid
+    .map((row) => "{ " + row.join(", ") + " }")
+    .join(",\n  ");
+  return { cols, rows, rowsCode };
+}
+
+function buildBitmapCopyIntoList(
+  varName: string,
+  bitmapBlock: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  const { cols, rows, rowsCode } = readBitmapGrid(bitmapBlock, generator);
+  return (
+    "{\n" +
+    "  const byte _ucb_bmp[" +
+    rows +
+    "][" +
+    cols +
+    "] = {\n  " +
+    rowsCode +
+    "\n  };\n" +
+    "  for (int _ucb_r = 0; _ucb_r < " +
+    rows +
+    "; _ucb_r++) {\n" +
+    "    for (int _ucb_c = 0; _ucb_c < " +
+    cols +
+    "; _ucb_c++) {\n" +
+    "      " +
+    varName +
+    "[_ucb_r][_ucb_c] = _ucb_bmp[_ucb_r][_ucb_c];\n" +
+    "    }\n" +
+    "  }\n" +
+    "}\n"
+  );
+}
+
+/**
+ * Array_bitmap - global 2D byte array from FieldBitmap (rows x cols of 0/1).
+ */
+export const Array_bitmap = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): string {
+  if (!isPrimaryListDeclarationBlock(block)) {
+    return "";
+  }
+  const varName = generator.getVariableName(block.getFieldValue("VAR"));
+  if (!varName || varName === "variable") {
+    return "// Error: Invalid variable name\n";
+  }
+  const { cols, rows, rowsCode } = readBitmapGrid(block, generator);
+  const declaration =
+    "byte " +
+    varName +
+    "[" +
+    rows +
+    "][" +
+    cols +
+    "] = {\n  " +
+    rowsCode +
+    "\n};";
+  generator.addArrayDeclaration(declaration);
+  generator.addVariable(varName, declaration);
+  return "";
+};
+
+/**
+ * Array_bitmap_get - value: 2D 0/1 initializer from FieldBitmap.
+ */
+export const Array_bitmap_get = function (
+  block: Blockly.Block,
+  generator: ArduinoGenerator,
+): [string, number] {
+  const { rowsCode } = readBitmapGrid(block, generator);
+  return ["{\n  " + rowsCode + "\n}", Order.ATOMIC];
 };

@@ -36,10 +36,13 @@
  */
 export const ARRAY_BLOCK_TYPES = {
   Array_with: "null",
+  Array_bitmap: "null",
+  Array_bitmap_get: "Array",
   Array_list_literal: "__DYNAMIC__arrayFromInputs",
   Array_list_3: "__DYNAMIC__arrayFromInputs", // legacy alias
   Array_getIndex_in_list: "__DYNAMIC__arrayGetIndexElement",
   Array_modify: "null",
+  Array_set: "null",
   Array_declare: "null",
   Array_create: "null",
   Array_fix: "null",

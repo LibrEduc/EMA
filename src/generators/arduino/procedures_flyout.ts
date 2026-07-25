@@ -61,7 +61,7 @@ export function createProceduresFlyout(
     { kind: "sep", id: undefined, gap: 24, cssconfig: undefined },
   ];
   if (Blockly.Procedures && typeof Blockly.Procedures.flyoutCategory === "function") {
-    items.push(...Blockly.Procedures.flyoutCategory(workspace, false));
+    items.push(...Blockly.Procedures.flyoutCategory(workspace));
   }
   return withFlyoutBlockLevels(items);
 }

@@ -39,7 +39,7 @@ import * as Blockly from "blockly";
 import { resolveVariableTypeForBlock } from "../../categories/blockly/shared";
 import { BLOCK_TYPES } from "./block_types/index";
 import { getCompatibleTypes, getInternalTypeForArduinoType, isTypeCompatible, normalizeBlocklyCheckToInternalType } from "./block_types";
-import { LIST_VARIABLE_TYPE } from "./variable_utils";
+import { LIST_DECLARE_BLOCK_TYPES, LIST_VARIABLE_TYPE, isVariableDeclarationOwner } from "./variable_utils";
 import { debugLog } from "./debug";
 
 /**
@@ -209,30 +209,82 @@ export function hasArrayListConnectedElements(block: Blockly.Block): boolean {
   return false;
 }
 
-const LIST_DECLARE_BLOCK_TYPES = [
-  "Array_declare",
-  "Array_create",
-  "Array_with",
-] as const;
+/**
+ * All list declaration blocks that reference a given variable id (workspace order).
+ */
+export function findAllListDeclarationBlocks(
+  workspace: Blockly.Workspace,
+  variableId: string,
+): Blockly.Block[] {
+  const found: Blockly.Block[] = [];
+  for (const block of workspace.getAllBlocks(false)) {
+    if (!(LIST_DECLARE_BLOCK_TYPES as readonly string[]).includes(block.type)) {
+      continue;
+    }
+    if (block.getFieldValue("VAR") === variableId) {
+      found.push(block);
+    }
+  }
+  return found;
+}
 
 /**
  * Finds the list declaration block for a workspace variable id.
+ * Prefers the ownership claim (`__ucbDeclareBlockId`); otherwise first block.
  */
 export function findListDeclarationBlock(
   workspace: Blockly.Workspace,
   variableId: string,
 ): Blockly.Block | null {
-  for (const block of workspace.getAllBlocks(false)) {
-    if (
-      !(LIST_DECLARE_BLOCK_TYPES as readonly string[]).includes(block.type)
-    ) {
-      continue;
-    }
-    if (block.getFieldValue("VAR") === variableId) {
-      return block;
+  const all = findAllListDeclarationBlocks(workspace, variableId);
+  if (all.length === 0) {
+    return null;
+  }
+  const variable = workspace.getVariableMap().getVariableById(variableId);
+  const ownerId = (variable as { __ucbDeclareBlockId?: string } | null)
+    ?.__ucbDeclareBlockId;
+  if (ownerId) {
+    const owned = all.find((block) => block.id === ownerId);
+    if (owned) {
+      return owned;
     }
   }
-  return null;
+  return all[0] ?? null;
+}
+
+/**
+ * True when this block owns the exclusive list declaration (const-like).
+ * Falls back to workspace order when ownership is not yet claimed.
+ */
+export function isPrimaryListDeclarationBlock(block: Blockly.Block): boolean {
+  const variableId = block.getFieldValue("VAR");
+  if (!variableId || !block.workspace) {
+    return true;
+  }
+  const variable = block.workspace.getVariableMap().getVariableById(variableId);
+  if (variable) {
+    if (!isVariableDeclarationOwner(variable, block.id)) {
+      return false;
+    }
+    const ownerId = (variable as { __ucbDeclareBlockId?: string })
+      .__ucbDeclareBlockId;
+    if (ownerId) {
+      return ownerId === block.id;
+    }
+  }
+  const primary = findListDeclarationBlock(block.workspace, variableId);
+  return !primary || primary.id === block.id;
+}
+
+/**
+ * True when another list declaration block already owns the same variable.
+ */
+export function hasDuplicateListDeclaration(block: Blockly.Block): boolean {
+  const variableId = block.getFieldValue("VAR");
+  if (!variableId || !block.workspace) {
+    return false;
+  }
+  return findAllListDeclarationBlocks(block.workspace, variableId).length > 1;
 }
 
 /**
@@ -254,6 +306,9 @@ export function inferListVariableElementType(
       return "__NO_TYPE__";
     }
     return inferArrayElementTypeFromBlock(declareBlock);
+  }
+  if (declareBlock.type === "Array_bitmap") {
+    return getInternalTypeForArduinoType("byte");
   }
   const typeField = declareBlock.getFieldValue("type") || "int";
   return getInternalTypeForArduinoType(typeField);

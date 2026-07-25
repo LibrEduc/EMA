@@ -29,6 +29,19 @@ export const normalizeHexColour = (raw: string | null | undefined): string | nul
   if (/^[0-9a-fA-F]{6}$/.test(trimmed)) {
     return `#${trimmed.toUpperCase()}`;
   }
+  // FieldColour may expose shortened #rgb in getText(); accept it for ARIA too.
+  if (/^#[0-9a-fA-F]{3}$/.test(trimmed)) {
+    const r = trimmed[1];
+    const g = trimmed[2];
+    const b = trimmed[3];
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+  }
+  if (/^[0-9a-fA-F]{3}$/.test(trimmed)) {
+    const r = trimmed[0];
+    const g = trimmed[1];
+    const b = trimmed[2];
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+  }
   return null;
 };
 

@@ -60,7 +60,7 @@ export function isArrayAssignmentValueBlock(block: Block | null): boolean {
 
 /** Bloc instruction « define variable as list » (déclaration globale). */
 export function isArrayListStatementBlock(block: Block | null): boolean {
-  return block?.type === "Array_with";
+  return block?.type === "Array_with" || block?.type === "Array_bitmap";
 }
 
 /**

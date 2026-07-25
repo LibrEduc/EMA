@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*"],
+  "exclude": [
+    "tests/**/*",
+    "build/**/*",
+    "node_modules/**/*",
+    "src/index.ts",
+    "src/code_editor.ts",
+    "src/blockly_application_type.ts",
+    "src/demo/**/*",
+    "src/workspace_flex.ts",
+    "src/workspace_resize.ts",
+    "src/workspace_layout_utils.ts",
+    "src/shell_a11y.ts",
+    "src/shell_shortcuts.ts",
+    "src/ui_palette_theme.ts",
+    "src/a11y_labels.ts",
+    "src/continuous_metrics_overlay_flyout.ts",
+    "src/block_debug_context_menu.ts"
+  ]
+}

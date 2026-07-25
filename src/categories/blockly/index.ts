@@ -36,6 +36,7 @@ import { defineLoopsBlocks } from "./loops";
 import { defineMathCompatBlocks } from "./math";
 import { defineTextCompatBlocks } from "./text";
 import { defineArrayBlocks } from "./array";
+import { defineArrayBitmapBlock } from "./array_bitmap";
 import { defineLibreBlocks } from "./libre";
 import { defineBoardBlocks, refreshBoardPinDropdowns } from "./board";
 import { defineColourBlocks } from "./colour";
@@ -62,6 +63,7 @@ export const defineBlocklyArduinoCompatBlocks = (): void => {
   defineMathCompatBlocks();
   defineTextCompatBlocks();
   defineArrayBlocks();
+  defineArrayBitmapBlock();
   defineLibreBlocks();
   defineBoardBlocks();
   defineColourBlocks();
@@ -95,6 +97,7 @@ export const defineAllTypedVariableBlocks = (): void => {
 
 export {
   defineArrayBlocks,
+  defineArrayBitmapBlock,
   defineLibreBlocks,
   defineBoardBlocks,
   defineLoopsBlocks,

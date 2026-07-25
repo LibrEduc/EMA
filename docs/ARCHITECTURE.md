@@ -8,6 +8,8 @@
 
 This document helps new contributors understand the codebase layout, conventions, and where to change things.
 
+> **Noyau vs démo** : pour l’API publique embed (`createUcBlockly`), les builds sans Monaco et la frontière interne/public, voir **[KERNEL.md](./KERNEL.md)**.
+
 ## Overview
 
 **µcBlockly** is a visual programming environment (Blockly-based) that generates Arduino/C code. Users assemble blocks in the workspace; the Arduino generator turns the block tree into C++ code. The app also includes a code editor (Monaco), board profiles, and optional plugins (minimap, backpack, search, etc.).
@@ -16,8 +18,10 @@ This document helps new contributors understand the codebase layout, conventions
 
 ```
 src/
-├── index.ts                    # Entry point: Blockly/Arduino global exposure, workspace init, UI wiring
-├── blockly_application_type.ts # Core app class: inject, options, plugins, persistence, language
+├── index.ts                    # Demo entry: Blockly global exposure, workspace init, UI wiring
+├── blockly_application_type.ts # Re-export → demo/blockly_application_shell.ts
+├── core/                       # **Public kernel** — createUcBlockly, workspace manager (see KERNEL.md)
+├── demo/                       # Demo shell + embed example (internal)
 ├── blockly_patches.ts          # Defensive patches for Blockly (e.g. removeTopBlock during drag)
 ├── toolbox.ts                  # Toolbox structure: categories, block lists, board-specific toolbox
 ├── toolbox_search_i18n.ts      # i18n wrapper for @blockly/toolbox-search (Blockly.Msg)

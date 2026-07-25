@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>µcBlockly — exemple embed</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #f5f5f5;
+    }
+    header {
+      padding: 0.5rem 1rem;
+      background: #2c3e50;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: 0;
+    }
+    #ucblockly-editor {
+      min-height: 0;
+      background: #fff;
+      border-right: 1px solid #ccc;
+    }
+    #ucblockly-code-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    #ucblockly-code-wrap h2 {
+      margin: 0;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: #e8e8e8;
+      border-bottom: 1px solid #ccc;
+    }
+    #ucblockly-code {
+      flex: 1;
+      margin: 0;
+      padding: 1rem;
+      overflow: auto;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+      #ucblockly-editor { border-right: none; border-bottom: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+  <header>µcBlockly — intégration minimale via <code>createUcBlockly()</code></header>
+  <main>
+    <div id="ucblockly-editor" aria-label="Workspace Blockly"></div>
+    <div id="ucblockly-code-wrap">
+      <h2>Code Arduino généré</h2>
+      <pre id="ucblockly-code"><code></code></pre>
+    </div>
+  </main>
+</body>
+</html>

@@ -17,4 +17,9 @@ describe("field_colour_a11y", () => {
     assert.match(spoken, /#FF0000/);
     assert.match(spoken, /255,\s*0,\s*0/);
   });
+
+  it("normalizeHexColour expands #rgb", () => {
+    assert.equal(normalizeHexColour("#f00"), "#FF0000");
+    assert.equal(normalizeHexColour("0f0"), "#00FF00");
+  });
 });

@@ -15,6 +15,7 @@ import {
   monacoResolve,
   monacoWebpackPluginOptions,
 } from "./monaco.webpack.config.mjs";
+import { tsLoaderUse } from "./webpack.ts-loader.config.mjs";
 import CopyPlugin from "copy-webpack-plugin";
 import TerserPlugin from "terser-webpack-plugin";
 import WebpackObfuscator from "webpack-obfuscator";
@@ -75,10 +76,16 @@ const resolvePublicAsset = (compilation, assetName) => {
 
 // Base config that applies to either development or production mode.
 let config = {
-  entry: "./src/index.ts",
+  entry: {
+    main: "./src/index.ts",
+    embed: "./src/demo/embed_example.ts",
+  },
   output: {
     // Compile the source files into a bundle.
-    filename: "bundle.[contenthash].js",
+    filename: (pathData) =>
+      pathData.chunk?.name === "main"
+        ? "bundle.[contenthash].js"
+        : "[name].[contenthash].js",
     chunkFilename: "[name].[contenthash].js",
     assetModuleFilename: "assets/[name].[contenthash][ext][query]",
     path: path.resolve(__dirname, "dist/bundle"),
@@ -101,12 +108,12 @@ let config = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: tsLoaderUse,
         include: shareableProceduresSrc,
       },
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: tsLoaderUse,
         exclude: /node_modules/,
       },
       {
@@ -130,6 +137,11 @@ let config = {
       "@blockly/block-shareable-procedures$": path.join(
         shareableProceduresSrc,
         "index.ts",
+      ),
+      // package.json "module" points to missing ./src/index.js — force dist.
+      "@blockly/field-bitmap$": path.resolve(
+        __dirname,
+        "node_modules/@blockly/field-bitmap/dist/index.js",
       ),
     },
     ...monacoResolve,
@@ -197,6 +209,7 @@ let config = {
     new webpack.optimize.ModuleConcatenationPlugin(),
     new HtmlWebpackPlugin({
       template: "public/index.html",
+      chunks: ["main"],
       templateParameters: (compilation, assets, assetTags, options) => ({
         compilation,
         webpackConfig: compilation.options,
@@ -207,6 +220,12 @@ let config = {
         },
         publicAsset: (name) => resolvePublicAsset(compilation, name),
       }),
+    }),
+    new HtmlWebpackPlugin({
+      template: "public/embed-example.html",
+      filename: "embed-example.html",
+      chunks: ["embed"],
+      inject: "body",
     }),
     new MonacoWebpackPlugin(monacoWebpackPluginOptions),
     new CopyPlugin({
@@ -227,7 +246,7 @@ let config = {
           from: path.resolve(__dirname, "public"),
           to: ".",
           globOptions: {
-            ignore: ["**/index.html", "**/assets/**"],
+            ignore: ["**/index.html", "**/embed-example.html", "**/assets/**"],
           },
         },
       ],

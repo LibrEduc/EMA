@@ -81,23 +81,9 @@ if (typeof window !== 'undefined') {
   debugLog('Available properties:', Object.keys(globalWindow.Blockly));
 }
 
-/**
- * Defines typed variable blocks once Blockly is available.
- * @returns True when blocks were registered, false when Blockly is unavailable.
- */
-function defineTypedVariableBlocks() {
-  if (typeof Blockly !== 'undefined') {
-    defineAllTypedVariableBlocks();
-    return true;
-  }
-  return false;
-}
-
 import { arduinoGenerator } from "./generators/arduino";
-import { defineAllTypedVariableBlocks, refreshBoardPinDropdowns } from "./categories/blockly";
-import { applyBlockTypesFromRegistry } from "./generators/arduino/block_types_registry";
-import { configureStandardBlocks } from "./generators/arduino/configure_standard_blocks";
-import { applyLevelsToAllBlockDefinitions } from "./block_levels";
+import { refreshBoardPinDropdowns } from "./categories/blockly";
+import { registerUcBlocklyKernel } from "./core/register";
 import {
   applyBlockDebugMetadata,
   installBlockDebugContextMenu,
@@ -110,6 +96,7 @@ import {
   HTML_changeLanguage,
 } from "./language";
 import { languagesMap } from "./languages/languageMap";
+import { getBoardFamilyMessageKey, getShellMessage } from "./shell_messages";
 import { BOARD_PROFILES, DEFAULT_BOARD_ID } from "./boards";
 import { syncUiPaletteTheme } from "./ui_palette_theme";
 
@@ -135,14 +122,15 @@ import {
   RecyclableBlockFlyoutInflater,
 } from "@blockly/continuous-toolbox";
 import { ContinuousMetricsOverlayFlyout } from "./continuous_metrics_overlay_flyout";
-import { ContentHighlight } from "@blockly/workspace-content-highlight";
-//import { KeyboardNavigation } from '@blockly/keyboard-navigation';
-//KeyboardNavigation.registerKeyboardNavigationStyles();
 import "./css/index.css";
 import "./css/µcBlockly.css";
 
 import { getA11yLabel } from "./a11y_labels";
+import { registerShellBlocklyWorkspace } from "./blockly_shell_focus";
+import { registerBlocklyA11yExtensions } from "./blockly_a11y_extensions";
 import { applyShellLandmarks, applyToolbarA11y, announceShellMessage, registerShellAreaNavigation } from "./shell_a11y";
+import { registerShortcutsHelp } from "./shell_shortcuts_help";
+import { registerKeyboardTutorial } from "./shell_keyboard_tutorial";
 import { registerShellFileShortcuts } from "./shell_shortcuts";
 import { µcB_codeEditor } from "./code_editor";
 import { registerWorkspaceForSvgResize, µcB_workspaceOnResize } from "./workspace_resize";
@@ -154,12 +142,6 @@ import {
   updateResizerAriaValue,
   updateRightPanelToggleButton,
 } from "./workspace_flex";
-
-// Diagnostic switches for stepwise re-enable of typing overlay.
-// Current step (requested): only configureStandardBlocks enabled.
-const ENABLE_TYPED_VARIABLE_BLOCKS = true;
-const ENABLE_BLOCK_TYPES_REGISTRY = true;
-const ENABLE_CONFIGURE_STANDARD_BLOCKS = true;
 
 // Cache DOM elements
 const elements = {
@@ -307,24 +289,8 @@ const HTML_populateBoards = (): void => {
     return;
   }
 
-  const getBoardFamily = (boardId: string): string => {
-    if (boardId === "none") return "Other";
-    if (boardId.startsWith("arduino_") || boardId === "lilypad" || boardId === "LilyPadUSB" || boardId === "attiny85") {
-      return "Arduino / AVR";
-    }
-    if (boardId.startsWith("esp8266")) return "ESP8266";
-    if (boardId.startsWith("esp32")) return "ESP32";
-    if (boardId.startsWith("franzininho_")) return "Franzininho";
-    if (boardId.startsWith("pi-pico")) return "Raspberry Pi Pico";
-    if (boardId.startsWith("st-nucleo")) return "STM32 Nucleo";
-    if (boardId.startsWith("teensy")) return "Teensy";
-    if (boardId.startsWith("makeblock_")) return "Makeblock";
-    if (boardId.startsWith("dfrobot_")) return "DFRobot";
-    if (boardId.startsWith("dagu_")) return "Dagu";
-    if (boardId.startsWith("peguino_")) return "Peguino";
-    if (boardId.startsWith("kit_")) return "Kits";
-    return "Other";
-  };
+  const getBoardFamily = (boardId: string, lang: string): string =>
+    getShellMessage(getBoardFamilyMessageKey(boardId), lang);
 
   const currentLang =
     (elements.languageMenu?.value && elements.languageMenu.value.trim().length > 0
@@ -348,7 +314,7 @@ const HTML_populateBoards = (): void => {
   const groupedBoards = new Map<string, Array<{ boardId: string; label: string }>>();
   for (const [boardId, profile] of Object.entries(BOARD_PROFILES)) {
     if (boardId === "none") continue;
-    const family = getBoardFamily(boardId);
+    const family = getBoardFamily(boardId, currentLang);
     const description =
       typeof profile.description === "string" && profile.description.trim().length > 0
         ? profile.description
@@ -389,10 +355,9 @@ const HTML_populateBoards = (): void => {
   }
 };
 
-// Initialize Blockly Application
-// Ensure custom blocks are registered before toolbox injection.
+// Initialize Blockly Application — kernel registers blocks once before inject.
 restoreLayoutFromSessionStorage();
-defineTypedVariableBlocks();
+registerUcBlocklyKernel();
 installBlockDebugContextMenu();
 applyBlockDebugMetadata();
 primeWorkspaceContainerDimensions();
@@ -710,12 +675,7 @@ const HTML_onChange = (): void => {
   };
 
   elements.pluginHighlight.onchange = () => {
-    if (elements.pluginHighlight.checked) {
-      µcB.plugin_contentHighlight = new ContentHighlight(µcB.workspace);
-      µcB.plugin_contentHighlight.init();
-    } else {
-      µcB.plugin_contentHighlight.dispose();
-    }
+    µcB.setContentHighlight(elements.pluginHighlight.checked);
     setPluginsInURL("pluginHighlight", "highlight");
   };
 
@@ -737,13 +697,7 @@ const HTML_onChange = (): void => {
       if (file) {
         const hasExistingBlocks = µcB.workspaceHasAnyBlocks();
         const currentLang = getLangParamFromUrl();
-        const mergeMessage = currentLang === 'fr'
-          ? 'Le workspace contient déjà des blocs.\n\nCliquez sur "OK" pour fusionner avec les blocs existants.\nCliquez sur "Annuler" pour remplacer tous les blocs.'
-          : currentLang === 'es'
-          ? 'El workspace ya contiene bloques.\n\nHaga clic en "OK" para fusionar con los bloques existentes.\nHaga clic en "Cancelar" para reemplazar todos los bloques.'
-          : currentLang === 'ar'
-          ? 'يحتوي مساحة العمل بالفعل على كتل.\n\nانقر فوق "موافق" للدمج مع الكتل الموجودة.\nانقر فوق "إلغاء" لاستبدال جميع الكتل.'
-          : 'The workspace already contains blocks.\n\nClick "OK" to merge with existing blocks.\nClick "Cancel" to replace all blocks.';
+        const mergeMessage = getShellMessage("LOAD_MERGE_CONFIRM", currentLang);
         const merge = hasExistingBlocks ? confirm(mergeMessage) : false;
         µcB.workspaceLoadFromFile(file, merge);
         // Reset input value to allow reloading the same file
@@ -838,33 +792,19 @@ const HTML_onChange = (): void => {
  */
 const resetAllParameters = (): void => {
   µcB.workspaceSetupPlugins(true);
-  µcB.workspace.dispose();
 
-  // Clear all sessionStorage data
   if (window.sessionStorage) {
     window.sessionStorage.clear();
   }
-  // Clear all localStorage data (if used)
   if (window.localStorage) {
     window.localStorage.clear();
   }
 
-  // Reset div sizes to default values
   document.getElementById("flex_container_up_right")!.style.flexGrow = "0";
   document.getElementById("flex_container_bottom")!.style.flexGrow = "0";
   document.getElementById("flex_container_up")!.style.flexGrow = "1";
   document.getElementById("flex_container_up_left")!.style.flexGrow = "1";
 
-  const originalToolbox = µcB.stripCustomCategoriesForContinuousToolbox();
-  µcB.workspace = Blockly.inject(
-    document.getElementById("div_workspace_content_blockly")!,
-    µcB.WORKSPACE_OPTIONS,
-  );
-  µcB.restoreWorkspaceAfterInject();
-  µcB.workspaceSetupPlugins(false);
-  µcB.restoreToolboxAfterInject(originalToolbox);
-
-  // Recharger la page sur la racine
   window.location.href = "/";
 };
 
@@ -893,45 +833,19 @@ const scheduleNonCriticalDomInit = (callback: () => void): void => {
 };
 // The `DomIsLoaded` function prepares everything needed by structure of DOM.
 DomIsLoaded((): void => {
-  // Define typed variable blocks after Blockly is loaded
-  if (ENABLE_TYPED_VARIABLE_BLOCKS) {
-    if (defineTypedVariableBlocks()) {
-      debugLog('✅ Typed variable blocks defined at the right time');
-    } else {
-      debugLog('⚠️ Blockly pas encore disponible, retry dans 100ms...');
-      // Retry after a delay
-      setTimeout(() => {
-        if (defineTypedVariableBlocks()) {
-          debugLog('✅ Blocs de variables typées définis après retry');
-        } else {
-          console.error('❌ Impossible de définir les blocs de variables typées');
-        }
-      }, 100);
-    }
-  }
-
-  // Apply block types from the registry
-  if (typeof Blockly !== 'undefined') {
-    if (ENABLE_BLOCK_TYPES_REGISTRY) {
-      applyBlockTypesFromRegistry();
-    }
-    if (ENABLE_CONFIGURE_STANDARD_BLOCKS) {
-      // Configure standard blocks (controls_if, procedures, etc.)
-      configureStandardBlocks();
-    }
-    applyLevelsToAllBlockDefinitions();
-    applyBlockDebugMetadata();
-  }
-
   HTML_populateLanguages(µcB);
   HTML_populateBoards();
   syncUiPaletteTheme();
   initializeRightPanelToggleButton();
   initializeBottomPanelToggleButton();
   registerShellAreaNavigation();
+  registerShortcutsHelp();
+  registerKeyboardTutorial();
   applyA11yAttributes();
   µcB.changeLanguage(false);
   µcB.workspaceInit();
+  registerShellBlocklyWorkspace(() => µcB.workspace as Blockly.WorkspaceSvg);
+  registerBlocklyA11yExtensions(() => µcB.workspace as Blockly.WorkspaceSvg);
   // If a board is already selected (e.g. from URL), show board category and refresh pin dropdowns.
   if (elements.boardMenu.value && elements.boardMenu.value !== "none") {
     const lang = getLangParamFromUrl();
@@ -945,19 +859,7 @@ DomIsLoaded((): void => {
 /* The `window.onload` event is triggered when the entire page has finished loading, including all
 resources such as images and scripts. */
 window.onload = (): void => {
-  // Blockly and arduinoGenerator are already exposed globally
   debugLog('🔄 window.onload - Checking components...');
-
-  // Ensure typed variable blocks are defined
-  if (
-    ENABLE_TYPED_VARIABLE_BLOCKS &&
-    (!Blockly.Blocks['variables_get_dynamic'] || !Blockly.Blocks['variables_set_dynamic'])
-  ) {
-    debugLog('🔄 Redefining typed variable blocks in window.onload...');
-    defineTypedVariableBlocks();
-    applyLevelsToAllBlockDefinitions();
-    applyBlockDebugMetadata();
-  }
 
   HTML_onChange();
   const code = arduinoGenerator.workspaceToCode(µcB.workspace);

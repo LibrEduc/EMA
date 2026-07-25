@@ -12,6 +12,7 @@ import {
   monacoResolve,
   monacoWebpackPluginOptions,
 } from "./monaco.webpack.config.mjs";
+import { tsLoaderUse } from "./webpack.ts-loader.config.mjs";
 import CopyPlugin from "copy-webpack-plugin";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +56,7 @@ const config = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        use: tsLoaderUse,
         exclude: /node_modules/,
       },
       {
@@ -75,6 +76,13 @@ const config = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    alias: {
+      // package.json "module" points to missing ./src/index.js — force dist.
+      "@blockly/field-bitmap$": path.resolve(
+        __dirname,
+        "node_modules/@blockly/field-bitmap/dist/index.js",
+      ),
+    },
     ...monacoResolve,
   },
   plugins: [

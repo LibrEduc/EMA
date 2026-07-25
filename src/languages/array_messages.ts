@@ -58,6 +58,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_LIST: "list",
     ARRAY_LIST_UNTYPED_WARNING:
       "Untyped list. Connect values to determine the type.",
+    ARRAY_LIST_DUPLICATE_WARNING:
+      "This list is already defined. Rename the variable or remove the extra declaration.",
     ARRAY_ARRAY: "array",
     ARRAY_TAILLE: "size",
     ARRAY_CONTIENT: "contains",
@@ -95,6 +97,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_LIST: "la liste",
     ARRAY_LIST_UNTYPED_WARNING:
       "Liste non typée. Connectez des valeurs pour déterminer le type.",
+    ARRAY_LIST_DUPLICATE_WARNING:
+      "Cette liste est déjà définie. Renommez la variable ou supprimez la déclaration en trop.",
     ARRAY_ARRAY: "le tableau",
     ARRAY_TAILLE: "taille",
     ARRAY_CONTIENT: "qui contient",
@@ -130,6 +134,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_LIST: "lista",
     ARRAY_LIST_UNTYPED_WARNING:
       "Lista sin tipo. Conecte valores para determinar el tipo.",
+    ARRAY_LIST_DUPLICATE_WARNING:
+      "Esta lista ya está definida. Cambie el nombre de la variable o quite la declaración extra.",
     ARRAY_ARRAY: "tabla",
     ARRAY_TAILLE: "tamaño",
     ARRAY_CONTIENT: "contiene",
@@ -169,6 +175,8 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
     ARRAY_LIST: "القائمة",
     ARRAY_LIST_UNTYPED_WARNING:
       "قائمة غير مُحددة النوع. صِل قيماً لتحديد النوع.",
+    ARRAY_LIST_DUPLICATE_WARNING:
+      "هذه القائمة معرّفة مسبقاً. أعد تسمية المتغير أو احذف التعريف الإضافي.",
     ARRAY_ARRAY: "المصفوفة",
     ARRAY_TAILLE: "الحجم",
     ARRAY_CONTIENT: "يحتوي",

@@ -12,12 +12,13 @@ Ce document décrit **comment intégrer le dépôt µcBlockly** (tel quel, sans 
 
 ## 1. État actuel de µcBlockly
 
-- **Application autonome** : un seul point d’entrée (`src/index.ts`), un build Webpack qui produit une app complète (HTML + JS + assets).
-- **Pas de build « bibliothèque »** : pas d’entry secondaire qui exporterait une API réutilisable, pas de package npm publié.
-- **Couplage fort au DOM** : le code s’attend à une page avec des éléments précis (ex. `div_workspace_content_blockly`, `languageMenu`, `boardMenu`, etc.). Voir la liste `requiredElements` dans `src/index.ts`.
-- **`"private": true`** dans `package.json` : le projet n’est pas prévu pour être publié sur npm.
+- **Noyau embeddable** : `src/core/` + API `createUcBlockly()` — voir [KERNEL.md](./KERNEL.md).
+- **Démo autonome** : `src/index.ts` + Webpack → `dist/bundle/` (HTML + Monaco + shell).
+- **Embed minimal** : `npm run build:core:bundle` → `dist/core/` (sans Monaco).
+- **Exports npm** : `"."` / `"./core"` → noyau ; `"./demo"` → entrée démo.
+- **`"private": true`** : pas encore publié sur npm (P3).
 
-Donc **on ne peut pas aujourd’hui faire un simple `npm install µcBlockly`** et importer une API. En revanche, **intégrer le dépôt** (submodule ou copie) est possible de plusieurs façons.
+La démo complète reste couplée au DOM (`requiredElements` dans `src/index.ts`). Les intégrations embeddables doivent utiliser **`µcBlockly/core`** uniquement.
 
 ---
 
@@ -126,7 +127,33 @@ Pour une vraie intégration « lib », il faudrait soit :
 
 ---
 
-## 4. Évolution possible : package npm « lib »
+## 4. API noyau `createUcBlockly` (P0)
+
+Le point d’entrée embed est disponible dans `src/core/` et compilé vers `build/src/core/` :
+
+```ts
+import {
+  createUcBlockly,
+  basic_toolbox,
+} from "./core/index.js"; // ou "µcBlockly/core" via package exports
+
+const editor = createUcBlockly(document.getElementById("editor")!, {
+  toolbox: basic_toolbox,
+  language: "fr",
+  theme: "classic",
+  media: "./media/",
+  onCodeChange: (code) => {
+    document.getElementById("code")!.textContent = code;
+  },
+});
+
+// editor.getCode(), editor.saveWorkspace(), editor.loadWorkspace(state), editor.dispose()
+```
+
+- Pas de `getElementById` imposé pour le workspace (seul un conteneur est requis).
+- La démo complète (`src/index.ts` + `BlocklyApplication`) reste inchangée pour l’instant.
+
+## 5. Évolution possible : package npm « lib »
 
 Pour qu’un autre projet puisse un jour faire simplement :
 
@@ -141,11 +168,11 @@ inject(document.getElementById('editor'), { toolbox: '...', language: 'fr' });
 
 il faudrait dans µcBlockly :
 
-1. Un **second point d’entrée** (ex. `src/ucblockly-api.ts`) qui :
-   - exporte une fonction `inject(container, options)` ;
-   - crée le DOM minimal requis dans `container` et lance l’init du workspace, toolbox, générateur, etc.
-2. Un **build « lib »** (Webpack ou autre) qui produit un bundle avec ce point d’entrée (ex. `dist/ucblockly.js` + `dist/ucblockly.css`).
-3. Dans `package.json` : `"main"`, `"module"` ou `"exports"` pointant vers ce bundle, et retirer `"private": true` si publication npm.
+1. ~~Un **second point d’entrée** (ex. `src/ucblockly-api.ts`)~~ → **fait (P0)** : `src/core/create_ucblockly.ts` + `createUcBlockly()`.
+2. ~~Un **build « lib »**~~ → **fait (P2)** : `npm run build:core` + `build:core:bundle` → `dist/core/` (sans Monaco). Voir [KERNEL.md](./KERNEL.md).
+3. Dans `package.json` : retirer `"private": true` et publier sur npm (P3).
+
+`package.json` expose `"."` / `"./core"` vers `build/src/core/index.js`. Le bundle navigateur embed est dans `dist/core/`.
 
 Cela ne change pas le fonctionnement actuel de l’app autonome ; ça ajoute une couche réutilisable pour l’intégration dans un autre projet.
 

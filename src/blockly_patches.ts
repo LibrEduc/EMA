@@ -98,6 +98,7 @@ export function patchConnectionCheckerForConstBlock(): void {
 
 /**
  * Extends VariableMap.createVariable to normalize types and avoid duplicates.
+ * Same name always resolves to one variable model (scalar, list, or instance).
  */
 export function patchVariableMapCreateVariable(workspace: Blockly.Workspace): void {
   try {

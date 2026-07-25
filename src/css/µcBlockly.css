@@ -215,6 +215,135 @@ label.plugin-option input[type="checkbox"]:focus-visible {
   border: 0;
 }
 
+.shortcuts-help-dialog {
+  max-width: min(42rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  width: 100%;
+  padding: 1rem 1.25rem 1.25rem;
+  border: 2px solid var(--focus-ring);
+  border-radius: 8px;
+  background: var(--panel-right-bg, #fff);
+  color: var(--panel-console-fg, #111);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+}
+
+.shortcuts-help-dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.shortcuts-help-dialog__title {
+  margin: 0 2.5rem 1rem 0;
+  font-size: 1.25rem;
+  font-family: arial, sans-serif;
+}
+
+.shortcuts-help-dialog__content {
+  overflow: auto;
+  max-height: calc(100vh - 8rem);
+}
+
+.shortcuts-help-dialog__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.shortcuts-help-dialog__close:hover {
+  background: var(--topbar-control-hover, rgb(0 0 0 / 8%));
+}
+
+.shortcuts-help-dialog__close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.shortcuts-help-section {
+  margin-bottom: 1.25rem;
+}
+
+.shortcuts-help-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-family: arial, sans-serif;
+}
+
+.shortcuts-help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: arial, sans-serif;
+  font-size: 0.9rem;
+}
+
+.shortcuts-help-table th,
+.shortcuts-help-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 15%, transparent);
+  text-align: start;
+  vertical-align: top;
+}
+
+.shortcuts-help-table thead th {
+  font-weight: 700;
+  border-bottom-width: 2px;
+}
+
+.shortcuts-help-table tbody th {
+  font-weight: 500;
+}
+
+.shortcuts-help-table td {
+  font-family: ui-monospace, "Cascadia Code", consolas, monospace;
+  white-space: nowrap;
+}
+
+.keyboard-tutorial-dialog__progress {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.keyboard-tutorial-dialog__body {
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.keyboard-tutorial-dialog__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.keyboard-tutorial-dialog__dismiss {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.35rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-align: start;
+}
+
+.keyboard-tutorial-dialog__dismiss:hover {
+  opacity: 0.85;
+}
+
+.keyboard-tutorial-dialog__dismiss:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 #shortcuts:not([hidden]) {
   position: static;
   width: auto;

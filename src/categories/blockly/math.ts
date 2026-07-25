@@ -32,7 +32,7 @@
 
 import * as Blockly from "blockly";
 import { FieldAngle } from "@blockly/field-angle";
-import { FieldSlider } from "@blockly/field-slider";
+import { AccessibleFieldSlider } from "./field_slider_accessible";
 import { getBlocklyMsgOr, inferRequiredNumericTypeForVariable, resolveMathChangeVariableId, syncNumericVariableType, getTypeMismatchWarningText, shouldSkipVariableChange, type VariableWithMutableType, inferNumericInputType, getBlocklyMsg } from "./shared";
 
 /** Blockly menu options for math_constant (Arduino: no INFINITY). */
@@ -52,7 +52,7 @@ export const defineMathCompatBlocks = (): void => {
     Blockly.Blocks["math_percent"] = {
       init: function (this: Blockly.Block) {
         this.appendDummyInput()
-          .appendField(new FieldSlider(20, 0, 100, 1), "PERCENT")
+          .appendField(new AccessibleFieldSlider(20, 0, 100, 1), "PERCENT")
           .appendField("%");
         this.setOutput(true, "Number");
         this.setStyle("math_blocks");

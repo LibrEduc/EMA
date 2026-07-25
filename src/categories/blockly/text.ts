@@ -94,7 +94,7 @@ export const defineTextCompatBlocks = (): void => {
       this.setTooltip(
         getBlocklyMsgOr(
           "TEXT_MULTILINE_TOOLTIP",
-          "Texte sur plusieurs lignes (saut de ligne dans la chaîne Arduino).",
+          "Multiline text (newline preserved in the Arduino string).",
         ),
       );
       this.setHelpUrl(getBlocklyMsgOr("TEXT_TEXT_HELPURL", ""));

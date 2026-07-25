@@ -34,6 +34,8 @@ import { BlocklyApplicationType } from './blockly_application_type';
 import { pushStateReplaceSearchParam } from './tools';
 import { languagesMap, LanguageItem } from './languages/languageMap';
 import { applyDocumentLanguage, applyToolbarA11y } from './shell_a11y';
+import { refreshShortcutsHelp } from './shell_shortcuts_help';
+import { refreshKeyboardTutorial } from './shell_keyboard_tutorial';
 
 const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'lki']);
 import { ToolboxConfiguration } from "./toolbox";
@@ -256,6 +258,8 @@ export const HTML_changeLanguage = (newLang: string, rtl?: boolean): void => {
 
   applyDocumentLanguage(newLang, rtl ?? RTL_LANGUAGES.has(newLang));
   applyToolbarA11y();
+  refreshShortcutsHelp();
+  refreshKeyboardTutorial();
 }
 
 /**

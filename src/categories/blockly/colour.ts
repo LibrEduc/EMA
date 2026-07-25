@@ -31,9 +31,13 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldColour } from "@blockly/field-colour";
 import { FieldColorPicker } from "./field_colour_picker";
+import {
+  LocalizedFieldColour,
+  registerAccessibleFieldColour,
+} from "./field_colour_accessible";
 import { LocalizedFieldColourHsvSliders } from "./field_colour_hsv_sliders";
+import { registerAccessibleFieldSlider } from "./field_slider_accessible";
 import { getBlocklyMsg, getBlocklyMsgOr } from "./shared";
 
 const COLOUR_CHECKER_ICON =
@@ -70,12 +74,15 @@ const HSV_SLIDER_ICON =
  * Registers colour blocks and custom color picker fields.
  */
 export const defineColourBlocks = (): void => {
+  registerAccessibleFieldColour();
+  registerAccessibleFieldSlider();
+
   if (!Blockly.Blocks["colour_picker"]) {
     Blockly.Blocks["colour_picker"] = {
       init: function(this: Blockly.Block) {
         this.appendDummyInput()
-          .appendField(new Blockly.FieldImage(COLOUR_CHECKER_ICON, 16, 16, "palette"))
-          .appendField(new FieldColour("#ff0000") as unknown as Blockly.Field, "COLOUR");
+          .appendField(new Blockly.FieldImage(COLOUR_CHECKER_ICON, 16, 16, getBlocklyMsgOr("COLOUR_ICON_PALETTE", "palette")))
+          .appendField(new LocalizedFieldColour("#ff0000") as unknown as Blockly.Field, "COLOUR");
         this.setOutput(true, "Colour");
         this.setStyle("colour_blocks");
         this.setTooltip(getBlocklyMsgOr("COLOUR_PICKER_TOOLTIP", ""));
@@ -88,7 +95,7 @@ export const defineColourBlocks = (): void => {
     Blockly.Blocks["color_picker_custom"] = {
       init: function(this: Blockly.Block) {
         this.appendDummyInput()
-          .appendField(new Blockly.FieldImage(COLOUR_WHEEL_ICON, 16, 16, "wheel"))
+          .appendField(new Blockly.FieldImage(COLOUR_WHEEL_ICON, 16, 16, getBlocklyMsgOr("COLOUR_ICON_WHEEL", "wheel")))
           .appendField(new FieldColorPicker("#ff00ff") as unknown as Blockly.Field, "COLOR");
         this.setOutput(true, "Colour");
         this.setStyle("colour_blocks");
@@ -102,7 +109,7 @@ export const defineColourBlocks = (): void => {
     Blockly.Blocks["color_picker_hsv"] = {
       init: function () {
         this.appendDummyInput()
-          .appendField(new Blockly.FieldImage(HSV_SLIDER_ICON, 32, 16, "hsv"))
+          .appendField(new Blockly.FieldImage(HSV_SLIDER_ICON, 32, 16, getBlocklyMsgOr("COLOUR_ICON_HSV", "hsv")))
           .appendField(new LocalizedFieldColourHsvSliders('#ff0000'), 'COLOUR');
         this.setOutput(true, 'Colour');
         this.setStyle('colour_blocks');
@@ -144,6 +151,7 @@ export const defineColourBlocks = (): void => {
       },
     };
   }
+
 
   if (!Blockly.Blocks["colour_blend"]) {
     Blockly.Blocks["colour_blend"] = {

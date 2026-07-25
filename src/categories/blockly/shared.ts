@@ -47,6 +47,7 @@ import {
 } from "../../generators/arduino/block_types";
 import {
   clearVariableType,
+  INSTANCE_VARIABLE_TYPE,
   LIST_VARIABLE_TYPE,
   setVariableType,
   tagVariableAsList,
@@ -58,6 +59,8 @@ export type VariableWithMutableType = Blockly.VariableModel & {
   __ucbManualType?: boolean;
   __ucbConst?: boolean;
   __ucbConstBlockId?: string;
+  /** Exclusive declaration owner (list / instance), same idea as const. */
+  __ucbDeclareBlockId?: string;
 };
 
 /**
@@ -105,6 +108,16 @@ export const getArrayListUntypedWarningText = (): string =>
   getBlocklyMsgOr(
     "ARRAY_LIST_UNTYPED_WARNING",
     "Untyped list. Connect values to determine the type.",
+  );
+
+/**
+ * Warning when several list declaration blocks share the same variable.
+ * Same conflict idea as VARIABLES_CONST_WARNING for const ownership.
+ */
+export const getDuplicateListDeclarationWarningText = (): string =>
+  getBlocklyMsgOr(
+    "ARRAY_LIST_DUPLICATE_WARNING",
+    "This list is already defined. Rename the variable or remove the extra declaration.",
   );
 
 /**
@@ -285,6 +298,20 @@ export const configureListVariableField = (field: Blockly.FieldVariable): void =
   };
   fieldWithTypes.variableTypes = [LIST_VARIABLE_TYPE];
   fieldWithTypes.defaultType = LIST_VARIABLE_TYPE;
+};
+
+/**
+ * Configures a FieldVariable for instance variables only (future blocks).
+ */
+export const configureInstanceVariableField = (
+  field: Blockly.FieldVariable,
+): void => {
+  const fieldWithTypes = field as unknown as {
+    variableTypes?: string[] | null;
+    defaultType?: string;
+  };
+  fieldWithTypes.variableTypes = [INSTANCE_VARIABLE_TYPE];
+  fieldWithTypes.defaultType = INSTANCE_VARIABLE_TYPE;
 };
 
 /**

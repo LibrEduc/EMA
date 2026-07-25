@@ -441,6 +441,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     for (const block of workspace.getAllBlocks(false)) {
       if (
         block.type !== "Array_with" &&
+        block.type !== "Array_bitmap" &&
         block.type !== "Array_declare" &&
         block.type !== "Array_create"
       ) {

@@ -33,7 +33,7 @@
 import * as Blockly from "blockly";
 import { FieldDependentDropdown } from "@blockly/field-dependent-dropdown";
 import { FieldGridDropdown } from "@blockly/field-grid-dropdown";
-import { FieldSlider } from "@blockly/field-slider";
+import { AccessibleFieldSlider } from "./field_slider_accessible";
 import {
   DEFAULT_BOARD_ID,
   getBoardDigitalPinOptionMapping,
@@ -289,7 +289,7 @@ export const defineBoardBlocks = (): void => {
       this.appendDummyInput()
         .setAlign(Blockly.inputs.Align.RIGHT)
         .appendField(getBlocklyMsgOr("ARDUINO_INOUT_ANALOG_WRITE_INPUT2", "value"))
-        .appendField(new FieldSlider(127, 0, 255, 1), "PWM");
+        .appendField(new AccessibleFieldSlider(127, 0, 255, 1), "PWM");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);

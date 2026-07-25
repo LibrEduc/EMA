@@ -41,6 +41,7 @@ import {
   getDeclareContenuBlocklyChecks,
   getDeclareElementBlocklyChecks,
   getArrayListUntypedWarningText,
+  getDuplicateListDeclarationWarningText,
   handleVariablesSetChange,
   syncListVariableFromBlock,
 } from "./shared";
@@ -51,7 +52,14 @@ import {
   inferArrayElementTypeFromBlock,
   inferArrayGetIndexElementType,
 } from "../../generators/arduino/block_types_registry";
-import { LIST_VARIABLE_TYPE } from "../../generators/arduino/variable_utils";
+import {
+  claimVariableDeclaration,
+  getOrCreateKindedVariable,
+  isListDeclareBlockType,
+  LIST_DEFAULT_VARIABLE_NAME,
+  LIST_VARIABLE_TYPE,
+  releaseVariableDeclaration,
+} from "../../generators/arduino/variable_utils";
 
 let arrayBlocksRegistered = false;
 
@@ -72,17 +80,16 @@ const ARRAY_LIST_LITERAL_LABEL = (): string =>
 const ARRAY_WITH_CONTAINING_LABEL = (): string =>
   getBlocklyMsgOr("ARRAY_WITH_CONTAINING", "containing");
 
-const ARRAY_DEFAULT_VAR_NAME = "item";
+const ARRAY_DEFAULT_VAR_NAME = LIST_DEFAULT_VARIABLE_NAME;
 
-/** Lie le champ VAR à la variable par défaut « list » (flyout et workspace). */
+/** Lie le champ VAR à la variable liste (réutilise le nom via VariableMap, comme les scalaires). */
 function bindArrayWithDefaultVariable(block: Blockly.Block): void {
   const workspace = block.workspace;
   if (!workspace) {
     return;
   }
-  const variableModel = Blockly.Variables.getOrCreateVariablePackage(
+  const variableModel = getOrCreateKindedVariable(
     workspace,
-    null,
     ARRAY_DEFAULT_VAR_NAME,
     LIST_VARIABLE_TYPE,
   );
@@ -92,7 +99,65 @@ function bindArrayWithDefaultVariable(block: Blockly.Block): void {
   }
 }
 
-/** Synchronise le type Blockly `list` après création ou changement du champ VAR. */
+/**
+ * Claims / releases list declaration ownership (same pattern as variables_const).
+ * @returns true when a duplicate-owner warning was set.
+ */
+export const syncListDeclarationOwnership = (block: Blockly.Block): boolean => {
+  if (!block.workspace || block.isInFlyout || !isListDeclareBlockType(block.type)) {
+    return false;
+  }
+  const variableId = block.getFieldValue("VAR");
+  if (!variableId) {
+    return false;
+  }
+  const variable = block.workspace.getVariableMap().getVariableById(variableId);
+  if (!variable) {
+    return false;
+  }
+  const claim = claimVariableDeclaration(variable, block.id);
+  if (claim === "owned_by_other") {
+    block.setWarningText(getDuplicateListDeclarationWarningText());
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Affiche un avertissement si ce bloc n'est pas le propriétaire de la déclaration.
+ * @returns true when a duplicate warning was set.
+ */
+export const syncListDeclarationUniqueness = (block: Blockly.Block): boolean => {
+  return syncListDeclarationOwnership(block);
+};
+
+/** Applique warning ownership (+ non typé pour Array_with). */
+export const applyListDeclarationBlockWarning = (block: Blockly.Block): void => {
+  if (syncListDeclarationOwnership(block)) {
+    return;
+  }
+  if (block.type === "Array_with") {
+    syncArrayListUntypedWarning(block);
+    return;
+  }
+  if (isListDeclareBlockType(block.type)) {
+    block.setWarningText(null);
+  }
+};
+
+/** Revalide l'ownership des déclarations de listes sur tout le workspace. */
+export const revalidateListDeclarationUniqueness = (
+  workspace: Blockly.Workspace,
+): void => {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (!isListDeclareBlockType(block.type)) {
+      continue;
+    }
+    applyListDeclarationBlockWarning(block);
+  }
+};
+
+/** Synchronise le type Blockly `list` et l'ownership de déclaration. */
 function handleArrayListVariableSync(
   block: Blockly.Block,
   event: Blockly.Events.Abstract,
@@ -105,10 +170,24 @@ function handleArrayListVariableSync(
     return;
   }
   if (
+    event.type === Blockly.Events.BLOCK_DELETE &&
+    isListDeclareBlockType(block.type)
+  ) {
+    // Block may already be disposed; release via event ids when possible.
+    return;
+  }
+  if (
     event.type === Blockly.Events.BLOCK_CREATE &&
     (event as Blockly.Events.BlockCreate).blockId === block.id
   ) {
-    syncListVariableFromBlock(block);
+    if (isListDeclareBlockType(block.type) && event.recordUndo) {
+      bindArrayWithDefaultVariable(block);
+    } else {
+      syncListVariableFromBlock(block);
+    }
+    if (workspace) {
+      revalidateListDeclarationUniqueness(workspace);
+    }
     return;
   }
   if (
@@ -116,7 +195,26 @@ function handleArrayListVariableSync(
     (event as Blockly.Events.BlockChange).element === "field" &&
     (event as Blockly.Events.BlockChange).name === "VAR"
   ) {
+    const change = event as Blockly.Events.BlockChange;
+    if (isListDeclareBlockType(block.type) && change.oldValue) {
+      const previous = workspace
+        ?.getVariableMap()
+        .getVariableById(String(change.oldValue));
+      releaseVariableDeclaration(previous, block.id);
+    }
     syncListVariableFromBlock(block);
+    if (workspace) {
+      revalidateListDeclarationUniqueness(workspace);
+    }
+    return;
+  }
+  if (
+    event.type === Blockly.Events.BLOCK_DELETE ||
+    event.type === Blockly.Events.BLOCK_CREATE
+  ) {
+    if (workspace) {
+      revalidateListDeclarationUniqueness(workspace);
+    }
   }
 }
 
@@ -170,7 +268,10 @@ function revalidateGetIndexBlocksForVariable(
       block.type === "Array_getIndex_in_array"
     ) {
       arrayGetIndexOutputSyncOnChange.call(block, event);
-    } else if (block.type === "Array_modify" || block.type === "Array_fix") {
+    } else if (
+      block.type === "Array_modify" ||
+      block.type === "Array_fix"
+    ) {
       syncArrayListAssignValueInputCheck(block);
       syncArrayIndexInputChecks(block);
     }
@@ -277,6 +378,9 @@ function syncArrayListAddInputChecks(
 }
 
 function syncArrayListUntypedWarning(block: Blockly.Block): void {
+  if (syncListDeclarationUniqueness(block)) {
+    return;
+  }
   const inferred = inferArrayElementTypeFromBlock(block);
   const incomplete =
     !hasArrayListConnectedElements(block) ||
@@ -395,7 +499,7 @@ function arrayWithDeclareTypeFromInputsOnChange(
       ? getDeclareElementBlocklyChecks(inferred)
       : null;
   syncArrayListAddInputChecks(this, checks);
-  syncArrayListUntypedWarning(this);
+  applyListDeclarationBlockWarning(this);
   handleArrayListVariableSync(this, event);
   const varId = this.getFieldValue("VAR");
   if (varId && this.workspace) {
@@ -570,7 +674,7 @@ export const defineArrayBlocks = (): void => {
         .appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "in list"))
         .appendField(
           new Blockly.FieldVariable(
-            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            ARRAY_DEFAULT_VAR_NAME,
             undefined,
             null,
             LIST_VARIABLE_TYPE,
@@ -602,7 +706,7 @@ export const defineArrayBlocks = (): void => {
         .appendField(getBlocklyMsgOr("ARRAY_MODIFY_NAME", "in array"))
         .appendField(
           new Blockly.FieldVariable(
-            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            ARRAY_DEFAULT_VAR_NAME,
             undefined,
             null,
             LIST_VARIABLE_TYPE,
@@ -626,6 +730,43 @@ export const defineArrayBlocks = (): void => {
     },
     onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
       handleArrayModifyOnChange(this, event);
+    },
+  };
+
+  // Array_set - like variables_set: set [list] to [value] (whole list)
+  Blockly.Blocks["Array_set"] = {
+    init: function (this: Blockly.Block) {
+      this.appendValueInput("VALUE")
+        .setCheck(null)
+        .appendField(getBlocklyMsgOr("ARRAY_SET", "set"))
+        .appendField(
+          new Blockly.FieldVariable(
+            ARRAY_DEFAULT_VAR_NAME,
+            undefined,
+            null,
+            LIST_VARIABLE_TYPE,
+          ),
+          "VAR",
+        )
+        .appendField(getBlocklyMsgOr("ARRAY_SET_TO", "to"));
+      const varField = this.getField("VAR") as Blockly.FieldVariable | null;
+      if (varField) {
+        configureListVariableField(varField);
+      }
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setStyle("list_blocks");
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARRAY_SET_TOOLTIP",
+          "Assign a whole list (e.g. from a bitmap or list literal).",
+        ),
+      );
+      this.setHelpUrl(getBlocklyMsgOr("ARRAY_SET_HELPURL", ""));
+    },
+    onchange: function (this: Blockly.Block, event: Blockly.Events.Abstract) {
+      handleArrayListVariableSync(this, event);
     },
   };
 
@@ -694,7 +835,7 @@ export const defineArrayBlocks = (): void => {
         .appendField(getBlocklyMsgOr("ARRAY_CREATE", "define"))
         .appendField(
           new Blockly.FieldVariable(
-            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            ARRAY_DEFAULT_VAR_NAME,
             undefined,
             null,
             LIST_VARIABLE_TYPE,
@@ -784,6 +925,15 @@ export const defineArrayBlocks = (): void => {
         }
       }
       handleArrayListVariableSync(this, event);
+      if (
+        event.type === Blockly.Events.BLOCK_CREATE &&
+        (event as Blockly.Events.BlockCreate).blockId === this.id
+      ) {
+        bindArrayWithDefaultVariable(this);
+      }
+      if (this.workspace) {
+        revalidateListDeclarationUniqueness(this.workspace);
+      }
     },
   };
 
@@ -798,7 +948,7 @@ export const defineArrayBlocks = (): void => {
         .appendField(getBlocklyMsgOr("ARRAY_CREATE", "define") + getBlocklyMsgOr("ARRAY_ARRAY", "array"))
         .appendField(
           new Blockly.FieldVariable(
-            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            ARRAY_DEFAULT_VAR_NAME,
             undefined,
             null,
             LIST_VARIABLE_TYPE,
@@ -903,7 +1053,7 @@ export const defineArrayBlocks = (): void => {
         .appendField(getBlocklyMsgOr("ARRAY_FIX", "set element"))
         .appendField(
           new Blockly.FieldVariable(
-            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            ARRAY_DEFAULT_VAR_NAME,
             undefined,
             null,
             LIST_VARIABLE_TYPE,
@@ -974,7 +1124,7 @@ export const defineArrayBlocks = (): void => {
         .appendField(getBlocklyMsgOr("ARRAY_GETINDEX_ITEM", "element of"))
         .appendField(
           new Blockly.FieldVariable(
-            getBlocklyMsgOr("VARIABLES_GET_ITEM", "item"),
+            ARRAY_DEFAULT_VAR_NAME,
             undefined,
             null,
             LIST_VARIABLE_TYPE,

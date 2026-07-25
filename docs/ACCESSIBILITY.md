@@ -6,7 +6,7 @@
 
 </div>
 
-µcBlockly est un **outil auteur** Blockly pour Arduino. L’accessibilité repose sur trois couches : la **coque HTML** (barre d’outils, panneaux), les **champs personnalisés** (couleur, variables typées), et le **moteur Blockly** (navigation clavier native prévue en v13).
+µcBlockly est un **outil auteur** Blockly pour Arduino. L’accessibilité repose sur trois couches : la **coque HTML** (barre d’outils, panneaux), les **champs personnalisés** (couleur, variables typées), et le **moteur Blockly 13** (navigation clavier, `FocusManager`, annonces lecteur d’écran).
 
 **Niveau visé :** alignement progressif sur [WCAG 2.2 niveau AA](https://www.w3.org/TR/WCAG22/) et les [bonnes pratiques Blockly](https://docs.blockly.com/guides/app-integration/accessibility/best-practices/), en complément des [Accessibility Conformance Reports (ACR)](https://docs.blockly.com/guides/app-integration/accessibility/compliance/) de Google Blockly.
 
@@ -19,10 +19,16 @@
 | Lot | Contenu | État |
 |-----|---------|------|
 | P0 — Champs custom | `getAriaValue()` sur sélecteurs couleur, éditeurs iro accessibles | Fait |
+| P0 — Blockly v13 | Navigation clavier cœur, `FocusManager`, hints, mode lecteur d’écran | Fait (Blockly **13.1.x**) |
 | P1 — Coque UI | Skip link, landmarks, boutons sémantiques, menu zones Ctrl+B, raccourcis fichier | Fait |
 | P1 — Doc | Cette page, raccourcis, conformité | Fait |
+| P1 — Intégration coque ↔ Blockly | Menu zones et skip link via `FocusManager` (raccourcis **W** / **T**) | Fait |
+| P1 — Traductions Blockly v13 | Clés `SHORTCUTS_*`, `KEYBOARD_NAV_*`, `SCREENREADER_*` en fr/es/ar | Fait |
 | P2 — Thèmes | Sync coque + Monaco, contraste, persistance thème | Fait |
-| P0 — Blockly v13 | Navigation clavier cœur, migration paquets | À venir |
+| P2 — Aide raccourcis | Modale coque + Blockly (`F1`, `?`, bouton barre d'outils) | Fait |
+| P2 — Navigation avancée | `registerNavigationShortcuts()` (Home, Page Up/Down, etc.) | Fait |
+| P2 — Mode lecteur d'écran | Persistance `localStorage` (`ucbScreenreaderMode`) | Fait |
+| P2 — Tutoriel clavier | Modale pas-à-pas au premier chargement (bouton barre d'outils) | Fait |
 
 ---
 
@@ -30,7 +36,7 @@
 
 ### Lien d’évitement
 
-Au premier **Tab** après chargement, le lien **« Aller au workspace Blockly »** (`A11Y_SKIP_TO_WORKSPACE`) place le focus sur `<main id="blockly-workspace-main">`.
+Au premier **Tab** après chargement, le lien **« Aller au workspace Blockly »** (`A11Y_SKIP_TO_WORKSPACE`) délègue au `FocusManager` Blockly (équivalent **W**). Si le workspace n’est pas encore injecté, repli sur `<main id="blockly-workspace-main">`.
 
 ### Repères (landmarks)
 
@@ -42,7 +48,7 @@ Au premier **Tab** après chargement, le lien **« Aller au workspace Blockly »
 | Console | `role="log"` + `aria-live="polite"` sur `#content_console` |
 | Séparateurs flex | `role="separator"` avec `aria-orientation` |
 
-Implémentation : `src/shell_a11y.ts`, `src/a11y_labels.ts`, `src/index.ts` (`applyA11yAttributes`).
+Implémentation : `src/shell_a11y.ts`, `src/blockly_shell_focus.ts`, `src/a11y_labels.ts`, `src/index.ts` (`applyA11yAttributes`, `registerShellBlocklyWorkspace`).
 
 ### Menu de zones (Ctrl+B / Cmd+B)
 
@@ -50,11 +56,13 @@ Implémentation : `src/shell_a11y.ts`, `src/a11y_labels.ts`, `src/index.ts` (`ap
 2. Message annoncé via `#shortcuts` (`aria-live="polite"`).
 3. Touches **1** à **5** :
    - **1** — barre d’outils
-   - **2** — boîte à outils Blockly
-   - **3** — workspace
+   - **2** — boîte à outils Blockly (`FocusManager`, équivalent **T**)
+   - **3** — workspace (`FocusManager`, équivalent **W**)
    - **4** — panneau code
    - **5** — console
 4. **Échap** — annule.
+
+Les intégrateurs embarqués doivent appeler `registerShellBlocklyWorkspace(() => workspace)` après l’inject Blockly pour activer les zones **2** et **3** et le skip link.
 
 ### Barre d’outils
 
@@ -78,17 +86,89 @@ Les listes déroulantes (langue, thème, rendu, carte) portent un `aria-label` l
 | **Ctrl+O** / **Cmd+O** | Ouvrir un fichier (hors champs de saisie texte) |
 | **1** – **5** (après Ctrl+B) | Focus zone 1 à 5 |
 | **Échap** (menu zones ouvert) | Fermer le menu zones |
+| **F1** ou **?** | Ouvrir l'aide des raccourcis (hors champs texte) |
 
-### Blockly (workspace)
+Les raccourcis fichier sont gérés par `src/shell_shortcuts.ts` et **ne s’appliquent pas** dans Monaco ni dans les champs texte (`isTextEntryTarget`).
 
-Les raccourcis par défaut de Blockly s’appliquent dans le workspace (copier/coller, suppression, etc.). Référence officielle : [Blockly keyboard shortcuts](https://docs.blockly.com/guides/configure/web/keyboard_shortcuts).
+### Blockly 13 (cœur)
 
-Plugins actifs :
+À l’import de `blockly`, trois jeux de raccourcis sont enregistrés automatiquement :
+
+| Jeu | Rôle |
+|-----|------|
+| `registerDefaultShortcuts` | Édition de base (copier, coller, annuler, supprimer…) |
+| `registerKeyboardNavigationShortcuts` | Navigation flèches, focus workspace/toolbox, déplacement |
+| `registerScreenReaderShortcuts` | Annonces et mode lecteur d’écran |
+
+Référence officielle : [Blockly keyboard shortcuts](https://docs.blockly.com/guides/configure/web/keyboard_shortcuts).
+
+#### Navigation et focus
+
+| Raccourci | Action |
+|-----------|--------|
+| **Flèches** | Naviguer entre blocs, champs et connexions |
+| **W** | Focus workspace |
+| **T** | Focus boîte à outils (toolbox) ou flyout |
+| **Entrée** / **Espace** | Éditer ou confirmer l’élément focusé |
+| **N** / **B** | Stack suivante / précédente |
+| **M** | Démarrer un déplacement de bloc |
+| **H** / **Shift+H** | Titre (heading) suivant / précédent dans le flyout |
+
+#### Édition
+
+| Raccourci | Action |
+|-----------|--------|
+| **Ctrl+C** / **Cmd+C** | Copier le bloc focusé |
+| **Ctrl+X** / **Cmd+X** | Couper le bloc focusé |
+| **Ctrl+V** / **Cmd+V** | Coller |
+| **Ctrl+Z** / **Cmd+Z** | Annuler |
+| **Ctrl+Shift+Z** / **Cmd+Shift+Z** ou **Ctrl+Y** | Rétablir |
+| **Suppr** / **Retour arrière** | Supprimer le bloc focusé |
+| **Shift+X** | Déconnecter le bloc |
+| **D** | Dupliquer |
+| **C** | Nettoyer le workspace (réorganiser les blocs) |
+| **Échap** | Fermer menus et popovers |
+
+#### Lecteur d’écran
+
+| Raccourci | Action |
+|-----------|--------|
+| **I** | Annoncer une description de l’élément focusé |
+| **Shift+I** | Annoncer une description détaillée |
+| **Alt+Shift+A** | Activer / désactiver le mode lecteur d’écran |
+
+Le mode lecteur d’écran est **mémorisé** dans `localStorage` (`ucbScreenreaderMode`) et réappliqué après recréation du workspace. Au **premier focus clavier**, Blockly peut annoncer `SCREENREADER_HINT`.
+
+#### Navigation avancée (sauts)
+
+Activée explicitement via `Blockly.ShortcutItems.registerNavigationShortcuts()` (`src/blockly_a11y_extensions.ts`).
+
+| Raccourci | Action |
+|-----------|--------|
+| **Home** | Début du bloc courant |
+| **End** | Fin du bloc courant |
+| **Page Up** | Haut de la pile |
+| **Page Down** | Bas de la pile |
+| **Ctrl+Home** / **Cmd+Home** | Premier bloc du workspace |
+| **Ctrl+End** / **Cmd+End** | Dernier bloc du workspace |
+
+> **Note :** ces raccourcis ne font pas partie du jeu par défaut de Blockly ; µcBlockly les active au démarrage.
+
+#### Coexistence coque / Blockly
+
+| Raccourci | Comportement |
+|-----------|--------------|
+| **Ctrl+S** / **Ctrl+O** | Coque uniquement (hors champs texte) |
+| **Ctrl+B** | Menu de zones (coque) |
+| **Ctrl+C** / **Ctrl+V** | Blockly dans le workspace ; Monaco dans l’éditeur de code |
+| **W** / **T** | Blockly uniquement |
+
+L’ancien plugin `@blockly/keyboard-navigation` n’est **plus utilisé** : sa navigation est intégrée au cœur de Blockly 13.
+
+### Plugins de recherche
 
 - **Recherche workspace** — `@blockly/plugin-workspace-search`
 - **Recherche toolbox** — `@blockly/toolbox-search`
-
-> La navigation clavier Blockly v13 intégrée n’est pas encore activée (migration 12 → 13 en cours). L’ancien plugin `@blockly/keyboard-navigation` reste désactivé (conflit copier/coller documenté dans le code).
 
 ### Zoom
 
@@ -148,7 +228,7 @@ Les **blocs Arduino custom** ajoutés par des tiers doivent implémenter les mê
 
 ## Conformité Blockly (ACR)
 
-µcBlockly s’appuie sur Blockly **12.5.1**. Les rapports de conformité Google couvrent le **cœur Blockly** ; les extensions µcBlockly (coque, blocs Arduino, champs couleur) relèvent de la responsabilité de ce projet.
+µcBlockly s’appuie sur Blockly **13.1.x** (`blockly` ^13.1.1). Les rapports de conformité Google couvrent le **cœur Blockly** ; les extensions µcBlockly (coque, blocs Arduino, champs couleur) relèvent de la responsabilité de ce projet.
 
 | Ressource | Lien |
 |-----------|------|
@@ -161,19 +241,22 @@ Les **blocs Arduino custom** ajoutés par des tiers doivent implémenter les mê
 
 ## Limites connues
 
-- Navigation clavier **dans les blocs** : en attente de Blockly **v13** et résolution du conflit copier/coller.
-- **Tutoriel clavier** interactif : non implémenté (public adulte — documentation statique fournie ici).
+- **Menu zones / skip link** : repli DOM si le workspace Blockly n’est pas encore disponible.
+- **Tutoriel clavier** : modale pas-à-pas (`src/shell_keyboard_tutorial.ts`), affichée au premier chargement sauf si « Ne plus afficher ».
+- **Aide raccourcis in-app** : modale native (`<dialog>`) via le bouton **raccourcis**, **F1** ou **?** — voir `src/shell_shortcuts_help.ts`.
 - **Annonces** du code généré à chaque modification : non activées (risque de spam lecteur d’écran). Une annonce brève suit l’enregistrement fichier (Ctrl+S).
 - Éléments layout **`<flex>`** custom : peu sémantiques ; les repères ARIA compensent partiellement.
 - **RTL** : arabe supporté pour l’UI ; vérifier manuellement la cohérence toolbox + coque.
+
+Les **hints** et libellés de raccourcis Blockly 13 sont surchargés via `src/languages/blockly_a11y_messages.ts` (fr, en, es, ar), fusionnés dans `applyUcBlocklyLocale()`.
 
 ---
 
 ## Tests manuels suggérés
 
-1. Clavier seul : skip link → Ctrl+B → zone 3 → créer un bloc → Ctrl+S → ouvrir sélecteur couleur → générer du code.
-2. Lecteur d’écran (NVDA, Narrator, VoiceOver) sur menu zones et champs couleur.
-3. Chaque thème d’accessibilité : lisibilité barre d’outils, panneau code (pré + Monaco), workspace.
+1. Clavier seul : skip link → **W** (focus workspace) → flèches → créer un bloc → **Ctrl+S** → sélecteur couleur → **T** (toolbox).
+2. Lecteur d’écran (NVDA, Narrator, VoiceOver) : menu zones Ctrl+B, hints Blockly, champs couleur, **Alt+Shift+A** (mode lecteur d’écran).
+3. Chaque thème d’accessibilité : lisibilité barre d’outils, panneau code (pré + Monaco), workspace avec anneaux de focus clavier (`blocklyKeyboardNavigation`).
 4. Zoom navigateur 200 % : pas de chevauchement bloquant des panneaux.
 
 Commandes projet : `npm test`, `npm run check-translations`, `npm run lint`.
