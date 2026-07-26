@@ -93,6 +93,16 @@ export function createUcBlockly(
     : options.toolbox;
 
   const injectionDiv = options.injectionTarget ?? ensureInjectionHost(container);
+  if (options.injectionTarget) {
+    const style = injectionDiv.style;
+    if (!style.position || style.position === "static") {
+      style.position = "relative";
+    }
+    // Pourcentage CSS sur parent sans hauteur explicite → clientHeight 0 → toolbox invisible.
+    if (injectionDiv.clientHeight < 40 && !style.minHeight) {
+      style.minHeight = "300px";
+    }
+  }
 
   const workspaceOptions: Blockly.BlocklyOptions = {
     grid: {

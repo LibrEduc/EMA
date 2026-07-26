@@ -16,6 +16,7 @@ import { ZoomToFitControl } from "@blockly/zoom-to-fit";
 import { SoundToggleControl } from "./sound_toggle_control";
 import { resolvePluginOptions } from "./default_options";
 import type { UcBlocklyPluginOptions } from "./types";
+import { applyShortcutPreferences } from "../shortcut_preferences";
 
 const DEFAULT_BACKPACK_OPTIONS = {
   allowEmptyBackpackOpen: true,
@@ -75,6 +76,8 @@ const installCrossTabCopyPaste = (): void => {
   }
 
   crossTabCopyPasteInstalled = true;
+  // Re-apply after COPY/CUT/PASTE were replaced by the plugin.
+  applyShortcutPreferences();
 };
 
 /**

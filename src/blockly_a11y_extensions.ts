@@ -5,6 +5,7 @@
  */
 
 import * as Blockly from "blockly";
+import { applyShortcutPreferences } from "./shortcut_preferences";
 
 type WorkspaceSvg = Blockly.WorkspaceSvg;
 type WorkspaceGetter = () => WorkspaceSvg | null | undefined;
@@ -108,6 +109,7 @@ const initBlocklyA11yExtensionsOnce = (): void => {
   Blockly.ShortcutItems.registerNavigationShortcuts();
   screenreaderModeEnabled = readScreenreaderMode();
   registerPersistentScreenreaderToggle();
+  applyShortcutPreferences();
 };
 
 /**
