@@ -31,6 +31,13 @@ export interface UcBlocklyPluginOptions {
   workspaceSearch?: boolean;
   zoomToFit?: boolean;
   shadowBlockConverter?: boolean;
+  /**
+   * Cross-tab copy/paste via localStorage (Ctrl/Cmd+C/X/V + context menu).
+   * Replaces Blockly's built-in clipboard shortcuts when enabled (default: true).
+   */
+  crossTabCopyPaste?: boolean;
+  /** Bottom-right speaker control to mute/unmute Blockly sounds (default: true). */
+  soundToggle?: boolean;
 }
 
 /** One-time block / generator registration flags. */

@@ -19,6 +19,8 @@ export const DEFAULT_UCBLOCKLY_PLUGINS: Required<UcBlocklyPluginOptions> = {
   workspaceSearch: true,
   zoomToFit: true,
   shadowBlockConverter: true,
+  crossTabCopyPaste: true,
+  soundToggle: true,
 };
 
 /** Default enforcers applied after workspace injection. */

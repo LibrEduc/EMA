@@ -193,6 +193,10 @@ export interface LanguageItem {
   COPY_TO_BACKPACK: string;
   COPY_ALL_TO_BACKPACK: string;
   PASTE_ALL_FROM_BACKPACK: string;
+  CROSS_TAB_COPY: string;
+  CROSS_TAB_PASTE: string;
+  SOUND_TOGGLE_MUTE_ARIA: string;
+  SOUND_TOGGLE_UNMUTE_ARIA: string;
   RESET_TITLE: string;
   TYPED_VAR_MODAL_CONFIRM_BUTTON: string;
   TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: string;

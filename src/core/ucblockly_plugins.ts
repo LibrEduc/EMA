@@ -8,10 +8,12 @@ import * as Blockly from "blockly";
 import { Backpack } from "@blockly/workspace-backpack";
 import { ContentHighlight } from "@blockly/workspace-content-highlight";
 import { Modal } from "@blockly/plugin-modal";
+import { CrossTabCopyPaste } from "@blockly/plugin-cross-tab-copy-paste";
 import { PositionedMinimap } from "@blockly/workspace-minimap";
 import { shadowBlockConversionChangeListener } from "@blockly/shadow-block-converter";
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
 import { ZoomToFitControl } from "@blockly/zoom-to-fit";
+import { SoundToggleControl } from "./sound_toggle_control";
 import { resolvePluginOptions } from "./default_options";
 import type { UcBlocklyPluginOptions } from "./types";
 
@@ -29,6 +31,52 @@ const DEFAULT_BACKPACK_OPTIONS = {
   },
 };
 
+/** LocalStorage key dedicated to µcBlockly (avoids clashing with other Blockly demos). */
+const CROSS_TAB_STORAGE_KEY = "ucbBlocklyStash";
+
+/**
+ * Cross-tab copy/paste registers on global Blockly registries (not per workspace).
+ * Keep a process-wide guard so remounting a workspace does not double-register.
+ */
+let crossTabCopyPasteInstalled = false;
+
+const installCrossTabCopyPaste = (): void => {
+  if (crossTabCopyPasteInstalled) {
+    return;
+  }
+  const plugin = new CrossTabCopyPaste();
+  plugin.init(
+    { contextMenu: true, shortcut: true },
+    () => {
+      console.warn(
+        "[µcBlockly] Cross-tab paste failed (TypeError). " +
+          "The clipboard may contain an unsupported or unknown block type.",
+      );
+    },
+    CROSS_TAB_STORAGE_KEY,
+  );
+
+  // Prefer cross-tab copy over the redundant "Duplicate" entry.
+  try {
+    Blockly.ContextMenuRegistry.registry.unregister("blockDuplicate");
+  } catch {
+    // already removed or never registered
+  }
+
+  const copyItem =
+    Blockly.ContextMenuRegistry.registry.getItem("blockCopyToStorage");
+  const pasteItem =
+    Blockly.ContextMenuRegistry.registry.getItem("blockPasteFromStorage");
+  if (copyItem) {
+    copyItem.weight = 2;
+  }
+  if (pasteItem) {
+    pasteItem.weight = 3;
+  }
+
+  crossTabCopyPasteInstalled = true;
+};
+
 /**
  * Manages optional Blockly workspace plugins from {@link UcBlocklyPluginOptions}.
  */
@@ -44,6 +92,7 @@ export class UcBlocklyPluginHost {
   private pluginModal = new Modal();
   private pluginWorkspaceSearch: { init: () => void; dispose: () => void } | null = null;
   private pluginZoomToFit = new ZoomToFitControl();
+  private pluginSoundToggle: SoundToggleControl | null = null;
 
   /** Updates plugin flags (e.g. from demo checkboxes) before init. */
   setOptions(options?: UcBlocklyPluginOptions): void {
@@ -113,6 +162,8 @@ export class UcBlocklyPluginHost {
       this.safeDispose(() => this.pluginModal.dispose());
       this.safeDispose(() => this.pluginWorkspaceSearch?.dispose());
       this.safeDispose(() => this.pluginZoomToFit.dispose());
+      this.safeDispose(() => this.pluginSoundToggle?.dispose());
+      this.pluginSoundToggle = null;
       this.pluginsInitialized = false;
       this.pluginsWorkspace = null;
       this.contentHighlightActive = false;
@@ -127,6 +178,11 @@ export class UcBlocklyPluginHost {
     }
 
     const svgWorkspace = workspace as Blockly.WorkspaceSvg;
+
+    // Global registries: install once for the page lifetime.
+    if (opts.crossTabCopyPaste) {
+      installCrossTabCopyPaste();
+    }
 
     if (opts.backpack) {
       this.pluginBackpack = new Backpack(svgWorkspace, DEFAULT_BACKPACK_OPTIONS);
@@ -144,6 +200,10 @@ export class UcBlocklyPluginHost {
     if (opts.zoomToFit) {
       this.pluginZoomToFit = new ZoomToFitControl(workspace);
       this.pluginZoomToFit.init();
+    }
+    if (opts.soundToggle) {
+      this.pluginSoundToggle = new SoundToggleControl(svgWorkspace);
+      this.pluginSoundToggle.init();
     }
     if (opts.shadowBlockConverter) {
       workspace.addChangeListener(shadowBlockConversionChangeListener);
