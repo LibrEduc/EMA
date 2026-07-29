@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module BlocklyCategories.Loops
- * @description Blocs de boucles adaptés à µcBlockly.
+ * @description Loop blocks adapted for µcBlockly.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -10,7 +10,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ import {
 let loopsBlocksRegistered = false;
 
 const LIST_DEFAULT_VAR_NAME = LIST_DEFAULT_VARIABLE_NAME;
-/** Variable de boucle (élément courant), distincte du tableau `item`. */
+/** Loop variable (current element), distinct from the `item` list. */
 const FOREACH_INDEX_VAR_NAME = "element";
 
 function bindForEachDefaultVariables(block: Blockly.Block): void {

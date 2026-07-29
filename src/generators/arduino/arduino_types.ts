@@ -4,15 +4,15 @@
  * @description Arduino data types and their properties.
  * @remarks
  * Defines Arduino data types, labels, and metadata.
- * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

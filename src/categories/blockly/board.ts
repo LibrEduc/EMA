@@ -3,7 +3,7 @@
  * @module BlocklyCategories.Board
  * @description Board (s4e) block definitions – setup, loop, digital/analog I/O, delay, tone.
  * @remarks
- * Blocs issus de exemples/s4e/S4E/categories/board (board_base.blocks / board_base.arduino).
+ * Blocks from exemples/s4e/S4E/categories/board (board_base.blocks / board_base.arduino).
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -12,7 +12,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

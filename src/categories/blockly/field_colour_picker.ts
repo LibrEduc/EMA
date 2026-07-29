@@ -12,7 +12,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ const markInputTargets = (root: HTMLElement): void => {
  * @returns Constructor function or null if not available.
  */
 const getIroPicker = (): (new (
-  selector: string,
+  parent: string | HTMLElement,
   options: { width: number; height: number; color: string },
 ) => IroColorPicker) | null => {
   const maybeIro = iro as unknown as {
@@ -128,7 +128,7 @@ const getIroPicker = (): (new (
     return null;
   }
   return picker as new (
-    selector: string,
+    parent: string | HTMLElement,
     options: { width: number; height: number; color: string },
   ) => IroColorPicker;
 };
@@ -263,9 +263,8 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     editorRoot.setAttribute("aria-label", getColourPickerEditorLabel());
     editorRoot.setAttribute("tabindex", "-1");
 
-    const mountId = `ucb-colour-picker-${Blockly.utils.idGenerator.genUid()}`;
     const mount = document.createElement("div");
-    mount.id = mountId;
+    mount.className = "ucb-colour-picker-mount";
     mount.setAttribute("aria-hidden", "true");
     editorRoot.appendChild(mount);
 
@@ -274,14 +273,20 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     let observer: MutationObserver | null = null;
 
     const disposeEditor = (): void => {
+      // DropDownDiv may already have cleared contentDiv before calling this.
+      if (this.editorDispose_ !== disposeEditor) {
+        return;
+      }
+      this.editorDispose_ = null;
       for (const binding of boundEvents) {
         Blockly.browserEvents.unbind(binding);
       }
       boundEvents.length = 0;
       observer?.disconnect();
       observer = null;
-      editorRoot.remove();
-      this.editorDispose_ = null;
+      if (editorRoot.isConnected) {
+        editorRoot.remove();
+      }
     };
     this.editorDispose_ = disposeEditor;
 
@@ -340,7 +345,8 @@ export class FieldColorPicker extends Blockly.FieldTextInput {
     };
     showWithRetry();
 
-    const colorPicker = new Picker(`#${mountId}`, {
+    // Pass the element: Blockly genUid() can produce IDs invalid as CSS selectors.
+    const colorPicker = new Picker(mount, {
       width: 150,
       height: 150,
       color: this.getValue() || FieldColorPicker.DEFAULT_VALUE,

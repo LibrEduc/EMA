@@ -12,7 +12,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ export const frLang: LanguageMap = {
     CAT_LOOPS: "Boucles",
     CAT_MATHS: "Math",
     CAT_TEXT: "Texte",
-    CAT_LISTS: "Tableaux / listes",
+    CAT_LISTS: "Tableaux",
     CAT_LIBRE: "Libre",
     CAT_BOARD: "Carte",
     CAT_BOARD_BASE: "Base",

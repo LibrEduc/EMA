@@ -4,20 +4,15 @@
  * @description Block types registry - centralized type definitions for all blocks.
  * @remarks
  * Loads block type definitions and applies them to Blockly blocks.
- * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
- *
- * This module loads block type definitions from `block_types/` and applies them to Blockly blocks.
- *
- * Runtime compatibility checks (including Blockly aliases) are documented in
- * `docs/TYPES_ET_COMPATIBILITES.md`.
  */
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

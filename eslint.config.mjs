@@ -14,39 +14,45 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default [...compat.extends("plugin:@typescript-eslint/recommended"), {
-    plugins: {
-        "@typescript-eslint": typescriptEslintEslintPlugin,
-        tsdoc,
-    },
-
-    languageOptions: {
-        parser: tsParser,
-        ecmaVersion: 2020,
-        sourceType: "module",
-        parserOptions: {
-            project: "./tsconfig.json",
-            tsconfigRootDir: "F:\\Logiciels\\Arduino_graphique\\µcBlockly",
-        },
-    },
-
-    rules: {
-        "tsdoc/syntax": "warn",
-        "@typescript-eslint/no-unused-vars": [
-            "error",
-            {
-                argsIgnorePattern: "^_",
-                varsIgnorePattern: "^_",
-                caughtErrorsIgnorePattern: "^_",
-            },
+export default [
+    {
+        // Global ignores (own object) — config files are not in tsconfig.eslint.json.
+        ignores: [
+            "eslint.config.mjs",
+            "src/out/scripts/prettify/prettify.js",
+            "**/*.min.js",
+            "dist/**",
+            "build/**",
+            "node_modules/**",
         ],
     },
+    ...compat.extends("plugin:@typescript-eslint/recommended"),
+    {
+        plugins: {
+            "@typescript-eslint": typescriptEslintEslintPlugin,
+            tsdoc,
+        },
 
-    ignores: [
-        "src/out/scripts/prettify/prettify.js",
-        "**/*.min.js",
-        "dist/**",
-        "build/**",
-        "node_modules/**"
-    ],
-}];
+        languageOptions: {
+            parser: tsParser,
+            ecmaVersion: 2020,
+            sourceType: "module",
+            parserOptions: {
+                project: "./tsconfig.eslint.json",
+                tsconfigRootDir: __dirname,
+            },
+        },
+
+        rules: {
+            "tsdoc/syntax": "warn",
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    argsIgnorePattern: "^_",
+                    varsIgnorePattern: "^_",
+                    caughtErrorsIgnorePattern: "^_",
+                },
+            ],
+        },
+    },
+];

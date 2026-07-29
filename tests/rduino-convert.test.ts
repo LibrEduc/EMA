@@ -1,6 +1,6 @@
 /**
  * @license GPL-3.0-or-later
- * Tests du convertisseur Blockly@rduino → µcBlockly.
+ * Tests for the Blockly@rduino → µcBlockly converter.
  */
 
 import { test } from "node:test";

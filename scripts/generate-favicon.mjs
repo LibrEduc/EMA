@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Regénère les favicons à partir de public/assets/logo_µcBlockly.png
- * (fond blanc → transparent, multi-tailles 16/32/48, favicon.ico).
- * Ne modifie pas le fichier logo source.
+ * Regenerates favicons from public/assets/logo_µcBlockly.png
+ * (white background → transparent, multi-size 16/32/48, favicon.ico).
+ * Does not modify the source logo file.
  */
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -65,7 +65,7 @@ function pngsToIco(pngBuffers) {
 
   return out;
 }
-/** Fond blanc / gris clair uniforme → alpha 0 (ne touche pas aux couleurs du logo). */
+/** Uniform white / light-gray background → alpha 0 (does not touch logo colors). */
 async function loadWithTransparentBackground(inputPath) {
   const { data, info } = await sharp(inputPath)
     .ensureAlpha()

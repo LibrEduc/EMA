@@ -1,16 +1,16 @@
 /**
- * Correspondance des types de blocs Blockly@rduino → µcBlockly.
- * Couvre le cœur Arduino (arduino_base / serial / conversion) et quelques alias S4e.
+ * Blockly@rduino → µcBlockly block type mapping.
+ * Covers the Arduino core (arduino_base / serial / conversion) and a few S4e aliases.
  */
 
 /** @type {Readonly<Record<string, string>>} */
 export const BLOCK_TYPE_MAP = {
-  // Structure programme
+  // Program structure
   base_setup: "board_base_setup",
   base_loop: "board_base_loop",
   base_setup_loop: "board_base_setup_loop",
 
-  // Entrées / sorties
+  // Inputs / outputs
   inout_buildin_led: "board_base_inout_buildin_led",
   inout_digital_write: "board_base_inout_digital_write",
   inout_digital_write_validator: "board_base_inout_digital_write",
@@ -33,7 +33,7 @@ export const BLOCK_TYPE_MAP = {
   tone_notime: "board_base_inout_tone",
   notone: "board_base_inout_notone",
 
-  // Temps / utilitaires
+  // Time / utilities
   base_delay: "board_base_time_delay",
   base_delay_sec: "board_base_time_delay_sec",
   millis: "board_base_time_millis",
@@ -48,7 +48,7 @@ export const BLOCK_TYPE_MAP = {
   conversion_tobyte: "board_conversion_tobyte",
   conversion_toString: "board_conversion_toString",
 
-  // Série
+  // Serial
   serial_init: "board_serial_begin",
   serial_print: "board_serial_print",
   serial_print_tab: "board_serial_print",
@@ -66,18 +66,18 @@ export const BLOCK_TYPE_MAP = {
   serial_parseInt: "board_serial_parseInt",
   serial_parseFloat: "board_serial_parseFloat",
 
-  // Variables / macros (alias déjà gérés côté µcBlockly)
+  // Variables / macros (aliases already handled on the µcBlockly side)
   variable_define: "variables_define",
 
-  // Texte / date
+  // Text / date
   current_date: "text_date",
 
-  // Code libre → commentaire
+  // Free-form code → comment
   base_code: "libre_out",
   base_comment: "libre_out",
 };
 
-/** Types de blocs « chapeau » ou conteneurs structurels. */
+/** Hat block types or structural containers. */
 export const HAT_BLOCK_TYPES = new Set([
   "board_base_setup",
   "board_base_loop",
@@ -87,7 +87,7 @@ export const HAT_BLOCK_TYPES = new Set([
   "base_setup_loop",
 ]);
 
-/** Types ignorés (structure ou métadonnées sans équivalent utile). */
+/** Skipped types (structure or metadata with no useful equivalent). */
 export const SKIP_BLOCK_TYPES = new Set([
   "base_begin",
   "base_end",
@@ -97,8 +97,8 @@ export const SKIP_BLOCK_TYPES = new Set([
 ]);
 
 /**
- * Renommage d'entrées par type source (après mapping de type si besoin).
- * Clé = type Blockly@rduino source.
+ * Input rename table by source type (after type mapping if needed).
+ * Key = Blockly@rduino source type.
  */
 export const INPUT_RENAME_BY_SOURCE = {
   base_setup: { DO: "SETUP" },
@@ -118,7 +118,7 @@ export const INPUT_RENAME_BY_SOURCE = {
 };
 
 /**
- * Renommage de champs par type source.
+ * Field rename table by source type.
  */
 export const FIELD_RENAME_BY_SOURCE = {
   serial_init: { SPEED: "BAUD" },

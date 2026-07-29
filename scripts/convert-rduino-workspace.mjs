@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Convertit une sauvegarde Blockly@rduino (XML / .B@) en workspace JSON µcBlockly.
+ * Converts a Blockly@rduino save (XML / .B@) into a µcBlockly workspace JSON.
  *
- * Usage :
- *   npm run convert-rduino -- <fichier-entree> [fichier-sortie.json]
+ * Usage:
+ *   npm run convert-rduino -- <input-file> [output-file.json]
  *   node scripts/convert-rduino-workspace.mjs examples/blink.xml out.json
  *
- * Entrée : .xml, .B@ ou tout fichier XML Blockly@rduino (export « enregistrer projet »).
- * Sortie : JSON chargeable via « Ouvrir » dans µcBlockly (workspace.json).
+ * Input: .xml, .B@, or any Blockly@rduino XML file (“save project” export).
+ * Output: JSON loadable via “Open” in µcBlockly (workspace.json).
  *
- * Limites :
- * - Blocs extensions (Grove, mBot, TechnoZone, etc.) sans entrée dans la table de
- *   correspondance sont conservés sous leur nom d'origine (peuvent ne pas charger).
- * - Les blocs « définitions » orange (base_define_bloc) sont dépliés en blocs racine.
- * - Les piles sans setup/loop sont enveloppées dans board_base_setup_loop (corps loop).
+ * Limits:
+ * - Extension blocks (Grove, mBot, TechnoZone, etc.) with no entry in the
+ *   mapping table are kept under their original name (may fail to load).
+ * - Orange “definitions” blocks (base_define_bloc) are flattened into root blocks.
+ * - Stacks without setup/loop are wrapped in board_base_setup_loop (loop body).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -23,10 +23,10 @@ import { convertRduinoXmlToUcbJson } from "./lib/rduino-xml-to-ucb-json.mjs";
 function printUsage() {
   console.log(`Usage: node scripts/convert-rduino-workspace.mjs <input.xml|.B@> [output.json]
 
-Convertit une sauvegarde Blockly@rduino en workspace JSON µcBlockly.
+Converts a Blockly@rduino save into a µcBlockly workspace JSON.
 
-Options via variables d'environnement :
-  UCB_NO_WRAP=1   Ne pas envelopper les blocs orphelins dans setup/loop
+Options via environment variables:
+  UCB_NO_WRAP=1   Do not wrap orphan blocks in setup/loop
 `);
 }
 

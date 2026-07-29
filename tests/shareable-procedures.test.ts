@@ -1,6 +1,6 @@
 /**
  * @license GPL-3.0-or-later
- * Tests du plugin @blockly/block-shareable-procedures (POC).
+ * Tests for the @blockly/block-shareable-procedures plugin (POC).
  */
 
 import { test } from "node:test";

@@ -1,22 +1,46 @@
 /**
  * @packageDocumentation
  * @module BlocklyFields.ColourA11y
- * @description Helpers ARIA pour les champs couleur (Blockly v13+).
+ * @description ARIA helpers for colour fields (Blockly v13+).
+ * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
+ * @version 1.0.0
+ * @since 1.0.0
+ */
+
+/**
+ * @license
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/.
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { getBlocklyMsgOr } from "./shared";
 
-/** Type ARIA localisé pour un champ couleur. */
+/** Localized ARIA type name for a colour field. */
 export const getColourAriaTypeName = (): string =>
   getBlocklyMsgOr("FIELD_COLOUR_ARIA_TYPE", "Colour");
 
-/** Valeur ARIA lorsque la couleur est absente ou invalide. */
+/** ARIA value when the colour is missing or invalid. */
 export const getColourAriaEmptyValue = (): string =>
   getBlocklyMsgOr("FIELD_COLOUR_ARIA_EMPTY", "empty");
 
 /**
- * Normalise une couleur hexadécimale (#RRGGBB).
- * @returns Hex en majuscules ou null si invalide.
+ * Normalizes a hexadecimal colour (#RRGGBB).
+ * @returns Uppercase hex or null if invalid.
  */
 export const normalizeHexColour = (raw: string | null | undefined): string | null => {
   if (!raw || typeof raw !== "string") {
@@ -46,8 +70,8 @@ export const normalizeHexColour = (raw: string | null | undefined): string | nul
 };
 
 /**
- * Représentation lisible par lecteur d'écran pour une couleur hex.
- * @remarks Utilisé par `getAriaValue` / `getText` des champs couleur custom.
+ * Screen-reader-friendly representation of a hex colour.
+ * @remarks Used by custom colour fields' `getAriaValue` / `getText`.
  */
 export const formatColourAriaValue = (raw: string | null | undefined): string => {
   const hex = normalizeHexColour(raw);

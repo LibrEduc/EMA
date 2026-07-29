@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module BlockLevels
- * @description Niveaux pédagogiques (1, 2, 3) sur les définitions de blocs Blockly.
+ * @description Pedagogical levels (1, 2, 3) on Blockly block definitions.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -10,7 +10,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 import * as Blockly from "blockly";
 
-/** Niveaux par défaut pour tous les blocs (filtrage toolbox / workspace). */
+/** Default levels for all blocks (toolbox / workspace filtering). */
 export const DEFAULT_BLOCK_LEVELS = "1, 2, 3";
 
 export type BlockDefinitionWithLevels = {
@@ -40,8 +40,8 @@ export type BlockDefinitionWithLevels = {
 };
 
 /**
- * Applique levels sur chaque entrée de Blockly.Blocks.
- * @param levels - Chaîne CSV (ex. "1, 2, 3").
+ * Applies levels to each Blockly.Blocks entry.
+ * @param levels - CSV string (e.g. "1, 2, 3").
  */
 export function applyLevelsToAllBlockDefinitions(
   levels: string = DEFAULT_BLOCK_LEVELS,

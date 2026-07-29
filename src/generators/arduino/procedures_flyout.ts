@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module Arduino.ProceduresFlyout
- * @description Flyout de la catégorie Procédures & Fonctions (setup/loop Arduino + procédures Blockly).
+ * @description Flyout for the Procedures & Functions category (Arduino setup/loop + Blockly procedures).
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -10,7 +10,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ function withFlyoutBlockLevels(
 }
 
 /**
- * Flyout : blocs setup()/loop() Arduino, puis séparateur, puis procédures Blockly.
+ * Flyout: Arduino setup()/loop() blocks, then a separator, then Blockly procedures.
  */
 export function createProceduresFlyout(
   workspace: Blockly.WorkspaceSvg,

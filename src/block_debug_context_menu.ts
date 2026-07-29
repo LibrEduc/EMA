@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module BlockDebugContextMenu
- * @description Entrées de menu contextuel (clic droit) visibles en mode debug.
+ * @description Context menu entries (right-click) visible in debug mode.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -10,7 +10,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ import {
   VARIABLES_DEFINE_LEGACY_BLOCK_TYPE,
 } from "./generators/arduino/variable_utils";
 
-/** Fonction d'enregistrement Blockly associée à un type de bloc (blocs µcBlockly). */
+/** Blockly registration function associated with a block type (µcBlockly blocks). */
 const BLOCK_DEFINITION_FUNCTIONS: Readonly<Record<string, string>> = {
   Array_with: "defineArrayBlocks",
   Array_list_literal: "defineArrayBlocks",

@@ -1,4 +1,16 @@
 # CHANGELOG.md
+## 3.0.0, 2026-07-29
+- **Breaking** : mise à jour vers Blockly **v13** (et plugins `@blockly/*` ^13) — incompatible avec un hôte encore en Blockly 12
+- accessibilité : navigation clavier cœur Blockly 13, coque UI, tutoriel, labels ARIA, traductions fr/en/es/ar
+- raccourcis clavier personnalisables (persistance `localStorage`) et panneau d’aide éditable
+- copy/paste inter-onglets (`@blockly/plugin-cross-tab-copy-paste`) et bascule son
+- thèmes : hacker mode ; champs : bitmap, grid-dropdown, dependent-dropdown
+- structure programme Arduino : blocs setup/loop et enforceur de structure
+- catégorie « libre », sélection de carte, améliorations variables typées / listes / switch
+- `logic_compare` : connexions numériques + EQ/NEQ multi-types avec contrôle de compatibilité
+- correctifs : blocs board/text/boucles, sélecteur de couleur (iro.js / dispose DropDownDiv)
+- outillage : tests générateur + `logic_compare`, ESLint/tsconfig, découpage de modules Arduino
+
 ## 2.1.5, 2026-06-13
 - update with Blockly v12.5
 - meilleure prise en charge LTR / RTL pour les libellés des options

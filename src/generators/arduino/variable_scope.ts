@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module Arduino.VariableScope
- * @description Résolution du périmètre des variables locales (setup / loop / procédure).
+ * @description Resolves the scope of local variables (setup / loop / procedure).
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -10,7 +10,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ export type LocalVariableScope =
   | { kind: "setup" }
   | { kind: "loop" };
 
-/** Blocs littéraux de liste (valeur branchée dans variables_set ou Array_declare). */
+/** List literal blocks (value plugged into variables_set or Array_declare). */
 export function isArrayValueBlock(block: Block | null): boolean {
   return (
     block?.type === "Array_list_literal" ||
@@ -44,7 +44,7 @@ export function isArrayValueBlock(block: Block | null): boolean {
   );
 }
 
-/** Valeur de liste connectée à un bloc set (littéral ou local enveloppant un littéral). */
+/** List value connected to a set block (literal or local wrapping a literal). */
 export function isArrayAssignmentValueBlock(block: Block | null): boolean {
   if (!block) {
     return false;

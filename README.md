@@ -17,11 +17,15 @@
   — génération de code Arduino/C++ à partir de blocs.
 </p>
 
-[Contribuer](docs/CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md)
+[Contribuer](docs/CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
 ---
+
+## Compatibilité
+
+**v3.0.0** nécessite **Blockly 13** (`blockly` ^13 et plugins `@blockly/*` alignés). Une intégration encore en Blockly 12 doit rester sur µcBlockly 2.x.
 
 ## Démarrage rapide
 

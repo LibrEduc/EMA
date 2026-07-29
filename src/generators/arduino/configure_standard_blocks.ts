@@ -4,15 +4,15 @@
  * @description Configuration for standard Blockly blocks.
  * @remarks
  * Applies typed-variable behaviors to standard Blockly blocks.
- * @license GPL-3.0-or-later
  * @author scanet\@libreduc.cc (Sébastien Canet)
+ * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,9 +53,9 @@ import {
 } from "../../categories/blockly/shared";
 import { getVariableTypeDropdownOptions } from "../../categories/blockly/variables";
 import { isArduinoScalarType } from "./block_types";
-import { checkTypeCompatibility, getCompatibleTypesForCheck } from "./block_types_registry";
 import { debugLog } from "./debug";
 import { isShareableProceduresEnabled } from "../../shareable_procedures";
+import { configureLogicCompareAndTernaryBlocks } from "./configure_logic_blocks";
 
 /**
  * Configure standard Blockly blocks to work with our type system
@@ -113,114 +113,7 @@ export function configureStandardBlocks(): void {
   // So controls_if will accept our variables with type 'bool' (mapped to 'Boolean')
   // No need to modify controls_if - it already uses 'Boolean' correctly
 
-  type LogicCompareDef = Blockly.Block & {
-    init?: (this: Blockly.Block) => void;
-    __typedConfigured?: boolean;
-  };
-  const logicCompareDef = Blockly.Blocks["logic_compare"] as LogicCompareDef | undefined;
-  if (logicCompareDef && !logicCompareDef.__typedConfigured) {
-    logicCompareDef.__typedConfigured = true;
-    const originalInit = logicCompareDef.init;
-    logicCompareDef.init = function (this: Blockly.Block) {
-      if (originalInit) {
-        originalInit.call(this);
-      }
-      const numberChecks = ["int", "float"];
-      const inputA = this.getInput("A");
-      const inputB = this.getInput("B");
-      inputA?.connection?.setCheck(numberChecks);
-      inputB?.connection?.setCheck(numberChecks);
-    };
-  }
-
-  type LogicTernaryDef = Blockly.Block & {
-    init?: (this: Blockly.Block) => void;
-    __typedConfiguredTernary?: boolean;
-  };
-  const logicTernaryDef = Blockly.Blocks["logic_ternary"] as LogicTernaryDef | undefined;
-  if (logicTernaryDef && !logicTernaryDef.__typedConfiguredTernary) {
-    logicTernaryDef.__typedConfiguredTernary = true;
-    const originalInit = logicTernaryDef.init;
-    const inferOutputType = (candidate: Blockly.Block | null): string | null => {
-      if (!candidate) {
-        return null;
-      }
-      if (
-        candidate.type === "variables_get" ||
-        candidate.type === "variables_get_dynamic"
-      ) {
-        const variableId = candidate.getFieldValue("VAR");
-        return variableId
-          ? candidate.workspace?.getVariableMap().getVariableById(variableId)?.getType() || null
-          : null;
-      }
-      const typed = candidate as Blockly.Block & { getBlockType?: () => string | null };
-      const typedType = typed.getBlockType?.() || null;
-      if (typedType) {
-        return typedType;
-      }
-      if (candidate.type === "math_number") {
-        const raw = candidate.getFieldValue("NUM");
-        const numeric = raw !== null && raw !== undefined ? Number(raw) : NaN;
-        if (!Number.isNaN(numeric)) {
-          return Number.isInteger(numeric) ? "int" : "float";
-        }
-      }
-      const check = candidate.outputConnection?.getCheck();
-      if (Array.isArray(check)) {
-        return check[0] || null;
-      }
-      return check || null;
-    };
-    const getStrictChecksForType = (type: string | null): string[] | null => {
-      if (!type) return null;
-      const checks = new Set(getCompatibleTypesForCheck(type) || [type]);
-      if (checks.has("bool")) checks.add("Boolean");
-      if (checks.has("Boolean")) checks.add("bool");
-      if (checks.has("int") || checks.has("float")) checks.add("Number");
-      if (checks.has("string")) checks.add("String");
-      if (checks.has("String")) checks.add("string");
-      return Array.from(checks);
-    };
-    logicTernaryDef.init = function (this: Blockly.Block) {
-      if (originalInit) {
-        originalInit.call(this);
-      }
-      // THEN decides admissible type for ELSE.
-      this.getInput("THEN")?.connection?.setCheck(null);
-      this.getInput("ELSE")?.connection?.setCheck(null);
-      this.outputConnection?.setCheck(null);
-      const originalOnchange = this.onchange;
-      this.onchange = function (this: Blockly.Block, event: Blockly.Events.Abstract) {
-        if (originalOnchange) {
-          originalOnchange.call(this, event);
-        }
-        if (event.isUiEvent) {
-          return;
-        }
-        this.getInput("THEN")?.connection?.setCheck(null);
-        const thenBlock = this.getInputTargetBlock("THEN");
-        const inferredThenType = inferOutputType(thenBlock);
-        const elseInput = this.getInput("ELSE");
-        elseInput?.connection?.setCheck(getStrictChecksForType(inferredThenType));
-        const elseBlock = this.getInputTargetBlock("ELSE");
-        if (elseBlock && inferredThenType) {
-          const elseType = inferOutputType(elseBlock);
-          const normalizedThen = normalizeBlocklyTypeToVariableType(inferredThenType);
-          const normalizedElse = elseType
-            ? normalizeBlocklyTypeToVariableType(elseType)
-            : null;
-          const isAccepted = Boolean(
-            normalizedElse && checkTypeCompatibility(normalizedElse, normalizedThen),
-          );
-          if (!isAccepted) {
-            elseInput?.connection?.disconnect();
-          }
-        }
-        this.outputConnection?.setCheck(null);
-      };
-    };
-  }
+  configureLogicCompareAndTernaryBlocks();
 
   type RepeatExtDef = Blockly.Block & {
     init?: (this: Blockly.Block) => void;
@@ -820,5 +713,7 @@ export function configureStandardBlocks(): void {
 
   // procedures_mutatorarg : mutateur legacy ; procédures via block-plus-minus (+/-).
 
-  debugLog("✅ Standard blocks configured (logic_compare restricted to int/float)");
+  debugLog(
+    "✅ Standard blocks configured (logic_compare: EQ/NEQ same-type, else Number/int/float)",
+  );
 }

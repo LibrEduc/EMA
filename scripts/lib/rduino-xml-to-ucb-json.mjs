@@ -1,5 +1,5 @@
 /**
- * Convertit un fichier XML Blockly@rduino (.B@ / .xml) en workspace JSON µcBlockly.
+ * Converts a Blockly@rduino XML file (.B@ / .xml) into a µcBlockly workspace JSON.
  */
 
 import { DOMParser } from "@xmldom/xmldom";

@@ -15,7 +15,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,13 +35,19 @@
 
 import * as Blockly from 'blockly/core';
 import {
-  checkTypeCompatibility as sharedCheckTypeCompatibility,
   inferArrayElementTypeFromBlock,
   inferListVariableElementType,
 } from "./block_types_registry";
 import { isDeclareContainsTypeCompatible, isTypeCompatible } from "./block_types";
 import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
 import { debugLog } from "./debug";
+import {
+  checkSwitchCaseIntConnection,
+  checkTypeCompatibility,
+  getInputNameForConnection,
+  resolveSourceBlockType,
+  resolveSwitchCaseSourceType,
+} from "./strict_connection_type_utils";
 
 /**
  * Custom ConnectionChecker that extends Blockly's default ConnectionChecker
@@ -109,6 +115,16 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       }
     }
     return super.canConnectWithReason(a, b, isDragging, opt_distance);
+  }
+
+  /** Delegates to extracted switch-case int connection check. */
+  private checkSwitchCaseIntConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    return checkSwitchCaseIntConnection(a, b, {
+      resolveOutputInputPair: (x, y) => this.resolveOutputInputPair_(x, y),
+    });
   }
 
   /**
@@ -230,18 +246,6 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     return { out, inp };
   }
 
-  private getInputNameForConnection_(
-    block: Blockly.Block,
-    connection: Blockly.Connection,
-  ): string | null {
-    for (const input of block.inputList) {
-      if (input.connection === connection) {
-        return input.name;
-      }
-    }
-    return null;
-  }
-
   private resolveArrayDefineInputContext_(
     inputConnection: Blockly.Connection,
   ): { choix: string; typeField: string } | null {
@@ -249,7 +253,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     if (!targetBlock) {
       return null;
     }
-    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    const inputName = getInputNameForConnection(targetBlock, inputConnection);
     if (!inputName) {
       return null;
     }
@@ -302,7 +306,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     ) {
       return null;
     }
-    const inputName = this.getInputNameForConnection_(targetBlock, pair.inp);
+    const inputName = getInputNameForConnection(targetBlock, pair.inp);
     if (inputName !== "value") {
       return null;
     }
@@ -323,7 +327,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return this.isDeclareElementTypeCompatible_(numType, elementType);
     }
 
-    const rawSourceType = this.resolveSourceBlockType_(sourceBlock);
+    const rawSourceType = resolveSourceBlockType(sourceBlock);
     if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
       return false;
     }
@@ -345,7 +349,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     ) {
       return false;
     }
-    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    const inputName = getInputNameForConnection(targetBlock, inputConnection);
     return inputName !== null && /^D\d+$/.test(inputName);
   }
 
@@ -357,7 +361,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     if (!pair || !this.isArrayIndexInput_(pair.inp)) {
       return null;
     }
-    const semanticType = this.resolveSwitchCaseSourceType_(pair.out.getSourceBlock());
+    const semanticType = resolveSwitchCaseSourceType(pair.out.getSourceBlock());
     return semanticType === "int";
   }
 
@@ -370,7 +374,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     ) {
       return false;
     }
-    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    const inputName = getInputNameForConnection(targetBlock, inputConnection);
     return inputName !== null && /^ARG\d+$/.test(inputName);
   }
 
@@ -413,7 +417,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return null;
     }
 
-    const inputName = this.getInputNameForConnection_(callBlock, pair.inp);
+    const inputName = getInputNameForConnection(callBlock, pair.inp);
     const argIndex = inputName ? parseInt(inputName.replace("ARG", ""), 10) : -1;
     if (argIndex < 0 || Number.isNaN(argIndex)) {
       return null;
@@ -487,7 +491,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       if (sourceBlock.type === "math_number") {
         return resolveMathNumberBlockType(sourceBlock) === "int";
       }
-      const sourceType = this.resolveSourceBlockType_(sourceBlock);
+      const sourceType = resolveSourceBlockType(sourceBlock);
       return sourceType === "int";
     }
 
@@ -507,7 +511,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return this.isDeclareElementTypeCompatible_(numType, typeField);
     }
 
-    const rawSourceType = this.resolveSourceBlockType_(sourceBlock);
+    const rawSourceType = resolveSourceBlockType(sourceBlock);
     if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
       return false;
     }
@@ -520,7 +524,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     if (!targetBlock) {
       return false;
     }
-    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
+    const inputName = getInputNameForConnection(targetBlock, inputConnection);
     if (!inputName?.startsWith("ADD")) {
       return false;
     }
@@ -584,7 +588,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return isDeclareContainsTypeCompatible(numType, typeKey);
     }
 
-    const rawSourceType = this.resolveSourceBlockType_(sourceBlock);
+    const rawSourceType = resolveSourceBlockType(sourceBlock);
     if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
       return false;
     }
@@ -655,92 +659,6 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return Blockly.Connection.REASON_DRAG_CHECKS_FAILED;
     }
     return Blockly.Connection.CAN_CONNECT;
-  }
-
-  private isSwitchCaseInput_(inputConnection: Blockly.Connection): boolean {
-    const targetBlock = inputConnection.getSourceBlock();
-    if (!targetBlock || targetBlock.type !== "controls_switch") {
-      return false;
-    }
-    const inputName = this.getInputNameForConnection_(targetBlock, inputConnection);
-    return !!inputName && inputName.startsWith("CASE");
-  }
-
-  private resolveSourceBlockType_(sourceBlock: Blockly.Block | null): string | null {
-    if (!sourceBlock) {
-      return null;
-    }
-    const typedBlock = sourceBlock as Blockly.Block & {
-      getBlockType?: () => string | null;
-    };
-    if (typeof typedBlock.getBlockType === "function") {
-      const blockType = typedBlock.getBlockType();
-      if (blockType !== null && blockType !== undefined) {
-        return blockType;
-      }
-    }
-    const sourceCheck = sourceBlock.outputConnection?.getCheck();
-    if (sourceCheck) {
-      if (Array.isArray(sourceCheck) && sourceCheck.length > 0) {
-        return sourceCheck[0] as string;
-      }
-      if (typeof sourceCheck === "string") {
-        return sourceCheck;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Resolves semantic type for a block connecting to a switch case input.
-   */
-  private resolveSwitchCaseSourceType_(
-    sourceBlock: Blockly.Block | null,
-  ): "int" | "float" | "invalid" | null {
-    if (!sourceBlock) {
-      return null;
-    }
-    if (sourceBlock.type === "math_number") {
-      return resolveMathNumberBlockType(sourceBlock);
-    }
-    const sourceType = this.resolveSourceBlockType_(sourceBlock);
-    if (sourceType === "int") {
-      return "int";
-    }
-    if (sourceType === "float") {
-      return "float";
-    }
-    if (sourceType === "__NO_TYPE__" || sourceType === "undefined") {
-      return "invalid";
-    }
-    if (sourceType === "Number" || sourceType === "number") {
-      return "int";
-    }
-    return null;
-  }
-
-  /**
-   * Switch case inputs require int values. Blockly's default checker compares
-   * output checks (e.g. math_number → "Number") against setCheck(["int"]) and
-   * rejects before getBlockType() runs — handle that case explicitly.
-   */
-  private checkSwitchCaseIntConnection_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
-    if (!pair || !this.isSwitchCaseInput_(pair.inp)) {
-      return null;
-    }
-
-    const semanticType = this.resolveSwitchCaseSourceType_(pair.out.getSourceBlock());
-    if (semanticType === "int") {
-      return true;
-    }
-    if (semanticType === "float" || semanticType === "invalid") {
-      return false;
-    }
-    return false;
   }
 
   private finishSwitchCaseConnect_(
@@ -902,7 +820,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
 
       // If sourceType matches any target check, allow connection
       for (const check of targetChecks) {
-        if (check && this.checkTypeCompatibility(sourceType, check)) {
+        if (check && checkTypeCompatibility(sourceType, check)) {
           return true;
         }
       }
@@ -916,23 +834,6 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     return super.doTypeChecks(a, b);
   }
 
-  /**
-   * Checks if two types are compatible.
-   *
-   * @param sourceType - The type from the source block (from getBlockType()).
-   * @param targetType - The type expected by the target connection.
-   * @returns True if types are compatible, false otherwise.
-   */
-  private checkTypeCompatibility(sourceType: string, targetType: string): boolean {
-    if (sourceType === targetType) {
-      return true;
-    }
-    if (sourceType === 'null' || sourceType === 'undefined' ||
-      targetType === 'null' || targetType === 'undefined') {
-      return sourceType === targetType;
-    }
-    return sharedCheckTypeCompatibility(sourceType, targetType);
-  }
 }
 
 /**

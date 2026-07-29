@@ -1,12 +1,12 @@
 /**
  * @packageDocumentation
  * @module ProgramStructureEnforcer
- * @description Désactive les blocs empilables non raccordés à un bloc actif.
+ * @description Disables stackable blocks that are not connected to an active block.
  * @remarks
- * - previousConnection : actif seulement s'il est connecté à un bloc actif.
- * - outputConnection seul (sans previous) : actif seulement s'il est branché
- *   dans un bloc actif.
- * - Chapeaux / conteneurs (ni previous ni output) : actifs à la racine.
+ * - previousConnection: active only if connected to an active block.
+ * - outputConnection alone (no previous): active only if plugged into an
+ *   active block.
+ * - Hats / containers (neither previous nor output): active at the root.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -15,7 +15,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 import * as Blockly from "blockly";
 import { isBlockOnMainWorkspace } from "./categories/blockly/shared";
 
-/** Identifiant Blockly pour le motif « non raccordé ». */
+/** Blockly identifier for the "not connected" reason. */
 export const NOT_IN_PROGRAM_DISABLED_REASON = "ucb_not_in_program";
 
 type WorkspaceListener = (e: Blockly.Events.Abstract) => void;
@@ -50,10 +50,10 @@ const isRelevantEvent = (e: Blockly.Events.Abstract): boolean =>
   e.type === Blockly.Events.FINISHED_LOADING;
 
 /**
- * Évalue l'activité d'une pile d'instructions à partir de son sommet.
+ * Evaluates whether a statement stack is active from its top block.
  * @remarks
- * getSurroundParent() ignore les empilements next-only (ex. début → si) ;
- * on remonte d'abord via getTopStackBlock().
+ * getSurroundParent() ignores next-only stacks (e.g. start → if);
+ * walk up via getTopStackBlock() first.
  */
 function isStatementStackActive(block: Blockly.Block): boolean {
   const anchor = block.getTopStackBlock();

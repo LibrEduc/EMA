@@ -7,10 +7,6 @@
  * - scalar (`""`) — ordinary typed variables
  * - list (`list`) — arrays declared by List toolbox blocks
  * - instance (`instance`) — reserved for future object/instance bindings
- *
- * Name collisions reuse the existing VariableMap entry (see
- * `patchVariableMapCreateVariable`). Exclusive declaration ownership uses
- * `__ucbDeclareBlockId`, the same pattern as `__ucbConstBlockId` for const.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -19,7 +15,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

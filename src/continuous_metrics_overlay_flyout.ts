@@ -1,12 +1,12 @@
 /**
  * @packageDocumentation
  * @module ContinuousMetricsOverlayFlyout
- * @description Métriques « toolbox continue » avec flyout en superposition (comme la toolbox classique).
+ * @description Continuous toolbox metrics with overlay flyout (like the classic toolbox).
  * @remarks
- * Le {@link ContinuousMetrics} du plugin soustrait **toolbox + flyout** de la zone de vue, ce qui
- * réduit le workspace et décale les ascenseurs quand le flyout s’ouvre. En mode classique, le
- * flyout **recouvre** la zone de blocs sans changer la taille du viewport : on reproduit ce
- * comportement en ne réservant que la **toolbox** dans {@link getViewMetrics} et
+ * The plugin's {@link ContinuousMetrics} subtracts **toolbox + flyout** from the view area,
+ * which shrinks the workspace and shifts scrollbars when the flyout opens. In classic mode,
+ * the flyout **overlays** the blocks area without changing the viewport size: this class
+ * reproduces that behaviour by reserving only the **toolbox** in {@link getViewMetrics} and
  * {@link getAbsoluteMetrics}.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
@@ -16,7 +16,7 @@
 
 /**
  * @license
- * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@ import * as Blockly from "blockly";
 const ToolboxPosition = Blockly.utils.toolbox.Position;
 
 /**
- * Comme {@link ContinuousMetrics}, mais le flyout ne réduit pas la zone du workspace : il se
- * superpose (comportement proche de la toolbox à catégories classique).
+ * Like {@link ContinuousMetrics}, but the flyout does not shrink the workspace area: it
+ * overlays it (behaviour close to the classic category toolbox).
  */
 export class ContinuousMetricsOverlayFlyout extends ContinuousMetrics {
   getViewMetrics(

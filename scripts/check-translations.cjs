@@ -1,31 +1,31 @@
 #!/usr/bin/env node
 
 /**
- * Vérification des traductions µcBlockly (fr, en, es, ar).
+ * µcBlockly translation check (fr, en, es, ar).
  *
- * Usage : `npm run check-translations` (ou `node scripts/check-translations.cjs`)
+ * Usage: `npm run check-translations` (or `node scripts/check-translations.cjs`)
  *
- * ## Périmètre vérifié
+ * ## Checked scope
  *
- * 1. **Clés personnalisées** (`CUSTOM_KEYS`) dans `src/languages/{fr,en,es,ar}.ts`
- *    — messages µcBlockly hors catalogue Blockly standard (variables typées, cast,
- *    boucles personnalisées, couleurs HSV, etc.).
+ * 1. **Custom keys** (`CUSTOM_KEYS`) in `src/languages/{fr,en,es,ar}.ts`
+ *    — µcBlockly messages outside the standard Blockly catalog (typed variables, cast,
+ *    custom loops, HSV colours, etc.).
  *
- * 2. **`array_messages.ts`** — messages des blocs listes/tableaux S4e (`ARRAY_*`).
+ * 2. **`array_messages.ts`** — S4e list/array block messages (`ARRAY_*`).
  *
- * 3. **`board_messages.ts`** — parité des clés `ARDUINO_*` / `SERIAL_*` entre les
- *    4 langues (référence = anglais).
+ * 3. **`board_messages.ts`** — parity of `ARDUINO_*` / `SERIAL_*` keys across the
+ *    4 languages (reference = English).
  *
- * 4. **`blockly_a11y_messages.ts`** — raccourcis et hints Blockly 13 (fr, en, es, ar).
+ * 4. **`blockly_a11y_messages.ts`** — Blockly 13 shortcuts and hints (fr, en, es, ar).
  *
- * ## Hors périmètre (non vérifié par ce script)
+ * ## Out of scope (not checked by this script)
  *
- * - Messages Blockly natifs fournis par la bibliothèque `blockly` (ex. `CONTROLS_IF_MSG_IF`).
- * - Clés fusionnées dynamiquement dans `blockly_application_type.ts` sans être listées ici.
- * - Fichiers HTML / UI hors `src/languages/`.
+ * - Native Blockly messages provided by the `blockly` library (e.g. `CONTROLS_IF_MSG_IF`).
+ * - Keys merged dynamically in `blockly_application_type.ts` without being listed here.
+ * - HTML / UI files outside `src/languages/`.
  *
- * Pour ajouter une nouvelle clé : l'inscrire dans les 4 fichiers de langue concernés
- * **et** dans `CUSTOM_KEYS` ou `ARRAY_MESSAGES_KEYS` ci-dessous.
+ * To add a new key: register it in the 4 relevant language files
+ * **and** in `CUSTOM_KEYS` or `ARRAY_MESSAGES_KEYS` below.
  */
 
 const fs = require('fs');
@@ -38,9 +38,9 @@ const ARRAY_MESSAGES_FILE = path.join(__dirname, '../src/languages/array_message
 const BOARD_MESSAGES_FILE = path.join(__dirname, '../src/languages/board_messages.ts');
 const BLOCKLY_A11Y_MESSAGES_FILE = path.join(__dirname, '../src/languages/blockly_a11y_messages.ts');
 
-// Clés personnalisées qui doivent être dans nos fichiers de langues (pas dans Blockly.Msg standard)
+// Custom keys that must appear in our language files (not in standard Blockly.Msg)
 const CUSTOM_KEYS = new Set([
-  // Variables personnalisées
+  // Custom variables
   'VARIABLES_GET_ITEM',
   'VARIABLES_AS',
   'VARIABLES_LOCAL',
@@ -75,7 +75,7 @@ const CUSTOM_KEYS = new Set([
   'TYPED_VAR_UNTYPED_WARNING',
   'TYPED_VAR_TYPE_MISMATCH',
   
-  // Array personnalisées (celles qui ne sont pas dans array_messages.ts)
+  // Custom array keys (those not in array_messages.ts)
   'ARRAY_UNE_LISTE',
   'ARRAY_WITH_TOOLTIP',
   'ARRAY_WITH_HELPURL',
@@ -91,7 +91,7 @@ const CUSTOM_KEYS = new Set([
   'ARRAY_BITMAP_GET_TOOLTIP',
   'ARRAY_BITMAP_GET_HELPURL',
   
-  // Math personnalisées
+  // Custom math
   'MATH_CHANGE_LABEL',
   'MATH_CHANGE_BY',
   'MATH_CHANGE_VAR_WARNING',
@@ -101,7 +101,7 @@ const CUSTOM_KEYS = new Set([
   'INOUT_ANGLE_MATHS_TOOLTIP',
   'MATH_INTERVAL_TOOLTIP',
   
-  // Logic personnalisées (switch)
+  // Custom logic (switch)
   'CONTROLS_SWITCH_HELPURL',
   'CONTROLS_SWITCH_VAR_TITLE',
   'CONTROLS_SWITCH_VAR_TAIL',
@@ -117,7 +117,7 @@ const CUSTOM_KEYS = new Set([
   'CONTROLS_SWITCH_TOOLTIP_3',
   'CONTROLS_SWITCH_TOOLTIP_4',
 
-  // Boucle for-each (libellés sans %1/%2 Blockly)
+  // For-each loop (labels without Blockly %1/%2)
   'CONTROLS_FOREACH_LIST_EMPTY',
   'UCB_FOREACH_EACH',
   'UCB_FOREACH_IN',
@@ -129,7 +129,7 @@ const CUSTOM_KEYS = new Set([
   'ARDUINO_BASE_DEFINE_CONST_TOOLTIP',
   'ARDUINO_BASE_DEFINE_CONST_HELPURL',
 
-  // Couleur (icônes accessibilité)
+  // Colour (accessibility icons)
   'COLOUR_ICON_PALETTE',
   'COLOUR_ICON_WHEEL',
   'COLOUR_ICON_HSV',
@@ -138,7 +138,7 @@ const CUSTOM_KEYS = new Set([
   '_AT',
 ]);
 
-// Messages shell (alertes, familles de cartes) — src/languages/*.ts
+// Shell messages (alerts, board families) — src/languages/*.ts
 const SHELL_KEYS = new Set([
   'LOAD_MERGE_CONFIRM',
   'FILE_INVALID_FORMAT',
@@ -213,7 +213,7 @@ const SHELL_KEYS = new Set([
   'KEYBOARD_TUTORIAL_STEP_5_BODY',
 ]);
 
-// Clés dans blockly_a11y_messages.ts (Blockly 13 accessibilité)
+// Keys in blockly_a11y_messages.ts (Blockly 13 accessibility)
 const BLOCKLY_A11Y_MESSAGES_KEYS = new Set([
   'KEYBOARD_NAV_BLOCK_NAVIGATION_HINT',
   'KEYBOARD_NAV_CONSTRAINED_MOVE_HINT',
@@ -261,7 +261,7 @@ const BLOCKLY_A11Y_MESSAGES_KEYS = new Set([
   'SHORTCUTS_TOGGLE_SCREENREADER_MODE',
 ]);
 
-// Clés dans array_messages.ts
+// Keys in array_messages.ts
 const ARRAY_MESSAGES_KEYS = new Set([
   'ARRAY_CREATE_EMPTY_TITLE',
   'ARRAY_CREATE_WITH',
@@ -301,18 +301,18 @@ const ARRAY_MESSAGES_KEYS = new Set([
 ]);
 
 /**
- * Lit un fichier de langue TypeScript et extrait les clés
+ * Reads a TypeScript language file and extracts keys
  */
 function extractKeysFromLangFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const keys = new Set();
   
-  // Recherche les clés dans le format: KEY: "value",
+  // Match keys in the form: KEY: "value",
   const regex = /(\w+):\s*["'`][^"'`]*["'`]/g;
   let match;
   while ((match = regex.exec(content)) !== null) {
     const key = match[1];
-    // Ignore les clés de métadonnées comme 'fr', 'en', etc.
+    // Ignore metadata keys like 'fr', 'en', etc.
     if (key.length > 1 && key !== 'fr' && key !== 'en' && key !== 'es' && key !== 'ar') {
       keys.add(key);
     }
@@ -322,7 +322,7 @@ function extractKeysFromLangFile(filePath) {
 }
 
 /**
- * Lit un fichier de messages (array_messages.ts, board_messages.ts) et extrait les clés par langue.
+ * Reads a messages file (array_messages.ts, board_messages.ts) and extracts keys per language.
  */
 function extractMessagesKeysFromFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
@@ -346,21 +346,21 @@ function extractMessagesKeysFromFile(filePath) {
 }
 
 /**
- * Lit array_messages.ts et extrait les clés pour chaque langue
+ * Reads array_messages.ts and extracts keys for each language
  */
 function extractArrayMessagesKeys() {
   return extractMessagesKeysFromFile(ARRAY_MESSAGES_FILE);
 }
 
 /**
- * Lit board_messages.ts et extrait les clés pour chaque langue
+ * Reads board_messages.ts and extracts keys for each language
  */
 function extractBoardMessagesKeys() {
   return extractMessagesKeysFromFile(BOARD_MESSAGES_FILE);
 }
 
 /**
- * Lit blockly_a11y_messages.ts et extrait les clés pour chaque langue
+ * Reads blockly_a11y_messages.ts and extracts keys for each language
  */
 function extractBlocklyA11yMessagesKeys() {
   const result = extractMessagesKeysFromFile(BLOCKLY_A11Y_MESSAGES_FILE);
@@ -377,17 +377,17 @@ function extractBlocklyA11yMessagesKeys() {
 }
 
 /**
- * Vérifie les traductions
+ * Checks translations
  */
 function checkTranslations() {
-  console.log('🔍 Vérification des traductions µcBlockly (fr, en, es, ar)\n');
-  console.log('Périmètre :');
-  console.log(`  • ${CUSTOM_KEYS.size} clés personnalisées (src/languages/*.ts)`);
-  console.log(`  • ${SHELL_KEYS.size} clés shell (alertes, familles cartes)`);
-  console.log(`  • ${ARRAY_MESSAGES_KEYS.size} clés array_messages.ts`);
-  console.log(`  • ${BLOCKLY_A11Y_MESSAGES_KEYS.size} clés blockly_a11y_messages.ts`);
-  console.log('  • Parité board_messages.ts (ARDUINO_* / SERIAL_*)');
-  console.log('  • Hors périmètre : messages Blockly natifs (bibliothèque blockly)\n');
+  console.log('🔍 Checking µcBlockly translations (fr, en, es, ar)\n');
+  console.log('Scope:');
+  console.log(`  • ${CUSTOM_KEYS.size} custom keys (src/languages/*.ts)`);
+  console.log(`  • ${SHELL_KEYS.size} shell keys (alerts, board families)`);
+  console.log(`  • ${ARRAY_MESSAGES_KEYS.size} array_messages.ts keys`);
+  console.log(`  • ${BLOCKLY_A11Y_MESSAGES_KEYS.size} blockly_a11y_messages.ts keys`);
+  console.log('  • board_messages.ts parity (ARDUINO_* / SERIAL_*)');
+  console.log('  • Out of scope: native Blockly messages (blockly library)\n');
   
   const langKeys = {};
   const missingKeys = {};
@@ -396,7 +396,7 @@ function checkTranslations() {
   const boardMessagesKeys = extractBoardMessagesKeys();
   const boardReferenceKeys = boardMessagesKeys.en || new Set();
   
-  // Charger les clés de chaque fichier de langue
+  // Load keys from each language file
   for (const lang of LANGUAGES) {
     const langFile = path.join(LANG_DIR, `${lang}.ts`);
     langKeys[lang] = extractKeysFromLangFile(langFile);
@@ -409,8 +409,8 @@ function checkTranslations() {
     };
   }
   
-  // Vérifier les clés personnalisées (pas dans Blockly.Msg standard)
-  console.log('📋 Vérification des clés personnalisées...');
+  // Check custom keys (not in standard Blockly.Msg)
+  console.log('📋 Checking custom keys...');
   for (const key of CUSTOM_KEYS) {
     for (const lang of LANGUAGES) {
       if (!langKeys[lang].has(key)) {
@@ -419,8 +419,8 @@ function checkTranslations() {
     }
   }
 
-  // Vérifier les messages shell (UI)
-  console.log('📋 Vérification des clés shell...');
+  // Check shell messages (UI)
+  console.log('📋 Checking shell keys...');
   for (const key of SHELL_KEYS) {
     for (const lang of LANGUAGES) {
       if (!langKeys[lang].has(key)) {
@@ -429,8 +429,8 @@ function checkTranslations() {
     }
   }
   
-  // Vérifier les clés d'array_messages
-  console.log('📋 Vérification des clés array_messages...');
+  // Check array_messages keys
+  console.log('📋 Checking array_messages keys...');
   for (const key of ARRAY_MESSAGES_KEYS) {
     for (const lang of LANGUAGES) {
       if (!arrayMessagesKeys[lang].has(key)) {
@@ -439,8 +439,8 @@ function checkTranslations() {
     }
   }
 
-  // Vérifier les clés blockly_a11y_messages
-  console.log('📋 Vérification des clés blockly_a11y_messages...');
+  // Check blockly_a11y_messages keys
+  console.log('📋 Checking blockly_a11y_messages keys...');
   for (const key of BLOCKLY_A11Y_MESSAGES_KEYS) {
     for (const lang of LANGUAGES) {
       if (!blocklyA11yMessagesKeys[lang].has(key)) {
@@ -449,8 +449,8 @@ function checkTranslations() {
     }
   }
 
-  // Vérifier la parité des clés board_messages (référence = en)
-  console.log('📋 Vérification des clés board_messages...');
+  // Check board_messages key parity (reference = en)
+  console.log('📋 Checking board_messages keys...');
   for (const lang of LANGUAGES) {
     for (const key of boardReferenceKeys) {
       if (!boardMessagesKeys[lang].has(key)) {
@@ -464,7 +464,7 @@ function checkTranslations() {
     }
   }
   
-  // Afficher les résultats
+  // Display results
   let hasErrors = false;
   for (const lang of LANGUAGES) {
     const mainMissing = missingKeys[lang].main.length;
@@ -477,49 +477,49 @@ function checkTranslations() {
       hasErrors = true;
       console.log(`\n❌ ${lang.toUpperCase()}:`);
       if (mainMissing > 0) {
-        console.log(`   Clés principales manquantes (${mainMissing}):`);
+        console.log(`   Missing main keys (${mainMissing}):`);
         missingKeys[lang].main.forEach(key => {
           console.log(`     - ${key}`);
         });
       }
       if (shellMissing > 0) {
-        console.log(`   Clés shell manquantes (${shellMissing}):`);
+        console.log(`   Missing shell keys (${shellMissing}):`);
         missingKeys[lang].shell.forEach(key => {
           console.log(`     - ${key}`);
         });
       }
       if (arrayMissing > 0) {
-        console.log(`   Clés array_messages manquantes (${arrayMissing}):`);
+        console.log(`   Missing array_messages keys (${arrayMissing}):`);
         missingKeys[lang].array.forEach(key => {
           console.log(`     - ${key}`);
         });
       }
       if (a11yMissing > 0) {
-        console.log(`   Clés blockly_a11y_messages manquantes (${a11yMissing}):`);
+        console.log(`   Missing blockly_a11y_messages keys (${a11yMissing}):`);
         missingKeys[lang].a11y.forEach(key => {
           console.log(`     - ${key}`);
         });
       }
       if (boardMissing > 0) {
-        console.log(`   Clés board_messages manquantes ou en trop (${boardMissing}):`);
+        console.log(`   Missing or extra board_messages keys (${boardMissing}):`);
         missingKeys[lang].board.forEach(key => {
           console.log(`     - ${key}`);
         });
       }
     } else {
-      console.log(`\n✅ ${lang.toUpperCase()}: Toutes les traductions sont présentes`);
+      console.log(`\n✅ ${lang.toUpperCase()}: All translations are present`);
     }
   }
   
   if (!hasErrors) {
-    console.log('\n✨ Toutes les traductions sont complètes dans les 4 langues !');
+    console.log('\n✨ All translations are complete in all 4 languages!');
     return 0;
   } else {
-    console.log('\n⚠️  Certaines traductions sont manquantes. Veuillez les ajouter.');
+    console.log('\n⚠️  Some translations are missing. Please add them.');
     return 1;
   }
 }
 
-// Exécuter la vérification
+// Run the check
 const exitCode = checkTranslations();
 process.exit(exitCode);

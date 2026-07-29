@@ -1,6 +1,6 @@
 /**
  * @license GPL-3.0-or-later
- * Tests unitaires des générateurs Arduino.
+ * Unit tests for Arduino generators.
  */
 export {};
 //# sourceMappingURL=generators.test.d.ts.map
