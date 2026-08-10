@@ -164,6 +164,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
     this.ws.setAutoSaveEnabled(enabled);
   };
 
+  /** Clears blocks and undo/redo stacks on the live workspace. */
+  public clearWorkspaceFully = (): void => {
+    this.ws.clearWorkspaceFully();
+  };
+
   public workspaceHasAnyBlocks = (): boolean => this.ws.workspaceHasAnyBlocks();
 
   public removeDefaultItemVariable = (): void => this.ws.removeDefaultItemVariable();

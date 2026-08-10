@@ -8,7 +8,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "audit": "npm audit fix",
+    "audit": "npm audit",
     "build:lib": "tsc -p tsconfig.json",
     "build:core": "tsc -p tsconfig.core.json",
     "build:core:bundle": "npm run build:core && webpack --config webpack.core.config.mjs --mode production",
@@ -17,7 +17,7 @@
     "build:local": "webpack --config webpack.local.config.mjs",
     "build:prod-hardened": "cross-env UCB_HARDENED=1 webpack --mode production",
     "docs": "typedoc",
-    "lint": "eslint src --fix --ignore-pattern src/out/**",
+    "lint": "eslint src --fix",
     "check-translations": "node scripts/check-translations.cjs",
     "convert-rduino": "node scripts/convert-rduino-workspace.mjs",
     "generate-favicon": "node scripts/generate-favicon.mjs",
@@ -31,7 +31,7 @@
     "url": "git+https://github.com/A-S-T-U-C-E/ucBlockly.git"
   },
   "author": "Sébastien Canet",
-  "license": "GNU GENERAL PUBLIC LICENSE Version 3 (GPLv3)",
+  "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/A-S-T-U-C-E/ucBlockly/issues"
   },
@@ -55,32 +55,39 @@
       "types": "./build/src/core/index.d.ts",
       "import": "./build/src/core/index.js"
     },
+    "./host": {
+      "types": "./build/src/host/index.d.ts",
+      "import": "./build/src/host/index.js"
+    },
     "./demo": {
       "types": "./build/src/index.d.ts",
       "import": "./build/src/index.js"
     }
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
-    "@typescript-eslint/eslint-plugin": "~8.65.0",
-    "@typescript-eslint/parser": "~8.65.0",
+    "@eslint/eslintrc": "^3.3.6",
+    "@eslint/js": "10.0.1",
+    "@types/node": "^26.2.0",
+    "@typescript-eslint/eslint-plugin": "~8.66.0",
+    "@typescript-eslint/parser": "~8.66.0",
     "@xmldom/xmldom": "^0.9.10",
     "copy-webpack-plugin": "^14.0.0",
     "cross-env": "^10.1.0",
     "css-loader": "^7.1.4",
-    "eslint": "~10.8.0",
+    "eslint": "~10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-tsdoc": "^0.5.2",
     "html-webpack-plugin": "^5.6.8",
     "javascript-obfuscator": "^5.5.0",
     "jsdom": "^27.4.0",
+    "monaco-editor-webpack-plugin": "^7.1.1",
     "sharp": "^0.35.3",
     "source-map-loader": "^5.0.0",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.6.1",
     "ts-loader": "^9.6.2",
-    "tsx": "^4.23.1",
+    "tsx": "^4.23.11",
     "typedoc": "^0.28.20",
     "typescript": "~6.0.3",
     "webpack": "^5.109.2",
@@ -90,7 +97,6 @@
   },
   "dependencies": {
     "@blockly/block-plus-minus": "^13.2.0",
-    "@blockly/block-shareable-procedures": "^13.2.0",
     "@blockly/continuous-toolbox": "^13.2.0",
     "@blockly/field-angle": "^13.2.0",
     "@blockly/field-bitmap": "^13.2.0",
@@ -115,13 +121,9 @@
     "@blockly/workspace-content-highlight": "^13.2.0",
     "@blockly/workspace-minimap": "^13.2.0",
     "@blockly/zoom-to-fit": "^13.2.0",
-    "@eslint/eslintrc": "^3.3.6",
-    "@eslint/js": "10.0.1",
     "@jaames/iro": "^5.5.2",
-    "@microsoft/api-extractor": "^7.58.12",
-    "blockly": "^13.2.0",
-    "monaco-editor": "^0.56.0",
-    "monaco-editor-webpack-plugin": "^7.1.1"
+    "blockly": "^13.2.1",
+    "monaco-editor": "^0.56.0"
   },
   "overrides": {
     "typescript": "$typescript",
@@ -133,7 +135,7 @@
       "blockly": "$blockly"
     },
     "dompurify": "^3.4.12",
-    "brace-expansion": "5.0.8",
+    "brace-expansion": "5.0.9",
     "jsdom": "$jsdom"
   },
   "allowScripts": {

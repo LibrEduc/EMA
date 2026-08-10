@@ -37,6 +37,7 @@ import { Order } from "../arduino_generator";
 export function board_base_setup(block: Block, generator: ArduinoGenerator): string {
   let code = generator.statementToCode(block, "SETUP") || "";
   code = generator.scrubArduino_(block, code);
+  // Always register setup, even when empty → emits `void setup() {}`.
   generator.addSetup("base_setup", code);
   return "";
 }
@@ -47,12 +48,17 @@ export function board_base_setup_loop(block: Block, generator: ArduinoGenerator)
   generator.addSetup("base_setup", setupCode);
   let loopCode = generator.statementToCode(block, "LOOP") || "";
   loopCode = generator.scrubArduino_(block, loopCode, true);
-  return loopCode;
+  // Always register loop, even when empty → emits `void loop() {}`.
+  generator.addLoop("base_loop", loopCode);
+  return "";
 }
 
 export function board_base_loop(block: Block, generator: ArduinoGenerator): string {
-  const code = generator.statementToCode(block, "LOOP") || "";
-  return generator.scrubArduino_(block, code);
+  let code = generator.statementToCode(block, "LOOP") || "";
+  code = generator.scrubArduino_(block, code);
+  // Always register loop, even when empty → emits `void loop() {}`.
+  generator.addLoop("base_loop", code);
+  return "";
 }
 
 export function board_base_inout_buildin_led(block: Block, generator: ArduinoGenerator): string {

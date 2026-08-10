@@ -84,10 +84,6 @@ if (typeof window !== 'undefined') {
 import { arduinoGenerator } from "./generators/arduino";
 import { refreshBoardPinDropdowns } from "./categories/blockly";
 import { registerUcBlocklyKernel } from "./core/register";
-import {
-  applyBlockDebugMetadata,
-  installBlockDebugContextMenu,
-} from "./block_debug_context_menu";
 import { debugLog } from "./generators/arduino/debug";
 import {
   HTML_populateLanguages,
@@ -130,6 +126,7 @@ import { registerShellBlocklyWorkspace } from "./blockly_shell_focus";
 import { registerBlocklyA11yExtensions } from "./blockly_a11y_extensions";
 import { applyShellLandmarks, applyToolbarA11y, announceShellMessage, registerShellAreaNavigation } from "./shell_a11y";
 import { registerShortcutsHelp } from "./shell_shortcuts_help";
+import { registerAboutDialog, refreshAboutDialog } from "./shell_about";
 import { registerKeyboardTutorial } from "./shell_keyboard_tutorial";
 import { registerShellFileShortcuts } from "./shell_shortcuts";
 import { µcB_codeEditor } from "./code_editor";
@@ -358,8 +355,6 @@ const HTML_populateBoards = (): void => {
 // Initialize Blockly Application — kernel registers blocks once before inject.
 restoreLayoutFromSessionStorage();
 registerUcBlocklyKernel();
-installBlockDebugContextMenu();
-applyBlockDebugMetadata();
 primeWorkspaceContainerDimensions();
 // No board selected at init: hide board category until user selects a board.
 const initialToolbox = getToolboxWithoutBoardCategory(basic_toolbox);
@@ -395,9 +390,9 @@ const µcB: BlocklyApplication = new BlocklyApplication(
  */
 µcB.LANGUAGE_NAME = {
   ar: "العربية",
-  en: "English",
-  es: "Español",
-  fr: "Français",
+  en: "english",
+  es: "español",
+  fr: "français",
 };
 
 /**
@@ -639,6 +634,7 @@ const HTML_onChange = (): void => {
     const rtl: boolean = µcB.changeLanguage(true);
     µcB.WORKSPACE_OPTIONS["rtl"] = rtl;
     applyA11yAttributes();
+    refreshAboutDialog();
     µcB.workspaceReboot();
   };
 
@@ -787,25 +783,48 @@ const HTML_onChange = (): void => {
   }
 };
 
+/** When true, beforeunload must not re-persist workspace/layout (full reset). */
+let skipUnloadWorkspaceSave = false;
+
 /**
- * Clears saved state and reloads the application to defaults.
+ * Clears workspace, undo/redo, storages and reloads the application to defaults.
+ * Disables autosave first so beforeunload cannot rewrite cleared sessionStorage.
  */
 const resetAllParameters = (): void => {
-  µcB.workspaceSetupPlugins(true);
-
-  if (window.sessionStorage) {
-    window.sessionStorage.clear();
+  skipUnloadWorkspaceSave = true;
+  try {
+    µcB.setAutoSaveEnabled(false);
+  } catch {
+    // Ignore if workspace is not ready.
   }
-  if (window.localStorage) {
-    window.localStorage.clear();
+  try {
+    µcB.clearWorkspaceFully();
+  } catch {
+    // Ignore if workspace is not ready.
   }
 
-  document.getElementById("flex_container_up_right")!.style.flexGrow = "0";
-  document.getElementById("flex_container_bottom")!.style.flexGrow = "0";
-  document.getElementById("flex_container_up")!.style.flexGrow = "1";
-  document.getElementById("flex_container_up_left")!.style.flexGrow = "1";
+  try {
+    window.sessionStorage?.clear();
+  } catch {
+    // Ignore storage errors.
+  }
+  try {
+    window.localStorage?.clear();
+  } catch {
+    // Ignore storage errors.
+  }
 
-  window.location.href = "/";
+  const upRight = document.getElementById("flex_container_up_right");
+  const bottom = document.getElementById("flex_container_bottom");
+  const up = document.getElementById("flex_container_up");
+  const upLeft = document.getElementById("flex_container_up_left");
+  if (upRight) upRight.style.flexGrow = "0";
+  if (bottom) bottom.style.flexGrow = "0";
+  if (up) up.style.flexGrow = "1";
+  if (upLeft) upLeft.style.flexGrow = "1";
+
+  // Clean URL (no query) → démarrage avec les valeurs par défaut.
+  window.location.href = window.location.pathname || "/";
 };
 
 /**
@@ -840,19 +859,25 @@ DomIsLoaded((): void => {
   initializeBottomPanelToggleButton();
   registerShellAreaNavigation();
   registerShortcutsHelp();
+  registerAboutDialog();
   registerKeyboardTutorial();
   applyA11yAttributes();
   µcB.changeLanguage(false);
   µcB.workspaceInit();
   registerShellBlocklyWorkspace(() => µcB.workspace as Blockly.WorkspaceSvg);
   registerBlocklyA11yExtensions(() => µcB.workspace as Blockly.WorkspaceSvg);
-  // If a board is already selected (e.g. from URL), show board category and refresh pin dropdowns.
-  if (elements.boardMenu.value && elements.boardMenu.value !== "none") {
+  // Affiche la catégorie Carte avec libellé à jour (aucune / nom de carte).
+  {
     const lang = getLangParamFromUrl();
-    const toolboxForBoard = changeLanguageToolbox(lang, getToolboxForCurrentBoard(basic_toolbox));
+    const toolboxForBoard = changeLanguageToolbox(
+      lang,
+      getToolboxForCurrentBoard(basic_toolbox),
+    );
     µcB.WORKSPACE_OPTIONS.toolbox = toolboxForBoard;
     (µcB.workspace as Blockly.WorkspaceSvg).updateToolbox(toolboxForBoard);
-    refreshBoardPinDropdowns(µcB.workspace);
+    if (elements.boardMenu.value && elements.boardMenu.value !== "none") {
+      refreshBoardPinDropdowns(µcB.workspace);
+    }
   }
 });
 
@@ -960,6 +985,9 @@ window.onload = (): void => {
 
 // Persist layout when the user leaves the page (save window positions to sessionStorage).
 window.onbeforeunload = (): void => {
+  if (skipUnloadWorkspaceSave) {
+    return;
+  }
   saveLayoutToSessionStorage();
   µcB.workspaceSaveBlocks("mainWorkspace_blocks");
 };

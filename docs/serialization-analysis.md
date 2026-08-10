@@ -8,7 +8,7 @@
 
 ## État actuel de l'implémentation
 
-Toute la persistance passe par **`blockly_application_type.ts`** : sessionStorage, fichiers JSON (Ouvrir / Enregistrer), et fusion optionnelle à l’import.
+Toute la persistance workspace passe par **`UcBlocklyWorkspaceManager`** (`src/core/ucblockly_workspace_manager.ts`), avec l’aide de `sanitizeSerializedWorkspaceState` (`src/core/workspace_state.ts`). Le shell démo (`demo/blockly_application_shell.ts`) et le re-export `blockly_application_type.ts` délèguent à ce manager.
 
 ### Session storage (`workspaceSaveBlocks` / `workspaceLoadBlocks`)
 

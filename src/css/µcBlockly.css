@@ -475,3 +475,82 @@ label.plugin-option input[type="checkbox"]:focus-visible {
 .blocklyDropDownContent {
   max-width: 18rem;
 }
+
+/* Modale « à propos » + attribution Blockly */
+.ucb-about-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: min(90vh, 40rem);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #5f6368;
+  border-radius: 12px;
+  background: #f8f9fa;
+  color: #202124;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+}
+
+.ucb-about-dialog::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.ucb-about-dialog__title {
+  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  color: #006468;
+}
+
+.ucb-about-dialog__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ucb-about-dialog__logo {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  margin-top: 0.15rem;
+  border-radius: 6px;
+}
+
+.ucb-about-dialog__intro .ucb-about-dialog__title {
+  margin-bottom: 0.35rem;
+}
+
+.ucb-about-dialog__intro .ucb-about-dialog__text {
+  margin-bottom: 0;
+}
+
+.ucb-about-dialog__text,
+.ucb-about-dialog__blockly p {
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+
+.ucb-about-dialog__links {
+  margin: 0 0 1rem;
+}
+
+.ucb-about-dialog__blockly {
+  margin: 1rem 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid #dadce0;
+}
+
+.ucb-about-dialog__blockly img {
+  display: block;
+  height: 32px;
+  width: auto;
+  margin: 0.5rem 0;
+}
+
+.ucb-about-dialog__docs {
+  font-size: 0.85rem;
+}
+
+.ucb-about-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}

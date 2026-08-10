@@ -19,7 +19,6 @@ export default [
         // Global ignores (own object) — config files are not in tsconfig.eslint.json.
         ignores: [
             "eslint.config.mjs",
-            "src/out/scripts/prettify/prettify.js",
             "**/*.min.js",
             "dist/**",
             "build/**",

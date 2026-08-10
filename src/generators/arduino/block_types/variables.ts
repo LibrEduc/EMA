@@ -40,6 +40,6 @@ export const VARIABLES_BLOCK_TYPES = {
   variables_set_dynamic: "null",
   variables_local: "__DYNAMIC__localWrapper",
   variables_define: "null",
-  /** @deprecated Alias legacy — voir `variables_define`. */
+  // Legacy block type for workspaces saved with singular `variable_define`.
   variable_define: "null",
 } as const;

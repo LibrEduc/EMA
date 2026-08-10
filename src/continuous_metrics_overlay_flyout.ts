@@ -36,6 +36,7 @@
 
 import { ContinuousMetrics } from "@blockly/continuous-toolbox";
 import * as Blockly from "blockly";
+import { getLiveContentMetrics } from "./core/live_content_metrics";
 
 const ToolboxPosition = Blockly.utils.toolbox.Position;
 
@@ -44,6 +45,18 @@ const ToolboxPosition = Blockly.utils.toolbox.Position;
  * overlays it (behaviour close to the classic category toolbox).
  */
 export class ContinuousMetricsOverlayFlyout extends ContinuousMetrics {
+  /**
+   * Content metrics excluding disposing / insertion-marker elements (trash drag).
+   */
+  getContentMetrics(
+    getWorkspaceCoordinates?: boolean,
+  ): Blockly.MetricsManager.ContainerRegion {
+    return getLiveContentMetrics(
+      this.workspace_,
+      Boolean(getWorkspaceCoordinates),
+    );
+  }
+
   getViewMetrics(
     getWorkspaceCoordinates?: boolean,
   ): Blockly.MetricsManager.ContainerRegion {

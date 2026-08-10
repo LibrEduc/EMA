@@ -287,10 +287,14 @@ const µcB_workspaceManageResize = (
     return;
   }
   let lastPos: number = Number((mouseDown as unknown as IElement)[posProp]);
+  const parentEl = recall.parentElement;
+  const parentRtl =
+    parentEl != null && getComputedStyle(parentEl).direction === "rtl";
 
   const onMouseMove = (mouseMove: Event): void => {
     let pos: number = Number((mouseMove as unknown as IElement)[posProp]);
-    const difference: number = pos - lastPos;
+    // When a row flex is still RTL, visual order is mirrored: invert drag delta.
+    const difference: number = parentRtl ? lastPos - pos : pos - lastPos;
     prevSize += difference;
     nextSize -= difference;
     if (prevSize < 0) {

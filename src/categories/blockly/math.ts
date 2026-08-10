@@ -33,7 +33,18 @@
 import * as Blockly from "blockly";
 import { FieldAngle } from "@blockly/field-angle";
 import { AccessibleFieldSlider } from "./field_slider_accessible";
-import { getBlocklyMsgOr, inferRequiredNumericTypeForVariable, resolveMathChangeVariableId, syncNumericVariableType, getTypeMismatchWarningText, shouldSkipVariableChange, type VariableWithMutableType, inferNumericInputType, getBlocklyMsg } from "./shared";
+import {
+  getBlocklyMsgOr,
+  inferRequiredNumericTypeForVariable,
+  resolveMathChangeVariableId,
+  syncNumericVariableType,
+  getTypeMismatchWarningText,
+  shouldSkipVariableChange,
+  type VariableWithMutableType,
+  inferNumericInputType,
+  getBlocklyMsg,
+  isMathChangeCompatibleVariableType,
+} from "./shared";
 
 /** Blockly menu options for math_constant (Arduino: no INFINITY). */
 const getMathConstantDropdownOptions = (): Blockly.MenuOption[] => [
@@ -66,7 +77,8 @@ export const defineMathCompatBlocks = (): void => {
     init: function (this: Blockly.Block) {
       this.appendValueInput("VAR")
         .setAlign(Blockly.inputs.Align.CENTRE)
-        .setCheck(null)
+        // Numeric only: unchecked (null) would also accept String via the connection checker.
+        .setCheck(["Number", "int", "float", "long"])
         .appendField(getBlocklyMsgOr("MATH_CHANGE_LABEL", "change"));
       this.appendValueInput("DELTA")
         .setCheck(["Number", "int", "float"])
@@ -104,6 +116,21 @@ export const defineMathCompatBlocks = (): void => {
         this.setWarningText(getBlocklyMsgOr("MATH_CHANGE_VAR_WARNING", "Connect a variable."));
         return;
       }
+      const rejectNonNumeric = (actualType: string, expectedType: string): void => {
+        const varConnection = this.getInput("VAR")?.connection;
+        if (varConnection?.isConnected()) {
+          varConnection.disconnect();
+        }
+        this.setWarningText(getTypeMismatchWarningText(actualType, expectedType));
+      };
+      const varType = variable.getType();
+      if (!isMathChangeCompatibleVariableType(varType)) {
+        rejectNonNumeric(
+          varType,
+          inferRequiredNumericTypeForVariable(this.workspace, variableId) || "int",
+        );
+        return;
+      }
       const deltaBlock = this.getInputTargetBlock("DELTA");
       const requiredType = inferRequiredNumericTypeForVariable(this.workspace, variableId);
       if (deltaBlock && !requiredType) {
@@ -116,33 +143,17 @@ export const defineMathCompatBlocks = (): void => {
       if (requiredType) {
         const typedVariable = variable as VariableWithMutableType;
         syncNumericVariableType(variable, requiredType);
-        const varType = variable.getType();
+        const syncedType = variable.getType();
         if (
           requiredType === "float" &&
-          varType === "int" &&
+          syncedType === "int" &&
           typedVariable.__ucbManualType
         ) {
-          this.setWarningText(getTypeMismatchWarningText(varType, requiredType));
+          this.setWarningText(getTypeMismatchWarningText(syncedType, requiredType));
           return;
         }
-        if (
-          varType &&
-          varType !== "__NO_TYPE__" &&
-          varType !== "int" &&
-          varType !== "float"
-        ) {
-          this.setWarningText(getTypeMismatchWarningText(varType, requiredType));
-          return;
-        }
-      } else {
-        const varType = variable.getType();
-        if (
-          varType &&
-          varType !== "__NO_TYPE__" &&
-          varType !== "int" &&
-          varType !== "float"
-        ) {
-          this.setWarningText(getTypeMismatchWarningText(varType, "int"));
+        if (!isMathChangeCompatibleVariableType(syncedType)) {
+          rejectNonNumeric(syncedType || "?", requiredType);
           return;
         }
       }

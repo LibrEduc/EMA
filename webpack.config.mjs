@@ -22,10 +22,6 @@ import WebpackObfuscator from "webpack-obfuscator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const shareableProceduresSrc = path.resolve(
-  __dirname,
-  "node_modules/@blockly/block-shareable-procedures/src",
-);
 
 /**
  * Build fingerprint (watermark) for this build: version + git short hash + ISO date.
@@ -109,11 +105,6 @@ let config = {
       {
         test: /\.tsx?$/,
         use: tsLoaderUse,
-        include: shareableProceduresSrc,
-      },
-      {
-        test: /\.tsx?$/,
-        use: tsLoaderUse,
         exclude: /node_modules/,
       },
       {
@@ -134,10 +125,6 @@ let config = {
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
     alias: {
-      "@blockly/block-shareable-procedures$": path.join(
-        shareableProceduresSrc,
-        "index.ts",
-      ),
       // package.json "module" points to missing ./src/index.js — force dist.
       "@blockly/field-bitmap$": path.resolve(
         __dirname,

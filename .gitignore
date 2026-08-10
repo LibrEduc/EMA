@@ -24,7 +24,13 @@ docs/api/
 # Optional npm cache directory
 .npm
 
-# Test coverage (if you add tests later)
+# Accidental compiled test artefacts (source of truth: *.test.ts)
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map
+
+# Test coverage
 coverage/
 
 # IDEs and editors

@@ -49,7 +49,7 @@ const toolboxTranslationCache = new WeakMap<
  * Builds a stable cache key for a toolbox translation.
  * @param lang - Language code.
  * @param toolbox - Toolbox configuration to hash.
- * @returns Cache key used for storage.
+ * @return Cache key used for storage.
  */
 const getToolboxCacheKey = (lang: string, toolbox: ToolboxConfiguration): string => {
   const raw = JSON.stringify(toolbox);
@@ -63,7 +63,7 @@ const getToolboxCacheKey = (lang: string, toolbox: ToolboxConfiguration): string
 /**
  * Reads a cached toolbox translation from local storage.
  * @param key - Cache key to read.
- * @returns Cached JSON string or null.
+ * @return Cached JSON string or null.
  */
 const readToolboxFromLocalStorage = (key: string): string | null => {
   try {
@@ -113,7 +113,7 @@ const writeToolboxToLocalStorage = (key: string, value: string): void => {
  * Returns a translated toolbox JSON string with caching.
  * @param newLang - Target language code.
  * @param toolbox - Base toolbox configuration.
- * @returns Serialized toolbox JSON for the target language.
+ * @return Serialized toolbox JSON for the target language.
  */
 const getTranslatedToolboxJson = (
   newLang: string,
@@ -180,7 +180,7 @@ const getTranslatedToolboxJson = (
 
 /**
  * Gets the language code from the URL query string.
- * @returns Language code, defaulting to "en".
+ * @return Language code, defaulting to "en".
  */
 export const getLangParamFromUrl = (): string => {
   const lang = new URLSearchParams(window.location.search).get('lang') ?? 'en';
@@ -190,7 +190,7 @@ export const getLangParamFromUrl = (): string => {
 
 /**
  * Gets the selected language from the dropdown and syncs the URL.
- * @returns Selected language code.
+ * @return Selected language code.
  */
 export const getLangParamFromDropdown = (): string => {
   const dropdownMenu: HTMLSelectElement = document.getElementById('languageMenu') as HTMLSelectElement;
@@ -271,7 +271,7 @@ export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): v
    * Sorts language tuples by display name.
    * @param a - [label, code] tuple.
    * @param b - [label, code] tuple.
-   * @returns Sort order indicator.
+   * @return Sort order indicator.
    */
   const comp = (a: string[], b: string[]) => {
     // Sort based on first argument ('English', 'Русский', '简体字', etc).
@@ -303,14 +303,54 @@ export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): v
 
 /**
  * Returns a toolbox configuration with translated category labels.
+ * Also sets the board category to « Carte : Arduino Uno » / « Carte : aucune ».
  * @param newLang - Target language code.
  * @param toolbox - Source toolbox configuration.
- * @returns Translated toolbox configuration.
+ * @return Translated toolbox configuration.
  */
 export const changeLanguageToolbox = (
   newLang: string,
   toolbox: ToolboxConfiguration,
 ): ToolboxConfiguration => {
   const toolboxJson = getTranslatedToolboxJson(newLang, toolbox);
-  return JSON.parse(toolboxJson) as ToolboxConfiguration;
+  const parsed = JSON.parse(toolboxJson) as ToolboxConfiguration;
+  return applyBoardCategoryDisplayName(parsed, newLang);
 };
+
+/**
+ * Updates the top-level board category label from the current #boardMenu selection.
+ */
+export function applyBoardCategoryDisplayName(
+  toolbox: ToolboxConfiguration,
+  language: string,
+): ToolboxConfiguration {
+  const langMap: LanguageItem = languagesMap[language] ?? languagesMap.en;
+  const prefix = langMap.CAT_BOARD;
+  const menu = document.getElementById("boardMenu") as HTMLSelectElement | null;
+  const value = menu?.value?.trim();
+  const suffix =
+    !value || value === "none"
+      ? langMap.CAT_BOARD_NONE
+      : menu?.selectedOptions[0]?.textContent?.trim() || value;
+  const label = `${prefix} : ${suffix}`;
+
+  type Cat = {
+    kind?: string;
+    name?: string;
+    categorystyle?: string;
+    contents?: Cat[];
+  };
+  for (const item of (toolbox.contents ?? []) as Cat[]) {
+    if (
+      item.kind === "category" &&
+      (item.categorystyle === "board_category" ||
+        item.name === "CAT_BOARD" ||
+        item.name === prefix ||
+        (typeof item.name === "string" && item.name.startsWith(`${prefix} :`)))
+    ) {
+      item.name = label;
+      break;
+    }
+  }
+  return toolbox;
+}

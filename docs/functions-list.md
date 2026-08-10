@@ -8,7 +8,7 @@
 
 > **Note :** inventaire généré par `npm run extract-functions`. La documentation API interactive : `npm run docs` → [TYPEDOC.md](./TYPEDOC.md).
 
-Total: 324 fonctions
+Total: 432 fonctions
 
 ---
 
@@ -17,7 +17,7 @@ Total: 324 fonctions
 
 ### getA11yLabel
 
-**Fichier:** `a11y_labels.ts` (ligne 61)
+**Fichier:** `a11y_labels.ts` (ligne 69)
 
 **Signature:** `export const getA11yLabel = (key: A11yLabelKey): string =>`
 
@@ -65,8 +65,8 @@ Enregistre les entrées de menu contextuel debug (une seule fois).
 
 **Description:**
 
-Applique levels sur chaque entrée de Blockly.Blocks.
-@param levels - Chaîne CSV (ex. "1, 2, 3").
+Applies levels to each Blockly.Blocks entry.
+@param levels - CSV string (e.g. "1, 2, 3").
 
 ---
 
@@ -95,17 +95,77 @@ Parse levels CSV en liste de numéros.
 ---
 
 
-## blockly_application_type.ts
+## blockly_a11y_extensions.ts
 
-### BlocklyApplication
+### attachBlocklyA11yToWorkspace
 
-**Fichier:** `blockly_application_type.ts` (ligne 137)
+**Fichier:** `blockly_a11y_extensions.ts` (ligne 142)
 
-**Signature:** `export class BlocklyApplication implements BlocklyApplicationType`
+**Signature:** `export const attachBlocklyA11yToWorkspace = (workspace: WorkspaceSvg): void =>`
 
 **Description:**
 
-Application state and configuration (workspace, toolbox, language, plugins).
+Applique le mode lecteur d'écran mémorisé sur un workspace (y compris après reboot).
+
+---
+
+### dismissKeyboardTutorial
+
+**Fichier:** `blockly_a11y_extensions.ts` (ligne 177)
+
+**Signature:** `export const dismissKeyboardTutorial = (): void =>`
+
+**Description:**
+
+Mémorise que l'utilisateur ne souhaite plus le tutoriel automatique.
+
+---
+
+### getScreenreaderModeEnabled
+
+**Fichier:** `blockly_a11y_extensions.ts` (ligne 66)
+
+**Signature:** `export const getScreenreaderModeEnabled = (): boolean => screenreaderModeEnabled;`
+
+**Description:**
+
+Indique si le mode lecteur d'écran Blockly est actif.
+
+---
+
+### isKeyboardTutorialDismissed
+
+**Fichier:** `blockly_a11y_extensions.ts` (ligne 168)
+
+**Signature:** `export const isKeyboardTutorialDismissed = (): boolean =>`
+
+**Description:**
+
+Le tutoriel clavier a été marqué comme « ne plus afficher ».
+
+---
+
+### refreshBlocklyA11yExtensions
+
+**Fichier:** `blockly_a11y_extensions.ts` (ligne 163)
+
+**Signature:** `export const refreshBlocklyA11yExtensions = (): void =>`
+
+**Description:**
+
+Réapplique l'état a11y après recréation du workspace Blockly.
+
+---
+
+### registerBlocklyA11yExtensions
+
+**Fichier:** `blockly_a11y_extensions.ts` (ligne 151)
+
+**Signature:** `export const registerBlocklyA11yExtensions = (getter: WorkspaceGetter): void =>`
+
+**Description:**
+
+Active les raccourcis de navigation avancés et la persistance du mode lecteur d'écran.
 
 ---
 
@@ -114,7 +174,7 @@ Application state and configuration (workspace, toolbox, language, plugins).
 
 ### patchBlockChangeForProcedureCompat
 
-**Fichier:** `blockly_patches.ts` (ligne 174)
+**Fichier:** `blockly_patches.ts` (ligne 175)
 
 **Signature:** `export function patchBlockChangeForProcedureCompat(): void`
 
@@ -127,7 +187,7 @@ Also skip missing `${argId}_TYPE` fields during arg creation event mirroring.
 
 ### patchBlocklyDefensive
 
-**Fichier:** `blockly_patches.ts` (ligne 253)
+**Fichier:** `blockly_patches.ts` (ligne 254)
 
 **Signature:** `export function patchBlocklyDefensive(): void`
 
@@ -152,7 +212,7 @@ is always allowed.
 
 ### patchFieldVariableValidation
 
-**Fichier:** `blockly_patches.ts` (ligne 126)
+**Fichier:** `blockly_patches.ts` (ligne 127)
 
 **Signature:** `export function patchFieldVariableValidation(): void`
 
@@ -164,22 +224,74 @@ Extends FieldVariable validation and initModel for flyout/insertion-marker handl
 
 ### patchVariableMapCreateVariable
 
-**Fichier:** `blockly_patches.ts` (ligne 102)
+**Fichier:** `blockly_patches.ts` (ligne 103)
 
 **Signature:** `export function patchVariableMapCreateVariable(workspace: Blockly.Workspace): void`
 
 **Description:**
 
 Extends VariableMap.createVariable to normalize types and avoid duplicates.
+Same name always resolves to one variable model (scalar, list, or instance).
+
+---
+
+
+## blockly_shell_focus.ts
+
+### focusBlocklyToolbox
+
+**Fichier:** `blockly_shell_focus.ts` (ligne 86)
+
+**Signature:** `export const focusBlocklyToolbox = (): boolean =>`
+
+**Description:**
+
+Place le focus Blockly sur la toolbox ou le flyout (équivalent touche **T**).
+
+---
+
+### focusBlocklyWorkspace
+
+**Fichier:** `blockly_shell_focus.ts` (ligne 68)
+
+**Signature:** `export const focusBlocklyWorkspace = (): boolean =>`
+
+**Description:**
+
+Place le focus Blockly sur le workspace (équivalent touche **W**).
+
+---
+
+### registerShellBlocklyWorkspace
+
+**Fichier:** `blockly_shell_focus.ts` (ligne 41)
+
+**Signature:** `export const registerShellBlocklyWorkspace = (getter: WorkspaceGetter): void =>`
+
+**Description:**
+
+Registers access to the active Blockly workspace (after inject or reboot).
 
 ---
 
 
 ## boards.ts
 
+### getBoardDigitalPinOptionMapping
+
+**Fichier:** `boards.ts` (ligne 1142)
+
+**Signature:** `export function getBoardDigitalPinOptionMapping(): Record<string, [string, string][]>`
+
+**Description:**
+
+Digital pin options per board id, for dependent-dropdown child menus.
+
+---
+
 ### getBoardDropdownOptions
 
-**Fichier:** `boards.ts` (ligne 1130)
+**Fichier:** `boards.ts` (ligne 1155)
 
 **Signature:** `export function getBoardDropdownOptions(boardId: BoardId):`
 
@@ -187,6 +299,18 @@ Extends VariableMap.createVariable to normalize types and avoid duplicates.
 
 Returns dropdown options (digital, PWM, analog, serial baud) for a given board.
 Used so block pin dropdowns match the selected board.
+
+---
+
+### getBoardProfileDropdownOptions
+
+**Fichier:** `boards.ts` (ligne 1127)
+
+**Signature:** `export function getBoardProfileDropdownOptions(): [string, string][]`
+
+**Description:**
+
+Board choices for embedded per-block board dropdowns (excludes "none").
 
 ---
 
@@ -271,11 +395,77 @@ Used so block pin dropdowns match the selected board.
 ---
 
 
+## categories\blockly\array_bitmap_grid.ts
+
+### createEmptyBitmapGrid
+
+**Fichier:** `categories\blockly\array_bitmap_grid.ts` (ligne 44)
+
+**Signature:** `export const createEmptyBitmapGrid = (rows: number, cols: number): number[][] =>`
+
+**Description:**
+
+Builds an empty rows x cols grid of 0s.
+
+---
+
+### resizeBitmapGrid
+
+**Fichier:** `categories\blockly\array_bitmap_grid.ts` (ligne 55)
+
+**Signature:** `export const resizeBitmapGrid = (`
+
+**Description:**
+
+Resizes a bitmap grid, preserving overlapping pixels.
+
+---
+
+
+## categories\blockly\array_bitmap.ts
+
+### defineArrayBitmapBlock
+
+**Fichier:** `categories\blockly\array_bitmap.ts` (ligne 217)
+
+**Signature:** `export const defineArrayBitmapBlock = (): void =>`
+
+**Description:**
+
+Registers Array_bitmap (declaration) and Array_bitmap_get (value grid).
+
+---
+
+### readBitmapDimInput
+
+**Fichier:** `categories\blockly\array_bitmap.ts` (ligne 68)
+
+**Signature:** `export const readBitmapDimInput = (`
+
+**Description:**
+
+Reads a dimension from a value input (prefers math_number NUM).
+
+---
+
+
 ## categories\blockly\array.ts
+
+### applyListDeclarationBlockWarning
+
+**Fichier:** `categories\blockly\array.ts` (ligne 135)
+
+**Signature:** `export const applyListDeclarationBlockWarning = (block: Blockly.Block): void =>`
+
+**Description:**
+
+Applique warning ownership (+ non typé pour Array_with).
+
+---
 
 ### defineArrayBlocks
 
-**Fichier:** `categories\blockly\array.ts` (ligne 496)
+**Fichier:** `categories\blockly\array.ts` (ligne 600)
 
 **Signature:** `export const defineArrayBlocks = (): void =>`
 
@@ -286,12 +476,50 @@ Array_getIndex_in_list, Array_getIndex_in_array, Array_modify, Array_fix).
 
 ---
 
+### revalidateListDeclarationUniqueness
+
+**Fichier:** `categories\blockly\array.ts` (ligne 149)
+
+**Signature:** `export const revalidateListDeclarationUniqueness = (`
+
+**Description:**
+
+Revalide l'ownership des déclarations de listes sur tout le workspace.
+
+---
+
+### syncListDeclarationOwnership
+
+**Fichier:** `categories\blockly\array.ts` (ligne 106)
+
+**Signature:** `export const syncListDeclarationOwnership = (block: Blockly.Block): boolean =>`
+
+**Description:**
+
+Claims / releases list declaration ownership (same pattern as variables_const).
+@returns true when a duplicate-owner warning was set.
+
+---
+
+### syncListDeclarationUniqueness
+
+**Fichier:** `categories\blockly\array.ts` (ligne 130)
+
+**Signature:** `export const syncListDeclarationUniqueness = (block: Blockly.Block): boolean =>`
+
+**Description:**
+
+Affiche un avertissement si ce bloc n'est pas le propriétaire de la déclaration.
+@returns true when a duplicate warning was set.
+
+---
+
 
 ## categories\blockly\board.ts
 
 ### defineBoardBlocks
 
-**Fichier:** `categories\blockly\board.ts` (ligne 95)
+**Fichier:** `categories\blockly\board.ts` (ligne 103)
 
 **Signature:** `export const defineBoardBlocks = (): void =>`
 
@@ -303,7 +531,7 @@ Registers board (s4e) blocks: setup, loop, digital/analog I/O, delay, map, tone.
 
 ### refreshBoardPinDropdowns
 
-**Fichier:** `categories\blockly\board.ts` (ligne 591)
+**Fichier:** `categories\blockly\board.ts` (ligne 667)
 
 **Signature:** `export function refreshBoardPinDropdowns(workspace: Blockly.Workspace): void`
 
@@ -320,7 +548,7 @@ Uses setOptions when available; otherwise updates the menu generator so the drop
 
 ### defineColourBlocks
 
-**Fichier:** `categories\blockly\colour.ts` (ligne 72)
+**Fichier:** `categories\blockly\colour.ts` (ligne 76)
 
 **Signature:** `export const defineColourBlocks = (): void =>`
 
@@ -331,17 +559,123 @@ Registers colour blocks and custom color picker fields.
 ---
 
 
+## categories\blockly\field_colour_a11y.ts
+
+### formatColourAriaValue
+
+**Fichier:** `categories\blockly\field_colour_a11y.ts` (ligne 76)
+
+**Signature:** `export const formatColourAriaValue = (raw: string | null | undefined): string =>`
+
+**Description:**
+
+Screen-reader-friendly representation of a hex colour.
+@remarks Used by custom colour fields' `getAriaValue` / `getText`.
+
+---
+
+### getColourAriaEmptyValue
+
+**Fichier:** `categories\blockly\field_colour_a11y.ts` (ligne 38)
+
+**Signature:** `export const getColourAriaEmptyValue = (): string =>`
+
+**Description:**
+
+ARIA value when the colour is missing or invalid.
+
+---
+
+### getColourAriaTypeName
+
+**Fichier:** `categories\blockly\field_colour_a11y.ts` (ligne 34)
+
+**Signature:** `export const getColourAriaTypeName = (): string =>`
+
+**Description:**
+
+Localized ARIA type name for a colour field.
+
+---
+
+### getColourHsvEditorLabel
+
+**Fichier:** `categories\blockly\field_colour_a11y.ts` (ligne 95)
+
+**Signature:** `export const getColourHsvEditorLabel = (): string =>`
+
+**Description:**
+
+Libellé du groupe éditeur curseurs HSV.
+
+---
+
+### getColourPickerEditorLabel
+
+**Fichier:** `categories\blockly\field_colour_a11y.ts` (ligne 91)
+
+**Signature:** `export const getColourPickerEditorLabel = (): string =>`
+
+**Description:**
+
+Libellé du groupe éditeur pipette iro.js.
+
+---
+
+### normalizeHexColour
+
+**Fichier:** `categories\blockly\field_colour_a11y.ts` (ligne 45)
+
+**Signature:** `export const normalizeHexColour = (raw: string | null | undefined): string | null =>`
+
+**Description:**
+
+Normalizes a hexadecimal colour (#RRGGBB).
+@returns Uppercase hex or null if invalid.
+
+---
+
+
+## categories\blockly\field_colour_accessible.ts
+
+### LocalizedFieldColour
+
+**Fichier:** `categories\blockly\field_colour_accessible.ts` (ligne 41)
+
+**Signature:** `export class LocalizedFieldColour extends FieldColour`
+
+**Description:**
+
+Colour grid field with screen-reader-friendly ARIA values.
+
+---
+
+### registerAccessibleFieldColour
+
+**Fichier:** `categories\blockly\field_colour_accessible.ts` (ligne 58)
+
+**Signature:** `export const registerAccessibleFieldColour = (): void =>`
+
+**Description:**
+
+Registers (or overrides) `field_colour` with the ARIA wrapper.
+Do not unregister first: `@blockly/field-colour` does not auto-register on
+import, and Blockly warns when unregistering a missing entry.
+
+---
+
+
 ## categories\blockly\field_colour_hsv_sliders.ts
 
 ### LocalizedFieldColourHsvSliders
 
-**Fichier:** `categories\blockly\field_colour_hsv_sliders.ts` (ligne 91)
+**Fichier:** `categories\blockly\field_colour_hsv_sliders.ts` (ligne 119)
 
 **Signature:** `export class LocalizedFieldColourHsvSliders extends FieldColourHsvSliders`
 
 **Description:**
 
-HSV sliders field with localized labels.
+HSV sliders field with localized labels and screen-reader-friendly values.
 
 ---
 
@@ -350,7 +684,7 @@ HSV sliders field with localized labels.
 
 ### FieldColorPicker
 
-**Fichier:** `categories\blockly\field_colour_picker.ts` (ligne 134)
+**Fichier:** `categories\blockly\field_colour_picker.ts` (ligne 146)
 
 **Signature:** `export class FieldColorPicker extends Blockly.FieldTextInput`
 
@@ -361,11 +695,39 @@ Custom Blockly field that renders an iro.js color picker.
 ---
 
 
+## categories\blockly\field_slider_accessible.ts
+
+### AccessibleFieldSlider
+
+**Fichier:** `categories\blockly\field_slider_accessible.ts` (ligne 44)
+
+**Signature:** `export class AccessibleFieldSlider extends FieldSlider`
+
+**Description:**
+
+Number slider with accessible on-block type and editor ARIA attributes.
+
+---
+
+### registerAccessibleFieldSlider
+
+**Fichier:** `categories\blockly\field_slider_accessible.ts` (ligne 92)
+
+**Signature:** `export const registerAccessibleFieldSlider = (): void =>`
+
+**Description:**
+
+Registers (or overrides) `field_slider` with the ARIA wrapper.
+Prefer override over unregister to avoid Blockly console warnings.
+
+---
+
+
 ## categories\blockly\index.ts
 
 ### defineAllTypedVariableBlocks
 
-**Fichier:** `categories\blockly\index.ts` (ligne 73)
+**Fichier:** `categories\blockly\index.ts` (ligne 75)
 
 **Signature:** `export const defineAllTypedVariableBlocks = (): void =>`
 
@@ -377,7 +739,7 @@ Registers all typed variable blocks and extensions (get/set/define/local and sta
 
 ### defineBlocklyArduinoCompatBlocks
 
-**Fichier:** `categories\blockly\index.ts` (ligne 60)
+**Fichier:** `categories\blockly\index.ts` (ligne 61)
 
 **Signature:** `export const defineBlocklyArduinoCompatBlocks = (): void =>`
 
@@ -437,7 +799,7 @@ Redéfinit `controls_forEach` : menu des tableaux (variables `list`) au lieu d'u
 
 ### defineMathCompatBlocks
 
-**Fichier:** `categories\blockly\math.ts` (ligne 50)
+**Fichier:** `categories\blockly\math.ts` (ligne 61)
 
 **Signature:** `export const defineMathCompatBlocks = (): void =>`
 
@@ -448,11 +810,11 @@ Registers math compatibility blocks for µcBlockly.
 ---
 
 
-## categories\blockly\shared.ts
+## categories\blockly\shared_numeric.ts
 
 ### areLoopBoundTypesCompatible
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 985)
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 150)
 
 **Signature:** `export const areLoopBoundTypesCompatible = (`
 
@@ -462,9 +824,200 @@ Returns true when two loop bound types can coexist (int/float may mix).
 
 ---
 
+### inferChangeByRequiredType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 326)
+
+**Signature:** `export const inferChangeByRequiredType = (`
+
+**Description:**
+
+Infers int/float required by all math_change blocks using a variable.
+
+---
+
+### inferChangeByRequiredTypeFromBlock
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 313)
+
+**Signature:** `export const inferChangeByRequiredTypeFromBlock = (`
+
+**Description:**
+
+Infers int/float required by a math_change block from its DELTA input.
+
+---
+
+### inferLoopCounterType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 233)
+
+**Signature:** `export const inferLoopCounterType = (`
+
+**Description:**
+
+Infers the loop-counter type implied by controls_for blocks using a variable.
+@param workspace - Workspace containing the variable uses.
+@param variableId - Target variable ID.
+@returns int, float, or null when not used as a numeric loop counter.
+
+---
+
+### inferLoopCounterTypeFromForBlock
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 202)
+
+**Signature:** `export const inferLoopCounterTypeFromForBlock = (`
+
+**Description:**
+
+Infers int/float for the counter variable of a controls_for block from its bounds.
+@param forBlock - controls_for block instance.
+@returns Counter type or null when bounds are not fully numeric.
+
+---
+
+### inferNumericInputType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 118)
+
+**Signature:** `export const inferNumericInputType = (block: Blockly.Block | null): string | null =>`
+
+**Description:**
+
+Infers the numeric type of a value block connected to a loop bound input.
+@param block - Connected block or null.
+@returns Normalized numeric type or null when unknown/non-numeric.
+
+---
+
+### inferRequiredNumericTypeForVariable
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 358)
+
+**Signature:** `export const inferRequiredNumericTypeForVariable = (`
+
+**Description:**
+
+Aggregates int/float required by loop counters and change-by blocks for a variable.
+
+---
+
+### isBlockOnMainWorkspace
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 94)
+
+**Signature:** `export const isBlockOnMainWorkspace = (block: Blockly.Block): boolean =>`
+
+**Description:**
+
+Returns true when the block lives on the main workspace (not flyout/toolbox).
+
+---
+
+### isLoopCounterVariableCompatible
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 192)
+
+**Signature:** `export const isLoopCounterVariableCompatible = (`
+
+**Description:**
+
+Checks whether a variable type can serve as a loop counter of the given type.
+
+---
+
+### isMathChangeCompatibleVariableType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 288)
+
+**Signature:** `export const isMathChangeCompatibleVariableType = (`
+
+**Description:**
+
+Types accepted on math_change VAR: untyped or numeric scalars (not String/bool/…).
+
+---
+
+### isNumericScalarVariableType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 272)
+
+**Signature:** `export const isNumericScalarVariableType = (`
+
+**Description:**
+
+True when a type is a numeric scalar usable by math_change (int/float/long).
+
+---
+
+### isUnresolvedVariableType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 261)
+
+**Signature:** `export const isUnresolvedVariableType = (`
+
+**Description:**
+
+True when a variable type is missing / not yet resolved (allowed on math_change VAR).
+
+---
+
+### resolveMathChangeVariableId
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 296)
+
+**Signature:** `export const resolveMathChangeVariableId = (block: Blockly.Block): string | null =>`
+
+**Description:**
+
+Resolves the variable ID targeted by a math_change block (field or connected getter).
+
+---
+
+### resolveMathNumberBlockType
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 106)
+
+**Signature:** `export const resolveMathNumberBlockType = (block: Blockly.Block): "int" | "float" =>`
+
+**Description:**
+
+Resolves math_number typing: int by default until on main workspace,
+then int/float from the NUM field via identifyMathNumberType.
+
+---
+
+### unifyLoopBoundTypes
+
+**Fichier:** `categories\blockly\shared_numeric.ts` (ligne 165)
+
+**Signature:** `export const unifyLoopBoundTypes = (`
+
+**Description:**
+
+Unifies loop bound types; any float bound promotes the counter to float.
+
+---
+
+
+## categories\blockly\shared.ts
+
+### configureInstanceVariableField
+
+**Fichier:** `categories\blockly\shared.ts` (ligne 328)
+
+**Signature:** `export const configureInstanceVariableField = (`
+
+**Description:**
+
+Configures a FieldVariable for instance variables only (future blocks).
+
+---
+
 ### configureListVariableField
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 281)
+**Fichier:** `categories\blockly\shared.ts` (ligne 316)
 
 **Signature:** `export const configureListVariableField = (field: Blockly.FieldVariable): void =>`
 
@@ -476,7 +1029,7 @@ Configures a FieldVariable for list/array variables only.
 
 ### configureScalarVariableField
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 269)
+**Fichier:** `categories\blockly\shared.ts` (ligne 304)
 
 **Signature:** `export const configureScalarVariableField = (field: Blockly.FieldVariable): void =>`
 
@@ -489,7 +1042,7 @@ Configures a FieldVariable for scalar variables (excludes list/array variables).
 
 ### getArrayIndexBlocklyChecks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 263)
+**Fichier:** `categories\blockly\shared.ts` (ligne 298)
 
 **Signature:** `export const getArrayIndexBlocklyChecks = (): string[] => ["int", "Number"];`
 
@@ -501,7 +1054,7 @@ Checks Blockly pour les entrées d'index de tableau (entiers uniquement).
 
 ### getArrayListUntypedWarningText
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 104)
+**Fichier:** `categories\blockly\shared.ts` (ligne 129)
 
 **Signature:** `export const getArrayListUntypedWarningText = (): string =>`
 
@@ -513,7 +1066,7 @@ Warning when a list block has no connected element values yet.
 
 ### getBlocklyCompatibleChecks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 178)
+**Fichier:** `categories\blockly\shared.ts` (ligne 213)
 
 **Signature:** `export const getBlocklyCompatibleChecks = (`
 
@@ -531,7 +1084,7 @@ See `docs/TYPES_ET_COMPATIBILITES.md` for the mapping table (bool→Boolean, int
 
 ### getBlocklyMsg
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 68)
+**Fichier:** `categories\blockly\shared.ts` (ligne 93)
 
 **Signature:** `export const getBlocklyMsg = (key: string): string =>`
 
@@ -545,7 +1098,7 @@ Retrieves a Blockly message by key.
 
 ### getBlocklyMsgOr
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 79)
+**Fichier:** `categories\blockly\shared.ts` (ligne 104)
 
 **Signature:** `export const getBlocklyMsgOr = (key: string, fallback: string): string =>`
 
@@ -560,7 +1113,7 @@ Retrieves a Blockly message or returns a fallback.
 
 ### getConstWarningText
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 124)
+**Fichier:** `categories\blockly\shared.ts` (ligne 159)
 
 **Signature:** `export const getConstWarningText = (): string =>`
 
@@ -572,7 +1125,7 @@ Returns the warning text for const assignments.
 
 ### getDeclareContenuBlocklyChecks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 244)
+**Fichier:** `categories\blockly\shared.ts` (ligne 279)
 
 **Signature:** `export const getDeclareContenuBlocklyChecks = (`
 
@@ -585,7 +1138,7 @@ Le filtrage sémantique int/float/etc. est complété par StrictConnectionChecke
 
 ### getDeclareElementBlocklyChecks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 258)
+**Fichier:** `categories\blockly\shared.ts` (ligne 293)
 
 **Signature:** `export const getDeclareElementBlocklyChecks = (internalType: string): string[] =>`
 
@@ -595,9 +1148,22 @@ Checks Blockly pour les éléments d'un littéral de liste ou de Array_with.
 
 ---
 
+### getDuplicateListDeclarationWarningText
+
+**Fichier:** `categories\blockly\shared.ts` (ligne 139)
+
+**Signature:** `export const getDuplicateListDeclarationWarningText = (): string =>`
+
+**Description:**
+
+Warning when several list declaration blocks share the same variable.
+Same conflict idea as VARIABLES_CONST_WARNING for const ownership.
+
+---
+
 ### getListVariableOutputCheck
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 322)
+**Fichier:** `categories\blockly\shared.ts` (ligne 359)
 
 **Signature:** `export const getListVariableOutputCheck = (): string => "__NO_TYPE__";`
 
@@ -609,7 +1175,7 @@ Output check for variables_get when VAR is Blockly-only (`list`), not an Arduino
 
 ### getProcedureDefArgumentType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 413)
+**Fichier:** `categories\blockly\shared.ts` (ligne 450)
 
 **Signature:** `export const getProcedureDefArgumentType = (`
 
@@ -621,7 +1187,7 @@ Declared type of a procedure definition argument (reads `${argId}_TYPE` on proce
 
 ### getProcedureParameterDeclaredType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 365)
+**Fichier:** `categories\blockly\shared.ts` (ligne 402)
 
 **Signature:** `export const getProcedureParameterDeclaredType = (`
 
@@ -634,7 +1200,7 @@ Returns the type declared on a procedure parameter (menu on procedures_def*), if
 
 ### getTypeMismatchWarningText
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 116)
+**Fichier:** `categories\blockly\shared.ts` (ligne 151)
 
 **Signature:** `export const getTypeMismatchWarningText = (varType: string, connectedType: string): string =>`
 
@@ -649,7 +1215,7 @@ Builds the warning text for type mismatches.
 
 ### getUntypedWarningText
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 99)
+**Fichier:** `categories\blockly\shared.ts` (ligne 124)
 
 **Signature:** `export const getUntypedWarningText = (): string => getBlocklyMsg("TYPED_VAR_UNTYPED_WARNING");`
 
@@ -661,7 +1227,7 @@ Returns the warning text for untyped variables.
 
 ### handleBoardIntInputBlockChange
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 541)
+**Fichier:** `categories\blockly\shared.ts` (ligne 601)
 
 **Signature:** `export const handleBoardIntInputBlockChange = (`
 
@@ -673,7 +1239,7 @@ Enforces integer-only values on board block inputs (PWM, map, tone frequency).
 
 ### handleVariablesSetChange
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 1296)
+**Fichier:** `categories\blockly\shared.ts` (ligne 1109)
 
 **Signature:** `export const handleVariablesSetChange = (`
 
@@ -688,7 +1254,7 @@ Handles variable assignment changes to enforce typing rules.
 
 ### hasConnectedAssignmentForVariable
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 1217)
+**Fichier:** `categories\blockly\shared.ts` (ligne 1030)
 
 **Signature:** `export const hasConnectedAssignmentForVariable = (`
 
@@ -704,7 +1270,7 @@ Uses getVariableUsesById to avoid iterating all blocks.
 
 ### hasRealGlobalVariableUse
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 653)
+**Fichier:** `categories\blockly\shared.ts` (ligne 713)
 
 **Signature:** `export const hasRealGlobalVariableUse = (`
 
@@ -714,33 +1280,9 @@ True when the variable is genuinely read/written in setup, loop, or global scope
 
 ---
 
-### inferChangeByRequiredType
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1126)
-
-**Signature:** `export const inferChangeByRequiredType = (`
-
-**Description:**
-
-Infers int/float required by all math_change blocks using a variable.
-
----
-
-### inferChangeByRequiredTypeFromBlock
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1113)
-
-**Signature:** `export const inferChangeByRequiredTypeFromBlock = (`
-
-**Description:**
-
-Infers int/float required by a math_change block from its DELTA input.
-
----
-
 ### inferConnectedValueType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 1179)
+**Fichier:** `categories\blockly\shared.ts` (ligne 992)
 
 **Signature:** `export const inferConnectedValueType = (block: Blockly.Block | null): string | null =>`
 
@@ -754,7 +1296,7 @@ Infers a block's output type from its definition or connection.
 
 ### inferLocalAssignmentValueType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 713)
+**Fichier:** `categories\blockly\shared.ts` (ligne 773)
 
 **Signature:** `export const inferLocalAssignmentValueType = (`
 
@@ -764,52 +1306,9 @@ Infers the value type inside a `variables_local` wrapper (or null).
 
 ---
 
-### inferLoopCounterType
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1068)
-
-**Signature:** `export const inferLoopCounterType = (`
-
-**Description:**
-
-Infers the loop-counter type implied by controls_for blocks using a variable.
-@param workspace - Workspace containing the variable uses.
-@param variableId - Target variable ID.
-@returns int, float, or null when not used as a numeric loop counter.
-
----
-
-### inferLoopCounterTypeFromForBlock
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1037)
-
-**Signature:** `export const inferLoopCounterTypeFromForBlock = (`
-
-**Description:**
-
-Infers int/float for the counter variable of a controls_for block from its bounds.
-@param forBlock - controls_for block instance.
-@returns Counter type or null when bounds are not fully numeric.
-
----
-
-### inferNumericInputType
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 950)
-
-**Signature:** `export const inferNumericInputType = (block: Blockly.Block | null): string | null =>`
-
-**Description:**
-
-Infers the numeric type of a value block connected to a loop bound input.
-@param block - Connected block or null.
-@returns Normalized numeric type or null when unknown/non-numeric.
-
----
-
 ### inferProcedureCallArgSourceType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 436)
+**Fichier:** `categories\blockly\shared.ts` (ligne 473)
 
 **Signature:** `export const inferProcedureCallArgSourceType = (`
 
@@ -819,33 +1318,9 @@ Infers the source type of a value plugged into a procedure call argument.
 
 ---
 
-### inferRequiredNumericTypeForVariable
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1158)
-
-**Signature:** `export const inferRequiredNumericTypeForVariable = (`
-
-**Description:**
-
-Aggregates int/float required by loop counters and change-by blocks for a variable.
-
----
-
-### isBlockOnMainWorkspace
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 878)
-
-**Signature:** `export const isBlockOnMainWorkspace = (block: Blockly.Block): boolean =>`
-
-**Description:**
-
-Returns true when the block lives on the main workspace (not flyout/toolbox).
-
----
-
 ### isGlobalVariableAssignment
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 705)
+**Fichier:** `categories\blockly\shared.ts` (ligne 765)
 
 **Signature:** `export const isGlobalVariableAssignment = (block: Blockly.Block): boolean =>`
 
@@ -855,21 +1330,9 @@ True when a set block assigns a global variable (no `local` wrapper).
 
 ---
 
-### isLoopCounterVariableCompatible
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1027)
-
-**Signature:** `export const isLoopCounterVariableCompatible = (`
-
-**Description:**
-
-Checks whether a variable type can serve as a loop counter of the given type.
-
----
-
 ### isProcedureParameterBindingUse
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 627)
+**Fichier:** `categories\blockly\shared.ts` (ligne 687)
 
 **Signature:** `export const isProcedureParameterBindingUse = (`
 
@@ -881,7 +1344,7 @@ Procedure def header / call shell: binds a parameter name without a global read/
 
 ### isVariableProcedureParameter
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 600)
+**Fichier:** `categories\blockly\shared.ts` (ligne 660)
 
 **Signature:** `export const isVariableProcedureParameter = (`
 
@@ -893,7 +1356,7 @@ True when the variable is declared as a parameter on any procedure definition.
 
 ### isVariableUsedOutsideProcedureBodies
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 594)
+**Fichier:** `categories\blockly\shared.ts` (ligne 654)
 
 **Signature:** `export const isVariableUsedOutsideProcedureBodies = (`
 
@@ -905,7 +1368,7 @@ True when the variable appears in setup, loop, or global scope (not only as a pr
 
 ### isVariableUseOutsideProcedureBody
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 589)
+**Fichier:** `categories\blockly\shared.ts` (ligne 649)
 
 **Signature:** `export const isVariableUseOutsideProcedureBody = (block: Blockly.Block): boolean =>`
 
@@ -917,7 +1380,7 @@ True when the block is in setup/loop/global scope (not inside a procedure body).
 
 ### normalizeBlocklyTypeToVariableType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 329)
+**Fichier:** `categories\blockly\shared.ts` (ligne 366)
 
 **Signature:** `export const normalizeBlocklyTypeToVariableType = (type: string): string =>`
 
@@ -931,7 +1394,7 @@ Normalizes Blockly check types to µcBlockly variable types.
 
 ### resolveGlobalVariableType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 804)
+**Fichier:** `categories\blockly\shared.ts` (ligne 868)
 
 **Signature:** `export const resolveGlobalVariableType = (`
 
@@ -941,34 +1404,9 @@ Resolves global variable type from global assignments only (ignores `local` wrap
 
 ---
 
-### resolveMathChangeVariableId
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1096)
-
-**Signature:** `export const resolveMathChangeVariableId = (block: Blockly.Block): string | null =>`
-
-**Description:**
-
-Resolves the variable ID targeted by a math_change block (field or connected getter).
-
----
-
-### resolveMathNumberBlockType
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 890)
-
-**Signature:** `export const resolveMathNumberBlockType = (block: Blockly.Block): "int" | "float" =>`
-
-**Description:**
-
-Resolves math_number typing: int by default until on main workspace,
-then int/float from the NUM field via identifyMathNumberType.
-
----
-
 ### resolveVariableTypeForBlock
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 761)
+**Fichier:** `categories\blockly\shared.ts` (ligne 821)
 
 **Signature:** `export const resolveVariableTypeForBlock = (`
 
@@ -980,7 +1418,7 @@ Resolves the effective type of a variable for a specific block (scope-aware).
 
 ### revalidateBoardIntInputBlocks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 577)
+**Fichier:** `categories\blockly\shared.ts` (ligne 637)
 
 **Signature:** `export const revalidateBoardIntInputBlocks = (`
 
@@ -992,7 +1430,7 @@ Revalidates integer-only inputs on board blocks after workspace changes.
 
 ### revalidateLocalWrapperBlocks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 1254)
+**Fichier:** `categories\blockly\shared.ts` (ligne 1067)
 
 **Signature:** `export const revalidateLocalWrapperBlocks = (`
 
@@ -1004,7 +1442,7 @@ Re-runs onchange on `variables_local` wrappers so their output type tracks inner
 
 ### revalidateProcedureCallBlocks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 484)
+**Fichier:** `categories\blockly\shared.ts` (ligne 543)
 
 **Signature:** `export const revalidateProcedureCallBlocks = (`
 
@@ -1016,7 +1454,7 @@ Disconnects incompatible values on procedure call blocks and refreshes ARG input
 
 ### revalidateTypedNumericBlocks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 1273)
+**Fichier:** `categories\blockly\shared.ts` (ligne 1086)
 
 **Signature:** `export const revalidateTypedNumericBlocks = (`
 
@@ -1029,7 +1467,7 @@ Re-runs onchange handlers for blocks whose variable typing depends on child valu
 
 ### revalidateVariableBlocksForId
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 828)
+**Fichier:** `categories\blockly\shared.ts` (ligne 892)
 
 **Signature:** `export const revalidateVariableBlocksForId = (`
 
@@ -1041,7 +1479,7 @@ Re-runs onchange on variable get/set blocks referencing a variable.
 
 ### setVariableTypeAndMarkManual
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 132)
+**Fichier:** `categories\blockly\shared.ts` (ligne 167)
 
 **Signature:** `export const setVariableTypeAndMarkManual = (`
 
@@ -1055,7 +1493,7 @@ Sets a variable's type and marks it as manually chosen (e.g. via dropdown).
 
 ### shouldOmitGlobalVariableDeclaration
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 674)
+**Fichier:** `categories\blockly\shared.ts` (ligne 734)
 
 **Signature:** `export const shouldOmitGlobalVariableDeclaration = (`
 
@@ -1068,7 +1506,7 @@ Procedure parameters are omitted unless they are also used as real globals.
 
 ### shouldSkipVariableChange
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 855)
+**Fichier:** `categories\blockly\shared.ts` (ligne 919)
 
 **Signature:** `export const shouldSkipVariableChange = (`
 
@@ -1078,21 +1516,9 @@ Determines whether a variable change event should be ignored.
 
 ---
 
-### syncListVariableFromBlock
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 315)
-
-**Signature:** `export const syncListVariableFromBlock = (block: Blockly.Block): void =>`
-
-**Description:**
-
-@deprecated Use {@link syncListVariableFromField} with `"VAR"`.
-
----
-
 ### syncListVariableFromField
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 298)
+**Fichier:** `categories\blockly\shared.ts` (ligne 342)
 
 **Signature:** `export const syncListVariableFromField = (`
 
@@ -1104,7 +1530,7 @@ Ensures the variable selected on a list-category block has Blockly type `list`.
 
 ### syncNumericVariableType
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 145)
+**Fichier:** `categories\blockly\shared.ts` (ligne 180)
 
 **Signature:** `export const syncNumericVariableType = (`
 
@@ -1117,7 +1543,7 @@ Promotes int ↔ float according to aggregated usage; never overrides manual typ
 
 ### syncProcedureCallArgInputChecks
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 451)
+**Fichier:** `categories\blockly\shared.ts` (ligne 488)
 
 **Signature:** `export const syncProcedureCallArgInputChecks = (callBlock: Blockly.Block): void =>`
 
@@ -1127,21 +1553,9 @@ Applies setCheck on each ARG input from the procedure definition parameter types
 
 ---
 
-### unifyLoopBoundTypes
-
-**Fichier:** `categories\blockly\shared.ts` (ligne 1000)
-
-**Signature:** `export const unifyLoopBoundTypes = (`
-
-**Description:**
-
-Unifies loop bound types; any float bound promotes the counter to float.
-
----
-
 ### validateSingleChar
 
-**Fichier:** `categories\blockly\shared.ts` (ligne 89)
+**Fichier:** `categories\blockly\shared.ts` (ligne 114)
 
 **Signature:** `export const validateSingleChar = (value: string): string =>`
 
@@ -1173,7 +1587,7 @@ Registers text literal blocks for µcBlockly (Arduino C: "", '', raw).
 
 ### createArduinoScalarTypeField
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 115)
+**Fichier:** `categories\blockly\variables.ts` (ligne 101)
 
 **Signature:** `export const createArduinoScalarTypeField = (`
 
@@ -1185,7 +1599,7 @@ Arduino scalar type dropdown; maps invalid values (e.g. `list`) to `int` on load
 
 ### defineVariablesCastBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 255)
+**Fichier:** `categories\blockly\variables.ts` (ligne 241)
 
 **Signature:** `export const defineVariablesCastBlock = (): void =>`
 
@@ -1197,7 +1611,7 @@ Value block: cast a connected expression, e.g. (byte)(toto) when a get block is 
 
 ### defineVariablesConstBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 482)
+**Fichier:** `categories\blockly\variables.ts` (ligne 468)
 
 **Signature:** `export const defineVariablesConstBlock = (): void =>`
 
@@ -1209,7 +1623,7 @@ Registers the const declaration block.
 
 ### defineVariablesDefineBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 665)
+**Fichier:** `categories\blockly\variables.ts` (ligne 651)
 
 **Signature:** `export const defineVariablesDefineBlock = (): void =>`
 
@@ -1221,7 +1635,7 @@ Registers the variable definition block used by s4e compatibility.
 
 ### defineVariablesGetDynamicBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 138)
+**Fichier:** `categories\blockly\variables.ts` (ligne 124)
 
 **Signature:** `export const defineVariablesGetDynamicBlock = (): void =>`
 
@@ -1233,7 +1647,7 @@ Registers the dynamic variables_get block with typing support.
 
 ### defineVariablesLocalBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 302)
+**Fichier:** `categories\blockly\variables.ts` (ligne 288)
 
 **Signature:** `export const defineVariablesLocalBlock = (): void =>`
 
@@ -1245,7 +1659,7 @@ Registers the "local" wrapper block for scoped variables.
 
 ### defineVariablesSetDynamicBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 214)
+**Fichier:** `categories\blockly\variables.ts` (ligne 200)
 
 **Signature:** `export const defineVariablesSetDynamicBlock = (): void =>`
 
@@ -1257,7 +1671,7 @@ Registers the dynamic variables_set block with typing support.
 
 ### defineVariablesSetInitBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 574)
+**Fichier:** `categories\blockly\variables.ts` (ligne 560)
 
 **Signature:** `export const defineVariablesSetInitBlock = (): void =>`
 
@@ -1269,7 +1683,7 @@ Registers the typed variable initialization block.
 
 ### defineVariablesSetTypeBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 361)
+**Fichier:** `categories\blockly\variables.ts` (ligne 347)
 
 **Signature:** `export const defineVariablesSetTypeBlock = (): void =>`
 
@@ -1281,7 +1695,7 @@ Registers the block that forces a variable type.
 
 ### extendStandardVariablesGetBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 754)
+**Fichier:** `categories\blockly\variables.ts` (ligne 738)
 
 **Signature:** `export const extendStandardVariablesGetBlock = (): void =>`
 
@@ -1293,7 +1707,7 @@ Extends the standard variables_get block with typed behavior.
 
 ### extendStandardVariablesSetBlock
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 829)
+**Fichier:** `categories\blockly\variables.ts` (ligne 813)
 
 **Signature:** `export const extendStandardVariablesSetBlock = (): void =>`
 
@@ -1305,7 +1719,7 @@ Extends the standard variables_set block with typed behavior.
 
 ### getArduinoTypeDropdownOptions
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 75)
+**Fichier:** `categories\blockly\variables.ts` (ligne 73)
 
 **Signature:** `export const getArduinoTypeDropdownOptions = (): Blockly.MenuOption[] =>`
 
@@ -1318,7 +1732,7 @@ Shared Blockly menu options for every Arduino type dropdown
 
 ### getArduinoTypeLabel
 
-**Fichier:** `categories\blockly\variables.ts` (ligne 68)
+**Fichier:** `categories\blockly\variables.ts` (ligne 66)
 
 **Signature:** `export const getArduinoTypeLabel = (type: string): string =>`
 
@@ -1354,8 +1768,187 @@ Lazily initializes Monaco Editor to avoid heavy startup cost.
 
 **Description:**
 
-Comme {@link ContinuousMetrics}, mais le flyout ne réduit pas la zone du workspace : il se
-superpose (comportement proche de la toolbox à catégories classique).
+Like {@link ContinuousMetrics}, but the flyout does not shrink the workspace area: it
+overlays it (behaviour close to the classic category toolbox).
+
+---
+
+
+## core\create_ucblockly.ts
+
+### createUcBlockly
+
+**Fichier:** `core\create_ucblockly.ts` (ligne 102)
+
+**Signature:** `export function createUcBlockly(`
+
+**Description:**
+
+Creates a µcBlockly editor inside `container` without requiring demo shell DOM ids.
+@param container - Host element; a child div is created for Blockly injection unless
+  `options.injectionTarget` is set.
+@param options - Toolbox, language, theme, and optional callbacks.
+@returns API handle with workspace, code generation, and serialization.
+
+---
+
+
+## core\default_options.ts
+
+### resolveEnforcerOptions
+
+**Fichier:** `core\default_options.ts` (ligne 65)
+
+**Signature:** `export function resolveEnforcerOptions(`
+
+**Description:**
+
+Merges partial enforcer options with {@link DEFAULT_UCBLOCKLY_ENFORCERS}.
+
+---
+
+### resolvePluginOptions
+
+**Fichier:** `core\default_options.ts` (ligne 58)
+
+**Signature:** `export function resolvePluginOptions(`
+
+**Description:**
+
+Merges partial plugin options with {@link DEFAULT_UCBLOCKLY_PLUGINS}.
+
+---
+
+
+## core\locale.ts
+
+### applyUcBlocklyLocale
+
+**Fichier:** `core\locale.ts` (ligne 57)
+
+**Signature:** `export function applyUcBlocklyLocale(language: string): void`
+
+**Description:**
+
+Applies Blockly locale and µcBlockly custom messages.
+@param language - ISO 639 language code (e.g. `fr`, `en`).
+
+---
+
+### mergeCustomBlocklyMessages
+
+**Fichier:** `core\locale.ts` (ligne 39)
+
+**Signature:** `export function mergeCustomBlocklyMessages(language: string, keys: readonly string[]): void`
+
+**Description:**
+
+Copies selected µcBlockly message keys into `Blockly.Msg`.
+
+---
+
+
+## core\register.ts
+
+### registerUcBlocklyKernel
+
+**Fichier:** `core\register.ts` (ligne 57)
+
+**Signature:** `export function registerUcBlocklyKernel(`
+
+**Description:**
+
+Registers block definitions, types, and standard-block configuration.
+Safe to call multiple times (subsequent calls are no-ops).
+
+---
+
+### resetUcBlocklyKernelRegistrationForTests
+
+**Fichier:** `core\register.ts` (ligne 89)
+
+**Signature:** `export function resetUcBlocklyKernelRegistrationForTests(): void`
+
+**Description:**
+
+@internal Test helper — allows re-running registration in unit tests.
+
+---
+
+
+## core\sound_toggle_control.ts
+
+### SoundToggleControl
+
+**Fichier:** `core\sound_toggle_control.ts` (ligne 71)
+
+**Signature:** `export class SoundToggleControl`
+
+**Description:**
+
+Bottom-right speaker button that toggles Blockly workspace audio.
+
+---
+
+
+## core\ucblockly_plugins.ts
+
+### UcBlocklyPluginHost
+
+**Fichier:** `core\ucblockly_plugins.ts` (ligne 110)
+
+**Signature:** `export class UcBlocklyPluginHost`
+
+**Description:**
+
+Manages optional Blockly workspace plugins from {@link UcBlocklyPluginOptions}.
+
+---
+
+
+## core\ucblockly_workspace_manager.ts
+
+### UcBlocklyWorkspaceManager
+
+**Fichier:** `core\ucblockly_workspace_manager.ts` (ligne 63)
+
+**Signature:** `export class UcBlocklyWorkspaceManager`
+
+**Description:**
+
+Owns Blockly workspace injection, plugins, variables, and serialization.
+Demo UI (menus, Monaco, URL) stays in {@link BlocklyApplication} (`src/demo/`).
+
+---
+
+
+## core\workspace_state.ts
+
+### sanitizeSerializedWorkspaceState
+
+**Fichier:** `core\workspace_state.ts` (ligne 34)
+
+**Signature:** `export function sanitizeSerializedWorkspaceState(state: unknown): void`
+
+**Description:**
+
+Coerces invalid block coordinates before save/load.
+
+---
+
+
+## demo\blockly_application_shell.ts
+
+### BlocklyApplication
+
+**Fichier:** `demo\blockly_application_shell.ts` (ligne 119)
+
+**Signature:** `export class BlocklyApplication implements BlocklyApplicationType`
+
+**Description:**
+
+Full µcBlockly demo: menus, Monaco, session storage.
+Workspace logic lives in {@link UcBlocklyWorkspaceManager}.
 
 ---
 
@@ -1364,7 +1957,7 @@ superpose (comportement proche de la toolbox à catégories classique).
 
 ### ArduinoGenerator
 
-**Fichier:** `generators\arduino\arduino_generator.ts` (ligne 96)
+**Fichier:** `generators\arduino\arduino_generator.ts` (ligne 97)
 
 **Signature:** `export class ArduinoGenerator extends Blockly.CodeGenerator`
 
@@ -1438,7 +2031,7 @@ Checks whether a numeric value fits the given Arduino type.
 
 ### applyBlockTypesFromRegistry
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 563)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 634)
 
 **Signature:** `export function applyBlockTypesFromRegistry(): void`
 
@@ -1450,7 +2043,7 @@ Applies registered block type metadata to Blockly blocks.
 
 ### checkTypeCompatibility
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 490)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 561)
 
 **Signature:** `export function checkTypeCompatibility(`
 
@@ -1463,21 +2056,34 @@ Checks whether two types are compatible for connection.
 
 ---
 
+### findAllListDeclarationBlocks
+
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 231)
+
+**Signature:** `export function findAllListDeclarationBlocks(`
+
+**Description:**
+
+All list declaration blocks that reference a given variable id (workspace order).
+
+---
+
 ### findListDeclarationBlock
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 221)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 251)
 
 **Signature:** `export function findListDeclarationBlock(`
 
 **Description:**
 
 Finds the list declaration block for a workspace variable id.
+Prefers the ownership claim (`__ucbDeclareBlockId`); otherwise first block.
 
 ---
 
 ### getCompatibleTypesForCheck
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 462)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 533)
 
 **Signature:** `export function getCompatibleTypesForCheck(type: string | null | undefined): string[] | null`
 
@@ -1491,7 +2097,7 @@ Returns Blockly check types compatible with a given µcBlockly type.
 
 ### hasArrayListConnectedElements
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 201)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 217)
 
 **Signature:** `export function hasArrayListConnectedElements(block: Blockly.Block): boolean`
 
@@ -1501,9 +2107,21 @@ True when at least one ADD input has a connected value block.
 
 ---
 
+### hasDuplicateListDeclaration
+
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 298)
+
+**Signature:** `export function hasDuplicateListDeclaration(block: Blockly.Block): boolean`
+
+**Description:**
+
+True when another list declaration block already owns the same variable.
+
+---
+
 ### identifyMathNumberType
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 93)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 109)
 
 **Signature:** `export function identifyMathNumberType(`
 
@@ -1515,7 +2133,7 @@ Infers int/float from a math_number field value.
 
 ### inferArrayElementTypeFromBlock
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 187)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 203)
 
 **Signature:** `export function inferArrayElementTypeFromBlock(block: Blockly.Block): string`
 
@@ -1528,7 +2146,7 @@ Numeric types unify (int + float → float); float literals promote to float.
 
 ### inferArrayElementTypeFromInputs
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 134)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 150)
 
 **Signature:** `export function inferArrayElementTypeFromInputs(`
 
@@ -1541,7 +2159,7 @@ Numeric types unify (int + float → float); float literals promote to float.
 
 ### inferArrayGetIndexElementType
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 262)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 333)
 
 **Signature:** `export function inferArrayGetIndexElementType(block: Blockly.Block): string`
 
@@ -1551,7 +2169,7 @@ Numeric types unify (int + float → float); float literals promote to float.
 
 ### inferListVariableElementType
 
-**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 241)
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 309)
 
 **Signature:** `export function inferListVariableElementType(`
 
@@ -1561,12 +2179,38 @@ Element type (int, char, …) of a list variable from its declaration block.
 
 ---
 
+### isPrimaryListDeclarationBlock
+
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 275)
+
+**Signature:** `export function isPrimaryListDeclarationBlock(block: Blockly.Block): boolean`
+
+**Description:**
+
+True when this block owns the exclusive list declaration (const-like).
+Falls back to workspace order when ownership is not yet claimed.
+
+---
+
+### registerVariableTypeForBlockResolver
+
+**Fichier:** `generators\arduino\block_types_registry.ts` (ligne 61)
+
+**Signature:** `export function registerVariableTypeForBlockResolver(`
+
+**Description:**
+
+Wires the variable type resolver once category shared helpers have loaded.
+Safe to call multiple times (last registration wins).
+
+---
+
 
 ## generators\arduino\block_types.ts
 
 ### getArduinoTypeLabelKey
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 136)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 119)
 
 **Signature:** `export function getArduinoTypeLabelKey(typeKey: string): string`
 
@@ -1578,7 +2222,7 @@ Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`)
 
 ### getCompatibleTypes
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 247)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 227)
 
 **Signature:** `export function getCompatibleTypes(targetType: string | null | undefined): string[]`
 
@@ -1592,7 +2236,7 @@ Returns compatible types for a target type.
 
 ### getCppTypeName
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 181)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 161)
 
 **Signature:** `export function getCppTypeName(typeKey: string): string`
 
@@ -1604,7 +2248,7 @@ C++ type name emitted in generated Arduino code.
 
 ### getInternalTypeForArduinoType
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 143)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 126)
 
 **Signature:** `export function getInternalTypeForArduinoType(typeKey: string): string`
 
@@ -1616,7 +2260,7 @@ Internal µcBlockly type for connection checking.
 
 ### getVariableTypeOptions
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 220)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 200)
 
 **Signature:** `export function getVariableTypeOptions(): string[]`
 
@@ -1628,7 +2272,7 @@ Returns the ordered list of Arduino types for Blockly dropdown menus.
 
 ### isArduinoScalarType
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 225)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 205)
 
 **Signature:** `export function isArduinoScalarType(type: string | null | undefined): type is ArduinoTypeKey`
 
@@ -1640,7 +2284,7 @@ True when the type can appear in Arduino scalar type dropdowns (excludes `list`)
 
 ### isArrayElementTypeCompatible
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 201)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 181)
 
 **Signature:** `export function isArrayElementTypeCompatible(`
 
@@ -1652,7 +2296,7 @@ Compatibilité stricte pour les entrées des blocs liste (sans char ↔ string).
 
 ### isDeclareContainsTypeCompatible
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 190)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 170)
 
 **Signature:** `export function isDeclareContainsTypeCompatible(`
 
@@ -1666,7 +2310,7 @@ Vérifie qu'une valeur connectée en mode « contains » correspond au type du m
 
 ### isTypeCompatible
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 261)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 241)
 
 **Signature:** `export function isTypeCompatible(sourceType: string | null | undefined, targetType: string | null | undefined): boolean`
 
@@ -1681,7 +2325,7 @@ Checks if a source type can connect to a target type.
 
 ### normalizeBlocklyCheckToInternalType
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 157)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 137)
 
 **Signature:** `export function normalizeBlocklyCheckToInternalType(`
 
@@ -1694,7 +2338,7 @@ Colour blocks use Blockly check `Colour` but variables and arrays use `string`.
 
 ### resolveArduinoScalarVariableType
 
-**Fichier:** `generators\arduino\block_types.ts` (ligne 233)
+**Fichier:** `generators\arduino\block_types.ts` (ligne 213)
 
 **Signature:** `export function resolveArduinoScalarVariableType(`
 
@@ -1708,9 +2352,33 @@ Blockly-only types such as `list` are not Arduino types.
 
 ## generators\arduino\blocks\array.ts
 
+### Array_bitmap
+
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 651)
+
+**Signature:** `export const Array_bitmap = function (`
+
+**Description:**
+
+Array_bitmap - global 2D byte array from FieldBitmap (rows x cols of 0/1).
+
+---
+
+### Array_bitmap_get
+
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 681)
+
+**Signature:** `export const Array_bitmap_get = function (`
+
+**Description:**
+
+Array_bitmap_get - value: 2D 0/1 initializer from FieldBitmap.
+
+---
+
 ### Array_create
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 266)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 495)
 
 **Signature:** `export const Array_create = function (`
 
@@ -1722,7 +2390,7 @@ Array_create - int arr[size]; or int arr[] = \{...\}; (1D-5D with FieldVariable)
 
 ### Array_declare
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 205)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 428)
 
 **Signature:** `export const Array_declare = function (`
 
@@ -1734,7 +2402,7 @@ Array_declare - int arr[size]; or int arr[] = \{...\};
 
 ### Array_fix
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 329)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 564)
 
 **Signature:** `export const Array_fix = function (`
 
@@ -1746,7 +2414,7 @@ Array_fix - arr[i] = value; or arr[i][j] = value;
 
 ### Array_getIndex_in_array
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 347)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 582)
 
 **Signature:** `export const Array_getIndex_in_array = function (`
 
@@ -1758,7 +2426,7 @@ Array_getIndex_in_array - arr[i] or arr[i][j]
 
 ### Array_getIndex_in_list
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 179)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 205)
 
 **Signature:** `export const Array_getIndex_in_list = function (`
 
@@ -1770,7 +2438,7 @@ Array_getIndex_in_list - list[index] (index 0-based, comme en C/Arduino)
 
 ### Array_list_literal
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 130)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 144)
 
 **Signature:** `export const Array_list_literal = function (`
 
@@ -1782,7 +2450,7 @@ Array_list_literal - list literal value for Array_declare / Array_create.
 
 ### Array_modify
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 192)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 218)
 
 **Signature:** `export const Array_modify = function (`
 
@@ -1792,9 +2460,21 @@ Array_modify - listVar[indice] = value;
 
 ---
 
+### Array_set
+
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 231)
+
+**Signature:** `export const Array_set = function (`
+
+**Description:**
+
+Array_set - whole-list assignment: set list to [bitmap | list literal | text init].
+
+---
+
 ### Array_with
 
-**Fichier:** `generators\arduino\blocks\array.ts` (ligne 149)
+**Fichier:** `generators\arduino\blocks\array.ts` (ligne 163)
 
 **Signature:** `export const Array_with = function (`
 
@@ -1809,7 +2489,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_analog_read
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 94)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 125)
 
 **Signature:** `export function board_base_inout_analog_read(block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -1819,7 +2499,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_analog_write
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 82)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 113)
 
 **Signature:** `export function board_base_inout_analog_write(block: Block, generator: ArduinoGenerator): string`
 
@@ -1829,7 +2509,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_analog_write_slider
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 88)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 119)
 
 **Signature:** `export function board_base_inout_analog_write_slider(block: Block, _generator: ArduinoGenerator): string`
 
@@ -1839,7 +2519,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_buildin_led
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 58)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 64)
 
 **Signature:** `export function board_base_inout_buildin_led(block: Block, generator: ArduinoGenerator): string`
 
@@ -1849,7 +2529,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_digital_read
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 71)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 77)
 
 **Signature:** `export function board_base_inout_digital_read(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -1857,9 +2537,39 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ---
 
+### board_base_inout_digital_read_board
+
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 99)
+
+**Signature:** `export function board_base_inout_digital_read_board(`
+
+**Description:** *Aucune documentation*
+
+---
+
+### board_base_inout_digital_read_grid
+
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 92)
+
+**Signature:** `export function board_base_inout_digital_read_grid(`
+
+**Description:** *Aucune documentation*
+
+---
+
+### board_base_inout_digital_read_pin
+
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 83)
+
+**Signature:** `export function board_base_inout_digital_read_pin(`
+
+**Description:** *Aucune documentation*
+
+---
+
 ### board_base_inout_digital_write
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 64)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 70)
 
 **Signature:** `export function board_base_inout_digital_write(block: Block, generator: ArduinoGenerator): string`
 
@@ -1869,7 +2579,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_highlow
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 77)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 108)
 
 **Signature:** `export function board_base_inout_highlow(block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -1879,7 +2589,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_map
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 132)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 163)
 
 **Signature:** `export function board_base_inout_map(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -1889,7 +2599,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_notone
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 146)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 177)
 
 **Signature:** `export function board_base_inout_notone(block: Block, generator: ArduinoGenerator): string`
 
@@ -1899,7 +2609,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_pin_mode
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 126)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 157)
 
 **Signature:** `export function board_base_inout_pin_mode(block: Block, _generator: ArduinoGenerator): string`
 
@@ -1909,7 +2619,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_pulsein
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 113)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 144)
 
 **Signature:** `export function board_base_inout_pulsein(block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -1919,7 +2629,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_pulsein_timeout
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 119)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 150)
 
 **Signature:** `export function board_base_inout_pulsein_timeout(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -1929,7 +2639,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_inout_tone
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 139)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 170)
 
 **Signature:** `export function board_base_inout_tone(block: Block, generator: ArduinoGenerator): string`
 
@@ -1939,7 +2649,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 
 ### board_base_loop
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 53)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 56)
 
 **Signature:** `export function board_base_loop(block: Block, generator: ArduinoGenerator): string`
 
@@ -1956,7 +2666,7 @@ Array_with - define [variable] as global list (declaration before setup()).
 **Description:**
 
 @license
-Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -1973,7 +2683,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_base_setup_loop
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 44)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 45)
 
 **Signature:** `export function board_base_setup_loop(block: Block, generator: ArduinoGenerator): string`
 
@@ -1983,7 +2693,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_base_time_delay
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 99)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 130)
 
 **Signature:** `export function board_base_time_delay(block: Block, generator: ArduinoGenerator): string`
 
@@ -1993,7 +2703,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_base_time_delay_sec
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 108)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 139)
 
 **Signature:** `export function board_base_time_delay_sec(block: Block, generator: ArduinoGenerator): string`
 
@@ -2003,7 +2713,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_base_time_millis
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 104)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 135)
 
 **Signature:** `export function board_base_time_millis(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2013,7 +2723,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_conversion_constrain
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 238)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 269)
 
 **Signature:** `export function board_conversion_constrain(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2023,7 +2733,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_conversion_tobyte
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 228)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 259)
 
 **Signature:** `export function board_conversion_tobyte(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2033,7 +2743,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_conversion_tochar
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 223)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 254)
 
 **Signature:** `export function board_conversion_tochar(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2043,7 +2753,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_conversion_tofloat
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 218)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 249)
 
 **Signature:** `export function board_conversion_tofloat(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2053,7 +2763,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_conversion_toint
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 213)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 244)
 
 **Signature:** `export function board_conversion_toint(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2063,7 +2773,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_conversion_toString
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 233)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 264)
 
 **Signature:** `export function board_conversion_toString(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2073,7 +2783,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_available
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 182)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 213)
 
 **Signature:** `export function board_serial_available(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2083,7 +2793,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_begin
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 152)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 183)
 
 **Signature:** `export function board_serial_begin(block: Block, generator: ArduinoGenerator): string`
 
@@ -2093,7 +2803,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_flush
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 174)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 205)
 
 **Signature:** `export function board_serial_flush(_block: Block, _generator: ArduinoGenerator): string`
 
@@ -2103,7 +2813,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_parseFloat
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 208)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 239)
 
 **Signature:** `export function board_serial_parseFloat(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2113,7 +2823,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_parseInt
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 204)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 235)
 
 **Signature:** `export function board_serial_parseInt(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2123,7 +2833,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_peek
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 191)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 222)
 
 **Signature:** `export function board_serial_peek(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2133,7 +2843,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_print
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 158)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 189)
 
 **Signature:** `export function board_serial_print(block: Block, generator: ArduinoGenerator): string`
 
@@ -2143,7 +2853,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_printfor
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 168)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 199)
 
 **Signature:** `export function board_serial_printfor(block: Block, generator: ArduinoGenerator): string`
 
@@ -2153,7 +2863,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_println
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 163)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 194)
 
 **Signature:** `export function board_serial_println(block: Block, generator: ArduinoGenerator): string`
 
@@ -2163,7 +2873,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_read
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 178)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 209)
 
 **Signature:** `export function board_serial_read(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2173,7 +2883,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_readString
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 195)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 226)
 
 **Signature:** `export function board_serial_readString(_block: Block, _generator: ArduinoGenerator): [string, Order]`
 
@@ -2183,7 +2893,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_readStringUntil
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 199)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 230)
 
 **Signature:** `export function board_serial_readStringUntil(block: Block, generator: ArduinoGenerator): [string, Order]`
 
@@ -2193,7 +2903,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### board_serial_write
 
-**Fichier:** `generators\arduino\blocks\board.ts` (ligne 186)
+**Fichier:** `generators\arduino\blocks\board.ts` (ligne 217)
 
 **Signature:** `export function board_serial_write(block: Block, generator: ArduinoGenerator): string`
 
@@ -2206,7 +2916,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### color_picker_custom
 
-**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 59)
+**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 77)
 
 **Signature:** `export function color_picker_custom(block: Block): [string, Order]`
 
@@ -2220,7 +2930,7 @@ Generates Arduino code for the custom colour picker value.
 
 ### color_picker_hsv
 
-**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 72)
+**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 90)
 
 **Signature:** `export function color_picker_hsv(block: Block): [string, Order]`
 
@@ -2234,7 +2944,7 @@ Generates Arduino code for the HSV picker value.
 
 ### colour_blend
 
-**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 138)
+**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 156)
 
 **Signature:** `export function colour_blend(`
 
@@ -2249,7 +2959,7 @@ Generates Arduino code for blending two colours.
 
 ### colour_picker
 
-**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 49)
+**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 67)
 
 **Signature:** `export function colour_picker(block: Block): [string, Order]`
 
@@ -2263,7 +2973,7 @@ Generates Arduino code for a colour picker value.
 
 ### colour_random
 
-**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 82)
+**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 100)
 
 **Signature:** `export function colour_random(`
 
@@ -2277,7 +2987,7 @@ Generates Arduino code for a random colour.
 
 ### colour_rgb
 
-**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 109)
+**Fichier:** `generators\arduino\blocks\colour.ts` (ligne 127)
 
 **Signature:** `export function colour_rgb(`
 
@@ -2420,7 +3130,7 @@ Generates a C++ comment from the block's TEXT field (if non-empty).
 
 ### controls_if
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 50)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 68)
 
 **Signature:** `export function controls_if(block: Block, generator: ArduinoGenerator)`
 
@@ -2435,7 +3145,7 @@ Generates Arduino code for if/else control blocks.
 
 ### controls_switch
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 201)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 219)
 
 **Signature:** `export function controls_switch(`
 
@@ -2450,7 +3160,7 @@ Generates Arduino code for switch/case blocks.
 
 ### logic_boolean
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 178)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 196)
 
 **Signature:** `export function logic_boolean(`
 
@@ -2464,7 +3174,7 @@ Generates Arduino code for boolean literals.
 
 ### logic_compare
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 100)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 118)
 
 **Signature:** `export function logic_compare(`
 
@@ -2479,7 +3189,7 @@ Generates Arduino code for comparison operations.
 
 ### logic_negate
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 162)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 180)
 
 **Signature:** `export function logic_negate(`
 
@@ -2494,7 +3204,7 @@ Generates Arduino code for boolean negation.
 
 ### logic_null
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 190)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 208)
 
 **Signature:** `export function logic_null(): [string, Order]`
 
@@ -2507,7 +3217,7 @@ Generates Arduino code for null literal.
 
 ### logic_operation
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 129)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 147)
 
 **Signature:** `export function logic_operation(`
 
@@ -2522,7 +3232,7 @@ Generates Arduino code for boolean operations.
 
 ### logic_ternary
 
-**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 246)
+**Fichier:** `generators\arduino\blocks\logic.ts` (ligne 264)
 
 **Signature:** `export function logic_ternary(`
 
@@ -2540,7 +3250,7 @@ Generates Arduino code for ternary expressions.
 
 ### controls_flow_statements
 
-**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 323)
+**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 341)
 
 **Signature:** `export function controls_flow_statements(`
 
@@ -2554,7 +3264,7 @@ Generates Arduino code for flow statements (break/continue).
 
 ### controls_for
 
-**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 164)
+**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 182)
 
 **Signature:** `export function controls_for(`
 
@@ -2569,7 +3279,7 @@ Generates Arduino code for numeric for-loops.
 
 ### controls_forEach
 
-**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 281)
+**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 299)
 
 **Signature:** `export function controls_forEach(`
 
@@ -2584,7 +3294,7 @@ Generates Arduino code for foreach loops.
 
 ### controls_repeat_ext
 
-**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 104)
+**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 122)
 
 **Signature:** `export function controls_repeat_ext(`
 
@@ -2599,7 +3309,7 @@ Generates Arduino code for repeat loops with a count.
 
 ### controls_whileUntil
 
-**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 140)
+**Fichier:** `generators\arduino\blocks\loops.ts` (ligne 158)
 
 **Signature:** `export function controls_whileUntil(`
 
@@ -2617,7 +3327,7 @@ Generates Arduino code for while/until loops.
 
 ### addListHelpers
 
-**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 98)
+**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 116)
 
 **Signature:** `export function addListHelpers(generator: ArduinoGenerator): void`
 
@@ -2630,7 +3340,7 @@ Injects list helper functions into the generator.
 
 ### addMathInclude
 
-**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 47)
+**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 65)
 
 **Signature:** `export function addMathInclude(generator: ArduinoGenerator): void`
 
@@ -2644,7 +3354,7 @@ Only needed for libm symbols (sin, sqrt, pow, …) not provided by Arduino.h alo
 
 ### addPrimeHelper
 
-**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 77)
+**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 95)
 
 **Signature:** `export function addPrimeHelper(generator: ArduinoGenerator): void`
 
@@ -2657,7 +3367,7 @@ Injects a prime-check helper into the generator.
 
 ### addSqrtHelper
 
-**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 55)
+**Fichier:** `generators\arduino\blocks\math_helpers.ts` (ligne 73)
 
 **Signature:** `export function addSqrtHelper(generator: ArduinoGenerator): void`
 
@@ -2673,7 +3383,7 @@ Injects an integer square-root helper (avoids &lt;math.h&gt; for list statistics
 
 ### inout_angle_maths
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 99)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 130)
 
 **Signature:** `export function inout_angle_maths(block: Block): [string, Order]`
 
@@ -2687,7 +3397,7 @@ Generates Arduino code for an angle literal.
 
 ### math_arithmetic
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 110)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 141)
 
 **Signature:** `export function math_arithmetic(`
 
@@ -2702,7 +3412,7 @@ Generates Arduino code for arithmetic expressions.
 
 ### math_atan2
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 478)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 509)
 
 **Signature:** `export function math_atan2(`
 
@@ -2717,7 +3427,7 @@ Generates Arduino code for atan2.
 
 ### math_change
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 78)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 100)
 
 **Signature:** `export function math_change(`
 
@@ -2732,7 +3442,7 @@ Generates Arduino code for a change-by statement.
 
 ### math_constant
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 268)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 299)
 
 **Signature:** `export function math_constant(block: Block): [string, Order]`
 
@@ -2746,7 +3456,7 @@ Generates Arduino code for math constants.
 
 ### math_constrain
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 436)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 467)
 
 **Signature:** `export function math_constrain(`
 
@@ -2761,7 +3471,7 @@ Generates Arduino code for constrain(min, max).
 
 ### math_interval
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 202)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 233)
 
 **Signature:** `export function math_interval(`
 
@@ -2776,7 +3486,7 @@ Generates Arduino code for interval comparisons.
 
 ### math_modulo
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 417)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 448)
 
 **Signature:** `export function math_modulo(`
 
@@ -2791,7 +3501,7 @@ Generates Arduino code for modulo operation.
 
 ### math_number
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 55)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 77)
 
 **Signature:** `export function math_number(block: Block): [string, Order]`
 
@@ -2805,7 +3515,7 @@ Generates Arduino code for a numeric literal.
 
 ### math_number_property
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 292)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 323)
 
 **Signature:** `export function math_number_property(`
 
@@ -2820,7 +3530,7 @@ Generates Arduino code for numeric property checks.
 
 ### math_on_list
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 378)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 409)
 
 **Signature:** `export function math_on_list(`
 
@@ -2835,7 +3545,7 @@ Generates Arduino code for list math operations.
 
 ### math_percent
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 66)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 88)
 
 **Signature:** `export function math_percent(block: Block): [string, Order]`
 
@@ -2849,7 +3559,7 @@ Generates Arduino code for a percentage literal (0-100 mapped to 0-1).
 
 ### math_random_float
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 467)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 498)
 
 **Signature:** `export function math_random_float(): [string, Order]`
 
@@ -2862,7 +3572,7 @@ Generates Arduino code for a random float between 0 and 1.
 
 ### math_random_int
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 453)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 484)
 
 **Signature:** `export function math_random_int(`
 
@@ -2877,7 +3587,7 @@ Generates Arduino code for a random integer in a range.
 
 ### math_round
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 352)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 383)
 
 **Signature:** `export function math_round(`
 
@@ -2892,7 +3602,7 @@ Generates Arduino code for rounding operations.
 
 ### math_single
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 141)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 172)
 
 **Signature:** `export function math_single(`
 
@@ -2907,7 +3617,7 @@ Generates Arduino code for single-operand math operations.
 
 ### math_trig
 
-**Fichier:** `generators\arduino\blocks\math.ts` (ligne 243)
+**Fichier:** `generators\arduino\blocks\math.ts` (ligne 274)
 
 **Signature:** `export function math_trig(`
 
@@ -2925,7 +3635,7 @@ Generates Arduino code for trigonometric functions.
 
 ### procedures_callnoreturn
 
-**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 311)
+**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 329)
 
 **Signature:** `export function procedures_callnoreturn(`
 
@@ -2940,7 +3650,7 @@ Generates Arduino code for calling a procedure without return value.
 
 ### procedures_callreturn
 
-**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 289)
+**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 307)
 
 **Signature:** `export function procedures_callreturn(`
 
@@ -2955,7 +3665,7 @@ Generates Arduino code for calling a procedure with return value.
 
 ### procedures_defnoreturn
 
-**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 261)
+**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 279)
 
 **Signature:** `export const procedures_defnoreturn = function (`
 
@@ -2970,7 +3680,7 @@ Generates Arduino code for a procedure without return value.
 
 ### procedures_defreturn
 
-**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 216)
+**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 234)
 
 **Signature:** `export function procedures_defreturn(`
 
@@ -2985,7 +3695,7 @@ Generates Arduino code for a procedure with return value.
 
 ### procedures_ifreturn
 
-**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 332)
+**Fichier:** `generators\arduino\blocks\procedures.ts` (ligne 350)
 
 **Signature:** `export function procedures_ifreturn(`
 
@@ -3003,7 +3713,7 @@ Generates Arduino code for if-return blocks.
 
 ### addTextHelpers
 
-**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 129)
+**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 147)
 
 **Signature:** `export function addTextHelpers(generator: ArduinoGenerator): void`
 
@@ -3016,7 +3726,7 @@ Adds helper functions for text list operations (count, replace, reverse).
 
 ### addTitleCaseHelper
 
-**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 63)
+**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 81)
 
 **Signature:** `export function addTitleCaseHelper(generator: ArduinoGenerator): void`
 
@@ -3029,7 +3739,7 @@ Title-case helper without ctype (ASCII letter checks only).
 
 ### addTrimHelper
 
-**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 118)
+**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 136)
 
 **Signature:** `export function addTrimHelper(`
 
@@ -3043,7 +3753,7 @@ Injects only the trim helper required for the selected mode.
 
 ### addUpperLowerHelper
 
-**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 46)
+**Fichier:** `generators\arduino\blocks\text_helpers.ts` (ligne 64)
 
 **Signature:** `export function addUpperLowerHelper(generator: ArduinoGenerator): void`
 
@@ -3059,7 +3769,7 @@ Legacy rduino-style upper/lower case helper (Arduino String methods, no ctype).
 
 ### text
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 89)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 107)
 
 **Signature:** `export function text(block: Block): [string, Order]`
 
@@ -3073,7 +3783,7 @@ Generates Arduino code for a quoted text literal.
 
 ### text_append
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 174)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 192)
 
 **Signature:** `export function text_append(`
 
@@ -3088,7 +3798,7 @@ Generates Arduino code to append text to a variable.
 
 ### text_changeCase
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 326)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 344)
 
 **Signature:** `export function text_changeCase(`
 
@@ -3103,7 +3813,7 @@ Generates Arduino code for text case changes.
 
 ### text_char
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 133)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 151)
 
 **Signature:** `export function text_char(block: Block): [string, Order]`
 
@@ -3117,7 +3827,7 @@ Generates Arduino code for a single character literal.
 
 ### text_charAt
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 239)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 257)
 
 **Signature:** `export function text_charAt(`
 
@@ -3132,7 +3842,7 @@ Generates Arduino code to access a character at position.
 
 ### text_count
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 375)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 393)
 
 **Signature:** `export function text_count(`
 
@@ -3147,7 +3857,7 @@ Generates Arduino code for counting substrings.
 
 ### text_date
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 122)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 140)
 
 **Signature:** `export function text_date(block: Block): [string, Order]`
 
@@ -3161,7 +3871,7 @@ Generates Arduino code for a date literal.
 
 ### text_getSubstring
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 282)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 300)
 
 **Signature:** `export function text_getSubstring(`
 
@@ -3176,7 +3886,7 @@ Generates Arduino code for substring extraction.
 
 ### text_indexOf
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 221)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 239)
 
 **Signature:** `export function text_indexOf(`
 
@@ -3191,7 +3901,7 @@ Generates Arduino code for substring index lookup.
 
 ### text_isEmpty
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 206)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 224)
 
 **Signature:** `export function text_isEmpty(`
 
@@ -3206,7 +3916,7 @@ Generates Arduino code for is-empty checks.
 
 ### text_join
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 145)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 163)
 
 **Signature:** `export function text_join(`
 
@@ -3221,7 +3931,7 @@ Generates Arduino code to concatenate text parts.
 
 ### text_length
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 191)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 209)
 
 **Signature:** `export function text_length(`
 
@@ -3236,7 +3946,7 @@ Generates Arduino code for text length.
 
 ### text_multiline
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 111)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 129)
 
 **Signature:** `export function text_multiline(block: Block): [string, Order]`
 
@@ -3250,7 +3960,7 @@ Generates Arduino code for a multiline quoted text literal.
 
 ### text_no_quote
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 100)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 118)
 
 **Signature:** `export function text_no_quote(block: Block): [string, Order]`
 
@@ -3264,7 +3974,7 @@ Generates Arduino code for a raw text literal without quotes.
 
 ### text_print
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 427)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 445)
 
 **Signature:** `export function text_print(`
 
@@ -3279,7 +3989,7 @@ Generates Arduino code for printing text.
 
 ### text_prompt_ext
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 443)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 461)
 
 **Signature:** `export function text_prompt_ext(`
 
@@ -3294,7 +4004,7 @@ Generates Arduino code for prompt text (input).
 
 ### text_replace
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 392)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 410)
 
 **Signature:** `export function text_replace(`
 
@@ -3309,7 +4019,7 @@ Generates Arduino code for replacing substrings.
 
 ### text_reverse
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 411)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 429)
 
 **Signature:** `export function text_reverse(`
 
@@ -3324,7 +4034,7 @@ Generates Arduino code for reversing text.
 
 ### text_trim
 
-**Fichier:** `generators\arduino\blocks\text.ts` (ligne 350)
+**Fichier:** `generators\arduino\blocks\text.ts` (ligne 368)
 
 **Signature:** `export function text_trim(`
 
@@ -3495,6 +4205,21 @@ Generates Arduino code for variables_set.
 ---
 
 
+## generators\arduino\configure_logic_blocks.ts
+
+### configureLogicCompareAndTernaryBlocks
+
+**Fichier:** `generators\arduino\configure_logic_blocks.ts` (ligne 43)
+
+**Signature:** `export function configureLogicCompareAndTernaryBlocks(): void`
+
+**Description:**
+
+Configures logic_compare and logic_ternary for the typed connection system.
+
+---
+
+
 ## generators\arduino\configure_standard_blocks.ts
 
 ### configureStandardBlocks
@@ -3548,7 +4273,7 @@ Indique si le mode debug (switch UI ou localStorage) est actif.
 
 **Description:**
 
-Flyout : blocs setup()/loop() Arduino, puis séparateur, puis procédures Blockly.
+Flyout: Arduino setup()/loop() blocks, then a separator, then Blockly procedures.
 
 ---
 
@@ -3569,7 +4294,7 @@ Enregistre le callback de la catégorie PROCEDURE dans la toolbox.
 
 ### registerStrictConnectionChecker
 
-**Fichier:** `generators\arduino\strict_connection_checker.ts` (ligne 959)
+**Fichier:** `generators\arduino\strict_connection_checker.ts` (ligne 918)
 
 **Signature:** `export function registerStrictConnectionChecker(workspace: Blockly.Workspace): void`
 
@@ -3583,7 +4308,7 @@ Use registerStrictConnectionCheckerInRegistry() BEFORE Blockly.inject() instead 
 
 ### registerStrictConnectionCheckerInRegistry
 
-**Fichier:** `generators\arduino\strict_connection_checker.ts` (ligne 942)
+**Fichier:** `generators\arduino\strict_connection_checker.ts` (ligne 901)
 
 **Signature:** `export function registerStrictConnectionCheckerInRegistry(): void`
 
@@ -3596,7 +4321,7 @@ MUST be called BEFORE Blockly.inject() so the workspace uses our checker from th
 
 ### StrictConnectionChecker
 
-**Fichier:** `generators\arduino\strict_connection_checker.ts` (ligne 54)
+**Fichier:** `generators\arduino\strict_connection_checker.ts` (ligne 64)
 
 **Signature:** `export class StrictConnectionChecker extends Blockly.ConnectionChecker`
 
@@ -3604,6 +4329,86 @@ MUST be called BEFORE Blockly.inject() so the workspace uses our checker from th
 
 Custom ConnectionChecker that extends Blockly's default ConnectionChecker
 to use getBlockType() for source blocks, providing stricter type checking.
+
+---
+
+
+## generators\arduino\strict_connection_type_utils.ts
+
+### checkSwitchCaseIntConnection
+
+**Fichier:** `generators\arduino\strict_connection_type_utils.ts` (ligne 140)
+
+**Signature:** `export function checkSwitchCaseIntConnection(`
+
+**Description:**
+
+Switch case inputs require int values. Blockly's default checker compares
+output checks (e.g. math_number → "Number") against setCheck(["int"]) and
+rejects before getBlockType() runs — handle that case explicitly.
+@param helpers - Provides resolveOutputInputPair to identify OUTPUT_VALUE vs INPUT_VALUE.
+
+---
+
+### checkTypeCompatibility
+
+**Fichier:** `generators\arduino\strict_connection_type_utils.ts` (ligne 169)
+
+**Signature:** `export function checkTypeCompatibility(`
+
+**Description:**
+
+Checks if two types are compatible (exact match, null/undefined equality,
+or registry rules).
+
+---
+
+### getInputNameForConnection
+
+**Fichier:** `generators\arduino\strict_connection_type_utils.ts` (ligne 50)
+
+**Signature:** `export function getInputNameForConnection(`
+
+**Description:**
+
+Returns the input name for a connection on a block, or null if not found.
+
+---
+
+### isSwitchCaseInput
+
+**Fichier:** `generators\arduino\strict_connection_type_utils.ts` (ligne 65)
+
+**Signature:** `export function isSwitchCaseInput(inputConnection: Blockly.Connection): boolean`
+
+**Description:**
+
+True when the input connection is a `controls_switch` CASE* value input.
+
+---
+
+### resolveSourceBlockType
+
+**Fichier:** `generators\arduino\strict_connection_type_utils.ts` (ligne 78)
+
+**Signature:** `export function resolveSourceBlockType(`
+
+**Description:**
+
+Resolves the semantic type of a source (output) block via getBlockType()
+or the output connection check.
+
+---
+
+### resolveSwitchCaseSourceType
+
+**Fichier:** `generators\arduino\strict_connection_type_utils.ts` (ligne 108)
+
+**Signature:** `export function resolveSwitchCaseSourceType(`
+
+**Description:**
+
+Resolves semantic type for a block connecting to a switch case input.
 
 ---
 
@@ -3690,7 +4495,7 @@ Enregistre une déclaration locale dans le bon contexte Arduino.
 
 **Description:**
 
-Valeur de liste connectée à un bloc set (littéral ou local enveloppant un littéral).
+List value connected to a set block (literal or local wrapping a literal).
 
 ---
 
@@ -3714,7 +4519,7 @@ Bloc instruction « define variable as list » (déclaration globale).
 
 **Description:**
 
-Blocs littéraux de liste (valeur branchée dans variables_set ou Array_declare).
+List literal blocks (value plugged into variables_set or Array_declare).
 
 ---
 
@@ -3769,22 +4574,83 @@ Affectation produisant une déclaration locale (wrapper « local » ou liste).
 
 ## generators\arduino\variable_utils.ts
 
+### claimVariableDeclaration
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 268)
+
+**Signature:** `export function claimVariableDeclaration(`
+
+**Description:**
+
+Claims exclusive declaration ownership, mirroring const `__ucbConstBlockId`.
+@returns `owned_by_other` when another living block already declared this variable.
+
+---
+
 ### clearVariableType
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 116)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 201)
 
 **Signature:** `export function clearVariableType(`
 
 **Description:**
 
-Clears a variable's type metadata.
+Clears a variable's type metadata (back to scalar kind).
 @param variable - Variable model to update.
+
+---
+
+### getOrCreateKindedVariable
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 309)
+
+**Signature:** `export function getOrCreateKindedVariable(`
+
+**Description:**
+
+Gets or creates a variable of the given kind/name via Blockly's package helper
+(name reuse follows VariableMap / `patchVariableMapCreateVariable`).
+
+---
+
+### isInstanceVariable
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 142)
+
+**Signature:** `export function isInstanceVariable(`
+
+**Description:** *Aucune documentation*
+
+---
+
+### isInstanceVariableType
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 126)
+
+**Signature:** `export function isInstanceVariableType(`
+
+**Description:**
+
+Owner block id for the exclusive declaration of a kinded variable
+(list today, instance later). Same conflict pattern as `__ucbConstBlockId`.
+
+---
+
+### isListDeclareBlockType
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 81)
+
+**Signature:** `export function isListDeclareBlockType(`
+
+**Description:**
+
+True when the block type is a list declaration block.
 
 ---
 
 ### isListVariable
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 66)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 136)
 
 **Signature:** `export function isListVariable(`
 
@@ -3794,17 +4660,43 @@ Clears a variable's type metadata.
 
 ### isListVariableType
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 62)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 122)
 
 **Signature:** `export function isListVariableType(type: string | null | undefined): boolean`
+
+**Description:**
+
+Owner block id for the exclusive declaration of a kinded variable
+(list today, instance later). Same conflict pattern as `__ucbConstBlockId`.
+
+---
+
+### isScalarVariableType
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 132)
+
+**Signature:** `export function isScalarVariableType(type: string | null | undefined): boolean`
 
 **Description:** *Aucune documentation*
 
 ---
 
+### isVariableDeclarationOwner
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 246)
+
+**Signature:** `export function isVariableDeclarationOwner(`
+
+**Description:**
+
+True when `blockId` owns (or may claim) the exclusive declaration slot.
+Unowned variables and stale owners (deleted blocks) are claimable.
+
+---
+
 ### isVariablesDefineBlock
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 48)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 100)
 
 **Signature:** `export function isVariablesDefineBlock(`
 
@@ -3816,7 +4708,7 @@ Indique si le type de bloc correspond à une déclaration globale typée.
 
 ### normalizeVariableType
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 148)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 233)
 
 **Signature:** `export function normalizeVariableType(`
 
@@ -3827,9 +4719,21 @@ Normalizes null/"null" types to empty string.
 
 ---
 
+### releaseVariableDeclaration
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 292)
+
+**Signature:** `export function releaseVariableDeclaration(`
+
+**Description:**
+
+Releases declaration ownership when the owner block is deleted or retargeted.
+
+---
+
 ### setVariableType
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 77)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 153)
 
 **Signature:** `export function setVariableType(`
 
@@ -3841,9 +4745,21 @@ Sets a variable's type metadata and updates the model.
 
 ---
 
+### tagVariableAsInstance
+
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 191)
+
+**Signature:** `export function tagVariableAsInstance(`
+
+**Description:**
+
+Tags a workspace variable as an instance variable (`instance`).
+
+---
+
 ### tagVariableAsList
 
-**Fichier:** `generators\arduino\variable_utils.ts` (ligne 106)
+**Fichier:** `generators\arduino\variable_utils.ts` (ligne 182)
 
 **Signature:** `export function tagVariableAsList(`
 
@@ -3858,7 +4774,7 @@ Tags a workspace variable as a list/array variable (`list`).
 
 ### registerContinuousToolboxComponents
 
-**Fichier:** `index.ts` (ligne 648)
+**Fichier:** `index.ts` (ligne 495)
 
 **Signature:** `export const registerContinuousToolboxComponents = (): void =>`
 
@@ -3875,7 +4791,7 @@ for the continuous toolbox appearance.
 
 ### unregisterContinuousToolboxComponents
 
-**Fichier:** `index.ts` (ligne 725)
+**Fichier:** `index.ts` (ligne 572)
 
 **Signature:** `export const unregisterContinuousToolboxComponents = (): void =>`
 
@@ -3892,52 +4808,65 @@ and flyout inflaters, and unregisters the continuous toolbox components.
 
 ## language.ts
 
+### applyBoardCategoryDisplayName
+
+**Fichier:** `language.ts` (ligne 323)
+
+**Signature:** `export function applyBoardCategoryDisplayName(`
+
+**Description:**
+
+Updates the top-level board category label from the current #boardMenu selection.
+
+---
+
 ### changeLanguageToolbox
 
-**Fichier:** `language.ts` (ligne 300)
+**Fichier:** `language.ts` (ligne 311)
 
 **Signature:** `export const changeLanguageToolbox = (`
 
 **Description:**
 
 Returns a toolbox configuration with translated category labels.
+Also sets the board category to « Carte : Arduino Uno » / « Carte : aucune ».
 @param newLang - Target language code.
 @param toolbox - Source toolbox configuration.
-@returns Translated toolbox configuration.
+@return Translated toolbox configuration.
 
 ---
 
 ### getLangParamFromDropdown
 
-**Fichier:** `language.ts` (ligne 190)
+**Fichier:** `language.ts` (ligne 195)
 
 **Signature:** `export const getLangParamFromDropdown = (): string =>`
 
 **Description:**
 
 Gets the selected language from the dropdown and syncs the URL.
-@returns Selected language code.
+@return Selected language code.
 
 ---
 
 ### getLangParamFromUrl
 
-**Fichier:** `language.ts` (ligne 180)
+**Fichier:** `language.ts` (ligne 185)
 
 **Signature:** `export const getLangParamFromUrl = (): string =>`
 
 **Description:**
 
 Gets the language code from the URL query string.
-@returns Language code, defaulting to "en".
+@return Language code, defaulting to "en".
 
 ---
 
 ### HTML_changeLanguage
 
-**Fichier:** `language.ts` (ligne 201)
+**Fichier:** `language.ts` (ligne 206)
 
-**Signature:** `export const HTML_changeLanguage = (newLang: string): void =>`
+**Signature:** `export const HTML_changeLanguage = (newLang: string, rtl?: boolean): void =>`
 
 **Description:**
 
@@ -3948,7 +4877,7 @@ Applies translations to DOM elements with language keys.
 
 ### HTML_populateLanguages
 
-**Fichier:** `language.ts` (ligne 259)
+**Fichier:** `language.ts` (ligne 269)
 
 **Signature:** `export const HTML_populateLanguages = (blocklyObject: BlocklyApplicationType): void =>`
 
@@ -3964,7 +4893,7 @@ Populates the language dropdown from the application language map.
 
 ### mergeArrayMessages
 
-**Fichier:** `languages\array_messages.ts` (ligne 188)
+**Fichier:** `languages\array_messages.ts` (ligne 196)
 
 **Signature:** `export function mergeArrayMessages(lang: string): void`
 
@@ -3975,11 +4904,26 @@ Merge ARRAY_* messages into Blockly.Msg for the given language.
 ---
 
 
+## languages\blockly_a11y_messages.ts
+
+### mergeBlocklyA11yMessages
+
+**Fichier:** `languages\blockly_a11y_messages.ts` (ligne 300)
+
+**Signature:** `export function mergeBlocklyA11yMessages(lang: string): void`
+
+**Description:**
+
+Fusionne les messages accessibilité Blockly 13 dans `Blockly.Msg`.
+
+---
+
+
 ## languages\board_messages.ts
 
 ### mergeBoardMessages
 
-**Fichier:** `languages\board_messages.ts` (ligne 363)
+**Fichier:** `languages\board_messages.ts` (ligne 395)
 
 **Signature:** `export function mergeBoardMessages(lang: string): void`
 
@@ -3992,9 +4936,21 @@ Merge ARDUINO_* / SERIAL_* (s4e) messages into Blockly.Msg for the given languag
 
 ## program_structure_enforcer.ts
 
+### clearProgramStructureDisabledState
+
+**Fichier:** `program_structure_enforcer.ts` (ligne 125)
+
+**Signature:** `export function clearProgramStructureDisabledState(`
+
+**Description:**
+
+Retire la raison « hors programme » sans désinstaller l’écouteur.
+
+---
+
 ### installProgramStructureEnforcer
 
-**Fichier:** `program_structure_enforcer.ts` (ligne 144)
+**Fichier:** `program_structure_enforcer.ts` (ligne 168)
 
 **Signature:** `export function installProgramStructureEnforcer(`
 
@@ -4016,9 +4972,21 @@ Indique si le bloc doit rester actif sur le workspace.
 
 ---
 
+### syncProgramStructureAfterLoad
+
+**Fichier:** `program_structure_enforcer.ts` (ligne 138)
+
+**Signature:** `export function syncProgramStructureAfterLoad(`
+
+**Description:**
+
+Réapplique ou efface l’état après un load (remount, autosave, fichier).
+
+---
+
 ### uninstallProgramStructureEnforcer
 
-**Fichier:** `program_structure_enforcer.ts` (ligne 125)
+**Fichier:** `program_structure_enforcer.ts` (ligne 152)
 
 **Signature:** `export function uninstallProgramStructureEnforcer(`
 
@@ -4037,6 +5005,412 @@ Désinstalle l'enforceur de structure de programme.
 **Description:**
 
 Met à jour l'état actif/inactif de tous les blocs du workspace principal.
+
+---
+
+
+## shell_a11y.ts
+
+### announceShellMessage
+
+**Fichier:** `shell_a11y.ts` (ligne 240)
+
+**Signature:** `export const announceShellMessage = (message: string, timeoutMs = 3000): void =>`
+
+**Description:**
+
+Annonce un message bref aux lecteurs d'écran (région live dédiée).
+
+---
+
+### applyDocumentLanguage
+
+**Fichier:** `shell_a11y.ts` (ligne 228)
+
+**Signature:** `export const applyDocumentLanguage = (lang: string, rtl: boolean): void =>`
+
+**Description:**
+
+Met à jour `lang`, `xml:lang` et `dir` sur `<html>` lors d'un changement de langue.
+
+---
+
+### applyShellLandmarks
+
+**Fichier:** `shell_a11y.ts` (ligne 191)
+
+**Signature:** `export const applyShellLandmarks = (): void =>`
+
+**Description:**
+
+Applique les repères ARIA et tabindex sur la coque (hors workspace Blockly).
+
+---
+
+### applyToolbarA11y
+
+**Fichier:** `shell_a11y.ts` (ligne 256)
+
+**Signature:** `export const applyToolbarA11y = (): void =>`
+
+**Description:**
+
+Applique aria-label, aria-keyshortcuts et infobulles sur la barre d'outils.
+
+---
+
+### registerShellAreaNavigation
+
+**Fichier:** `shell_a11y.ts` (ligne 337)
+
+**Signature:** `export const registerShellAreaNavigation = (): void =>`
+
+**Description:**
+
+Enregistre le lien d'évitement et le menu de zones (Ctrl+B / Cmd+B puis 1–5).
+
+---
+
+
+## shell_about.ts
+
+### openAboutDialog
+
+**Fichier:** `shell_about.ts` (ligne 121)
+
+**Signature:** `export function openAboutDialog(): void`
+
+**Description:**
+
+Ouvre la modale à propos.
+
+---
+
+### refreshAboutDialog
+
+**Fichier:** `shell_about.ts` (ligne 130)
+
+**Signature:** `export function refreshAboutDialog(): void`
+
+**Description:**
+
+Met à jour les libellés si la modale est ouverte (changement de langue).
+
+---
+
+### registerAboutDialog
+
+**Fichier:** `shell_about.ts` (ligne 143)
+
+**Signature:** `export function registerAboutDialog(): void`
+
+**Description:**
+
+Enregistre le bouton « à propos » et la modale.
+
+---
+
+
+## shell_keyboard_tutorial.ts
+
+### openKeyboardTutorial
+
+**Fichier:** `shell_keyboard_tutorial.ts` (ligne 232)
+
+**Signature:** `export const openKeyboardTutorial = (step = 0): void =>`
+
+**Description:**
+
+Ouvre le tutoriel clavier à l'étape demandée (0 par défaut).
+
+---
+
+### refreshKeyboardTutorial
+
+**Fichier:** `shell_keyboard_tutorial.ts` (ligne 281)
+
+**Signature:** `export const refreshKeyboardTutorial = (): void =>`
+
+**Description:**
+
+Met à jour les libellés du bouton (et du contenu si la modale est ouverte).
+
+---
+
+### registerKeyboardTutorial
+
+**Fichier:** `shell_keyboard_tutorial.ts` (ligne 268)
+
+**Signature:** `export const registerKeyboardTutorial = (options?:`
+
+**Description:**
+
+Enregistre le bouton barre d'outils et le tutoriel automatique au premier chargement.
+@param options - autoOpen: if false, do not open the tutorial on startup (embedded hosts).
+
+---
+
+
+## shell_messages.ts
+
+### getBoardFamilyMessageKey
+
+**Fichier:** `shell_messages.ts` (ligne 75)
+
+**Signature:** `export const getBoardFamilyMessageKey = (boardId: string): ShellMessageKey =>`
+
+**Description:**
+
+Maps a board profile id to a translated optgroup family label key.
+
+---
+
+### getShellMessage
+
+**Fichier:** `shell_messages.ts` (ligne 67)
+
+**Signature:** `export const getShellMessage = (key: ShellMessageKey, language?: string): string =>`
+
+**Description:**
+
+Returns a localized shell/UI string for the given language (defaults from URL / menu).
+
+---
+
+
+## shell_shortcuts_help.ts
+
+### openShortcutsHelp
+
+**Fichier:** `shell_shortcuts_help.ts` (ligne 594)
+
+**Signature:** `export const openShortcutsHelp = (): void =>`
+
+**Description:**
+
+Ouvre la modale d'aide des raccourcis.
+
+---
+
+### refreshShortcutsHelp
+
+**Fichier:** `shell_shortcuts_help.ts` (ligne 607)
+
+**Signature:** `export const refreshShortcutsHelp = (): void =>`
+
+**Description:**
+
+Met à jour les libellés du bouton et du contenu si la modale est ouverte.
+
+---
+
+### registerShortcutsHelp
+
+**Fichier:** `shell_shortcuts_help.ts` (ligne 644)
+
+**Signature:** `export const registerShortcutsHelp = (): void =>`
+
+**Description:**
+
+Enregistre le bouton barre d'outils, la modale et les raccourcis F1 / ?.
+
+---
+
+
+## shell_shortcuts.ts
+
+### getModifierKeyLabel
+
+**Fichier:** `shell_shortcuts.ts` (ligne 73)
+
+**Signature:** `export const getModifierKeyLabel = (): string =>`
+
+**Description:**
+
+Libellé affiché du modificateur (Ctrl ou Cmd).
+
+---
+
+### getModifierKeyToken
+
+**Fichier:** `shell_shortcuts.ts` (ligne 69)
+
+**Signature:** `export const getModifierKeyToken = (): "Control" | "Meta" =>`
+
+**Description:**
+
+Jeton WAI-ARIA pour la touche modificateur (Control ou Meta).
+
+---
+
+### isTextEntryTarget
+
+**Fichier:** `shell_shortcuts.ts` (ligne 45)
+
+**Signature:** `export const isTextEntryTarget = (target: EventTarget | null): boolean =>`
+
+**Description:**
+
+Whether the target is a text input field (including Monaco).
+File shortcuts must not intercept Ctrl+S / Ctrl+O in these areas.
+
+---
+
+### registerShellFileShortcuts
+
+**Fichier:** `shell_shortcuts.ts` (ligne 85)
+
+**Signature:** `export const registerShellFileShortcuts = (`
+
+**Description:**
+
+Enregistre Ctrl+S / Cmd+S (enregistrer) et Ctrl+O / Cmd+O (ouvrir),
+sauf dans les champs de saisie texte.
+
+---
+
+
+## shortcut_preferences.ts
+
+### applyShortcutPreferences
+
+**Fichier:** `shortcut_preferences.ts` (ligne 350)
+
+**Signature:** `export const applyShortcutPreferences = (): void =>`
+
+**Description:**
+
+Apply persisted overrides onto the live ShortcutRegistry.
+Safe to call multiple times (e.g. after cross-tab copy/paste replaces C/X/V).
+
+---
+
+### findRebindConflicts
+
+**Fichier:** `shortcut_preferences.ts` (ligne 285)
+
+**Signature:** `export const findRebindConflicts = (`
+
+**Description:**
+
+Returns conflicting shortcut names for the proposed key codes (excluding `name`).
+
+---
+
+### formatSerializedKey
+
+**Fichier:** `shortcut_preferences.ts` (ligne 157)
+
+**Signature:** `export const formatSerializedKey = (serialized: string): string =>`
+
+**Description:**
+
+Human-readable label for a Blockly serialized key code (e.g. Control+67 → Ctrl+C).
+
+---
+
+### formatSerializedKeys
+
+**Fichier:** `shortcut_preferences.ts` (ligne 190)
+
+**Signature:** `export const formatSerializedKeys = (codes: string[]): string =>`
+
+**Description:** *Aucune documentation*
+
+---
+
+### getDefaultKeyCodes
+
+**Fichier:** `shortcut_preferences.ts` (ligne 341)
+
+**Signature:** `export const getDefaultKeyCodes = (name: string): string[] =>`
+
+**Description:**
+
+Current effective key codes for a shortcut (registry live state).
+
+---
+
+### getEffectiveKeyCodes
+
+**Fichier:** `shortcut_preferences.ts` (ligne 336)
+
+**Signature:** `export const getEffectiveKeyCodes = (name: string): string[] =>`
+
+**Description:**
+
+Current effective key codes for a shortcut (registry live state).
+
+---
+
+### hasCustomShortcutBindings
+
+**Fichier:** `shortcut_preferences.ts` (ligne 432)
+
+**Signature:** `export const hasCustomShortcutBindings = (): boolean =>`
+
+**Description:** *Aucune documentation*
+
+---
+
+### rebindShortcut
+
+**Fichier:** `shortcut_preferences.ts` (ligne 305)
+
+**Signature:** `export const rebindShortcut = (`
+
+**Description:**
+
+Rebind a registered shortcut to new serialized key codes.
+
+---
+
+### resetAllShortcutBindings
+
+**Fichier:** `shortcut_preferences.ts` (ligne 421)
+
+**Signature:** `export const resetAllShortcutBindings = (): void =>`
+
+**Description:**
+
+Restore all editable shortcuts to factory defaults.
+
+---
+
+### resetShortcutBinding
+
+**Fichier:** `shortcut_preferences.ts` (ligne 406)
+
+**Signature:** `export const resetShortcutBinding = (name: string): void =>`
+
+**Description:**
+
+Restore one shortcut to its factory binding.
+
+---
+
+### serializedKeyFromEvent
+
+**Fichier:** `shortcut_preferences.ts` (ligne 204)
+
+**Signature:** `export const serializedKeyFromEvent = (event: KeyboardEvent): string | null =>`
+
+**Description:**
+
+Build a Blockly serialized key from a KeyboardEvent.
+Returns null for modifier-only presses.
+
+---
+
+### setShortcutBinding
+
+**Fichier:** `shortcut_preferences.ts` (ligne 382)
+
+**Signature:** `export const setShortcutBinding = (`
+
+**Description:**
+
+Persist and apply a new binding for one shortcut.
 
 ---
 
@@ -4061,7 +5435,7 @@ Call once after importing `\@blockly/toolbox-search`.
 
 ### applyToolboxBlockLevels
 
-**Fichier:** `toolbox.ts` (ligne 58)
+**Fichier:** `toolbox.ts` (ligne 59)
 
 **Signature:** `export function applyToolboxBlockLevels(`
 
@@ -4073,13 +5447,13 @@ Ajoute la propriété levels à chaque entrée kind:"block" (récursif).
 
 ### getToolboxForCurrentBoard
 
-**Fichier:** `toolbox.ts` (ligne 912)
+**Fichier:** `toolbox.ts` (ligne 1004)
 
 **Signature:** `export function getToolboxForCurrentBoard(toolbox: ToolboxConfiguration): ToolboxConfiguration`
 
 **Description:**
 
-Returns the toolbox to use for the workspace: without the board category if
+Returns the toolbox to use for the workspace: board category emptied if
 no board is selected, otherwise a clone of the full toolbox.
 Read the current selection from the board menu in the DOM.
 
@@ -4087,14 +5461,15 @@ Read the current selection from the board menu in the DOM.
 
 ### getToolboxWithoutBoardCategory
 
-**Fichier:** `toolbox.ts` (ligne 899)
+**Fichier:** `toolbox.ts` (ligne 987)
 
 **Signature:** `export function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): ToolboxConfiguration`
 
 **Description:**
 
-Returns a deep clone of the toolbox with the board category (CAT_BOARD) removed.
-Used when no board is selected so the toolbox does not show board blocks.
+Returns a deep clone of the toolbox with the board category emptied
+(category kept so the label can show « Carte : aucune »).
+Used when no board is selected.
 
 ---
 
@@ -4158,6 +5533,34 @@ Updates one query parameter and pushes history state (full pathname + search + h
 Updates plugin flags in the URL based on a checkbox state.
 @param pluginName - DOM checkbox element id.
 @param pluginKey - URL key representing the plugin.
+
+---
+
+
+## ui_palette_theme.ts
+
+### resolveUiThemeMode
+
+**Fichier:** `ui_palette_theme.ts` (ligne 130)
+
+**Signature:** `export const resolveUiThemeMode = (`
+
+**Description:**
+
+Résout le mode coque (clair / sombre / contraste élevé) à partir du thème Blockly.
+
+---
+
+### syncUiPaletteTheme
+
+**Fichier:** `ui_palette_theme.ts` (ligne 147)
+
+**Signature:** `export const syncUiPaletteTheme = (themeKey?: string): void =>`
+
+**Description:**
+
+Dérive les variables CSS de la coque et le thème Monaco depuis le thème Blockly actif.
+@param themeKey - Clé du thème ; par défaut la valeur du menu `#themeMenu`.
 
 ---
 
@@ -4238,7 +5641,7 @@ Persists layout flex grow values to session storage.
 **Description:**
 
 @license
-Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
+Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or

@@ -15,7 +15,7 @@ Le typage repose sur **trois couches** :
 ```mermaid
 flowchart LR
   subgraph source ["Définition"]
-    BT["block_types.ts\nTYPE_COMPATIBILITY\nCAST_TYPE_TO_INTERNAL"]
+    BT["block_types.ts\nTYPE_COMPATIBILITY\nARDUINO_TYPE_TO_INTERNAL"]
     REG["block_types_registry.ts\ncheckTypeCompatibility\nBLOCK_TYPE_REGISTRY"]
     SH["shared.ts\ngetBlocklyCompatibleChecks"]
   end
@@ -171,7 +171,7 @@ Les fonctions dynamiques sont dans `DYNAMIC_TYPE_FUNCTIONS` (`block_types_regist
 Exemples :
 
 - `variables_get_dynamic` → type de la variable lue ;
-- `variables_cast` → `getInternalTypeForCast(CAST_TYPE)` ;
+- `variables_cast` → `getInternalTypeForArduinoType(CAST_TYPE)` ;
 - `math_number` → `int` ou `float` selon la valeur / le contexte.
 
 `applyBlockTypesFromRegistry()` attache `getBlockType()` aux définitions Blockly au démarrage.

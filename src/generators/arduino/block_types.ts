@@ -85,13 +85,7 @@ export const ARDUINO_TYPE_KEYS = [
   'float',
 ] as const;
 
-/** @deprecated Use {@link ARDUINO_TYPE_KEYS} */
-export const VARIABLE_CAST_TYPE_KEYS = ARDUINO_TYPE_KEYS;
-
 export type ArduinoTypeKey = (typeof ARDUINO_TYPE_KEYS)[number];
-
-/** @deprecated Use {@link ArduinoTypeKey} */
-export type VariableCastTypeKey = ArduinoTypeKey;
 
 /** Maps dropdown type key → internal µcBlockly type for connections. */
 export const ARDUINO_TYPE_TO_INTERNAL: Record<ArduinoTypeKey, string> = {
@@ -106,9 +100,6 @@ export const ARDUINO_TYPE_TO_INTERNAL: Record<ArduinoTypeKey, string> = {
   ulong: 'int',
   float: 'float',
 };
-
-/** @deprecated Use {@link ARDUINO_TYPE_TO_INTERNAL} */
-export const CAST_TYPE_TO_INTERNAL = ARDUINO_TYPE_TO_INTERNAL;
 
 /** Maps dropdown type key → C++ type name in generated code. */
 export const ARDUINO_TYPE_TO_CPP: Record<ArduinoTypeKey, string> = {
@@ -138,9 +129,6 @@ export function getInternalTypeForArduinoType(typeKey: string): string {
   }
   return ARDUINO_TYPE_TO_INTERNAL[typeKey as ArduinoTypeKey] ?? typeKey;
 }
-
-/** @deprecated Use {@link getInternalTypeForArduinoType} */
-export const getInternalTypeForCast = getInternalTypeForArduinoType;
 
 /**
  * Maps Blockly output/check types to internal µcBlockly types.

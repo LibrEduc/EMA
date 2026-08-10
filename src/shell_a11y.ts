@@ -230,6 +230,8 @@ export const applyDocumentLanguage = (lang: string, rtl: boolean): void => {
   html.lang = lang;
   html.setAttribute("xml:lang", lang);
   html.dir = rtl ? "rtl" : "ltr";
+  // Keep Blockly | code panel order physically stable; only Blockly workspace uses RTL.
+  document.getElementById("flex_container_up")?.setAttribute("dir", "ltr");
 };
 
 /**

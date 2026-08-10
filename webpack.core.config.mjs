@@ -12,10 +12,6 @@ import { tsLoaderUse } from "./webpack.ts-loader.config.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const shareableProceduresSrc = path.resolve(
-  __dirname,
-  "node_modules/@blockly/block-shareable-procedures/src",
-);
 
 /** @param {unknown} _env @param {{ mode?: string }} argv */
 export default (_env, argv) => {
@@ -45,11 +41,6 @@ export default (_env, argv) => {
         {
           test: /\.tsx?$/,
           use: tsLoaderUse,
-          include: shareableProceduresSrc,
-        },
-        {
-          test: /\.tsx?$/,
-          use: tsLoaderUse,
           exclude: /node_modules/,
         },
         {
@@ -61,10 +52,6 @@ export default (_env, argv) => {
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
       alias: {
-        "@blockly/block-shareable-procedures$": path.join(
-          shareableProceduresSrc,
-          "index.ts",
-        ),
         // package.json "module" points to missing ./src/index.js — force dist.
         "@blockly/field-bitmap$": path.resolve(
           __dirname,

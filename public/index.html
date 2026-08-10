@@ -24,9 +24,8 @@
         <img class="app-title__logo" src="assets/favicon-32x32.png?v=2" alt="" width="32" height="32" decoding="async">
         <span class="lang" key="HOME">µcBlockly</span>
       </div>
-      <a href="https://github.com/A-S-T-U-C-E/ucBlockly" target="_blank">
-        <span class="lang" key="ABOUT" data-title-key="ABOUT_TOOLTIP">About</span>
-      </a>
+      <button type="button" id="aboutButton" class="toolbar-btn lang" key="ABOUT"
+        data-title-key="ABOUT_TOOLTIP">About</button>
       <a href="https://www.linkedin.com/in/sebcanet/" target="_blank">
         <span class="lang" key="CONTACT" data-title-key="CONTACT_TOOLTIP">Contact</span>
       </a>
@@ -53,7 +52,7 @@
         <option class="lang" value="high_contrast" id="themeHighContrastSpan" key="THEME_HIGHCONTRAST">high_contrast</option>
         <option class="lang" value="dark" id="themeDarkSpan" key="THEME_DARK">dark</option>
         <option class="lang" value="hacker" id="themeHackerSpan" key="THEME_HACKER">hacker</option>
-        <option class="lang" value="seshat" id="themeSeshatThemeSpan" key="THEME_SESHAT">seshat</option>
+        <option class="lang" value="seshat" id="themeSeshatSpan" key="THEME_SESHAT">seshat</option>
         <option class="lang" value="blackWhite" id="themeBwSpan" key="THEME_BLACKWHITE">blackWhite</option>
       </select>
       <select name="rendererMenu" id="rendererMenu" data-title-key="RENDERER_MENU_TOOLTIP">
@@ -90,7 +89,7 @@
         </label>
       </div>
     </header>
-    <flex id="flex_container_up" class="wrapper_element" style="flex: 1;">
+      <flex id="flex_container_up" class="wrapper_element" dir="ltr" style="flex: 1;">
       <flex-item id="flex_container_up_left" style="flex: 1;">
         <div id="shortcuts" hidden></div>
         <div id="a11y-announcer" hidden></div>

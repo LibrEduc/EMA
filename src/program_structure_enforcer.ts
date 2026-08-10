@@ -120,6 +120,33 @@ export function updateProgramStructureDisabledState(
 }
 
 /**
+ * Retire la raison « hors programme » sans désinstaller l’écouteur.
+ */
+export function clearProgramStructureDisabledState(
+  workspace: Blockly.Workspace,
+): void {
+  for (const block of workspace.getAllBlocks(false)) {
+    if (isBlockOnMainWorkspace(block)) {
+      block.setDisabledReason(false, NOT_IN_PROGRAM_DISABLED_REASON);
+    }
+  }
+}
+
+/**
+ * Réapplique ou efface l’état après un load (remount, autosave, fichier).
+ */
+export function syncProgramStructureAfterLoad(
+  workspace: Blockly.Workspace,
+  enabled: boolean,
+): void {
+  if (enabled) {
+    updateProgramStructureDisabledState(workspace);
+  } else {
+    clearProgramStructureDisabledState(workspace);
+  }
+}
+
+/**
  * Désinstalle l'enforceur de structure de programme.
  */
 export function uninstallProgramStructureEnforcer(
@@ -127,15 +154,12 @@ export function uninstallProgramStructureEnforcer(
 ): void {
   const listener = INSTALLED.get(workspace);
   if (!listener) {
+    clearProgramStructureDisabledState(workspace);
     return;
   }
   workspace.removeChangeListener(listener);
   INSTALLED.delete(workspace);
-  for (const block of workspace.getAllBlocks(false)) {
-    if (isBlockOnMainWorkspace(block)) {
-      block.setDisabledReason(false, NOT_IN_PROGRAM_DISABLED_REASON);
-    }
-  }
+  clearProgramStructureDisabledState(workspace);
 }
 
 /**

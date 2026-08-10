@@ -17,7 +17,7 @@
   — génération de code Arduino/C++ à partir de blocs.
 </p>
 
-[Contribuer](docs/CONTRIBUTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md)
+[Contribuer](docs/CONTRIBUTING.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -56,6 +56,7 @@ Ouvrez l’URL affichée par Webpack (ou `public/index.html` après build) pour 
 
 | Document | Contenu |
 |----------|---------|
+| [docs/KERNEL.md](docs/KERNEL.md) | Surface publique du noyau embeddable (`createUcBlockly`) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Structure du code, conventions, flux principaux |
 | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) | Coque UI, raccourcis clavier, repères ARIA |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide pour les contributeurs |

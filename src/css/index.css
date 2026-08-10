@@ -158,6 +158,15 @@ flex.wrapper_element {
   flex-direction: row;
 }
 
+/*
+ * Keep Blockly (left) | code (right) physically stable when html[dir=rtl].
+ * Only the Blockly workspace content is mirrored via Blockly's `rtl` option.
+ */
+#flex_container_up.wrapper_element {
+  direction: ltr;
+  flex-direction: row;
+}
+
 flex.wrapper_global {
   flex-direction: column;
 }
@@ -220,6 +229,15 @@ flex.wrapper_global>flex-resizer {
 
 .monaco-editor {
   position: absolute !important;
+}
+
+#flex_content_code,
+#div_content_code,
+#div_content_monacoEditor {
+  /* Generated C++ must stay LTR under an RTL document (Arabic UI). */
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
 }
 
 #flex_container_up_right,

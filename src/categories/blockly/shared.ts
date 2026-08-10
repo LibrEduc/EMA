@@ -36,6 +36,7 @@ import { resolveLocalVariableScope, usesLocalVariableDeclaration, isArrayAssignm
 import {
   checkTypeCompatibility,
   getCompatibleTypesForCheck,
+  registerVariableTypeForBlockResolver,
 } from "../../generators/arduino/block_types_registry";
 import {
   ARDUINO_TYPE_KEYS,
@@ -66,6 +67,9 @@ export {
   inferRequiredNumericTypeForVariable,
   isBlockOnMainWorkspace,
   isLoopCounterVariableCompatible,
+  isMathChangeCompatibleVariableType,
+  isNumericScalarVariableType,
+  isUnresolvedVariableType,
   resolveMathChangeVariableId,
   resolveMathNumberBlockType,
   unifyLoopBoundTypes,
@@ -333,11 +337,6 @@ export const configureInstanceVariableField = (
 };
 
 /**
- * @deprecated Alias of {@link configureScalarVariableField}.
- */
-export const configureTypedVariableField = configureScalarVariableField;
-
-/**
  * Ensures the variable selected on a list-category block has Blockly type `list`.
  */
 export const syncListVariableFromField = (
@@ -352,13 +351,6 @@ export const syncListVariableFromField = (
   if (variable && variable.getType() !== LIST_VARIABLE_TYPE) {
     tagVariableAsList(variable);
   }
-};
-
-/**
- * @deprecated Use {@link syncListVariableFromField} with `"VAR"`.
- */
-export const syncListVariableFromBlock = (block: Blockly.Block): void => {
-  syncListVariableFromField(block, "VAR");
 };
 
 /**
@@ -867,6 +859,10 @@ export const resolveVariableTypeForBlock = (
   }
   return resolveArduinoScalarVariableType(modelType);
 };
+
+// Wire registry `variableLookup` without importing shared from the registry
+// (breaks shared → registry → shared).
+registerVariableTypeForBlockResolver(resolveVariableTypeForBlock);
 
 /** Resolves global variable type from global assignments only (ignores `local` wrappers). */
 export const resolveGlobalVariableType = (

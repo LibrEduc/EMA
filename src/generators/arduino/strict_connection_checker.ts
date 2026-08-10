@@ -38,7 +38,7 @@ import {
   inferArrayElementTypeFromBlock,
   inferListVariableElementType,
 } from "./block_types_registry";
-import { isDeclareContainsTypeCompatible, isTypeCompatible } from "./block_types";
+import { isDeclareContainsTypeCompatible, isTypeCompatible, normalizeBlocklyCheckToInternalType } from "./block_types";
 import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
 import { debugLog } from "./debug";
 import {
@@ -48,6 +48,10 @@ import {
   resolveSourceBlockType,
   resolveSwitchCaseSourceType,
 } from "./strict_connection_type_utils";
+import {
+  isMathChangeCompatibleVariableType,
+  isUnresolvedVariableType,
+} from "../../categories/blockly/shared_numeric";
 
 /**
  * Custom ConnectionChecker that extends Blockly's default ConnectionChecker
@@ -113,6 +117,13 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       if (switchCase === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
+      const mathChangeVar = this.checkMathChangeVarConnection_(a, b);
+      if (mathChangeVar === true) {
+        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+      }
+      if (mathChangeVar === false) {
+        return Blockly.Connection.REASON_CHECKS_FAILED;
+      }
     }
     return super.canConnectWithReason(a, b, isDragging, opt_distance);
   }
@@ -125,6 +136,39 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     return checkSwitchCaseIntConnection(a, b, {
       resolveOutputInputPair: (x, y) => this.resolveOutputInputPair_(x, y),
     });
+  }
+
+  /**
+   * math_change VAR accepts untyped or numeric scalars only (not String/bool/…).
+   * Untyped (__NO_TYPE__) must be allowed so change-by can still infer int/float.
+   */
+  private checkMathChangeVarConnection_(
+    a: Blockly.Connection,
+    b: Blockly.Connection,
+  ): boolean | null {
+    const pair = this.resolveOutputInputPair_(a, b);
+    if (!pair) {
+      return null;
+    }
+    const targetBlock = pair.inp.getSourceBlock();
+    if (!targetBlock || targetBlock.type !== "math_change") {
+      return null;
+    }
+    const inputName = getInputNameForConnection(targetBlock, pair.inp);
+    if (inputName !== "VAR" && inputName !== "NAME") {
+      return null;
+    }
+    const sourceBlock = pair.out.getSourceBlock();
+    const sourceType = resolveSourceBlockType(sourceBlock);
+    if (isUnresolvedVariableType(sourceType)) {
+      return true;
+    }
+    const normalized =
+      normalizeBlocklyCheckToInternalType(sourceType) ?? sourceType;
+    if (isMathChangeCompatibleVariableType(normalized)) {
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -180,6 +224,13 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
         return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
       }
       if (switchCase === false) {
+        return false;
+      }
+      const mathChangeVar = this.checkMathChangeVarConnection_(a, b);
+      if (mathChangeVar === true) {
+        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+      }
+      if (mathChangeVar === false) {
         return false;
       }
     }
@@ -718,6 +769,13 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return true;
     }
     if (switchCase === false) {
+      return false;
+    }
+    const mathChangeVar = this.checkMathChangeVarConnection_(a, b);
+    if (mathChangeVar === true) {
+      return true;
+    }
+    if (mathChangeVar === false) {
       return false;
     }
 

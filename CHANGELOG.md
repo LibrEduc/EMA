@@ -1,15 +1,35 @@
-# CHANGELOG.md
-## 3.0.0, 2026-07-29
-- **Breaking** : mise à jour vers Blockly **v13** (et plugins `@blockly/*` ^13) — incompatible avec un hôte encore en Blockly 12
-- accessibilité : navigation clavier cœur Blockly 13, coque UI, tutoriel, labels ARIA, traductions fr/en/es/ar
-- raccourcis clavier personnalisables (persistance `localStorage`) et panneau d’aide éditable
-- copy/paste inter-onglets (`@blockly/plugin-cross-tab-copy-paste`) et bascule son
-- thèmes : hacker mode ; champs : bitmap, grid-dropdown, dependent-dropdown
-- structure programme Arduino : blocs setup/loop et enforceur de structure
-- catégorie « libre », sélection de carte, améliorations variables typées / listes / switch
-- `logic_compare` : connexions numériques + EQ/NEQ multi-types avec contrôle de compatibilité
-- correctifs : blocs board/text/boucles, sélecteur de couleur (iro.js / dispose DropDownDiv)
-- outillage : tests générateur + `logic_compare`, ESLint/tsconfig, découpage de modules Arduino
+# Journal des modifications
+
+## 3.0.0 — 29 juillet 2026
+
+Version majeure basée sur **Blockly 13**. À lire avant de mettre à jour un projet existant.
+
+### Attention — rupture de compatibilité
+- µcBlockly 3 ne fonctionne **pas** avec Blockly 12. Il faut Blockly 13 et les extensions `@blockly/*` en version 13.
+- Si votre application utilise encore Blockly 12, restez sur µcBlockly **2.x**.
+
+### Intégration dans une autre application
+- **Noyau** (`µcBlockly/core`) : API pour intégrer l’éditeur dans une page (`createUcBlockly`, gestionnaire d’espace de travail).
+- **Aides produit** (`µcBlockly/host`) : thèmes d’interface, accessibilité, éditeur de code, etc.
+- **Démo** : l’interface complète de démonstration est séparée du noyau (menus, panneaux, stockage de session).
+
+### Accessibilité et clavier
+- Navigation au clavier alignée sur Blockly 13.
+- Interface de la démo adaptée (repères, tutoriel, libellés pour lecteurs d’écran).
+- Traductions : français, anglais, espagnol, arabe.
+- Raccourcis clavier personnalisables (mémorisés dans le navigateur) et panneau d’aide modifiable.
+
+### Fonctions de l’éditeur
+- Copier-coller de blocs **entre onglets** du navigateur.
+- Bouton pour activer ou couper le son.
+- Nouveau thème « hacker ».
+- Nouveaux types de champs : image matricielle (bitmap), listes déroulantes en grille, listes dépendantes.
+- Mise en évidence de la zone des blocs (plugin highlight) : la zone se recalcule correctement après une suppression à la corbeille.
+
+### Programme Arduino
+- Blocs **setup** et **loop** pour structurer le programme ; contrôle qui empêche de mal les placer.
+- Espace de travail **vide** : plus de `setup` / `loop` générés automatiquement s’il n’y a aucun bloc.
+- Catégorie « libre », choix de la carte Arduino, variables typées, listes et `switch` améliorés.
 
 ## 2.1.5, 2026-06-13
 - update with Blockly v12.5

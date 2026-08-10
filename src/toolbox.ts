@@ -83,11 +83,24 @@ export function applyToolboxBlockLevels(
 /**
  * Category entry: can contain blocks or nested subcategories (submenus).
  */
+/** Icône Font Awesome pour une catégorie (cssConfig Blockly). */
+export type ToolboxCategoryCssConfig = {
+  icon?: string;
+  openicon?: string;
+  closedicon?: string;
+};
+
+/** Helper : classe d’icône FA pour la toolbox (accessible + repère non textuel). */
+const toolboxIcon = (faIcon: string): ToolboxCategoryCssConfig => ({
+  icon: `customIcon fas ${faIcon}`,
+});
+
 export type ToolboxCategoryContentEntry = ToolboxBlockEntry | {
   kind: string,
   name?: string,
   categorystyle?: string,
   custom?: string,
+  cssConfig?: ToolboxCategoryCssConfig,
   contents?: ToolboxCategoryContentEntry[],
 };
 
@@ -103,6 +116,7 @@ export type ToolboxConfiguration = {
     name?: string,
     categorystyle?: string,
     custom?: string,
+    cssConfig?: ToolboxCategoryCssConfig,
     contents?: ToolboxCategoryContentEntry[],
     blockxml?: string
   }>
@@ -133,6 +147,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_LIBRE',
       'categorystyle': 'libre_category',
+      'cssConfig': toolboxIcon('fa-puzzle-piece'),
       'contents': [
         { 'kind': 'block', 'type': 'libre_start' },
         { 'kind': 'block', 'type': 'libre_in' },
@@ -152,11 +167,13 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_BOARD',
       'categorystyle': 'board_category',
+      'cssConfig': toolboxIcon('fa-microchip'),
       'contents': [
         {
           'kind': 'category',
           'name': 'CAT_BOARD_BASE',
           'categorystyle': 'board_category',
+          'cssConfig': toolboxIcon('fa-play'),
           'contents': [
             { 'kind': 'block', 'type': 'board_base_setup_loop' },
             { 'kind': 'block', 'type': 'board_base_setup' },
@@ -167,6 +184,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'kind': 'category',
           'name': 'CAT_BOARD_IN',
           'categorystyle': 'board_category',
+          'cssConfig': toolboxIcon('fa-right-to-bracket'),
           'contents': [
             { 'kind': 'block', 'type': 'board_base_inout_digital_read' },
             {
@@ -190,6 +208,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'kind': 'category',
           'name': 'CAT_BOARD_OUT',
           'categorystyle': 'board_category',
+          'cssConfig': toolboxIcon('fa-right-from-bracket'),
           'contents': [
             { 'kind': 'block', 'type': 'board_base_inout_buildin_led' },
             { 'kind': 'block', 'type': 'board_base_inout_digital_write' },
@@ -203,6 +222,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'kind': 'category',
           'name': 'CAT_BOARD_TIME',
           'categorystyle': 'board_category',
+          'cssConfig': toolboxIcon('fa-clock'),
           'contents': [
             { 'kind': 'block', 'type': 'board_base_time_delay', 'inputs': { 'DELAY_TIME': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 1000 } } } } },
             { 'kind': 'block', 'type': 'board_base_time_delay_sec', 'inputs': { 'DELAY_TIME': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 1 } } } } },
@@ -213,6 +233,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'kind': 'category',
           'name': 'CAT_BOARD_CONVERSION',
           'categorystyle': 'board_category',
+          'cssConfig': toolboxIcon('fa-right-left'),
           'contents': [
             { 'kind': 'block', 'type': 'board_conversion_toint', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
             { 'kind': 'block', 'type': 'board_conversion_tofloat', 'inputs': { 'VALUE': { 'shadow': { 'type': 'math_number', 'fields': { 'NUM': 0 } } } } },
@@ -226,6 +247,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'kind': 'category',
           'name': 'CAT_BOARD_SERIAL',
           'categorystyle': 'board_category',
+          'cssConfig': toolboxIcon('fa-terminal'),
           'contents': [
             { 'kind': 'block', 'type': 'board_serial_begin' },
             { 'kind': 'block', 'type': 'board_serial_print', 'inputs': { 'TEXT': { 'shadow': { 'type': 'text', 'fields': { 'TEXT': '' } } } } },
@@ -248,6 +270,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_LOGIC',
       'categorystyle': 'logic_category',
+      'cssConfig': toolboxIcon('fa-diagram-project'),
       'contents': [
         {
           'kind': 'block',
@@ -291,6 +314,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_LOOPS',
       'categorystyle': 'loop_category',
+      'cssConfig': toolboxIcon('fa-repeat'),
       'contents': [
         {
           'kind': 'block',
@@ -358,6 +382,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_MATHS',
       'categorystyle': 'math_category',
+      'cssConfig': toolboxIcon('fa-calculator'),
       'contents': [
         {
           'kind': 'block',
@@ -590,6 +615,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_TEXT',
       'categorystyle': 'text_category',
+      'cssConfig': toolboxIcon('fa-quote-left'),
       'contents': [
         {
           'kind': 'block',
@@ -797,6 +823,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_LISTS',
       'categorystyle': 'list_category',
+      'cssConfig': toolboxIcon('fa-list'),
       'contents': [
         {
           'kind': 'block',
@@ -872,6 +899,7 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_COLOR',
       'categorystyle': 'colour_category',
+      'cssConfig': toolboxIcon('fa-palette'),
       'contents': [
         {
           'kind': 'block',
@@ -926,12 +954,14 @@ const basic_toolbox_source: ToolboxConfiguration = {
       'kind': 'category',
       'name': 'CAT_VARIABLES',
       'categorystyle': 'variable_category',
+      'cssConfig': toolboxIcon('fa-code'),
       'custom': 'TYPED_VARIABLES',
     },
     {
       'kind': 'category',
       'name': 'CAT_FUNCTIONS',
       'categorystyle': 'procedure_category',
+      'cssConfig': toolboxIcon('fa-gears'),
       'custom': 'PROCEDURE',
     },
   ]
@@ -942,20 +972,32 @@ export const basic_toolbox: ToolboxConfiguration =
 
 const CAT_BOARD_NAME = 'CAT_BOARD';
 
+type ToolboxCategoryNode = {
+  kind?: string;
+  name?: string;
+  categorystyle?: string;
+  contents?: ToolboxCategoryNode[];
+};
+
 /**
- * Returns a deep clone of the toolbox with the board category (CAT_BOARD) removed.
- * Used when no board is selected so the toolbox does not show board blocks.
+ * Returns a deep clone of the toolbox with the board category emptied
+ * (category kept so the label can show « Carte : aucune »).
+ * Used when no board is selected.
  */
 export function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): ToolboxConfiguration {
   const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
   if (Array.isArray(clone.contents)) {
-    clone.contents = clone.contents.filter((c) => c.name !== CAT_BOARD_NAME);
+    for (const c of clone.contents as ToolboxCategoryNode[]) {
+      if (c.name === CAT_BOARD_NAME || c.categorystyle === 'board_category') {
+        c.contents = [];
+      }
+    }
   }
   return clone;
 }
 
 /**
- * Returns the toolbox to use for the workspace: without the board category if
+ * Returns the toolbox to use for the workspace: board category emptied if
  * no board is selected, otherwise a clone of the full toolbox.
  * Read the current selection from the board menu in the DOM.
  */
@@ -967,3 +1009,5 @@ export function getToolboxForCurrentBoard(toolbox: ToolboxConfiguration): Toolbo
   }
   return JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
 }
+
+export { CAT_BOARD_NAME };

@@ -48,9 +48,9 @@ import SeshatTheme from './theme_seshat';
 const LIBRE_CATEGORY_STYLE = { colour: '#00979D' };
 const LIBRE_BLOCK_STYLE = { colourPrimary: '#00979D' };
 
-/** Style for the Board category (same colour as Libre / Arduino). */
-const BOARD_CATEGORY_STYLE = { colour: '#00979D' };
-const BOARD_BLOCK_STYLE = { colourPrimary: '#00979D' };
+/** Style for the Board category (teint plus sombre que Libre pour le daltonisme). */
+const BOARD_CATEGORY_STYLE = { colour: '#006468' };
+const BOARD_BLOCK_STYLE = { colourPrimary: '#006468' };
 
 /** Black for the black and white theme (like other categories). */
 const LIBRE_BLACK = { colour: '#000000', colourPrimary: '#000000' };

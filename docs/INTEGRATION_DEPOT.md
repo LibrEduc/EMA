@@ -15,7 +15,7 @@ Ce document décrit **comment intégrer le dépôt µcBlockly** (tel quel, sans 
 - **Noyau embeddable** : `src/core/` + API `createUcBlockly()` — voir [KERNEL.md](./KERNEL.md).
 - **Démo autonome** : `src/index.ts` + Webpack → `dist/bundle/` (HTML + Monaco + shell).
 - **Embed minimal** : `npm run build:core:bundle` → `dist/core/` (sans Monaco).
-- **Exports npm** : `"."` / `"./core"` → noyau ; `"./demo"` → entrée démo.
+- **Exports npm** : `"."` / `"./core"` → noyau ; `"./host"` → aides produit ; `"./demo"` → entrée démo.
 - **`"private": true`** : pas encore publié sur npm (P3).
 
 La démo complète reste couplée au DOM (`requiredElements` dans `src/index.ts`). Les intégrations embeddables doivent utiliser **`µcBlockly/core`** uniquement.

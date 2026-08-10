@@ -64,6 +64,10 @@ import {
   addPrimeHelper,
   addSqrtHelper,
 } from "./math_helpers";
+import {
+  isMathChangeCompatibleVariableType,
+  resolveMathChangeVariableId,
+} from "../../../categories/blockly/shared_numeric";
 
 /**
  * Generates Arduino code for a numeric literal.
@@ -103,6 +107,15 @@ export function math_change(
     }
     return generator.valueToCode(block, inputName, Order.NONE) || "";
   };
+  const variableId = resolveMathChangeVariableId(block);
+  if (variableId && block.workspace) {
+    const variable = block.workspace.getVariableMap().getVariableById(variableId);
+    const varType = variable?.getType?.() ?? null;
+    if (varType && !isMathChangeCompatibleVariableType(varType)) {
+      // Do not emit String/bool += delta (would concatenate or be invalid).
+      return "";
+    }
+  }
   const target =
     getValueIfInputExists("VAR") || getValueIfInputExists("NAME") || "0";
   const delta = generator.valueToCode(block, "DELTA", Order.ADDITION) || "0";

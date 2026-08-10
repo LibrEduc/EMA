@@ -38,6 +38,7 @@ export class LazyMonacoEditor {
   private pendingValue: string | null = null;
   private initializing: Promise<void> | null = null;
   private monacoTheme: "vs" | "vs-dark" | "hc-black" = "vs";
+  private readOnly = false;
 
   /**
    * Aligns Monaco with the application shell theme.
@@ -50,6 +51,19 @@ export class LazyMonacoEditor {
         monaco.editor.setTheme(this.monacoTheme);
       });
     }
+  }
+
+  /**
+   * Toggles whether the user can edit generated code.
+   */
+  setReadOnly(readOnly: boolean): void {
+    this.readOnly = readOnly;
+    this.editor?.updateOptions({ readOnly });
+  }
+
+  /** Current read-only flag (default false — editable generated code). */
+  isReadOnly(): boolean {
+    return this.readOnly;
   }
 
   /**
@@ -73,10 +87,11 @@ export class LazyMonacoEditor {
         formatOnType: true,
         language: "cpp",
         lineNumbers: "on",
-        readOnly: false,
+        readOnly: this.readOnly,
         scrollBeyondLastLine: false,
         theme: this.monacoTheme,
       });
+      container.setAttribute("dir", "ltr");
       if (this.pendingValue !== null) {
         this.editor.setValue(this.pendingValue);
         this.pendingValue = null;

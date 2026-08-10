@@ -42,7 +42,14 @@ declare module "@blockly/workspace-minimap";
 declare module "@blockly/zoom-to-fit";
 declare module "@blockly/continuous-toolbox";
 declare module "@blockly/plugin-workspace-search";
-declare module "@blockly/workspace-content-highlight";
+declare module "@blockly/workspace-content-highlight" {
+  import type { WorkspaceSvg } from "blockly";
+  export class ContentHighlight {
+    constructor(workspace?: WorkspaceSvg);
+    init(padding?: number): void;
+    dispose(): void;
+  }
+}
 declare module "@blockly/plugin-modal";
 declare module "@blockly/toolbox-search";
 declare module "@blockly/theme-dark";

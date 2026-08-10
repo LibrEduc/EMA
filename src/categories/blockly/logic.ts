@@ -35,7 +35,7 @@ import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
 import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
-  configureTypedVariableField,
+  configureScalarVariableField,
   getBlocklyMsg,
   getTypeMismatchWarningText,
   hasConnectedAssignmentForVariable,
@@ -370,7 +370,7 @@ export const defineControlsSwitchBlocks = (): void => {
         .appendField(getBlocklyMsg("CONTROLS_SWITCH_VAR_TAIL"));
       const varField = this.getField("SWVAR") as Blockly.FieldVariable | null;
       if (varField) {
-        configureTypedVariableField(varField);
+        configureScalarVariableField(varField);
       }
       (this as Blockly.Block & { contextMenuMsg_?: string }).contextMenuMsg_ =
         Blockly.Msg.VARIABLES_GET_CREATE_SET ?? "";

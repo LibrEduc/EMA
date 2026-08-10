@@ -260,6 +260,7 @@ const ensureDialog = (): HTMLDialogElement => {
     stopListening();
     pendingStatus = null;
     pendingFocus = null;
+    document.getElementById(BUTTON_ID)?.classList.remove("is-active");
   });
 
   dialog.addEventListener("cancel", (event) => {
@@ -597,6 +598,7 @@ export const openShortcutsHelp = (): void => {
   renderDialogContent();
   if (!wasOpen) {
     dialog.showModal();
+    document.getElementById(BUTTON_ID)?.classList.add("is-active");
     restoreFocus({ kind: "close" });
   }
 };

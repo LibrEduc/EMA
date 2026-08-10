@@ -69,6 +69,19 @@ function buildArrayListLiteralCode(
 }
 
 /**
+ * Places a declaration-block error in the global variables section
+ * (not in an artificial `loop()` from top-level return code).
+ */
+function emitGlobalDeclarationError(
+  generator: ArduinoGenerator,
+  message: string,
+): string {
+  const comment = message.replace(/\n+$/, "");
+  generator.addArrayDeclaration(comment);
+  return "";
+}
+
+/**
  * Valeur « contient » : littéral `{...}` ou scalaire enveloppé `{123}`.
  */
 function formatArrayInitializer(
@@ -156,18 +169,27 @@ export const Array_with = function (
   }
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
   if (!varName || varName === "variable") {
-    return "// Error: Invalid variable name\n";
+    return emitGlobalDeclarationError(generator, "// Error: Invalid variable name");
   }
   if (!hasArrayListConnectedElements(block)) {
-    return "// Error: connect values to determine list type\n";
+    return emitGlobalDeclarationError(
+      generator,
+      "// Error: connect values to determine list type",
+    );
   }
   const listCode = buildArrayListLiteralCode(block, generator);
   if (listCode === "{}") {
-    return "// Error: connect values to determine list type\n";
+    return emitGlobalDeclarationError(
+      generator,
+      "// Error: connect values to determine list type",
+    );
   }
   const elementType = inferArrayElementTypeFromBlock(block);
   if (!elementType || elementType === "__NO_TYPE__") {
-    return "// Error: connect values to determine list type\n";
+    return emitGlobalDeclarationError(
+      generator,
+      "// Error: connect values to determine list type",
+    );
   }
   const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
   const cppType = getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
@@ -437,7 +459,10 @@ export const Array_declare = function (
         inferred === "__NO_TYPE__" ||
         values === "{}"
       ) {
-        return "// Error: connect values to determine list type\n";
+        return emitGlobalDeclarationError(
+          generator,
+          "// Error: connect values to determine list type",
+        );
       }
       if (dimension === "d2") {
         const row0 = formatArrayInitializer(generator, block, "contenu");
@@ -501,7 +526,10 @@ export const Array_create = function (
           inferred === "__NO_TYPE__" ||
           j === "{}"
         ) {
-          return "// Error: connect values to determine list type\n";
+          return emitGlobalDeclarationError(
+            generator,
+            "// Error: connect values to determine list type",
+          );
         }
         declaration = typeBlock + " " + varName + "[] = " + j + ";";
       } else {
@@ -629,7 +657,7 @@ export const Array_bitmap = function (
   }
   const varName = generator.getVariableName(block.getFieldValue("VAR"));
   if (!varName || varName === "variable") {
-    return "// Error: Invalid variable name\n";
+    return emitGlobalDeclarationError(generator, "// Error: Invalid variable name");
   }
   const { cols, rows, rowsCode } = readBitmapGrid(block, generator);
   const declaration =

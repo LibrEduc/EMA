@@ -36,7 +36,6 @@ import {
   getVariableTypeOptions,
   getInternalTypeForArduinoType,
   getArduinoTypeLabelKey,
-  getCppTypeName,
   isArduinoScalarType,
 } from "../../generators/arduino/block_types";
 import {
@@ -48,7 +47,6 @@ import {
 } from "../../generators/arduino/variable_utils";
 import {
   configureScalarVariableField,
-  configureTypedVariableField,
   getBlocklyCompatibleChecks,
   getBlocklyMsg,
   getBlocklyMsgOr,
@@ -77,18 +75,6 @@ export const getArduinoTypeDropdownOptions = (): Blockly.MenuOption[] =>
     getArduinoTypeLabel(type),
     type,
   ] as Blockly.MenuOption);
-
-/** @deprecated Use {@link getArduinoTypeDropdownOptions} */
-export const getVariableTypeDropdownOptions = getArduinoTypeDropdownOptions;
-
-/** @deprecated Use {@link getArduinoTypeLabel} */
-export const getVariableTypeLabel = getArduinoTypeLabel;
-
-/** @deprecated Use {@link getArduinoTypeDropdownOptions} */
-export const getVariableCastTypeOptions = getArduinoTypeDropdownOptions;
-
-/** @deprecated Use {@link getCppTypeName} from `block_types` */
-export const getCastCppKeyword = getCppTypeName;
 
 /** Resets a scalar type dropdown when its value is not a valid Arduino type (e.g. `list`). */
 const sanitizeArduinoTypeDropdown = (
@@ -147,7 +133,7 @@ export const defineVariablesGetDynamicBlock = (): void => {
         );
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
       if (varField) {
-        configureTypedVariableField(varField);
+        configureScalarVariableField(varField);
       }
       this.setOutput(true);
       this.setStyle("variable_dynamic_blocks");
@@ -226,7 +212,7 @@ export const defineVariablesSetDynamicBlock = (): void => {
         .appendField(getBlocklyMsg("TYPED_VAR_TO_LABEL"));
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
       if (varField) {
-        configureTypedVariableField(varField);
+        configureScalarVariableField(varField);
       }
       this.setInputsInline(false);
       this.setPreviousStatement(true, null);
@@ -374,7 +360,7 @@ export const defineVariablesSetTypeBlock = (): void => {
         );
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
       if (varField) {
-        configureTypedVariableField(varField);
+        configureScalarVariableField(varField);
       }
       this.setInputsInline(true);
       this.setStyle("variable_dynamic_blocks");
@@ -492,7 +478,7 @@ export const defineVariablesConstBlock = (): void => {
         .appendField(getBlocklyMsgOr("VARIABLES_SET_CONST_AT", "at"));
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
       if (varField) {
-        configureTypedVariableField(varField);
+        configureScalarVariableField(varField);
       }
       this.setStyle("variable_dynamic_blocks");
       this.setTooltip(
@@ -588,7 +574,7 @@ export const defineVariablesSetInitBlock = (): void => {
         .appendField(getBlocklyMsgOr("_AT", "at"));
       const varField = this.getField("VAR") as Blockly.FieldVariable | null;
       if (varField) {
-        configureTypedVariableField(varField);
+        configureScalarVariableField(varField);
       }
       this.setInputsInline(false);
       this.setPreviousStatement(true, null);
@@ -673,10 +659,8 @@ export const defineVariablesDefineBlock = (): void => {
       .appendField(getBlocklyMsgOr("VARIABLES_AS", "as"));
     const varField = this.getField("VAR") as Blockly.FieldVariable | null;
     if (varField) {
-      configureTypedVariableField(varField);
+      configureScalarVariableField(varField);
     }
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
     this.setStyle("variable_dynamic_blocks");
     this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_DEFINE_CONST_TOOLTIP", ""));
     this.setHelpUrl(getBlocklyMsgOr("ARDUINO_BASE_DEFINE_CONST_HELPURL", ""));

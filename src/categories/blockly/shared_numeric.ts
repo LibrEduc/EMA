@@ -3,7 +3,7 @@
  * @module BlocklyCategories.SharedNumeric
  * @description Numeric and loop-bound typing helpers for Blockly category blocks.
  * @remarks
- * Extracted from {@link ./shared} to keep loop/math typing utilities focused.
+ * Extracted from shared helpers to keep loop/math typing utilities focused.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -40,7 +40,7 @@ import { resolveLocalVariableScope } from "../../generators/arduino/variable_sco
 
 /**
  * Normalizes Blockly check types to µcBlockly variable types.
- * Local copy to avoid a circular import with {@link ./shared}.
+ * Local copy to avoid a circular import with shared helpers.
  */
 const normalizeBlocklyTypeToVariableType = (type: string): string => {
   const normalized = normalizeBlocklyCheckToInternalType(type);
@@ -254,6 +254,41 @@ export const inferLoopCounterType = (
   }
   return result;
 };
+
+/**
+ * True when a variable type is missing / not yet resolved (allowed on math_change VAR).
+ */
+export const isUnresolvedVariableType = (
+  type: string | null | undefined,
+): boolean =>
+  !type ||
+  type === "__NO_TYPE__" ||
+  type === "null" ||
+  type === "undefined";
+
+/**
+ * True when a type is a numeric scalar usable by math_change (int/float/long).
+ */
+export const isNumericScalarVariableType = (
+  type: string | null | undefined,
+): boolean => {
+  const normalized = normalizeBlocklyCheckToInternalType(type) ?? type;
+  return (
+    normalized === "int" ||
+    normalized === "float" ||
+    normalized === "long" ||
+    normalized === "Number" ||
+    normalized === "number"
+  );
+};
+
+/**
+ * Types accepted on math_change VAR: untyped or numeric scalars (not String/bool/…).
+ */
+export const isMathChangeCompatibleVariableType = (
+  type: string | null | undefined,
+): boolean =>
+  isUnresolvedVariableType(type) || isNumericScalarVariableType(type);
 
 /**
  * Resolves the variable ID targeted by a math_change block (field or connected getter).

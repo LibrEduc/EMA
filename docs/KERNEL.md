@@ -16,7 +16,7 @@ Complète [ARCHITECTURE.md](./ARCHITECTURE.md) (vue contributeur) et [INTEGRATIO
 ```mermaid
 flowchart TB
   subgraph L1["Niveau 1 — Blockly"]
-    B[Blockly 12 + plugins @blockly]
+    B[Blockly 13 + plugins @blockly]
   end
   subgraph L2["Niveau 2 — µcBlockly noyau"]
     K[src/core/ · blocs · générateur Arduino]
@@ -76,6 +76,8 @@ Point d’entrée TypeScript : `src/core/index.ts` → `build/src/core/index.js`
 | `arduinoGenerator` | Génération C++ |
 | `basic_toolbox`, `getToolboxForCurrentBoard`, `getToolboxWithoutBoardCategory` | Toolbox JSON |
 | `ToolboxConfiguration` | Type toolbox |
+
+Pour les aides **produit / coque** (thème UI, langues DOM, a11y, cartes) : importer `µcBlockly/host` plutôt que le noyau.
 
 ### Exemple minimal
 
@@ -149,6 +151,7 @@ src/index.ts               ← INTERNe (webpack main)
 | Chemin | Cible |
 |--------|--------|
 | `"."` / `"./core"` | `build/src/core/index.js` — **noyau** |
+| `"./host"` | `build/src/host/index.js` — aides produit (thèmes, a11y, Monaco) |
 | `"./demo"` | `build/src/index.js` — point d’entrée démo (Monaco, shell) |
 
 Artefact navigateur embed : servir le dossier `dist/core/` (pas `dist/bundle/`).

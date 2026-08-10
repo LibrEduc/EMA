@@ -43,6 +43,11 @@ import { getToolboxForCurrentBoard, type ToolboxConfiguration } from "../toolbox
 import { createUcBlockly } from "./create_ucblockly";
 import { resolveEnforcerOptions } from "./default_options";
 import { sanitizeSerializedWorkspaceState } from "./workspace_state";
+import {
+  installProgramStructureEnforcer,
+  syncProgramStructureAfterLoad,
+  uninstallProgramStructureEnforcer,
+} from "../program_structure_enforcer";
 import { getShellMessage } from "../shell_messages";
 import { UcBlocklyPluginHost } from "./ucblockly_plugins";
 import type {
@@ -103,6 +108,19 @@ export class UcBlocklyWorkspaceManager {
 
   setAutoSaveEnabled(enabled: boolean): void {
     this.autoSaveEnabled = enabled;
+    if (!enabled && this.saveBlocksTimer !== null) {
+      window.clearTimeout(this.saveBlocksTimer);
+      this.saveBlocksTimer = null;
+    }
+  }
+
+  /**
+   * Clears all blocks and the undo/redo stacks (in-memory reset).
+   */
+  clearWorkspaceFully(): void {
+    this.workspace.clear();
+    this.workspace.clearUndo();
+    this.hasBlocks = false;
   }
 
   setAutoSaveKey(key: string): void {
@@ -153,6 +171,22 @@ export class UcBlocklyWorkspaceManager {
 
   setMinimapVisible(visible: boolean): void {
     this.pluginHost.setMinimapVisible(visible);
+  }
+
+  /**
+   * Active/désactive l’enforceur setup/loop sans réinjecter le workspace
+   * (préserve scroll et zoom).
+   */
+  setProgramStructureEnabled(enabled: boolean): void {
+    this.enforcers.programStructure = enabled;
+    if (!this.workspace) {
+      return;
+    }
+    if (enabled) {
+      installProgramStructureEnforcer(this.workspace);
+    } else {
+      uninstallProgramStructureEnforcer(this.workspace);
+    }
   }
 
   attachWorkspaceListeners(): void {
@@ -331,6 +365,10 @@ export class UcBlocklyWorkspaceManager {
       }
       this.normalizeVariableTypes();
       refreshBoardPinDropdowns(this.workspace);
+      syncProgramStructureAfterLoad(
+        this.workspace,
+        this.enforcers.programStructure,
+      );
     } catch (error) {
       console.error("Failed to load workspace blocks:", error);
       window.sessionStorage?.removeItem(storageKey);
@@ -386,6 +424,10 @@ export class UcBlocklyWorkspaceManager {
         }
         this.normalizeVariableTypes();
         refreshBoardPinDropdowns(this.workspace);
+        syncProgramStructureAfterLoad(
+          this.workspace,
+          this.enforcers.programStructure,
+        );
         this.workspaceSaveBlocks(this.autoSaveKey);
         const code = this.getCode();
         onLoaded?.(code);

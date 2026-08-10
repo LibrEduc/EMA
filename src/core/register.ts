@@ -29,11 +29,16 @@
  */
 
 import * as Blockly from "blockly";
+import {
+  applyBlockDebugMetadata,
+  installBlockDebugContextMenu,
+} from "../block_debug_context_menu";
 import { defineAllTypedVariableBlocks } from "../categories/blockly";
 import { applyLevelsToAllBlockDefinitions } from "../block_levels";
 import { configureStandardBlocks } from "../generators/arduino/configure_standard_blocks";
 import { applyBlockTypesFromRegistry } from "../generators/arduino/block_types_registry";
 import type { UcBlocklyRegistrationOptions } from "./types";
+import { installLiveBlocksBoundingBoxPatch } from "./live_content_metrics";
 
 let kernelRegistered = false;
 let commentContextMenuRegistered = false;
@@ -58,6 +63,8 @@ export function registerUcBlocklyKernel(
   }
   kernelRegistered = true;
 
+  installLiveBlocksBoundingBoxPatch();
+
   const typedVariables = options.typedVariables ?? true;
   const blockTypesRegistry = options.blockTypesRegistry ?? true;
   const configureStandard = options.configureStandardBlocks ?? true;
@@ -76,6 +83,9 @@ export function registerUcBlocklyKernel(
     applyLevelsToAllBlockDefinitions();
   }
   ensureCommentContextMenuRegistered();
+  // Hosts (BlocklyDuino, etc.) must get debug context menu without loading index.ts.
+  installBlockDebugContextMenu();
+  applyBlockDebugMetadata();
 }
 
 /** @internal Test helper — allows re-running registration in unit tests. */

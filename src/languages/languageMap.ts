@@ -81,6 +81,12 @@ export interface LanguageItem {
   SAVE: string;
   LOAD: string;
   ABOUT_TOOLTIP: string;
+  ABOUT_TEXT: string;
+  ABOUT_PROJECT: string;
+  ABOUT_BLOCKLY: string;
+  ABOUT_BLOCKLY_DOCS: string;
+  ABOUT_BLOCKLY_BADGE_ALT: string;
+  ABOUT_CLOSE: string;
   CONTACT_TOOLTIP: string;
   UNDO_TOOLTIP: string;
   REDO_TOOLTIP: string;
@@ -108,6 +114,7 @@ export interface LanguageItem {
   CAT_LISTS: string;
   CAT_LIBRE: string;
   CAT_BOARD: string;
+  CAT_BOARD_NONE: string;
   CAT_BOARD_BASE: string;
   CAT_BOARD_IN: string;
   CAT_BOARD_OUT: string;
@@ -127,6 +134,7 @@ export interface LanguageItem {
   THEME_HIGHCONTRAST: string;
   THEME_DARK: string;
   THEME_HACKER: string;
+  THEME_SESHAT: string;
   THEME_BLACKWHITE: string;
   RENDERER_GERAS: string;
   RENDERER_THRASOS: string;

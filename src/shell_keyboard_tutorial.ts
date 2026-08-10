@@ -263,13 +263,18 @@ const scheduleAutoTutorial = (): void => {
 
 /**
  * Enregistre le bouton barre d'outils et le tutoriel automatique au premier chargement.
+ * @param options - autoOpen: if false, do not open the tutorial on startup (embedded hosts).
  */
-export const registerKeyboardTutorial = (): void => {
+export const registerKeyboardTutorial = (options?: {
+  autoOpen?: boolean;
+}): void => {
   ensureDialog();
   const button = document.getElementById(BUTTON_ID);
   button?.addEventListener("click", () => openKeyboardTutorial(0));
   refreshTutorialButton();
-  scheduleAutoTutorial();
+  if (options?.autoOpen !== false) {
+    scheduleAutoTutorial();
+  }
 };
 
 /** Met à jour les libellés du bouton (et du contenu si la modale est ouverte). */

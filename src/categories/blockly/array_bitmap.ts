@@ -49,7 +49,7 @@ import {
   configureListVariableField,
   getArrayIndexBlocklyChecks,
   getBlocklyMsgOr,
-  syncListVariableFromBlock,
+  syncListVariableFromField,
 } from "./shared";
 
 const ARRAY_BITMAP_DEFAULT_VAR = LIST_DEFAULT_VARIABLE_NAME;
@@ -111,7 +111,7 @@ const bindDefaultListVariable = (block: Blockly.Block): void => {
   );
   if (variableModel?.getId()) {
     block.setFieldValue(variableModel.getId(), "VAR");
-    syncListVariableFromBlock(block);
+    syncListVariableFromField(block, "VAR");
   }
 };
 
@@ -275,7 +275,7 @@ export const defineArrayBitmapBlock = (): void => {
             if (create.recordUndo) {
               bindDefaultListVariable(this);
             } else {
-              syncListVariableFromBlock(this);
+              syncListVariableFromField(this, "VAR");
             }
             this.syncBitmapSize_?.();
           } else if (isBitmapDimEvent(this, event)) {
@@ -315,7 +315,7 @@ export const defineArrayBitmapBlock = (): void => {
               .getVariableById(String(change.oldValue));
             releaseVariableDeclaration(previous, this.id);
           }
-          syncListVariableFromBlock(this);
+          syncListVariableFromField(this, "VAR");
           revalidateListDeclarationUniqueness(this.workspace);
           return;
         }

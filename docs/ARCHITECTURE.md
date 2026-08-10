@@ -87,8 +87,14 @@ scripts/                        # Outils CLI (maintenance, conversion, assets)
 └── lib/                        # Modules partagés (rduino-block-map, rduino-xml-to-ucb-json)
 
 tests/                          # Tests Node (tsx --test)
-├── generators.test.ts          # Génération Arduino (switch, listes, etc.)
-└── rduino-convert.test.ts      # Convertisseur Blockly@rduino
+├── generators.test.ts          # Génération Arduino (switch, listes, setup/loop…)
+├── logic-compare-connections.test.ts
+├── math-change-typing.test.ts
+├── list-declaration-uniqueness.test.ts
+├── core-api.test.ts            # API noyau / createUcBlockly
+├── rduino-convert.test.ts      # Convertisseur Blockly@rduino
+├── array-bitmap.test.ts
+└── field-colour-a11y.test.ts
 ```
 
 Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Blockly@rduino.
@@ -106,7 +112,7 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 ## Key flows
 
 1. **Startup**: `index.ts` exposes Blockly and arduinoGenerator on `window`, then loads the app (e.g. `BlocklyApplication`). Block definitions (categories/blockly), block types (block_types_registry), and standard block config (configure_standard_blocks) are applied when Blockly is ready.
-2. **Workspace inject**: `blockly_application_type.ts` injects the workspace (toolbox, theme, options), restores saved blocks if any, and registers plugins (minimap, backpack, search, etc.).
+2. **Workspace inject**: the demo shell (`demo/blockly_application_shell.ts`) creates a `UcBlocklyWorkspaceManager`, injects the workspace (toolbox, theme, options), restores saved blocks if any, and registers plugins (minimap, backpack, search, etc.). Hosts can also use `createUcBlockly()` / `UcBlocklyWorkspaceManager` from `µcBlockly/core` without the demo shell.
 3. **Code generation**: User clicks “Generate code” (or equivalent) → `arduinoGenerator.workspaceToCode(workspace)` walks the block tree and calls the per-block generators in **generators/arduino/blocks/**.
 4. **Language**: `language.ts` and **languages/** handle UI language and toolbox translation; URL param and dropdown drive the current language.
 

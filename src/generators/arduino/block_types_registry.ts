@@ -31,7 +31,6 @@
  */
 
 import * as Blockly from "blockly";
-import { resolveVariableTypeForBlock } from "../../categories/blockly/shared";
 import { BLOCK_TYPES } from "./block_types/index";
 import { getCompatibleTypes, getInternalTypeForArduinoType, isTypeCompatible, normalizeBlocklyCheckToInternalType } from "./block_types";
 import { LIST_DECLARE_BLOCK_TYPES, LIST_VARIABLE_TYPE, isVariableDeclarationOwner } from "./variable_utils";
@@ -42,6 +41,28 @@ import { debugLog } from "./debug";
  */
 export type BlockTypeFunction = (block: Blockly.Block) => string;
 export type BlockTypeDefinition = string | BlockTypeFunction;
+
+/**
+ * Scope-aware variable type lookup used by `variableLookup`.
+ * Injected at load time by category shared helpers so this registry does not
+ * import the categories layer (avoids a circular dependency).
+ */
+export type VariableTypeForBlockResolver = (
+  block: Blockly.Block,
+  variableId: string,
+) => string | null;
+
+let resolveVariableTypeForBlockFn: VariableTypeForBlockResolver | null = null;
+
+/**
+ * Wires the variable type resolver once category shared helpers have loaded.
+ * Safe to call multiple times (last registration wins).
+ */
+export function registerVariableTypeForBlockResolver(
+  fn: VariableTypeForBlockResolver,
+): void {
+  resolveVariableTypeForBlockFn = fn;
+}
 
 /**
  * Registry of block types loaded from `block_types/`.
@@ -417,7 +438,7 @@ const DYNAMIC_TYPE_FUNCTIONS: Record<string, BlockTypeFunction> = {
       return '__NO_TYPE__';
     }
     try {
-      const varType = resolveVariableTypeForBlock(block, variableId);
+      const varType = resolveVariableTypeForBlockFn?.(block, variableId) ?? null;
       if (!varType) {
         return '__NO_TYPE__';
       }

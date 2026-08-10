@@ -43,9 +43,9 @@ import {
   getArrayListUntypedWarningText,
   getDuplicateListDeclarationWarningText,
   handleVariablesSetChange,
-  syncListVariableFromBlock,
+  syncListVariableFromField,
 } from "./shared";
-import { getVariableTypeDropdownOptions } from "./variables";
+import { getArduinoTypeDropdownOptions } from "./variables";
 import { getInternalTypeForArduinoType } from "../../generators/arduino/block_types";
 import {
   hasArrayListConnectedElements,
@@ -95,7 +95,7 @@ function bindArrayWithDefaultVariable(block: Blockly.Block): void {
   );
   if (variableModel?.getId()) {
     block.setFieldValue(variableModel.getId(), "VAR");
-    syncListVariableFromBlock(block);
+    syncListVariableFromField(block, "VAR");
   }
 }
 
@@ -183,7 +183,7 @@ function handleArrayListVariableSync(
     if (isListDeclareBlockType(block.type) && event.recordUndo) {
       bindArrayWithDefaultVariable(block);
     } else {
-      syncListVariableFromBlock(block);
+      syncListVariableFromField(block, "VAR");
     }
     if (workspace) {
       revalidateListDeclarationUniqueness(workspace);
@@ -202,7 +202,7 @@ function handleArrayListVariableSync(
         .getVariableById(String(change.oldValue));
       releaseVariableDeclaration(previous, block.id);
     }
-    syncListVariableFromBlock(block);
+    syncListVariableFromField(block, "VAR");
     if (workspace) {
       revalidateListDeclarationUniqueness(workspace);
     }
@@ -603,7 +603,7 @@ export const defineArrayBlocks = (): void => {
   }
   arrayBlocksRegistered = true;
   const getTypeOptions = (): Blockly.MenuOption[] =>
-    getVariableTypeDropdownOptions();
+    getArduinoTypeDropdownOptions();
 
   registerArrayListMutator("array_with_plus_minus_mutator", ARRAY_WITH_CONTAINING_LABEL);
   registerArrayListMutator("array_list_literal_mutator", ARRAY_LIST_LITERAL_LABEL);

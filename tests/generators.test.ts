@@ -61,18 +61,27 @@ test("controls_switch avec branche default génère default:", () => {
   assert.match(code, /default:\n  digitalWrite\(LED_BUILTIN, LOW\)/);
 });
 
-test("Array_with sans éléments ne génère pas int item[] = {0, 0}", () => {
+test("Array_with sans éléments place l'erreur en global, pas dans loop()", () => {
+  const workspace = new Blockly.Workspace();
   const generator = new ArduinoGenerator();
   generator.getVariableName = (name: string) => name;
+  generator.init(workspace);
   const block = {
+    type: "Array_with",
+    id: "test-array-with",
+    workspace,
     getFieldValue: (name: string) => (name === "VAR" ? "item" : ""),
     getInput: (name: string) => (name === "ADD0" ? {} : null),
     getInputTargetBlock: () => null,
   } as unknown as Block;
   const code = Array_with(block, generator);
-  assert.match(code, /connect values to determine list type/i);
-  assert.doesNotMatch(code, /\{0,\s*0\}/);
-  assert.doesNotMatch(code, /int item\[\]/);
+  assert.equal(code, "");
+  const finished = generator.finish("");
+  assert.match(finished, /connect values to determine list type/i);
+  assert.doesNotMatch(finished, /void loop\s*\(/);
+  assert.doesNotMatch(finished, /\{0,\s*0\}/);
+  assert.doesNotMatch(finished, /int item\[\]/);
+  workspace.dispose();
 });
 
 test("math_number génère un littéral entier", () => {
@@ -141,5 +150,25 @@ test("tagVariableAsList et inferConnectedValueType sur workspace Blockly", () =>
   const literal = { type: "Array_list_literal" } as Block;
   assert.equal(inferConnectedValueType(literal), LIST_VARIABLE_TYPE);
 
+  workspace.dispose();
+});
+
+test("workspace vide : aucun stub void setup/loop", () => {
+  const workspace = new Blockly.Workspace();
+  const generator = new ArduinoGenerator();
+  const code = generator.workspaceToCode(workspace);
+  assert.equal(code, "");
+  workspace.dispose();
+});
+
+test("setup/loop enregistrés vides émettent void setup/loop {}", () => {
+  const workspace = new Blockly.Workspace();
+  const generator = new ArduinoGenerator();
+  generator.init(workspace);
+  generator.addSetup("base_setup", "");
+  generator.addLoop("base_loop", "");
+  const code = generator.finish("");
+  assert.match(code, /void setup\(\) \{\n\}/);
+  assert.match(code, /void loop\(\) \{\n\}/);
   workspace.dispose();
 });

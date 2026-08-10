@@ -50,7 +50,6 @@ export class AccessibleFieldSlider extends FieldSlider {
   /**
    * Shows the slider editor and annotates the range input for assistive tech.
    */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   protected override showEditor_(e?: Event, quietInput?: boolean): void {
     super.showEditor_(e, quietInput);
     window.setTimeout(() => {

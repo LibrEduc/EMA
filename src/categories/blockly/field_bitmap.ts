@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module BlocklyFields.FieldBitmap
- * @description Re-export of @blockly/field-bitmap (named export; package has no default).
+ * @description Re-export of \@blockly/field-bitmap (named export; package has no default).
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0

@@ -21,7 +21,7 @@
  * ## Out of scope (not checked by this script)
  *
  * - Native Blockly messages provided by the `blockly` library (e.g. `CONTROLS_IF_MSG_IF`).
- * - Keys merged dynamically in `blockly_application_type.ts` without being listed here.
+ * - Keys merged dynamically in the demo shell / language bootstrap without being listed here.
  * - HTML / UI files outside `src/languages/`.
  *
  * To add a new key: register it in the 4 relevant language files

@@ -20,12 +20,12 @@ Les sections ci-dessous décrivent d’anciennes duplications **déjà résolues
 
 ---
 
-### 1.2 `getVariableTypeLabel` / options de dropdown type variable ✅
+### 1.2 Labels / options de dropdown type variable ✅
 
 | Fichier | Rôle |
 |--------|------|
-| **`categories/blockly/variables.ts`** | `getVariableTypeLabel`, `getVariableTypeDropdownOptions` (exportés). |
-| **`generators/arduino/configure_standard_blocks.ts`** | Importe `getVariableTypeDropdownOptions` depuis `variables.ts`. |
+| **`categories/blockly/variables.ts`** | `getArduinoTypeLabel`, `getArduinoTypeDropdownOptions` (exportés). |
+| **`generators/arduino/configure_standard_blocks.ts`** | Importe `getArduinoTypeDropdownOptions` depuis `variables.ts`. |
 
 ---
 
@@ -46,9 +46,9 @@ Helper **`setVariableTypeAndMarkManual`** dans `shared`, utilisé dans `configur
 
 ## 2. Répartition actuelle – points corrects
 
-- **`block_types.ts`** : règles de types pures (`TYPE_COMPATIBILITY`, `CAST_TYPE_TO_INTERNAL`, `getInternalTypeForCast`, `getCompatibleTypes`, `isTypeCompatible`, `getVariableTypeOptions`). Pas de Blockly. Documenté dans [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md).
+- **`block_types.ts`** : règles de types pures (`TYPE_COMPATIBILITY`, `ARDUINO_TYPE_TO_INTERNAL`, `getInternalTypeForArduinoType`, `getCompatibleTypes`, `isTypeCompatible`, `getVariableTypeOptions`). Pas de Blockly. Documenté dans [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md).
 - **`block_types_registry.ts`** : registre, `checkTypeCompatibility` (côté Blockly), `getCompatibleTypesForCheck`, application aux blocs. Utilise `block_types`. Bonne séparation.
-- **`variable_utils.ts`** : `setVariableType`, `clearVariableType`, `normalizeVariableType`. Utilisé par shared, variables, logic, configure_standard_blocks, blockly_application_type. Rôle clair.
+- **`variable_utils.ts`** : `setVariableType`, `clearVariableType`, `normalizeVariableType`. Utilisé par shared, variables, logic, configure_standard_blocks, workspace manager. Rôle clair.
 - **`shared.ts`** : i18n, inférence de type, helpers variables/blocs, avertissements, validation. Centralise le réutilisable entre categories/blockly. Cohérent.
 
 ---
@@ -81,7 +81,7 @@ Beaucoup de définitions de blocs (get, set, local, const, init, define, set_typ
 1. **`getBlocklyMsg` / `getBlocklyMsgOr`**  
    - `configure_standard_blocks` et `typed_variables_flyout` importent depuis `shared`, suppression des copies locales.
 
-2. **`getVariableTypeLabel` / `getVariableTypeDropdownOptions`**  
+2. **`getArduinoTypeLabel` / `getArduinoTypeDropdownOptions`**
    - Export depuis `variables.ts`, réutilisation dans `configure_standard_blocks`, suppression des doublons.
 
 3. **`VariableWithMutableType`**  

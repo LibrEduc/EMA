@@ -5,6 +5,7 @@
  * @example
  * ```ts
  * import { createUcBlockly, basic_toolbox } from "ucblockly/core";
+ * ```
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0
@@ -35,6 +36,10 @@ export { createUcBlockly } from "./create_ucblockly";
 export { registerUcBlocklyKernel, resetUcBlocklyKernelRegistrationForTests } from "./register";
 export { applyUcBlocklyLocale } from "./locale";
 export { sanitizeSerializedWorkspaceState } from "./workspace_state";
+export {
+  syncProgramStructureAfterLoad,
+  NOT_IN_PROGRAM_DISABLED_REASON,
+} from "../program_structure_enforcer";
 export {
   DEFAULT_UCBLOCKLY_PLUGINS,
   DEFAULT_UCBLOCKLY_ENFORCERS,

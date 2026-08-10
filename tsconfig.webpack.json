@@ -5,7 +5,6 @@
     "noEmit": true
   },
   "include": [
-    "src/**/*",
-    "node_modules/@blockly/block-shareable-procedures/src/**/*"
+    "src/**/*"
   ]
 }

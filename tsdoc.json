@@ -58,6 +58,11 @@
     "@public": true,
     "@version": true,
     "@description": true,
-    "@since": true
+    "@since": true,
+    "@deprecated": true,
+    "@returns": true,
+    "@see": true,
+    "@inheritdoc": true,
+    "@internal": true
   }
 }

@@ -33,6 +33,7 @@ import { refreshBoardPinDropdowns } from "../categories/blockly";
 import { arduinoGenerator } from "../generators/arduino";
 import {
   installProgramStructureEnforcer,
+  syncProgramStructureAfterLoad,
   uninstallProgramStructureEnforcer,
 } from "../program_structure_enforcer";
 import {
@@ -128,13 +129,8 @@ export function createUcBlockly(
     }
   }
 
+  const hostWorkspaceOptions = options.workspaceOptions ?? {};
   const workspaceOptions: Blockly.BlocklyOptions = {
-    grid: {
-      spacing: 20,
-      length: 3,
-      colour: "#ccc",
-      snap: true,
-    },
     scrollbars: true,
     zoom: {
       controls: true,
@@ -149,8 +145,24 @@ export function createUcBlockly(
     media: options.media ?? "./media/",
     theme: resolveTheme(options.theme),
     toolbox,
-    ...options.workspaceOptions,
+    ...hostWorkspaceOptions,
   };
+
+  // Grille : défaut ON seulement si l’hôte ne la définit pas.
+  // `grid: null` / `undefined` explicite via `in` → pas de grille.
+  if (!Object.prototype.hasOwnProperty.call(hostWorkspaceOptions, "grid")) {
+    workspaceOptions.grid = {
+      spacing: 20,
+      length: 3,
+      colour: "#ccc",
+      snap: true,
+    };
+  } else if (
+    hostWorkspaceOptions.grid === null ||
+    hostWorkspaceOptions.grid === undefined
+  ) {
+    delete workspaceOptions.grid;
+  }
 
   const workspace = Blockly.inject(injectionDiv, workspaceOptions);
   patchFieldVariableValidation();
@@ -208,6 +220,7 @@ export function createUcBlockly(
       workspace.clear();
       Blockly.serialization.workspaces.load(state, workspace);
       refreshBoardPinDropdowns(workspace);
+      syncProgramStructureAfterLoad(workspace, programStructure);
       notifyCodeChange();
     },
     resize(): void {

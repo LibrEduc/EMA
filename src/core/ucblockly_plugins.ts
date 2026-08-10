@@ -112,9 +112,13 @@ export class UcBlocklyPluginHost {
   private pluginsInitialized = false;
   private pluginsWorkspace: Blockly.Workspace | null = null;
   private contentHighlightActive = false;
+  private minimapResyncGeneration = 0;
+  private onMinimapResync:
+    | ((event: Blockly.Events.Abstract) => void)
+    | null = null;
 
   private pluginBackpack = new Backpack();
-  private pluginContentHighlight = new ContentHighlight();
+  private pluginContentHighlight: ContentHighlight | null = null;
   private pluginMinimap = new PositionedMinimap();
   private pluginModal = new Modal();
   private pluginWorkspaceSearch: { init: () => void; dispose: () => void } | null = null;
@@ -147,7 +151,8 @@ export class UcBlocklyPluginHost {
       this.contentHighlightActive = true;
       return;
     }
-    this.safeDispose(() => this.pluginContentHighlight.dispose());
+    this.safeDispose(() => this.pluginContentHighlight?.dispose());
+    this.pluginContentHighlight = null;
     this.contentHighlightActive = false;
   }
 
@@ -183,8 +188,14 @@ export class UcBlocklyPluginHost {
       if (opts.shadowBlockConverter) {
         workspace.removeChangeListener(shadowBlockConversionChangeListener);
       }
+      if (this.onMinimapResync) {
+        workspace.removeChangeListener(this.onMinimapResync);
+        this.onMinimapResync = null;
+      }
+      this.minimapResyncGeneration += 1;
       this.safeDispose(() => this.pluginMinimap.dispose());
-      this.safeDispose(() => this.pluginContentHighlight.dispose());
+      this.safeDispose(() => this.pluginContentHighlight?.dispose());
+      this.pluginContentHighlight = null;
       this.safeDispose(() => this.pluginBackpack.dispose());
       this.safeDispose(() => this.pluginModal.dispose());
       this.safeDispose(() => this.pluginWorkspaceSearch?.dispose());
@@ -251,6 +262,7 @@ export class UcBlocklyPluginHost {
         Blockly.svgResize(svgWorkspace);
         this.pluginMinimap.init();
         this.setMinimapVisible(opts.minimapVisible);
+        this.installMinimapResync(svgWorkspace);
       }
       onReady?.();
     };
@@ -270,5 +282,67 @@ export class UcBlocklyPluginHost {
     } catch {
       // no-op if never initialized
     }
+  }
+
+  /**
+   * Minimap event mirroring can leave a ghost block at the trash position after
+   * delete. Drop orphans that are no longer on the primary workspace, then zoom.
+   */
+  private installMinimapResync(workspace: Blockly.WorkspaceSvg): void {
+    if (this.onMinimapResync) {
+      workspace.removeChangeListener(this.onMinimapResync);
+    }
+    this.onMinimapResync = (event: Blockly.Events.Abstract): void => {
+      if (
+        event.type !== Blockly.Events.BLOCK_DELETE &&
+        event.type !== Blockly.Events.COMMENT_DELETE
+      ) {
+        return;
+      }
+      const generation = ++this.minimapResyncGeneration;
+      void Blockly.renderManagement.finishQueuedRenders().then(() => {
+        if (generation !== this.minimapResyncGeneration) {
+          return;
+        }
+        requestAnimationFrame(() => {
+          if (generation !== this.minimapResyncGeneration) {
+            return;
+          }
+          this.purgeMinimapOrphans(workspace);
+        });
+      });
+    };
+    workspace.addChangeListener(this.onMinimapResync);
+  }
+
+  private purgeMinimapOrphans(primary: Blockly.WorkspaceSvg): void {
+    const minimap = (
+      this.pluginMinimap as unknown as {
+        minimapWorkspace?: Blockly.WorkspaceSvg | null;
+      }
+    ).minimapWorkspace;
+    if (!minimap) {
+      return;
+    }
+
+    const primaryIds = new Set(
+      primary.getAllBlocks(false).map((block) => block.id),
+    );
+    for (const block of minimap.getAllBlocks(false)) {
+      if (!primaryIds.has(block.id)) {
+        block.dispose(false);
+      }
+    }
+
+    const primaryCommentIds = new Set(
+      primary.getTopComments(false).map((comment) => comment.id),
+    );
+    for (const comment of minimap.getTopComments(false)) {
+      if (!primaryCommentIds.has(comment.id)) {
+        comment.dispose();
+      }
+    }
+
+    minimap.zoomToFit();
   }
 }

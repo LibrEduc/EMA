@@ -72,7 +72,3 @@ const generators: typeof arduinoGenerator.forBlock = {
 for (const name in generators) {
   arduinoGenerator.forBlock[name] = generators[name];
 }
-
-// Remove duplicate registrations that can cause conflicts
-// arduinoGenerator.forBlock['variables_get_dynamic'] = variablesTyped.variables_get_dynamic;
-// arduinoGenerator.forBlock['variables_set_dynamic'] = variablesTyped.variables_set_dynamic;

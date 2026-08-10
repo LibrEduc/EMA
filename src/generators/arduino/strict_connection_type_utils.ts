@@ -135,8 +135,7 @@ export function resolveSwitchCaseSourceType(
  * output checks (e.g. math_number → "Number") against setCheck(["int"]) and
  * rejects before getBlockType() runs — handle that case explicitly.
  *
- * @param helpers.resolveOutputInputPair - Class helper that identifies
- *   which of `a`/`b` is OUTPUT_VALUE vs INPUT_VALUE.
+ * @param helpers - Provides resolveOutputInputPair to identify OUTPUT_VALUE vs INPUT_VALUE.
  */
 export function checkSwitchCaseIntConnection(
   a: Blockly.Connection,
