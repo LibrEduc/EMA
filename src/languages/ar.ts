@@ -164,7 +164,7 @@ export const arLang: LanguageMap = {
     KEYBOARD_TUTORIAL_STEP_5_TITLE: "المساعدة وقارئ الشاشة",
     KEYBOARD_TUTORIAL_STEP_5_BODY:
       "F1 أو ? يفتح مساعدة الاختصارات. Alt+Shift+A يبدّل وضع قارئ الشاشة Blockly (إعلانات مفصلة). يُحفظ اختيارك بين الجلسات.",
-    BOARD_MENU_TOOLTIP: "اختيار لوحة Arduino",
+    BOARD_MENU_TOOLTIP: "اختيار لوحة المتحكم الدقيق",
     EMPTY_BACKPACK: "إفراغ الحقيبة",
     REMOVE_FROM_BACKPACK: "إزالة من الحقيبة",
     COPY_TO_BACKPACK: "نسخ إلى الحقيبة",

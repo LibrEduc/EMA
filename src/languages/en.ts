@@ -164,7 +164,7 @@ export const enLang: LanguageMap = {
     KEYBOARD_TUTORIAL_STEP_5_TITLE: "Help and screen reader",
     KEYBOARD_TUTORIAL_STEP_5_BODY:
       "F1 or ? opens the shortcuts help. Alt+Shift+A toggles Blockly screen reader mode (detailed announcements). Your choice is remembered between sessions.",
-    BOARD_MENU_TOOLTIP: "Select Arduino board",
+    BOARD_MENU_TOOLTIP: "Select microcontroller board",
     EMPTY_BACKPACK: "Empty",
     REMOVE_FROM_BACKPACK: "Remove from Backpack",
     COPY_TO_BACKPACK: "Copy to Backpack",

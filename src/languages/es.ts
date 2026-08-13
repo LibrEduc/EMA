@@ -164,7 +164,7 @@ export const esLang: LanguageMap = {
     KEYBOARD_TUTORIAL_STEP_5_TITLE: "Ayuda y lector de pantalla",
     KEYBOARD_TUTORIAL_STEP_5_BODY:
       "F1 o ? abre la ayuda de atajos. Alt+Mayus+A activa el modo lector de pantalla Blockly (anuncios detallados). Su eleccion se guarda entre sesiones.",
-    BOARD_MENU_TOOLTIP: "Elegir placa Arduino",
+    BOARD_MENU_TOOLTIP: "Elegir placa de microcontrolador",
     EMPTY_BACKPACK: "Vaciar la mochila",
     REMOVE_FROM_BACKPACK: "Quitar de la mochila",
     COPY_TO_BACKPACK: "Copiar a la mochila",

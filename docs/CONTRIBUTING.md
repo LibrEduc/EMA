@@ -10,16 +10,19 @@ Thank you for considering contributing. This short guide will help you get start
 
 ## Before you start
 
+**Compatibility:** µcBlockly **v3** requires **Blockly 13** (`blockly` ^13 and aligned `@blockly/*` plugins). See the root [README](../README.md) and [KERNEL.md](./KERNEL.md).
+
 1. **Read the architecture**  
    See [ARCHITECTURE.md](./ARCHITECTURE.md) for:
-   - Source layout (`src/` and subfolders)
+   - Source layout (`src/` and subfolders: `core/`, `host/`, `demo/`)
    - Conventions (comments, TSDoc / TypeDoc, block definitions vs code generation)
    - Where to change what (new blocks, types, toolbox, boards, languages, themes)
 
 2. **Set up the project**  
    - `npm install`  
    - `npm run dev` for development with hot reload  
-   - `npm run build` for production build  
+   - `npm run build` for production build (demo + core bundle)  
+   - `npm run build:core` for the embeddable kernel only  
    - `npm run docs` to generate API documentation (TypeDoc) in `docs/api/` — see [TYPEDOC.md](./TYPEDOC.md)
 
 3. **Quality checks before a PR**  
@@ -43,6 +46,7 @@ Thank you for considering contributing. This short guide will help you get start
 | Add a board or change pins | `src/boards.ts` |
 | Add or edit a language | `src/languages/` — then `npm run check-translations` |
 | Convert Blockly@rduino project | `npm run convert-rduino` — see [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) |
+| Add a new toolbox category (e.g. servo) | [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) |
 | Regenerate functions inventory | `npm run extract-functions` → `docs/functions-list.md` |
 
 ## Reporting issues and pull requests

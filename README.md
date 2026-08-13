@@ -17,7 +17,7 @@
   — génération de code Arduino/C++ à partir de blocs.
 </p>
 
-[Contribuer](docs/CONTRIBUTING.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md)
+[Contribuer](docs/CONTRIBUTING.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md) · [Wiki](https://wiki.libreduc.cc/fr:arduino:ucblockly)
 
 </div>
 
@@ -65,9 +65,11 @@ Ouvrez l’URL affichée par Webpack (ou `public/index.html` après build) pour 
 | [docs/REPARTITION_FICHIERS.md](docs/REPARTITION_FICHIERS.md) | Analyse de la répartition du code entre fichiers |
 | [docs/CODE_IMPROVEMENTS.md](docs/CODE_IMPROVEMENTS.md) | Pistes d’amélioration et optimisations |
 | [docs/CONVERT_RDUINO.md](docs/CONVERT_RDUINO.md) | Conversion de sauvegardes Blockly@rduino |
+| [docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md](docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md) | Guide : ajouter une catégorie (ex. Servomoteur) |
 | [docs/serialization-analysis.md](docs/serialization-analysis.md) | Sérialisation Blockly (sauvegarde/chargement) |
 | [docs/functions-list.md](docs/functions-list.md) | Inventaire des fonctions exportées |
 | [docs/INTEGRATION_DEPOT.md](docs/INTEGRATION_DEPOT.md) | Intégrer µcBlockly dans un autre projet |
+| [Wiki LibrEduc](https://wiki.libreduc.cc/fr:arduino:ucblockly) | Miroir public des aides Markdown |
 
 ## Ressources visuelles
 

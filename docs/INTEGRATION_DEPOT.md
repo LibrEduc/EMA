@@ -36,9 +36,9 @@ La démo complète reste couplée au DOM (`requiredElements` dans `src/index.ts`
    ```
    Ou cloner le dépôt dans un sous-dossier de votre projet.
 
-2. **Build** : dans le dossier µcBlockly, exécuter `npm ci` puis `npm run build` (ou `build:local` si vous ouvrez en local). Le résultat est dans `ucBlockly/dist/bundle/` (ou `build/` en dev).
+2. **Build** : dans le dossier µcBlockly, exécuter `npm ci` puis `npm run build` (ou `build:local` si vous ouvrez en local). Le résultat est dans `ucBlockly/dist/bundle/` (ou `build/` en dev). Pour un embed sans Monaco : `npm run build:core:bundle` → `dist/core/`.
 
-3. **Servir le bundle** : votre projet sert le contenu de `ucBlockly/dist/bundle/` sous une URL (ex. `/blockly/` ou un sous-répertoire statique).
+3. **Servir le bundle** : votre projet sert le contenu de `ucBlockly/dist/bundle/` (ou `dist/core/`) sous une URL (ex. `/blockly/` ou un sous-répertoire statique).
 
 4. **Intégration dans votre page** :
    ```html
@@ -75,44 +75,37 @@ La démo complète reste couplée au DOM (`requiredElements` dans `src/index.ts`
 
 ---
 
-### 2.3 Intégration par source (importer le code TypeScript de µcBlockly)
+### 2.3 Intégration dans la page via le noyau (`createUcBlockly`) — recommandé sans iframe
 
-**Idée** : votre projet a son propre bundler (Webpack/Vite/…). Vous ajoutez µcBlockly en submodule et vous **importez directement des fichiers source** de µcBlockly (ex. `toolbox`, `generators`, `categories`) depuis votre code, au lieu d’utiliser le bundle autonome.
+**Idée** : submodule ou dépendance locale, build du noyau, puis injection dans un conteneur DOM de votre app.
 
-**Difficulté** : aujourd’hui, le point d’entrée de µcBlockly est une application complète qui :
-- attend un DOM déjà en place (liste `requiredElements`) ;
-- n’expose pas de fonction du type `init(container, options)`.
+```ts
+import { createUcBlockly, basic_toolbox } from "µcBlockly/core";
+// depuis les sources : "./ucBlockly/build/src/core/index.js"
 
-Pour une vraie intégration « lib », il faudrait soit :
+const editor = createUcBlockly(document.getElementById("editor")!, {
+  toolbox: basic_toolbox,
+  language: "fr",
+  media: "./media/", // servir aussi dist/core/media/ ou les media Blockly
+  enforcers: { strictTypes: true, programStructure: true },
+  plugins: { minimap: true, workspaceSearch: true },
+  onCodeChange: (code) => {
+    document.getElementById("code")!.textContent = code;
+  },
+});
 
-- **Option A** : Dans **votre** projet, reproduire le même HTML que `public/index.html` (ou un équivalent minimal avec les mêmes ids), puis importer et exécuter le code d’init de µcBlockly (en exposant éventuellement une fonction `runUcBlockly()` depuis un fichier dédié). Votre bundler résout les imports vers `./ucBlockly/src/...`.  
-  → Possible mais fragile (couplage aux ids du DOM et au flux d’init actuel).
+// editor.getCode(), editor.saveWorkspace(), editor.loadWorkspace(state),
+// editor.resize(), editor.dispose()
+```
 
-- **Option B** : **Modifier µcBlockly** (dans votre fork ou dans le dépôt intégré) pour ajouter un **point d’entrée « bibliothèque »** :
-  - un fichier du type `src/ucblockly-api.ts` qui exporte une fonction `inject(container: HTMLElement, options?: UcBlocklyOptions)` ;
-  - cette fonction crée en JS les divs nécessaires à l’intérieur de `container`, puis exécute la logique d’init actuelle (workspace, toolbox, générateur, etc.).
-  - Dans le projet parent, vous feriez : `import { inject } from './ucBlockly/src/ucblockly-api'; inject(document.getElementById('blockly-root'), {});`
+**Prérequis** : `npm run build:core` (et éventuellement `build:core:bundle` pour un artefact navigateur sous `dist/core/`). Voir [KERNEL.md](./KERNEL.md).
 
-**Mise en œuvre minimale (Option A, sans modifier µcBlockly) :**
+Pour les aides **produit** (thèmes coque, a11y, Monaco) : `µcBlockly/host` — pas le noyau.
 
-1. Submodule : `git submodule add https://github.com/A-S-T-U-C-E/ucBlockly.git ucBlockly`
-2. Dans votre config Webpack (ou Vite), ajouter un alias pour résoudre les imports vers le sous-dossier :
-   ```js
-   resolve: {
-     alias: {
-       'ucblockly': path.resolve(__dirname, 'ucBlockly/src'),
-     },
-   },
-   ```
-3. Dans votre page, inclure un clone du HTML requis par µcBlockly (ou un template qui génère les bons ids).
-4. Importer le point d’entrée de µcBlockly **après** que le DOM soit prêt :
-   ```js
-   import './ucBlockly/src/index.ts';
-   ```
-   Cela exécutera l’app entière ; il faut que votre page fournisse bien tous les éléments attendus.
+**Variante fragile (démo complète)** : importer `src/index.ts` / `µcBlockly/demo` en reproduisant le DOM de `public/index.html` (`requiredElements`). Réservé aux cas où vous voulez la coque démo entière, pas seulement l’éditeur.
 
-**Avantages** : un seul bundle, pas d’iframe.  
-**Inconvénients** : dépendances (Blockly, Monaco, etc.) partagées avec le reste de votre app, et sans Option B le couplage au DOM reste fort.
+**Avantages** : un seul document, API propre, sans Monaco dans le noyau.  
+**Inconvénients** : le bundler parent doit résoudre Blockly et les plugins `@blockly/*` (ou consommer `dist/core/`).
 
 ---
 
@@ -120,62 +113,34 @@ Pour une vraie intégration « lib », il faudrait soit :
 
 | Besoin | Approche recommandée |
 |--------|----------------------|
-| Intégrer µcBlockly « tel quel » avec le moins de changements | **2.1 Iframe** (submodule + build, afficher le bundle dans une iframe). |
-| Automatiser le build et le déploiement dans un gros projet | **2.2** (submodule + build dans la CI / script du parent, puis iframe ou route). |
-| Intégrer au même document (pas d’iframe), sans modifier µcBlockly | **2.3 Option A** (même DOM, import du `index.ts`). |
-| Intégrer au même document avec une API propre (init dans un div) | **2.3 Option B** (ajouter dans µcBlockly un entry « lib » du type `inject(container, options)`). |
+| Intégrer µcBlockly « tel quel » avec le moins de changements | **2.1 Iframe** (submodule + `build` / `build:core:bundle`) |
+| Automatiser le build dans un gros projet | **2.2** (submodule + CI parent, puis iframe ou route) |
+| Intégrer dans la page avec une API propre | **2.3** — `createUcBlockly()` via `µcBlockly/core` |
+| Reprendre la coque démo complète (Monaco, topbar) | Variante démo de **2.3** (DOM `public/index.html`) |
 
 ---
 
-## 4. API noyau `createUcBlockly` (P0)
+## 4. API noyau `createUcBlockly`
 
-Le point d’entrée embed est disponible dans `src/core/` et compilé vers `build/src/core/` :
-
-```ts
-import {
-  createUcBlockly,
-  basic_toolbox,
-} from "./core/index.js"; // ou "µcBlockly/core" via package exports
-
-const editor = createUcBlockly(document.getElementById("editor")!, {
-  toolbox: basic_toolbox,
-  language: "fr",
-  theme: "classic",
-  media: "./media/",
-  onCodeChange: (code) => {
-    document.getElementById("code")!.textContent = code;
-  },
-});
-
-// editor.getCode(), editor.saveWorkspace(), editor.loadWorkspace(state), editor.dispose()
-```
+Point d’entrée : `src/core/create_ucblockly.ts` → `build/src/core/` / exports `"."` et `"./core"`. Détail des options : [KERNEL.md](./KERNEL.md).
 
 - Pas de `getElementById` imposé pour le workspace (seul un conteneur est requis).
-- La démo complète (`src/index.ts` + `BlocklyApplication`) reste inchangée pour l’instant.
+- La démo (`src/index.ts` + shell) reste l’exemple produit complet.
 
-## 5. Évolution possible : package npm « lib »
+## 5. Publication npm (P3)
 
-Pour qu’un autre projet puisse un jour faire simplement :
+Déjà en place :
 
-```bash
-npm install ucblockly
+1. Point d’entrée lib : `createUcBlockly()` (`src/core/`).
+2. Build noyau : `npm run build:core` + `build:core:bundle` → `dist/core/` (sans Monaco).
+
+Reste à faire pour `npm install` public : retirer `"private": true` et publier sur npm.
+
+```ts
+import { createUcBlockly, basic_toolbox } from "µcBlockly";
+// ou "µcBlockly/core"
 ```
-
-```js
-import { inject } from 'ucblockly';
-inject(document.getElementById('editor'), { toolbox: '...', language: 'fr' });
-```
-
-il faudrait dans µcBlockly :
-
-1. ~~Un **second point d’entrée** (ex. `src/ucblockly-api.ts`)~~ → **fait (P0)** : `src/core/create_ucblockly.ts` + `createUcBlockly()`.
-2. ~~Un **build « lib »**~~ → **fait (P2)** : `npm run build:core` + `build:core:bundle` → `dist/core/` (sans Monaco). Voir [KERNEL.md](./KERNEL.md).
-3. Dans `package.json` : retirer `"private": true` et publier sur npm (P3).
-
-`package.json` expose `"."` / `"./core"` vers `build/src/core/index.js`. Le bundle navigateur embed est dans `dist/core/`.
-
-Cela ne change pas le fonctionnement actuel de l’app autonome ; ça ajoute une couche réutilisable pour l’intégration dans un autre projet.
 
 ---
 
-En résumé : **oui, il est possible d’intégrer le dépôt µcBlockly dans un autre projet**. La méthode la plus simple et la plus robuste aujourd’hui est l’**iframe** (submodule + build). Pour une intégration « dans la page » sans iframe, il faut soit reproduire le DOM attendu et importer le code (2.3 A), soit étendre µcBlockly avec un point d’entrée type « lib » (2.3 B / section 4).
+En résumé : **oui**, intégration possible. La plus simple reste l’**iframe** ; pour une intégration dans la page, utilisez **`createUcBlockly`** ([KERNEL.md](./KERNEL.md)).

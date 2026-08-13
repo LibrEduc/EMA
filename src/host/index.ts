@@ -34,7 +34,11 @@ export { themeMappings } from "../options";
 export { syncUiPaletteTheme } from "../ui_palette_theme";
 
 /** Lazy Monaco editor for the generated-code panel. */
-export { LazyMonacoEditor, µcB_codeEditor } from "../code_editor";
+export {
+  LazyMonacoEditor,
+  µcB_codeEditor,
+  type MonacoThemeId,
+} from "../code_editor";
 
 /** Toolbox / language for host remounts and label updates. */
 export {

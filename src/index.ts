@@ -993,6 +993,6 @@ window.onbeforeunload = (): void => {
 };
 
 /** Public API surface (same exports as before the workspace module split). */
-export { LazyMonacoEditor, µcB_codeEditor } from "./code_editor";
+export { LazyMonacoEditor, µcB_codeEditor, type MonacoThemeId } from "./code_editor";
 export { µcB_workspaceOnResize } from "./workspace_resize";
 export { µcB_addFlexResizerEvents } from "./workspace_flex";

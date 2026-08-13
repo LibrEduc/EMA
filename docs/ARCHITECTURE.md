@@ -12,7 +12,9 @@ This document helps new contributors understand the codebase layout, conventions
 
 ## Overview
 
-**µcBlockly** is a visual programming environment (Blockly-based) that generates Arduino/C code. Users assemble blocks in the workspace; the Arduino generator turns the block tree into C++ code. The app also includes a code editor (Monaco), board profiles, and optional plugins (minimap, backpack, search, etc.).
+**µcBlockly** (v3) is a visual programming environment based on **Blockly 13** that generates Arduino/C++ code. Users assemble blocks in the workspace; the Arduino generator turns the block tree into C++. The demo app also includes a Monaco code panel, board profiles, and optional plugins (minimap, backpack, search, content highlight, etc.).
+
+Public surfaces: **`µcBlockly/core`** (embed kernel), **`µcBlockly/host`** (product/shell helpers), **`µcBlockly/demo`** (full demo entry). See [KERNEL.md](./KERNEL.md).
 
 ## Source layout (`src/`)
 
@@ -21,6 +23,7 @@ src/
 ├── index.ts                    # Demo entry: Blockly global exposure, workspace init, UI wiring
 ├── blockly_application_type.ts # Re-export → demo/blockly_application_shell.ts
 ├── core/                       # **Public kernel** — createUcBlockly, workspace manager (see KERNEL.md)
+├── host/                       # **Product helpers** — themes, a11y, Monaco wiring (not in lean kernel)
 ├── demo/                       # Demo shell + embed example (internal)
 ├── blockly_patches.ts          # Defensive patches for Blockly (e.g. removeTopBlock during drag)
 ├── toolbox.ts                  # Toolbox structure: categories, block lists, board-specific toolbox
@@ -36,38 +39,36 @@ src/
 ├── workspace_layout_utils.ts   # Flex helpers (parsePositiveFlex, snapNearZeroFlex, layout keys)
 ├── a11y_labels.ts              # getA11yLabel for layout UI (avoids importing language.ts from flex stack)
 ├── shell_a11y.ts               # Skip link, menu zones Ctrl+B, landmarks coque HTML
+├── shell_shortcuts_help.ts     # Shortcuts help dialog (F1 / ?)
+├── shell_keyboard_tutorial.ts  # First-run keyboard tutorial
 ├── ui_palette_theme.ts         # syncUiPaletteTheme: coque CSS + Monaco depuis thème Blockly
 │
 ├── categories/blockly/         # Block *definitions* (UI blocks, fields, mutators)
 │   ├── index.ts                # Entry: defineBlocklyArduinoCompatBlocks, defineAllTypedVariableBlocks
-│   ├── array.ts                # Array/list blocks (S4e-style)
+│   ├── array.ts, array_bitmap*.ts  # Array/list + bitmap blocks
 │   ├── board.ts                # Board blocks (pins, serial, etc.)
 │   ├── colour.ts               # Colour blocks
 │   ├── libre.ts                # “Libre” / free-text blocks (ex Blockly@rduino null category)
-│   ├── logic.ts                # Logic/compare blocks
-│   ├── math.ts                 # Math blocks
-│   ├── text.ts                 # Text blocks
+│   ├── logic.ts, loops.ts      # Logic/compare + loops
+│   ├── math.ts, text.ts
 │   ├── variables.ts            # Typed variables (get/set/define/local), extensions
-│   ├── shared.ts               # Shared block helpers
-│   └── field_*.ts              # Custom fields (colour picker, HSV sliders)
+│   ├── shared.ts, shared_numeric.ts
+│   └── field_*.ts              # Custom fields (colour, slider, bitmap, HSV)
 │
 ├── generators/arduino/         # Arduino *code generation* (block → C++ string)
 │   ├── arduino_generator.ts    # Main generator class (variables, functions, loops, finish)
-│   ├── generators/arduino.ts    # Entry: arduinoGenerator, registers all block generators
 │   ├── block_types.ts          # Type compatibility (int/float/bool/string/…), TYPE_COMPATIBILITY
 │   ├── block_types_registry.ts # Applies block types to Blockly (setCheck), BLOCK_TYPE_REGISTRY
 │   ├── block_types/            # Per-category type definitions (static + __DYNAMIC__)
-│   │   ├── index.ts            # Aggregates all block types
-│   │   ├── array.ts, board.ts, colour.ts, libre.ts, loops.ts, math.ts, procedures.ts, text.ts, variables.ts, logic.ts
 │   ├── blocks/                 # Per-block code generators (one file per category)
-│   │   ├── array.ts, board.ts, colour.ts, libre.ts, loops.ts, logic.ts, math.ts, procedures.ts, text.ts, variables.ts, variables_typed.ts, text_helpers.ts, math_helpers.ts
-│   ├── configure_standard_blocks.ts # Standard Blockly blocks (controls_if, procedures, etc.) type checks
-│   ├── strict_connection_checker.ts # Optional strict connection checker (block type compatibility)
+│   ├── configure_standard_blocks.ts # Standard Blockly blocks type checks
+│   ├── strict_connection_checker.ts # Optional strict connection checker
 │   ├── strict_type_enforcer.ts # Type enforcer (e.g. variable types)
 │   ├── typed_variables_flyout.ts   # Typed variables category in toolbox
 │   ├── variable_utils.ts       # Variable type normalization
 │   ├── arduino_types.ts        # Arduino type metadata (default values, etc.)
 │   └── debug.ts                # debugLog (no-op unless enabled)
+├── generators/arduino.ts       # Entry: arduinoGenerator, registers all block generators
 │
 └── languages/                  # UI strings (Blockly.Msg, toolbox labels)
     ├── languageMap.ts          # Language list and mapping
@@ -75,6 +76,7 @@ src/
     ├── array_messages.ts       # Array block messages (mergeArrayMessages)
     └── board_messages.ts       # Board block messages (mergeBoardMessages)
 ```
+
 
 Hors `src/` :
 
@@ -121,6 +123,7 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 | Goal | Main files |
 |------|------------|
 | Add a new block (UI) | `categories/blockly/<category>.ts`, then register in `categories/blockly/index.ts` |
+| Add a whole category (e.g. servo) | [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) |
 | Add block type / compatibility | `generators/arduino/block_types/` + `block_types.ts`, then `block_types_registry.ts` — see [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Generate code for a block | `generators/arduino/blocks/<category>.ts` + register in `generators/arduino.ts` |
 | Change toolbox structure | `toolbox.ts` (basic_toolbox, getToolboxForCurrentBoard) |
@@ -135,7 +138,9 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 | Command | Purpose |
 |---------|---------|
 | `npm run dev` | Development server with hot reload (Webpack) |
-| `npm run build` | Production build (TypeScript + Webpack) |
+| `npm run build` | Production build (demo + core bundle) |
+| `npm run build:core` | Kernel TypeScript only → `build/src/core/` |
+| `npm run build:core:bundle` | Embed page without Monaco → `dist/core/` |
 | `npm run build:lib` | TypeScript compile only → `build/` |
 | `npm run lint` | ESLint on `src/` (auto-fix) |
 | `npm run test` | Generator and Blockly@rduino converter tests (`tests/`) |

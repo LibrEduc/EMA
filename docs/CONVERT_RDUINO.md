@@ -17,11 +17,18 @@ npm run convert-rduino -- <fichier-entree> [fichier-sortie.json]
 Exemple :
 
 ```bash
-npm run convert-rduino -- examples/blink.xml out/workspace.json
+npm run convert-rduino -- chemin/vers/projet.xml out/workspace.json
+```
+
+Exemple (si le dépôt voisin Blockly@rduino est présent, comme pour les tests) :
+
+```bash
+npm run convert-rduino -- ../Blockly-at-rduino/examples/blink/blink.xml out/workspace.json
 ```
 
 - **Entrée** : `.xml`, `.B@` ou tout export XML Blockly@rduino (« enregistrer projet »).
 - **Sortie** : JSON compatible avec **Ouvrir** dans µcBlockly (`workspace.json` par défaut si le second argument est omis).
+
 
 ## Comportement
 

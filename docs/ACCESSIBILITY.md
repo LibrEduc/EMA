@@ -19,7 +19,7 @@
 | Lot | Contenu | État |
 |-----|---------|------|
 | P0 — Champs custom | `getAriaValue()` sur sélecteurs couleur, éditeurs iro accessibles | Fait |
-| P0 — Blockly v13 | Navigation clavier cœur, `FocusManager`, hints, mode lecteur d’écran | Fait (Blockly **13.1.x**) |
+| P0 — Blockly v13 | Navigation clavier cœur, `FocusManager`, hints, mode lecteur d’écran | Fait (Blockly **13.2.x**) |
 | P1 — Coque UI | Skip link, landmarks, boutons sémantiques, menu zones Ctrl+B, raccourcis fichier | Fait |
 | P1 — Doc | Cette page, raccourcis, conformité | Fait |
 | P1 — Intégration coque ↔ Blockly | Menu zones et skip link via `FocusManager` (raccourcis **W** / **T**) | Fait |

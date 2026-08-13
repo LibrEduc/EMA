@@ -6,9 +6,10 @@
 
 </div>
 
-## 1. Duplications identifiées (historique — corrigées en 2.1.5)
+## 1. Duplications identifiées (historique — corrigées depuis 2.1.5 / v3)
 
-Les sections ci-dessous décrivent d’anciennes duplications **déjà résolues**. Voir §4 « Plan d’action ».
+Les sections ci-dessous décrivent d’anciennes duplications **déjà résolues**. Voir §4 « Plan d’action ». Pour les pistes encore ouvertes en v3, voir [CODE_IMPROVEMENTS.md](./CODE_IMPROVEMENTS.md).
+
 
 ### 1.1 `getBlocklyMsg` / `getBlocklyMsgOr` ✅
 

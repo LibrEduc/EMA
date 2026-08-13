@@ -30,6 +30,16 @@
 
 import type * as Monaco from "monaco-editor";
 
+/** Thèmes Monaco intégrés. */
+export type MonacoThemeId = "vs" | "vs-dark" | "hc-black" | "hc-light";
+
+const MONACO_THEMES = new Set<MonacoThemeId>([
+  "vs",
+  "vs-dark",
+  "hc-black",
+  "hc-light",
+]);
+
 /**
  * Lazily initializes Monaco Editor to avoid heavy startup cost.
  */
@@ -37,20 +47,59 @@ export class LazyMonacoEditor {
   private editor?: Monaco.editor.IStandaloneCodeEditor;
   private pendingValue: string | null = null;
   private initializing: Promise<void> | null = null;
-  private monacoTheme: "vs" | "vs-dark" | "hc-black" = "vs";
+  private monacoTheme: MonacoThemeId = "vs";
+  /** Si true, {@link applyTheme} suit le thème UI Blockly ; sinon thème manuel. */
+  private followUiTheme = true;
   private readOnly = false;
+  private fontFamily = "Consolas, 'Courier New', monospace";
 
   /**
-   * Aligns Monaco with the application shell theme.
+   * Aligns Monaco with the application shell theme (ignored if a manual theme is set).
    */
   applyTheme(mode: "light" | "dark" | "high-contrast"): void {
+    if (!this.followUiTheme) {
+      return;
+    }
     this.monacoTheme =
       mode === "dark" ? "vs-dark" : mode === "high-contrast" ? "hc-black" : "vs";
-    if (this.editor) {
-      void import("monaco-editor").then((monaco) => {
-        monaco.editor.setTheme(this.monacoTheme);
-      });
+    this.pushThemeToEditor();
+  }
+
+  /**
+   * Sets an explicit Monaco theme. Pass `followUiTheme: true` to resume auto mode.
+   */
+  setMonacoTheme(
+    theme: MonacoThemeId,
+    options?: { followUiTheme?: boolean },
+  ): void {
+    if (!MONACO_THEMES.has(theme)) {
+      return;
     }
+    this.followUiTheme = options?.followUiTheme ?? false;
+    this.monacoTheme = theme;
+    this.pushThemeToEditor();
+  }
+
+  /** Resume following the Blockly / shell UI theme. */
+  setFollowUiTheme(follow: boolean): void {
+    this.followUiTheme = follow;
+  }
+
+  isFollowUiTheme(): boolean {
+    return this.followUiTheme;
+  }
+
+  getMonacoTheme(): MonacoThemeId {
+    return this.monacoTheme;
+  }
+
+  private pushThemeToEditor(): void {
+    if (!this.editor) {
+      return;
+    }
+    void import("monaco-editor").then((monaco) => {
+      monaco.editor.setTheme(this.monacoTheme);
+    });
   }
 
   /**
@@ -64,6 +113,16 @@ export class LazyMonacoEditor {
   /** Current read-only flag (default false — editable generated code). */
   isReadOnly(): boolean {
     return this.readOnly;
+  }
+
+  /** Applique une police à l’éditeur Monaco (UI / accessibilité). */
+  setFontFamily(fontFamily: string): void {
+    const trimmed = fontFamily.trim();
+    if (!trimmed) {
+      return;
+    }
+    this.fontFamily = trimmed;
+    this.editor?.updateOptions({ fontFamily: trimmed });
   }
 
   /**
@@ -90,6 +149,7 @@ export class LazyMonacoEditor {
         readOnly: this.readOnly,
         scrollBeyondLastLine: false,
         theme: this.monacoTheme,
+        fontFamily: this.fontFamily,
       });
       container.setAttribute("dir", "ltr");
       if (this.pendingValue !== null) {

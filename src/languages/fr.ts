@@ -164,7 +164,7 @@ export const frLang: LanguageMap = {
     KEYBOARD_TUTORIAL_STEP_5_TITLE: "Aide et lecteur d'écran",
     KEYBOARD_TUTORIAL_STEP_5_BODY:
       "F1 ou ? ouvre l'aide des raccourcis. Alt+Maj+A active le mode lecteur d'écran Blockly (annonces détaillées). Votre choix est mémorisé entre les sessions.",
-    BOARD_MENU_TOOLTIP: "Choisir la carte Arduino",
+    BOARD_MENU_TOOLTIP: "Choisir la carte microcontrôleur",
     EMPTY_BACKPACK: "Vider le sac à dos",
     REMOVE_FROM_BACKPACK: "Retirer du sac à dos",
     COPY_TO_BACKPACK: "Copier dans le sac à dos",
