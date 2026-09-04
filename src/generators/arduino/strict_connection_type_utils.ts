@@ -31,7 +31,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as Blockly from "blockly/core";
+import * as Blockly from "blockly";
 import { checkTypeCompatibility as sharedCheckTypeCompatibility } from "./block_types_registry";
 import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
 

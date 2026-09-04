@@ -63,11 +63,6 @@ patchConnectionCheckerForConstBlock();
 patchBlockChangeForProcedureCompat();
 patchBlocklyDefensive();
 
-const div_workspace_content_blockly = document.getElementById(
-  "div_workspace_content_blockly",
-)!;
-const div_content_code = document.getElementById("div_content_code")!;
-
 function readPluginOptionsFromDom(): UcBlocklyPluginOptions {
   const highlight = document.getElementById(
     "pluginHighlight",
@@ -123,6 +118,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
   LANGUAGE_RTL: string[];
   PLUGINS: string[];
   private readonly ws: UcBlocklyWorkspaceManager;
+  /** Generated-code host (plain text fallback when Monaco is off). */
+  private readonly contentCodeEl: HTMLElement | null;
 
   get workspace(): Blockly.Workspace {
     return this.ws.workspace;
@@ -136,12 +133,14 @@ export class BlocklyApplication implements BlocklyApplicationType {
     toolbox: ToolboxConfiguration,
     workspaceOptions: Record<string, unknown>,
     injectionDiv: HTMLElement,
+    contentCodeEl: HTMLElement | null = null,
   ) {
     this.toolbox = toolbox;
     this.toolboxChoice = "cat";
     this.LANGUAGE_NAME = {};
     this.LANGUAGE_RTL = [];
     this.PLUGINS = [];
+    this.contentCodeEl = contentCodeEl;
 
     const themeKey = resolveInitialThemeKey();
     workspaceOptions.theme = themeMappings[themeKey] ?? themeMappings.classic;
@@ -155,7 +154,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
       plugins: readPluginOptionsFromDom(),
       onCodeChange: (code) => {
         µcB_codeEditor.setValue(code);
-        div_content_code.textContent = code;
+        if (this.contentCodeEl) {
+          this.contentCodeEl.textContent = code;
+        }
       },
     });
   }
@@ -209,7 +210,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
 
   public changeTheme = (themeChoice?: string): string => {
     if (!themeChoice) {
-      themeChoice = (document.getElementById("themeMenu") as HTMLSelectElement).value;
+      themeChoice =
+        (document.getElementById("themeMenu") as HTMLSelectElement | null)
+          ?.value ?? "classic";
     }
     this.WORKSPACE_OPTIONS.theme = themeMappings[themeChoice];
     if (
@@ -226,8 +229,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
   };
 
   public changeRenderer = (
-    renderNew: string = (document.getElementById("rendererMenu") as HTMLSelectElement)
-      .value,
+    renderNew: string = (
+      document.getElementById("rendererMenu") as HTMLSelectElement | null
+    )?.value ?? "geras",
   ): string => {
     if (!Blockly.registry.hasItem(Blockly.registry.Type.RENDERER, renderNew)) {
       renderNew = "geras";
@@ -328,55 +332,70 @@ export class BlocklyApplication implements BlocklyApplicationType {
   public workspaceLoadFromFile = (file: File, merge = false): void => {
     this.ws.workspaceLoadFromFile(file, merge, (code) => {
       µcB_codeEditor.setValue(code);
-      div_content_code.textContent = code;
+      if (this.contentCodeEl) {
+        this.contentCodeEl.textContent = code;
+      }
     });
   };
 
   public setParamsBlockly = (): void => {
     const searchParams = new URLSearchParams(window.location.search);
     let newParam: string | null;
-    let dropdownMenu: HTMLSelectElement;
     let rendererFromUrl = false;
     const previousRenderer = String(this.WORKSPACE_OPTIONS.renderer ?? "");
 
+    const languageMenu = document.getElementById(
+      "languageMenu",
+    ) as HTMLSelectElement | null;
     newParam = searchParams.get("lang");
-    dropdownMenu = document.getElementById("languageMenu") as HTMLSelectElement;
-    if (newParam == null || newParam === "null") {
-      newParam = dropdownMenu.options[dropdownMenu.selectedIndex].value;
-    } else {
-      dropdownMenu.value = newParam;
+    if (languageMenu) {
+      if (newParam == null || newParam === "null") {
+        newParam = languageMenu.options[languageMenu.selectedIndex]?.value ?? "en";
+      } else {
+        languageMenu.value = newParam;
+      }
+      window.sessionStorage?.setItem("paramLang", newParam);
+      pushStateReplaceSearchParam("lang", newParam);
     }
-    window.sessionStorage?.setItem("paramLang", newParam);
-    pushStateReplaceSearchParam("lang", newParam);
 
+    const themeMenu = document.getElementById(
+      "themeMenu",
+    ) as HTMLSelectElement | null;
     newParam = searchParams.get("theme");
-    dropdownMenu = document.getElementById("themeMenu") as HTMLSelectElement;
-    if (newParam == null || newParam === "null") {
-      newParam = dropdownMenu.options[dropdownMenu.selectedIndex].value;
-    } else {
-      dropdownMenu.value = newParam;
+    if (themeMenu) {
+      if (newParam == null || newParam === "null") {
+        newParam =
+          themeMenu.options[themeMenu.selectedIndex]?.value ?? "classic";
+      } else {
+        themeMenu.value = newParam;
+      }
+      const mappedTheme = themeMappings[newParam] ?? themeMappings.classic;
+      this.WORKSPACE_OPTIONS.theme = mappedTheme;
+      if (this.workspace && themeMappings.hasOwnProperty(newParam)) {
+        (this.workspace as Blockly.WorkspaceSvg).setTheme(mappedTheme);
+      }
+      window.sessionStorage?.setItem("paramTheme", newParam);
+      pushStateReplaceSearchParam("theme", newParam);
     }
-    const mappedTheme = themeMappings[newParam] ?? themeMappings.classic;
-    this.WORKSPACE_OPTIONS.theme = mappedTheme;
-    if (this.workspace && themeMappings.hasOwnProperty(newParam)) {
-      (this.workspace as Blockly.WorkspaceSvg).setTheme(mappedTheme);
-    }
-    window.sessionStorage?.setItem("paramTheme", newParam);
-    pushStateReplaceSearchParam("theme", newParam);
 
+    const rendererMenu = document.getElementById(
+      "rendererMenu",
+    ) as HTMLSelectElement | null;
     newParam = searchParams.get("renderer");
-    dropdownMenu = document.getElementById("rendererMenu") as HTMLSelectElement;
-    if (newParam == null || newParam === "null") {
-      newParam = dropdownMenu.options[dropdownMenu.selectedIndex].value;
-    } else {
-      dropdownMenu.value = newParam;
-      rendererFromUrl = true;
-    }
-    this.WORKSPACE_OPTIONS.renderer = newParam;
-    window.sessionStorage?.setItem("paramRenderer", newParam);
-    pushStateReplaceSearchParam("renderer", newParam);
-    if (rendererFromUrl && this.workspace && previousRenderer !== newParam) {
-      this.changeRenderer(newParam);
+    if (rendererMenu) {
+      if (newParam == null || newParam === "null") {
+        newParam =
+          rendererMenu.options[rendererMenu.selectedIndex]?.value ?? "geras";
+      } else {
+        rendererMenu.value = newParam;
+        rendererFromUrl = true;
+      }
+      this.WORKSPACE_OPTIONS.renderer = newParam;
+      window.sessionStorage?.setItem("paramRenderer", newParam);
+      pushStateReplaceSearchParam("renderer", newParam);
+      if (rendererFromUrl && this.workspace && previousRenderer !== newParam) {
+        this.changeRenderer(newParam);
+      }
     }
 
     newParam = searchParams.get("board");
@@ -405,8 +424,9 @@ export class BlocklyApplication implements BlocklyApplicationType {
   public pluginsSetupWorkspace = (): void => {
     const searchParams = new URLSearchParams(window.location.search);
     let paramsURL: string[] = [""];
-    if (searchParams.get("options") !== null) {
-      paramsURL = searchParams.get("options")!.split(",").filter(Boolean);
+    const optionsParam = searchParams.get("options");
+    if (optionsParam !== null) {
+      paramsURL = optionsParam.split(",").filter(Boolean);
     }
     const minimapFromUrl =
       searchParams.get("minimap") !== null &&
@@ -418,7 +438,10 @@ export class BlocklyApplication implements BlocklyApplicationType {
         window.sessionStorage.getItem(sessionKey) === "true" ||
         paramsURL.includes(urlFlag)
       ) {
-        const el = document.getElementById(id) as HTMLInputElement;
+        const el = document.getElementById(id) as HTMLInputElement | null;
+        if (!el) {
+          return;
+        }
         el.checked = true;
         el.dispatchEvent(new Event("change"));
       }
@@ -440,9 +463,11 @@ export class BlocklyApplication implements BlocklyApplicationType {
     ) {
       const cb = document.getElementById(
         "alwaysOpenedToolboxFlyout",
-      ) as HTMLInputElement;
-      cb.checked = true;
-      this.applyAlwaysOpenedToolboxFlyout();
+      ) as HTMLInputElement | null;
+      if (cb) {
+        cb.checked = true;
+        this.applyAlwaysOpenedToolboxFlyout();
+      }
     }
     if (
       window.sessionStorage.getItem("codeEditorSwitch") === "true" ||
@@ -496,6 +521,3 @@ export class BlocklyApplication implements BlocklyApplicationType {
     });
   }
 }
-
-/** @internal Demo workspace host element id. */
-export { div_workspace_content_blockly };

@@ -51,6 +51,12 @@ const LIBRE_BLOCK_STYLE = { colourPrimary: '#00979D' };
 /** Style for the Board category (teint plus sombre que Libre pour le daltonisme). */
 const BOARD_CATEGORY_STYLE = { colour: '#006468' };
 const BOARD_BLOCK_STYLE = { colourPrimary: '#006468' };
+/** Bordure jaune pour le conteneur « Define » (legacy Blockly@rduino). */
+const BOARD_DEFINE_BLOCK_STYLE = {
+  colourPrimary: '#006468',
+  colourSecondary: '#FFCC00',
+  colourTertiary: '#004446',
+};
 
 /** Black for the black and white theme (like other categories). */
 const LIBRE_BLACK = { colour: '#000000', colourPrimary: '#000000' };
@@ -83,11 +89,20 @@ function extendThemeWithLibre(key: string, base: Blockly.Theme): Blockly.Theme {
     : isHacker
       ? HACKER_LIBRE_BOARD_BLOCK_STYLE
       : BOARD_BLOCK_STYLE;
+  const boardDefineBlockStyle = isBlackWhite
+    ? { colourPrimary: LIBRE_BLACK.colourPrimary }
+    : isHacker
+      ? { ...HACKER_LIBRE_BOARD_BLOCK_STYLE, colourSecondary: '#FFCC00' }
+      : BOARD_DEFINE_BLOCK_STYLE;
   return Blockly.Theme.defineTheme(`${key}_libre`, {
     name: `${key}_libre`,
     base,
     categoryStyles: { libre_category: categoryStyle, board_category: boardCategoryStyle },
-    blockStyles: { libre_blocks: blockStyle, board_blocks: boardBlockStyle },
+    blockStyles: {
+      libre_blocks: blockStyle,
+      board_blocks: boardBlockStyle,
+      board_define_blocks: boardDefineBlockStyle,
+    },
   });
 }
 

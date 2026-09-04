@@ -74,6 +74,7 @@ Point d’entrée TypeScript : `src/core/index.ts` → `build/src/core/index.js`
 | Export | Source |
 |--------|--------|
 | `arduinoGenerator` | Génération C++ |
+| `FieldInstance`, `Instances`, `updateInstancePresenceWarning` | Instances nommées (Servo, I2C…) type Blockly@rduino — détail : [INSTANCES.md](./INSTANCES.md) |
 | `basic_toolbox`, `getToolboxForCurrentBoard`, `getToolboxWithoutBoardCategory` | Toolbox JSON |
 | `ToolboxConfiguration` | Type toolbox |
 

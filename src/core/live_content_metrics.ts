@@ -39,6 +39,28 @@ type MaybeDead = Blockly.IBoundedElement & {
   isInsertionMarker?: () => boolean;
 };
 
+type MetricsCacheEntry = {
+  frame: number;
+  workspaceCoordinates: boolean;
+  value: Blockly.MetricsManager.ContainerRegion;
+};
+
+let metricsFrame = 0;
+let metricsFrameScheduled = false;
+
+const bumpMetricsFrame = (): void => {
+  if (metricsFrameScheduled) {
+    return;
+  }
+  metricsFrameScheduled = true;
+  requestAnimationFrame(() => {
+    metricsFrame += 1;
+    metricsFrameScheduled = false;
+  });
+};
+
+const metricsCache = new WeakMap<Blockly.WorkspaceSvg, MetricsCacheEntry>();
+
 /**
  * Bounding box of live top-level blocks/comments only (workspace coordinates).
  */
@@ -75,14 +97,9 @@ export const getLiveBlocksBoundingBox = (
   return bounds ?? new Blockly.utils.Rect(0, 0, 0, 0);
 };
 
-/**
- * Content metrics from live elements only (same shape as MetricsManager.getContentMetrics).
- * @param workspace - Target workspace.
- * @param workspaceCoordinates - When true, values are in workspace units (not pixels).
- */
-export const getLiveContentMetrics = (
+const computeLiveContentMetrics = (
   workspace: Blockly.WorkspaceSvg,
-  workspaceCoordinates = true,
+  workspaceCoordinates: boolean,
 ): Blockly.MetricsManager.ContainerRegion => {
   const box = getLiveBlocksBoundingBox(workspace);
   const scale = workspaceCoordinates ? 1 : workspace.scale;
@@ -92,6 +109,33 @@ export const getLiveContentMetrics = (
     top: box.top * scale,
     left: box.left * scale,
   };
+};
+
+/**
+ * Content metrics from live elements only (same shape as MetricsManager.getContentMetrics).
+ * @param workspace - Target workspace.
+ * @param workspaceCoordinates - When true, values are in workspace units (not pixels).
+ */
+export const getLiveContentMetrics = (
+  workspace: Blockly.WorkspaceSvg,
+  workspaceCoordinates = true,
+): Blockly.MetricsManager.ContainerRegion => {
+  bumpMetricsFrame();
+  const cached = metricsCache.get(workspace);
+  if (
+    cached &&
+    cached.frame === metricsFrame &&
+    cached.workspaceCoordinates === workspaceCoordinates
+  ) {
+    return cached.value;
+  }
+  const value = computeLiveContentMetrics(workspace, workspaceCoordinates);
+  metricsCache.set(workspace, {
+    frame: metricsFrame,
+    workspaceCoordinates,
+    value,
+  });
+  return value;
 };
 
 let blocksBoundingBoxPatched = false;

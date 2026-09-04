@@ -31,13 +31,18 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldColourHsvSliders } from "@blockly/field-colour-hsv-sliders";
+import * as FieldColourHsvSlidersNS from "@blockly/field-colour-hsv-sliders";
+import { namedExportFromCjsPlugin } from "../../utils/blockly_plugin_export";
 import { getBlocklyMsgOr } from "./shared";
 import {
   formatColourAriaValue,
   getColourAriaTypeName,
   getColourHsvEditorLabel,
 } from "./field_colour_a11y";
+
+const FieldColourHsvSliders = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-colour-hsv-sliders").FieldColourHsvSliders
+>(FieldColourHsvSlidersNS, "FieldColourHsvSliders");
 
 const HSV_CSS_ID = "ucb-hsv-eyedropper-css";
 

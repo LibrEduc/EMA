@@ -1,0 +1,48 @@
+{
+  "kind": "category",
+  "name": "CAT_SERVO",
+  "toolboxitemid": "SERVO",
+  "categorystyle": "servo_category",
+  "levels": "1,2,3",
+  "cssConfig": {
+    "icon": "customIcon fas fa-robot"
+  },
+  "contents": [
+    {
+      "kind": "block",
+      "type": "servo_attach",
+      "inputs": {
+        "PIN": {
+          "shadow": {
+            "type": "math_number",
+            "fields": { "NUM": 9 }
+          }
+        }
+      }
+    },
+    {
+      "kind": "block",
+      "type": "servo_move",
+      "inputs": {
+        "DEGREE": {
+          "shadow": {
+            "type": "math_number",
+            "fields": { "NUM": 90 }
+          }
+        }
+      }
+    },
+    {
+      "kind": "block",
+      "type": "servo_read_degrees"
+    },
+    {
+      "kind": "block",
+      "type": "servo_detach"
+    },
+    {
+      "kind": "block",
+      "type": "servo_attached"
+    }
+  ]
+}

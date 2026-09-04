@@ -1,0 +1,14 @@
+{
+  "categoryStyles": {
+    "servo_category": {
+      "colour": "#C0392B"
+    }
+  },
+  "blockStyles": {
+    "servo_blocks": {
+      "colourPrimary": "#C0392B",
+      "colourSecondary": "#E74C3C",
+      "colourTertiary": "#922B21"
+    }
+  }
+}

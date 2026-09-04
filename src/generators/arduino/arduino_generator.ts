@@ -41,6 +41,13 @@ import {
 } from "../../categories/blockly/shared";
 import { getArduinoType } from "./arduino_types";
 import {
+  formatArduinoSketch,
+  validatePinUsageWarnings,
+} from "./arduino_code_format";
+import { Order } from "./order";
+
+export { Order } from "./order";
+import {
   getCppTypeName,
   isArduinoScalarType,
   normalizeBlocklyCheckToInternalType,
@@ -51,44 +58,6 @@ import {
   usesLocalVariableDeclaration,
 } from "./variable_scope";
 import { isVariablesDefineBlock, LIST_VARIABLE_TYPE } from "./variable_utils";
-
-export enum Order {
-  ATOMIC = 0, // 0 "" ...
-  NEW = 1.1, // new
-  MEMBER = 1.2, // . []
-  FUNCTION_CALL = 2, // ()
-  INCREMENT = 3.1, // ++
-  DECREMENT = 3.2, // --
-  BITWISE_NOT = 4.1, // ~
-  UNARY_PLUS = 4.2, // +
-  UNARY_NEGATION = 4.3, // -
-  LOGICAL_NOT = 4.4, // !
-  TYPEOF = 4.5, // typeof
-  VOID = 4.6, // void
-  DELETE = 4.7, // delete
-  AWAIT = 4.8, // await
-  EXPONENTIATION = 5.0, // **
-  MULTIPLICATION = 5.1, // *
-  DIVISION = 5.2, // /
-  MODULUS = 5.3, // %
-  SUBTRACTION = 6.1, // -
-  ADDITION = 6.2, // +
-  BITWISE_SHIFT = 7, // << >> >>>
-  RELATIONAL = 8, // < <= > >=
-  IN = 8.1, // in
-  INSTANCEOF = 8.2, // instanceof
-  EQUALITY = 9, // == != === !==
-  BITWISE_AND = 10, // &
-  BITWISE_XOR = 11, // ^
-  BITWISE_OR = 12, // |
-  LOGICAL_AND = 13, // &&
-  LOGICAL_OR = 14, // ||
-  CONDITIONAL = 15, // ?:
-  ASSIGNMENT = 16, // = += -= **= *= /= %= <<= >>= ...
-  YIELD = 17, // yield
-  COMMA = 18, // ,
-  NONE = 99, // (...)
-}
 
 /**
  * Arduino code generator class.
@@ -120,6 +89,8 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   private pins_ = Object.create(null);
   /** Array declarations from Array_declare and Array_create blocks. */
   private arrayDeclarations_: string[] = [];
+  /** Lignes émises par le bloc « define » (commentaires, etc.) avant setup/loop. */
+  private preamble_: Record<string, string> = Object.create(null);
 
   /**
    * List of outer-inner pairings that do NOT require parentheses.
@@ -194,6 +165,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.variables_ = Object.create(null);
     this.variableTypes_ = Object.create(null);
     this.arrayDeclarations_ = [];
+    this.preamble_ = Object.create(null);
     this.localVariables_ = Object.create(null);
     this.codeFunctions_ = Object.create(null);
     this.userFunctions_ = Object.create(null);
@@ -627,6 +599,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   finish(code: string): string {
     const includes = Object.values(this.includes_);
     const defines = Object.values(this.defines_);
+    const preamble = Object.values(this.preamble_);
     // Get variables from definitions_ (set in init()) and arrayDeclarations_
     const variablesDeclaration = this.definitions_["variables"] || '';
     const variables = [
@@ -649,18 +622,22 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     const pinWarnings = this.validatePinUsage();
 
     // Format the code with proper spacing and organization
-    const newcode = this.formatArduinoCode({
-      includes,
-      defines,
-      variables,
-      codeFunctions,
-      userFunctions,
-      functionNames,
-      setups,
-      loop,
-      code,
-      pinWarnings
-    });
+    const newcode = formatArduinoSketch(
+      {
+        includes,
+        defines,
+        preamble,
+        variables,
+        codeFunctions,
+        userFunctions,
+        functionNames,
+        setups,
+        loop,
+        code,
+        pinWarnings,
+      },
+      this.INDENT ?? "  ",
+    );
 
     return newcode;
   }
@@ -670,157 +647,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * @returns Array of warning messages.
    */
   private validatePinUsage(): string[] {
-    const warnings: string[] = [];
-    const pinUsages = this.getPinUsages();
-
-    // Check for potential conflicts or issues
-    for (const usage of Object.values(pinUsages)) {
-      const pinNum = parseInt(usage.number);
-      if (isNaN(pinNum) || pinNum < 0 || pinNum > 53) {
-        warnings.push(`Warning: Pin ${usage.number} may be invalid for Arduino`);
-      }
-    }
-
-    return warnings;
-  }
-
-  /**
-   * Prépare le corps d'une fonction Arduino (setup/loop) : indente les lignes
-   * brutes (ex. pinMode via addSetup) sans double-indenter le code issu de
-   * statementToCode (chaque ligne commence déjà par INDENT).
-   */
-  private formatFunctionBodyContent(content: string): string {
-    const trimmed = content.trimEnd();
-    if (!trimmed) {
-      return "";
-    }
-    const indent = this.INDENT ?? "  ";
-    return trimmed
-      .split("\n")
-      .map((line) => {
-        if (!line.trim()) {
-          return line;
-        }
-        if (line.startsWith(indent) || line.startsWith("\t")) {
-          return line;
-        }
-        return indent + line;
-      })
-      .join("\n");
-  }
-
-  /**
-   * Format Arduino code with proper structure and spacing.
-   * @param sections - Object containing all code sections.
-   * @returns Formatted Arduino code.
-   */
-  private formatArduinoCode(sections: {
-    includes: unknown[],
-    defines: unknown[],
-    variables: unknown[],
-    codeFunctions: unknown[],
-    userFunctions: unknown[],
-    functionNames: unknown[],
-    setups: unknown[],
-    loop: unknown[],
-    code: string,
-    pinWarnings: string[]
-  }): string {
-    const { includes, defines, variables, codeFunctions, userFunctions, setups, loop, code, pinWarnings } = sections;
-
-    const setupBody =
-      setups.length > 0
-        ? setups
-            .map((entry) => this.formatFunctionBodyContent(String(entry)))
-            .filter(Boolean)
-            .join("\n")
-        : "";
-    const loopFromTags =
-      loop.length > 0
-        ? loop
-            .map((entry) => this.formatFunctionBodyContent(String(entry)))
-            .filter(Boolean)
-            .join("\n")
-        : "";
-    const loopFromLoose = code.trim()
-      ? this.formatFunctionBodyContent(code.trim())
-      : "";
-    const loopBody = [loopFromTags, loopFromLoose].filter(Boolean).join("\n");
-
-    // Presence of setup/loop registrations (even empty) means emit the function.
-    const emitSetup = setups.length > 0;
-    const emitLoop = loop.length > 0 || Boolean(code.trim());
-    const hasPreamble =
-      includes.length > 0 ||
-      defines.length > 0 ||
-      variables.length > 0 ||
-      codeFunctions.length > 0 ||
-      userFunctions.length > 0;
-    const hasWarnings = pinWarnings.length > 0;
-
-    // Empty workspace: keep the code panel blank until blocks produce output.
-    if (!emitSetup && !emitLoop && !hasPreamble && !hasWarnings) {
-      return "";
-    }
-
-    let arduinoCode = "";
-
-    // Add header comment
-    arduinoCode += "// Generated by µcBlockly Arduino Generator\n";
-    arduinoCode += "// " + new Date().toISOString() + "\n\n";
-
-    if (hasWarnings) {
-      arduinoCode =
-        "// WARNINGS:\n" +
-        pinWarnings.map((w) => "// " + w).join("\n") +
-        "\n\n" +
-        arduinoCode;
-    }
-
-    // Add includes
-    if (includes.length > 0) {
-      arduinoCode += includes.join("\n") + "\n\n";
-    }
-
-    // Add defines
-    if (defines.length > 0) {
-      arduinoCode += defines.join("\n") + "\n\n";
-    }
-
-    // Add variables
-    if (variables.length > 0) {
-      arduinoCode += variables.join("\n") + "\n\n";
-    }
-
-    // Add helper functions
-    if (codeFunctions.length > 0) {
-      arduinoCode += codeFunctions.join("\n\n") + "\n\n";
-    }
-
-    // Add user functions
-    if (userFunctions.length > 0) {
-      arduinoCode += userFunctions.join("\n\n") + "\n\n";
-    }
-
-    if (emitSetup) {
-      arduinoCode += "void setup() {\n";
-      if (setupBody) {
-        arduinoCode += setupBody + "\n";
-      }
-      arduinoCode += "}\n";
-      if (emitLoop) {
-        arduinoCode += "\n";
-      }
-    }
-    if (emitLoop) {
-      arduinoCode += "void loop() {\n";
-      if (loopBody) {
-        arduinoCode += loopBody + "\n";
-      }
-      arduinoCode += "}\n";
-    }
-
-    return arduinoCode;
+    return validatePinUsageWarnings(this.getPinUsages());
   }
 
   addInclude(tag: string, code: string): void {
@@ -832,6 +659,13 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   addDefinition(tag: string, code: string): void {
     if (this.defines_[tag] === undefined) {
       this.defines_[tag] = code;
+    }
+  }
+
+  /** Contenu du bloc « define » Blockly@rduino (zone globale avant setup/loop). */
+  addPreamble(tag: string, code: string): void {
+    if (this.preamble_[tag] === undefined) {
+      this.preamble_[tag] = code;
     }
   }
 
@@ -1256,6 +1090,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   debugGeneratorState(): {
     includes: Record<string, string>;
     defines: Record<string, string>;
+    preamble: Record<string, string>;
     variables: Record<string, string>;
     codeFunctions: Record<string, string>;
     userFunctions: Record<string, string>;
@@ -1270,6 +1105,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     return {
       includes: this.includes_,
       defines: this.defines_,
+      preamble: this.preamble_,
       variables: this.variables_,
       codeFunctions: this.codeFunctions_,
       userFunctions: this.userFunctions_,
@@ -1309,6 +1145,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.variables_ = Object.create(null);
     this.variableTypes_ = Object.create(null);
     this.arrayDeclarations_ = [];
+    this.preamble_ = Object.create(null);
     this.codeFunctions_ = Object.create(null);
     this.userFunctions_ = Object.create(null);
     this.functionNames_ = Object.create(null);

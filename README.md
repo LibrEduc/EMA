@@ -56,16 +56,19 @@ Ouvrez l’URL affichée par Webpack (ou `public/index.html` après build) pour 
 
 | Document | Contenu |
 |----------|---------|
+| [CHANGELOG.md](CHANGELOG.md) | Journal des versions et ruptures de compatibilité |
 | [docs/KERNEL.md](docs/KERNEL.md) | Surface publique du noyau embeddable (`createUcBlockly`) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Structure du code, conventions, flux principaux |
 | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) | Coque UI, raccourcis clavier, repères ARIA |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide pour les contributeurs |
 | [docs/TYPEDOC.md](docs/TYPEDOC.md) | Génération et conventions de la doc API |
 | [docs/TYPES_ET_COMPATIBILITES.md](docs/TYPES_ET_COMPATIBILITES.md) | Typage des blocs et règles de compatibilité |
+| [docs/INSTANCES.md](docs/INSTANCES.md) | Instances nommées (FieldInstance, Servo, collisions variables) |
 | [docs/REPARTITION_FICHIERS.md](docs/REPARTITION_FICHIERS.md) | Analyse de la répartition du code entre fichiers |
 | [docs/CODE_IMPROVEMENTS.md](docs/CODE_IMPROVEMENTS.md) | Pistes d’amélioration et optimisations |
 | [docs/CONVERT_RDUINO.md](docs/CONVERT_RDUINO.md) | Conversion de sauvegardes Blockly@rduino |
-| [docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md](docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md) | Guide : ajouter une catégorie (ex. Servomoteur) |
+| [docs/AJOUTER_EXTENSION.md](docs/AJOUTER_EXTENSION.md) | **Chemin recommandé** : ajouter un pack de blocs (ex. Servo) sans rebuild |
+| [docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md](docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md) | Alternative : intégrer une catégorie **dans le noyau** (rebuild) |
 | [docs/serialization-analysis.md](docs/serialization-analysis.md) | Sérialisation Blockly (sauvegarde/chargement) |
 | [docs/functions-list.md](docs/functions-list.md) | Inventaire des fonctions exportées |
 | [docs/INTEGRATION_DEPOT.md](docs/INTEGRATION_DEPOT.md) | Intégrer µcBlockly dans un autre projet |
@@ -82,4 +85,6 @@ Pour régénérer les favicons après modification du logo : `npm run generate-f
 
 ## Licence
 
-GPL-3.0-or-later — voir les en-têtes des fichiers sources.
+GPL-3.0-or-later — voir les en-têtes des fichiers sources et [`LICENSE`](LICENSE).
+
+Journal des modifications : [CHANGELOG.md](CHANGELOG.md).

@@ -9,6 +9,8 @@
 This document helps new contributors understand the codebase layout, conventions, and where to change things.
 
 > **Noyau vs démo** : pour l’API publique embed (`createUcBlockly`), les builds sans Monaco et la frontière interne/public, voir **[KERNEL.md](./KERNEL.md)**.
+>
+> **Ajouter des blocs** : chemin par défaut = **pack runtime** sous `extensions/` — [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) (ex. [`extensions/servo/`](../extensions/servo/)). Intégration compilée dans le noyau = [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) (secondaire).
 
 ## Overview
 
@@ -25,14 +27,18 @@ src/
 ├── core/                       # **Public kernel** — createUcBlockly, workspace manager (see KERNEL.md)
 ├── host/                       # **Product helpers** — themes, a11y, Monaco wiring (not in lean kernel)
 ├── demo/                       # Demo shell + embed example (internal)
-├── blockly_patches.ts          # Defensive patches for Blockly (e.g. removeTopBlock during drag)
+├── extensions/                 # Runtime pack loader (manifest, toolbox merge, theme) — see AJOUTER_EXTENSION.md
+├── blockly_patches.ts          # Facade → `blockly_patches/` (const, variables, procedures, defensive)
+├── blockly_patches/            # Per-patch modules (re-test at Blockly bumps)
 ├── toolbox.ts                  # Toolbox structure: categories, block lists, board-specific toolbox
 ├── toolbox_search_i18n.ts      # i18n wrapper for @blockly/toolbox-search (Blockly.Msg)
 ├── options.ts                  # Theme extension (libre/board styles), themeMappings
 ├── tools.ts                    # URL/query helpers (addReplaceParamToUrl, setPluginsInURL)
 ├── language.ts                 # Language switching, toolbox translation, URL lang param
 ├── types.d.ts                  # Ambient declarations (Blockly plugins, Monaco, etc.)
-├── boards.ts                   # Board profiles (pins, PWM, serial, etc.) – data + helpers
+├── board_profiles.ts           # BOARD_PROFILES data (pins, PWM, serial, …)
+├── boards.ts                   # Pin validators + dropdown helpers (re-exports profiles)
+├── instances/                  # Named component instances (FieldInstance, Instances) — see INSTANCES.md
 ├── code_editor.ts              # Lazy Monaco editor (generated C++ panel); shared µcB_codeEditor
 ├── workspace_resize.ts         # Blockly.svgResize + registerWorkspaceForSvgResize (no import from index)
 ├── workspace_flex.ts           # Flex resizers, panel toggles, saveLayoutToSessionStorage, µcB_addFlexResizerEvents
@@ -52,7 +58,8 @@ src/
 │   ├── logic.ts, loops.ts      # Logic/compare + loops
 │   ├── math.ts, text.ts
 │   ├── variables.ts            # Typed variables (get/set/define/local), extensions
-│   ├── shared.ts, shared_numeric.ts
+│   ├── shared.ts               # Facade → shared_*.ts / blockly_i18n.ts
+│   ├── shared_numeric.ts, shared_type_inference.ts, …
 │   └── field_*.ts              # Custom fields (colour, slider, bitmap, HSV)
 │
 ├── generators/arduino/         # Arduino *code generation* (block → C++ string)
@@ -75,6 +82,15 @@ src/
     ├── en.ts, fr.ts, es.ts, ar.ts
     ├── array_messages.ts       # Array block messages (mergeArrayMessages)
     └── board_messages.ts       # Board block messages (mergeBoardMessages)
+```
+
+Packs runtime (hors `src/`, chargés sans rebuild du noyau) :
+
+```
+extensions/
+├── index.json              # Liste des packs actifs (noms = dossier = manifest.id)
+├── manifest.schema.json
+└── <id>/                   # ex. servo/ — voir AJOUTER_EXTENSION.md
 ```
 
 
@@ -109,7 +125,7 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
   - **categories/blockly/** = what the user sees (block shape, fields, connections). Register with `Blockly.Blocks["block_type"] = { init() { … } }` or `Blockly.defineBlocksWithJsonArray`.
   - **generators/arduino/blocks/** = how each block becomes C++ (e.g. `arduinoGenerator.forBlock["block_type"] = function(block, generator) { return "code"; }`).
 - **Block types**: Typing (int/float/bool/string/char/long/…) is defined in **block_types/** and **block_types.ts** (`TYPE_COMPATIBILITY`, cast mapping). **block_types_registry.ts** applies types and runs `checkTypeCompatibility`. See **[TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md)** for the full matrix and cast rules.
-- **Board-specific behaviour**: **boards.ts** holds board profiles (pins, PWM, serial, etc.). **toolbox.ts** uses `getToolboxForCurrentBoard()` to build the toolbox for the selected board. Pin dropdowns and validators are wired from **categories/blockly/board.ts** and refreshed via `refreshBoardPinDropdowns`.
+- **Board-specific behaviour**: **board_profiles.ts** holds board data; **boards.ts** exposes validators / dropdown helpers. **toolbox.ts** uses `getToolboxForCurrentBoard()`. Pin dropdowns are wired from **categories/blockly/board.ts** via `refreshBoardPinDropdowns`.
 
 ## Key flows
 
@@ -122,16 +138,18 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 
 | Goal | Main files |
 |------|------------|
-| Add a new block (UI) | `categories/blockly/<category>.ts`, then register in `categories/blockly/index.ts` |
-| Add a whole category (e.g. servo) | [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) |
+| Add a new block (UI) in the **kernel** | `categories/blockly/<category>.ts`, then register in `categories/blockly/index.ts` |
+| **Add blocks without rebuild (recommended)** | [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) + `extensions/<id>/` (see `extensions/servo/`) |
+| Add a whole category **compiled into the kernel** | [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) (secondary path) |
+| Named component instances (Servo, …) | [INSTANCES.md](./INSTANCES.md) + `src/instances/` |
 | Add block type / compatibility | `generators/arduino/block_types/` + `block_types.ts`, then `block_types_registry.ts` — see [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Generate code for a block | `generators/arduino/blocks/<category>.ts` + register in `generators/arduino.ts` |
 | Change toolbox structure | `toolbox.ts` (basic_toolbox, getToolboxForCurrentBoard) |
-| Add a board | `boards.ts` (BOARD_PROFILES + helpers) |
+| Add a board | `board_profiles.ts` (+ helpers in `boards.ts` if needed) |
+| Patches to Blockly core | `blockly_patches.ts` → `blockly_patches/` |
 | New UI language | `languages/languageMap.ts` + new file `languages/<code>.ts`, merge messages |
 | Theme / colours | `options.ts`, `theme_black_and_white.ts`, `theme_seshat.ts`, `ui_palette_theme.ts` |
 | Accessibility (shell) | `shell_a11y.ts`, `a11y_labels.ts`, [ACCESSIBILITY.md](./ACCESSIBILITY.md) |
-| Patches to Blockly core | `blockly_patches.ts` |
 
 ## Build, quality, and docs
 

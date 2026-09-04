@@ -29,9 +29,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export {
-  BlocklyApplication,
-      div_workspace_content_blockly,
-} from "./demo/blockly_application_shell";
+export { BlocklyApplication } from "./demo/blockly_application_shell";
 
 export type { BlocklyApplicationType } from "./demo/blockly_application_shell";

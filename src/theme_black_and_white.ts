@@ -34,7 +34,7 @@
  * @packageDocumentation Black & White theme.
  */
 
-import * as Blockly from 'blockly/core';
+import * as Blockly from "blockly";
 
 export default Blockly.Theme.defineTheme('black_and_white', {
   'name': 'Black and white',

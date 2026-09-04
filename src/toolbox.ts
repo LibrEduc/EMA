@@ -175,6 +175,9 @@ const basic_toolbox_source: ToolboxConfiguration = {
           'categorystyle': 'board_category',
           'cssConfig': toolboxIcon('fa-play'),
           'contents': [
+            { 'kind': 'block', 'type': 'include_library' },
+            { 'kind': 'block', 'type': 'define' },
+            { 'kind': 'block', 'type': 'comment' },
             { 'kind': 'block', 'type': 'board_base_setup_loop' },
             { 'kind': 'block', 'type': 'board_base_setup' },
             { 'kind': 'block', 'type': 'board_base_loop' },
@@ -984,6 +987,17 @@ type ToolboxCategoryNode = {
  * (category kept so the label can show « Carte : aucune »).
  * Used when no board is selected.
  */
+/** Retire la catégorie recherche (nécessite le plugin workspaceSearch). */
+export function getToolboxWithoutSearch(
+  toolbox: ToolboxConfiguration,
+): ToolboxConfiguration {
+  const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
+  if (Array.isArray(clone.contents)) {
+    clone.contents = clone.contents.filter((c) => c.kind !== "search");
+  }
+  return clone;
+}
+
 export function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): ToolboxConfiguration {
   const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
   if (Array.isArray(clone.contents)) {

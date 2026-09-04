@@ -40,7 +40,9 @@ import {
   installStrictTypeEnforcer,
   uninstallStrictTypeEnforcer,
 } from "../generators/arduino/strict_type_enforcer";
+import { registerProceduresCategory } from "../generators/arduino/procedures_flyout";
 import { registerStrictConnectionCheckerInRegistry } from "../generators/arduino/strict_connection_checker";
+import { registerTypedVariablesCategory } from "../generators/arduino/typed_variables_flyout";
 import { patchFieldVariableValidation, patchVariableMapCreateVariable } from "../blockly_patches";
 import { changeLanguageToolbox } from "../language";
 import { themeMappings } from "../options";
@@ -165,6 +167,9 @@ export function createUcBlockly(
   }
 
   const workspace = Blockly.inject(injectionDiv, workspaceOptions);
+  const svgWorkspace = workspace as Blockly.WorkspaceSvg;
+  registerTypedVariablesCategory(svgWorkspace);
+  registerProceduresCategory(svgWorkspace);
   patchFieldVariableValidation();
   patchVariableMapCreateVariable(workspace);
 

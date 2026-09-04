@@ -50,7 +50,7 @@ Helper **`setVariableTypeAndMarkManual`** dans `shared`, utilisé dans `configur
 - **`block_types.ts`** : règles de types pures (`TYPE_COMPATIBILITY`, `ARDUINO_TYPE_TO_INTERNAL`, `getInternalTypeForArduinoType`, `getCompatibleTypes`, `isTypeCompatible`, `getVariableTypeOptions`). Pas de Blockly. Documenté dans [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md).
 - **`block_types_registry.ts`** : registre, `checkTypeCompatibility` (côté Blockly), `getCompatibleTypesForCheck`, application aux blocs. Utilise `block_types`. Bonne séparation.
 - **`variable_utils.ts`** : `setVariableType`, `clearVariableType`, `normalizeVariableType`. Utilisé par shared, variables, logic, configure_standard_blocks, workspace manager. Rôle clair.
-- **`shared.ts`** : i18n, inférence de type, helpers variables/blocs, avertissements, validation. Centralise le réutilisable entre categories/blockly. Cohérent.
+- **`shared.ts`** : façade (~193 L) ; logique dans `shared_*.ts` / `blockly_i18n.ts`.
 
 ---
 
@@ -58,12 +58,23 @@ Helper **`setVariableTypeAndMarkManual`** dans `shared`, utilisé dans `configur
 
 ### 3.1 Découpage de `shared.ts`
 
-`shared` mêle i18n, inférence de types, handlers de variables, messages d’avertissement, validation. On pourrait extraire :
+`shared` mêle i18n, inférence de types, handlers de variables, messages d’avertissement, validation.
 
-- **`blockly_i18n.ts`** (ou `i18n.ts` dans blockly) : `getBlocklyMsg`, `getBlocklyMsgOr` → utilisé partout.
-- **`type_inference.ts`** : `inferConnectedValueType`, `normalizeBlocklyTypeToVariableType`, `getFirstCheckType`, `inferProcedureCallReturnType`.
+**Fait :**
 
-Intérêt : responsabilités plus nettes. Coût : plus de fichiers et de refactoring. À faire seulement si on prévoit d’enrichir fortement i18n ou inférence.
+- **`blockly_i18n.ts`** : `getBlocklyMsg`, `getBlocklyMsgOr`, warnings typés
+- **`shared_blockly_checks.ts`** : `getBlocklyCompatibleChecks`, checks Array_declare / index
+- **`shared_board_int.ts`** : `enforceIntOnlyValueInputs`, handlers board
+- **`shared_var_scope.ts`** : procédure vs global (`hasRealGlobalVariableUse`, …)
+- **`shared_procedures.ts`** : types ARG / paramètres ; `bindInferConnectedValueType`
+- **`shared_type_inference.ts`** : `inferConnectedValueType`, `normalizeBlocklyTypeToVariableType`
+- **`shared_variable_model.ts`** : `VariableWithMutableType`, sync numérique
+- **`shared_variable_resolve.ts`** : `resolveVariableTypeForBlock`, …
+- **`shared_variable_handlers.ts`** : `handleVariablesSetChange`, revalidate*
+
+`shared.ts` ≈ **193 L** : façade + `configure*VariableField` / `syncListVariableFromField` uniquement.
+
+Découpage **`shared.ts`** : **terminé** pour l’objectif « god module ».
 
 ### 3.2 `logic.ts` (≈ 456 lignes)
 
@@ -95,7 +106,7 @@ Beaucoup de définitions de blocs (get, set, local, const, init, define, set_typ
 
 ### Priorité 3 – Optionnel
 
-5. Extraction **`blockly_i18n`** / **`type_inference`** si croissance de ces parties.
+5. Extraction **`blockly_i18n`** / **`type_inference`** / handlers variables — ✅ FAIT (`shared_*.ts`).
 6. Découpage **`logic_switch`** / **`variables_*`** si besoin de clarté ou de collaboration sur des zones très ciblées.
 
 ---

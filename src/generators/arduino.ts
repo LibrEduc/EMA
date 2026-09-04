@@ -54,6 +54,7 @@ export const arduinoGenerator: ArduinoGenerator = new ArduinoGenerator();
 arduinoGenerator.addReservedWords('math,random,Number');
 
 // Install per-block-type generator functions:
+const { commentFromField: _commentFromField, ...libreGenerators } = libre;
 const generators: typeof arduinoGenerator.forBlock = {
   ...logic,
   ...loops,
@@ -64,7 +65,7 @@ const generators: typeof arduinoGenerator.forBlock = {
   ...text,
   ...variables,
   ...variablesTyped,
-  ...libre,
+  ...libreGenerators,
   ...board,
 };
 

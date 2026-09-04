@@ -29,8 +29,16 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldSlider } from "@blockly/field-slider";
+import * as FieldSliderNS from "@blockly/field-slider";
+import { namedExportFromCjsPlugin } from "../../utils/blockly_plugin_export";
 import { getBlocklyMsgOr } from "./shared";
+
+type FieldSliderCtor = typeof import("@blockly/field-slider").FieldSlider;
+
+const FieldSlider = namedExportFromCjsPlugin<FieldSliderCtor>(
+  FieldSliderNS,
+  "FieldSlider",
+);
 
 const getSliderAriaTypeName = (): string =>
   getBlocklyMsgOr("FIELD_SLIDER_ARIA_TYPE", "slider");

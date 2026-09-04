@@ -29,11 +29,16 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldColour } from "@blockly/field-colour";
+import * as FieldColourNS from "@blockly/field-colour";
+import { namedExportFromCjsPlugin } from "../../utils/blockly_plugin_export";
 import {
   formatColourAriaValue,
   getColourAriaTypeName,
 } from "./field_colour_a11y";
+
+const FieldColour = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-colour").FieldColour
+>(FieldColourNS, "FieldColour");
 
 /**
  * Colour grid field with screen-reader-friendly ARIA values.

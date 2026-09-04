@@ -31,6 +31,7 @@
 import * as Blockly from "blockly";
 import { languagesMap, languagesMapBlockly } from "../languages/languageMap";
 import { BLOCKLY_CUSTOM_MESSAGE_KEYS } from "../languages/blockly_custom_message_keys";
+import { mergeInstanceMessages } from "../instances/messages";
 import { mergeArrayMessages } from "../languages/array_messages";
 import { mergeBlocklyA11yMessages } from "../languages/blockly_a11y_messages";
 import { mergeBoardMessages } from "../languages/board_messages";
@@ -60,5 +61,6 @@ export function applyUcBlocklyLocale(language: string): void {
   mergeArrayMessages(language);
   mergeBoardMessages(language);
   mergeBlocklyA11yMessages(language);
+  mergeInstanceMessages(language);
   mergeCustomBlocklyMessages(language, BLOCKLY_CUSTOM_MESSAGE_KEYS);
 }

@@ -37,6 +37,12 @@ export { registerUcBlocklyKernel, resetUcBlocklyKernelRegistrationForTests } fro
 export { applyUcBlocklyLocale } from "./locale";
 export { sanitizeSerializedWorkspaceState } from "./workspace_state";
 export {
+  UCBLOCKLY_WORKSPACE_FILE_ACCEPT,
+  UCBLOCKLY_WORKSPACE_FILE_EXT,
+  UCBLOCKLY_WORKSPACE_FILE_MIME,
+  defaultUcBlocklyWorkspaceFilename,
+} from "../workspace_file";
+export {
   syncProgramStructureAfterLoad,
   NOT_IN_PROGRAM_DISABLED_REASON,
 } from "../program_structure_enforcer";
@@ -58,6 +64,38 @@ export type {
   UcBlocklyWorkspaceManagerOptions,
 } from "./types";
 
-export { arduinoGenerator } from "../generators/arduino";
-export { basic_toolbox, getToolboxForCurrentBoard, getToolboxWithoutBoardCategory } from "../toolbox";
+export { arduinoGenerator, Order } from "../generators/arduino";
+export {
+  ARDUINO_TYPE_KEYS,
+  type ArduinoTypeKey,
+} from "../generators/arduino/block_types";
+export { LIST_VARIABLE_TYPE } from "../generators/arduino/variable_utils";
+export {
+  FieldInstance,
+  Instances,
+  INSTANCE_NAME_TYPE,
+  registerUcBlocklyInstances,
+  updateInstancePresenceWarning,
+  allInstancesOf,
+  isInstancePresent,
+  renameInstance,
+  generateUniqueName,
+} from "../instances";
+export { basic_toolbox, getToolboxForCurrentBoard, getToolboxWithoutBoardCategory, getToolboxWithoutSearch } from "../toolbox";
 export type { ToolboxConfiguration } from "../toolbox";
+
+export {
+  loadExtensions,
+  applyExtensionMessages,
+  loadExtensionPack,
+  createHttpExtensionIo,
+  mergeExtensionsIntoToolbox,
+  getLoadedExtensions,
+  getExtensionMessagesForLang,
+} from "../extensions";
+export type {
+  ExtensionManifest,
+  ExtensionIo,
+  LoadedExtension,
+  LoadExtensionsOptions,
+} from "../extensions";

@@ -37,6 +37,7 @@ import * as Blockly from "blockly";
 import "./block_plus_minus_init";
 import "@blockly/toolbox-search";
 import { registerToolboxSearchI18n } from "./toolbox_search_i18n";
+import { defaultUcBlocklyWorkspaceFilename } from "./workspace_file";
 registerToolboxSearchI18n();
 
 // Monaco Editor configuration for local use (relative paths)
@@ -139,45 +140,26 @@ import {
   updateResizerAriaValue,
   updateRightPanelToggleButton,
 } from "./workspace_flex";
+import {
+  reportMissingDemoShellDom,
+  resolveDemoShellDom,
+} from "./demo/demo_dom";
 
-// Cache DOM elements
-const elements = {
-  workspaceContentArea: document.getElementById("div_workspace_content_area")!,
-  workspaceContentBlockly: document.getElementById(
-    "div_workspace_content_blockly",
-  )!,
-  contentCode: document.getElementById("div_content_code")!,
-  contentMonacoEditor: document.getElementById("div_content_monacoEditor")!,
-  languageMenu: document.getElementById("languageMenu") as HTMLSelectElement,
-  themeMenu: document.getElementById("themeMenu") as HTMLSelectElement,
-  rendererMenu: document.getElementById("rendererMenu") as HTMLSelectElement,
-  boardMenu: document.getElementById("boardMenu") as HTMLSelectElement,
-  pluginMinimap: document.getElementById("pluginMinimap") as HTMLInputElement,
-  pluginHighlight: document.getElementById(
-    "pluginHighlight",
-  ) as HTMLInputElement,
-  saveButton: document.getElementById("saveButton") as HTMLElement,
-  loadButton: document.getElementById("loadButton") as HTMLElement,
-  loadFileInput: document.getElementById("loadFileInput") as HTMLInputElement,
-  undoButton: document.getElementById("undoButton") as HTMLElement,
-  redoButton: document.getElementById("redoButton") as HTMLElement,
-  pluginContinuousToolbox: document.getElementById(
-    "pluginContinuousToolbox",
-  ) as HTMLInputElement,
-  alwaysOpenedToolboxFlyout: document.getElementById(
-    "alwaysOpenedToolboxFlyout",
-  ) as HTMLInputElement,
-  codeEditorSwitch: document.getElementById(
-    "codeEditorSwitch",
-  ) as HTMLInputElement,
-  debugSwitch: document.getElementById("debugSwitch") as HTMLInputElement,
-};
+const demoDom = resolveDemoShellDom();
+if (!demoDom.ok) {
+  reportMissingDemoShellDom(demoDom.missing);
+  throw new Error(
+    `µcBlockly demo: missing required DOM element(s): ${demoDom.missing.join(", ")}`,
+  );
+}
+
+/** Cached demo-shell hosts (resolved once, no non-null assertions on lookup). */
+const elements = demoDom.elements;
 
 let shellFileShortcutsRegistered = false;
 
 const triggerWorkspaceSave = (): void => {
-  const filename = `workspace_${new Date().toISOString().slice(0, 10)}.json`;
-  µcB.workspaceSaveToFile(filename);
+  µcB.workspaceSaveToFile(defaultUcBlocklyWorkspaceFilename());
   announceShellMessage(getA11yLabel("A11Y_SAVE_ANNOUNCED"));
 };
 
@@ -246,37 +228,7 @@ const primeWorkspaceContainerDimensions = (): void => {
   });
 };
 
-// Verify all required elements exist
-const requiredElements = [
-  "div_workspace_content_area",
-  "div_workspace_content_blockly",
-  "div_content_code",
-  "div_content_monacoEditor",
-  "languageMenu",
-  "themeMenu",
-  "rendererMenu",
-  "boardMenu",
-  "pluginMinimap",
-  "pluginHighlight",
-  "saveButton",
-  "loadButton",
-  "loadFileInput",
-  "undoButton",
-  "redoButton",
-  "pluginContinuousToolbox",
-  "codeEditorSwitch",
-  "debugSwitch",
-];
-
-requiredElements.forEach((id) => {
-  if (!document.getElementById(id)) {
-    console.error(`Required element with id '${id}' not found in DOM`);
-  }
-});
-
-if (elements.contentMonacoEditor) {
-  elements.contentMonacoEditor.style.display = "none";
-}
+elements.contentMonacoEditor.style.display = "none";
 
 /**
  * Populates the board dropdown with all available board profiles.
@@ -383,6 +335,7 @@ const µcB: BlocklyApplication = new BlocklyApplication(
     media: "./media/",
   },
   elements.workspaceContentBlockly,
+  elements.contentCode,
 );
 
 /**

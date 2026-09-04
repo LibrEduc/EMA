@@ -31,7 +31,8 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldAngle } from "@blockly/field-angle";
+import * as FieldAngleNS from "@blockly/field-angle";
+import { namedExportFromCjsPlugin } from "../../utils/blockly_plugin_export";
 import { AccessibleFieldSlider } from "./field_slider_accessible";
 import {
   getBlocklyMsgOr,
@@ -45,6 +46,10 @@ import {
   getBlocklyMsg,
   isMathChangeCompatibleVariableType,
 } from "./shared";
+
+const FieldAngle = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-angle").FieldAngle
+>(FieldAngleNS, "FieldAngle");
 
 /** Blockly menu options for math_constant (Arduino: no INFINITY). */
 const getMathConstantDropdownOptions = (): Blockly.MenuOption[] => [

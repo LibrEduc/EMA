@@ -31,8 +31,9 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldDependentDropdown } from "@blockly/field-dependent-dropdown";
-import { FieldGridDropdown } from "@blockly/field-grid-dropdown";
+import * as FieldDependentDropdownNS from "@blockly/field-dependent-dropdown";
+import * as FieldGridDropdownNS from "@blockly/field-grid-dropdown";
+import { namedExportFromCjsPlugin } from "../../utils/blockly_plugin_export";
 import { AccessibleFieldSlider } from "./field_slider_accessible";
 import {
   DEFAULT_BOARD_ID,
@@ -42,7 +43,16 @@ import {
 } from "../../boards";
 import { getBlocklyMsgOr, getBlocklyCompatibleChecks, handleBoardIntInputBlockChange } from "./shared";
 
+const FieldDependentDropdown = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-dependent-dropdown").FieldDependentDropdown
+>(FieldDependentDropdownNS, "FieldDependentDropdown");
+const FieldGridDropdown = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-grid-dropdown").FieldGridDropdown
+>(FieldGridDropdownNS, "FieldGridDropdown");
+
 const BOARD_STYLE = "board_blocks";
+/** Conteneur « Define » Blockly@rduino (bordure accentuée via colourSecondary). */
+const BOARD_DEFINE_STYLE = "board_define_blocks";
 
 const boardIntInputOnchange = function (
   this: Blockly.Block,
@@ -98,6 +108,16 @@ const BLOCK_PIN_DROPDOWN: Record<string, "digital" | "pwm" | "analog"> = {
 };
 
 /**
+ * Enregistre des dropdowns PIN pour des blocs d’extension (chargement runtime).
+ * Appelé par le loader d’extensions ; pris en compte par `refreshBoardPinDropdowns`.
+ */
+export function registerExtensionPinDropdowns(
+  mapping: Record<string, "digital" | "pwm" | "analog">,
+): void {
+  Object.assign(BLOCK_PIN_DROPDOWN, mapping);
+}
+
+/**
  * Registers board (s4e) blocks: setup, loop, digital/analog I/O, delay, map, tone.
  */
 export const defineBoardBlocks = (): void => {
@@ -147,6 +167,63 @@ export const defineBoardBlocks = (): void => {
       this.setTooltip(getBlocklyMsgOr("ARDUINO_BASE_LOOP_TOOLTIP", "The loop() function runs continuously and repeats the instructions it contains."));
       this.setHelpUrl("https://www.arduino.cc/reference/en/language/structure/sketch/loop/");
       this.setStyle(BOARD_STYLE);
+    },
+  };
+
+  // Legacy Blockly@rduino — commentaire, include et zone « define » (avant setup/loop)
+  Blockly.Blocks["comment"] = {
+    init(this: Blockly.Block) {
+      this.appendDummyInput()
+        .appendField(getBlocklyMsgOr("LIBRE_COMMENT_LABEL", "comment"))
+        .appendField(new Blockly.FieldTextInput(""), "TEXT");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setStyle(BOARD_STYLE);
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "LIBRE_COMMENT_TOOLTIP",
+          "Inserts a comment line in the generated code.",
+        ),
+      );
+    },
+  };
+
+  Blockly.Blocks["include_library"] = {
+    init(this: Blockly.Block) {
+      this.appendDummyInput()
+        .appendField(
+          getBlocklyMsgOr("ARDUINO_BASE_INCLUDE_LIBRARY_LABEL", "include librarie"),
+        )
+        .appendField(new Blockly.FieldTextInput(""), "FILE")
+        .appendField(".h");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setStyle(BOARD_STYLE);
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARDUINO_BASE_INCLUDE_LIBRARY_TOOLTIP",
+          "Adds #include <library.h> at the top of the sketch.",
+        ),
+      );
+    },
+  };
+
+  Blockly.Blocks["define"] = {
+    init(this: Blockly.Block) {
+      this.appendDummyInput().appendField(
+        getBlocklyMsgOr("ARDUINO_BASE_DEFINE_LABEL", "Define"),
+      );
+      this.appendStatementInput("DEFINE").setCheck(null);
+      this.setInputsInline(false);
+      this.setTooltip(
+        getBlocklyMsgOr(
+          "ARDUINO_BASE_DEFINE_TOOLTIP",
+          "Place blocks here to emit code in the global section (before setup and loop).",
+        ),
+      );
+      this.setStyle(BOARD_DEFINE_STYLE);
     },
   };
 

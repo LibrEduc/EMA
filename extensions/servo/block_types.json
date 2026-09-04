@@ -1,0 +1,4 @@
+{
+  "servo_read_degrees": "int",
+  "servo_attached": "Boolean"
+}

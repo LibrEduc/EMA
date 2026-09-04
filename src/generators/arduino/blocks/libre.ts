@@ -37,7 +37,7 @@ import { Order } from "../arduino_generator";
 /**
  * Generates a C++ comment from the block's TEXT field (if non-empty).
  */
-function commentFromField(block: Block, fieldName: string): string {
+export function commentFromField(block: Block, fieldName: string): string {
   const text = (block.getFieldValue(fieldName) as string) || "";
   const trimmed = text.trim();
   if (!trimmed) return "";

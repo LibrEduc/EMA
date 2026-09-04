@@ -33,6 +33,7 @@
 import type { Block } from "blockly/core";
 import type { ArduinoGenerator } from "../arduino_generator";
 import { Order } from "../arduino_generator";
+import { commentFromField } from "./libre";
 
 export function board_base_setup(block: Block, generator: ArduinoGenerator): string {
   let code = generator.statementToCode(block, "SETUP") || "";
@@ -58,6 +59,32 @@ export function board_base_loop(block: Block, generator: ArduinoGenerator): stri
   code = generator.scrubArduino_(block, code);
   // Always register loop, even when empty → emits `void loop() {}`.
   generator.addLoop("base_loop", code);
+  return "";
+}
+
+/** Bloc commentaire Blockly@rduino : `// texte` */
+export function comment(block: Block, _generator: ArduinoGenerator): string {
+  return commentFromField(block, "TEXT");
+}
+
+/** Bloc include librarie Blockly@rduino : `#include <Nom.h>` */
+export function include_library(block: Block, generator: ArduinoGenerator): string {
+  const raw = (block.getFieldValue("FILE") as string) || "";
+  const name = raw.trim().replace(/[<>"\\]/g, "");
+  if (name) {
+    generator.addInclude(`lib_${name}`, `#include <${name}.h>`);
+  }
+  return "";
+}
+
+/** Conteneur Define : code global (commentaires, etc.) avant setup/loop. */
+export function define(block: Block, generator: ArduinoGenerator): string {
+  let code = generator.statementToCode(block, "DEFINE") || "";
+  code = generator.scrubArduino_(block, code);
+  const trimmed = code.trimEnd();
+  if (trimmed) {
+    generator.addPreamble(`define_${block.id}`, trimmed + "\n");
+  }
   return "";
 }
 

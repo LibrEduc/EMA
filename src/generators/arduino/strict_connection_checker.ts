@@ -33,7 +33,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import * as Blockly from 'blockly/core';
+import * as Blockly from "blockly";
 import {
   inferArrayElementTypeFromBlock,
   inferListVariableElementType,
@@ -71,6 +71,9 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     isDragging: boolean,
     opt_distance?: number
   ): number {
+    if (isDragging) {
+      return super.canConnectWithReason(a, b, isDragging, opt_distance);
+    }
     if (a && b && this.allowValueToUncheckedInput_(a, b)) {
       return Blockly.Connection.CAN_CONNECT;
     }
@@ -180,6 +183,9 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     isDragging: boolean,
     opt_distance?: number
   ): boolean {
+    if (isDragging) {
+      return super.canConnect(a, b, isDragging, opt_distance);
+    }
     if (a && b && this.allowValueToUncheckedInput_(a, b)) {
       return true;
     }

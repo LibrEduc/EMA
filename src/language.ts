@@ -36,6 +36,8 @@ import { languagesMap, LanguageItem } from './languages/languageMap';
 import { applyDocumentLanguage, applyToolbarA11y } from './shell_a11y';
 import { refreshShortcutsHelp } from './shell_shortcuts_help';
 import { refreshKeyboardTutorial } from './shell_keyboard_tutorial';
+import * as Blockly from 'blockly';
+import { getExtensionMessagesForLang } from './extensions/registry';
 
 const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'lki']);
 import { ToolboxConfiguration } from "./toolbox";
@@ -57,7 +59,8 @@ const getToolboxCacheKey = (lang: string, toolbox: ToolboxConfiguration): string
   for (let i = 0; i < raw.length; i += 1) {
     hash = (hash * 33) ^ raw.charCodeAt(i);
   }
-  return `ucb.toolbox.${lang}.${(hash >>> 0).toString(16)}`;
+  // v2: category labels also resolve from Blockly.Msg / extension i18n
+  return `ucb.toolbox.v2.${lang}.${(hash >>> 0).toString(16)}`;
 };
 
 /**
@@ -140,12 +143,27 @@ const getTranslatedToolboxJson = (
     JSON.stringify(toolbox.contents),
   ) as ToolboxConfiguration["contents"];
   const langMap: LanguageItem = languagesMap[newLang];
+  const extensionMsgs = getExtensionMessagesForLang(newLang);
+  const blocklyMsg = Blockly.Msg as Record<string, string>;
   interface Category {
     kind: string;
     name?: string;
     categoryStyle?: string;
     contents?: Category[];
   }
+  const resolveCategoryLabel = (key: string): string | undefined => {
+    const fromLang = langMap?.[key as keyof LanguageItem];
+    if (typeof fromLang === "string" && fromLang) {
+      return fromLang;
+    }
+    if (extensionMsgs[key]) {
+      return extensionMsgs[key];
+    }
+    if (blocklyMsg[key]) {
+      return blocklyMsg[key];
+    }
+    return undefined;
+  };
   /**
    * Replaces category labels with localized values in place.
    * @param category - Toolbox category to localize.
@@ -153,10 +171,12 @@ const getTranslatedToolboxJson = (
   function replaceCategoryName(category: Category) {
     if (
       (category.kind === "category" || category.kind === "search") &&
-      category.name &&
-      langMap[category.name as keyof LanguageItem]
+      category.name
     ) {
-      category.name = langMap[category.name as keyof LanguageItem];
+      const label = resolveCategoryLabel(category.name);
+      if (label) {
+        category.name = label;
+      }
     }
     if (category.contents) {
       category.contents.forEach((content: Category) => {
@@ -184,7 +204,12 @@ const getTranslatedToolboxJson = (
  */
 export const getLangParamFromUrl = (): string => {
   const lang = new URLSearchParams(window.location.search).get('lang') ?? 'en';
-  (document.getElementById('languageMenu') as HTMLSelectElement | null)!.value = lang;
+  const languageMenu = document.getElementById(
+    'languageMenu',
+  ) as HTMLSelectElement | null;
+  if (languageMenu) {
+    languageMenu.value = lang;
+  }
   return lang;
 }
 
@@ -193,8 +218,12 @@ export const getLangParamFromUrl = (): string => {
  * @return Selected language code.
  */
 export const getLangParamFromDropdown = (): string => {
-  const dropdownMenu: HTMLSelectElement = document.getElementById('languageMenu') as HTMLSelectElement;
-  const newLang: string = dropdownMenu.options[dropdownMenu.selectedIndex].value;
+  const dropdownMenu = document.getElementById(
+    'languageMenu',
+  ) as HTMLSelectElement | null;
+  const newLang =
+    dropdownMenu?.options[dropdownMenu.selectedIndex]?.value ??
+    getLangParamFromUrl();
   pushStateReplaceSearchParam("lang", newLang);
   return newLang;
 };

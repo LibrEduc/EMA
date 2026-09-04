@@ -29,6 +29,9 @@
 import { getLangParamFromUrl } from "./language";
 import { languagesMap, type LanguageItem } from "./languages/languageMap";
 
+/** Version injectée au build (package.json). */
+declare const __UCB_APP_VERSION__: string;
+
 const DIALOG_ID = "ucb-about-dialog";
 const BUTTON_ID = "aboutButton";
 const PROJECT_URL = "https://github.com/A-S-T-U-C-E/ucBlockly";
@@ -63,6 +66,7 @@ function ensureDialog(): HTMLDialogElement {
       />
       <div>
         <h2 class="ucb-about-dialog__title" data-i18n="ABOUT"></h2>
+        <p class="ucb-about-dialog__version" id="ucb-about-version"></p>
         <p class="ucb-about-dialog__text" data-i18n="ABOUT_TEXT"></p>
       </div>
     </div>
@@ -114,6 +118,14 @@ function refreshDialogLabels(dialog: HTMLDialogElement): void {
   const logo = dialog.querySelector<HTMLImageElement>(".ucb-about-dialog__logo");
   if (logo) {
     logo.alt = t("HOME");
+  }
+  const versionEl = dialog.querySelector("#ucb-about-version");
+  if (versionEl) {
+    const version =
+      typeof __UCB_APP_VERSION__ !== "undefined" ? __UCB_APP_VERSION__ : "";
+    versionEl.textContent = version
+      ? `${t("ABOUT_VERSION")} ${version}`
+      : "";
   }
 }
 

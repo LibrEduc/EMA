@@ -87,6 +87,7 @@ export interface LanguageItem {
   ABOUT_BLOCKLY_DOCS: string;
   ABOUT_BLOCKLY_BADGE_ALT: string;
   ABOUT_CLOSE: string;
+  ABOUT_VERSION: string;
   CONTACT_TOOLTIP: string;
   UNDO_TOOLTIP: string;
   REDO_TOOLTIP: string;
@@ -313,6 +314,12 @@ export interface LanguageItem {
   ARRAY_BITMAP_GET_TOOLTIP: string;
   ARRAY_BITMAP_GET_HELPURL: string;
   LIBRE_TOOLTIP: string;
+  LIBRE_COMMENT_LABEL: string;
+  LIBRE_COMMENT_TOOLTIP: string;
+  ARDUINO_BASE_INCLUDE_LIBRARY_LABEL: string;
+  ARDUINO_BASE_INCLUDE_LIBRARY_TOOLTIP: string;
+  ARDUINO_BASE_DEFINE_LABEL: string;
+  ARDUINO_BASE_DEFINE_TOOLTIP: string;
   LIBRE_LOOP_DO: string;
   TOOLBOX_SEARCH_PLACEHOLDER: string;
   TOOLBOX_SEARCH_HINT: string;

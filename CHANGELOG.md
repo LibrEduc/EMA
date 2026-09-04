@@ -1,5 +1,24 @@
 # Journal des modifications
 
+## Non publié (après 3.0.0)
+
+Travaux depuis la release **3.0.0** (29 juillet 2026) — pas encore numérotés en version npm.
+
+### Documentation et accessibilité
+- Documentation d’accessibilité et infobulles de langue enrichies.
+- Guide [docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md](docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md).
+- Mise à jour des docs d’architecture, intégration, noyau, contribution, inventaire des fonctions.
+
+### Noyau et éditeur
+- Métriques de contenu « live » pour le plugin highlight / flyout (`live_content_metrics`, overlay continuous).
+- Raffinements plugins workspace, `createUcBlockly`, état de workspace.
+- Ajustements générateur Arduino, types de connexions, maths / variables / listes.
+
+### Qualité
+- Nouveaux tests (API noyau, couleur/a11y, logic_compare, math-change, listes, etc.).
+- Configurations TypeScript / ESLint affinées.
+- Exports `µcBlockly/host` et scripts npm (ex. sync wiki) mis à jour.
+
 ## 3.0.0 — 29 juillet 2026
 
 Version majeure basée sur **Blockly 13**. À lire avant de mettre à jour un projet existant.

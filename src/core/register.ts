@@ -37,6 +37,7 @@ import { defineAllTypedVariableBlocks } from "../categories/blockly";
 import { applyLevelsToAllBlockDefinitions } from "../block_levels";
 import { configureStandardBlocks } from "../generators/arduino/configure_standard_blocks";
 import { applyBlockTypesFromRegistry } from "../generators/arduino/block_types_registry";
+import { registerUcBlocklyInstances } from "../instances";
 import type { UcBlocklyRegistrationOptions } from "./types";
 import { installLiveBlocksBoundingBoxPatch } from "./live_content_metrics";
 
@@ -64,6 +65,7 @@ export function registerUcBlocklyKernel(
   kernelRegistered = true;
 
   installLiveBlocksBoundingBoxPatch();
+  registerUcBlocklyInstances();
 
   const typedVariables = options.typedVariables ?? true;
   const blockTypesRegistry = options.blockTypesRegistry ?? true;

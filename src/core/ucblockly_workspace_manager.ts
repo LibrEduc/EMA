@@ -44,6 +44,10 @@ import { createUcBlockly } from "./create_ucblockly";
 import { resolveEnforcerOptions } from "./default_options";
 import { sanitizeSerializedWorkspaceState } from "./workspace_state";
 import {
+  UCBLOCKLY_WORKSPACE_FILE_MIME,
+  defaultUcBlocklyWorkspaceFilename,
+} from "../workspace_file";
+import {
   installProgramStructureEnforcer,
   syncProgramStructureAfterLoad,
   uninstallProgramStructureEnforcer,
@@ -375,11 +379,11 @@ export class UcBlocklyWorkspaceManager {
     }
   }
 
-  workspaceSaveToFile(filename = "workspace.json"): void {
+  workspaceSaveToFile(filename = defaultUcBlocklyWorkspaceFilename()): void {
     const data = Blockly.serialization.workspaces.save(this.workspace);
     sanitizeSerializedWorkspaceState(data);
     const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
+    const blob = new Blob([jsonString], { type: UCBLOCKLY_WORKSPACE_FILE_MIME });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;

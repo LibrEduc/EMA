@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ucblockly-extension-manifest",
+  "title": "µcBlockly extension manifest (runtime-first)",
+  "type": "object",
+  "required": ["id", "version", "categoryKey", "blocks", "entrypoints"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "Must equal the folder name under extensions/ and the entry in index.json."
+    },
+    "version": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "categoryKey": { "type": "string" },
+    "toolboxItemId": { "type": "string" },
+    "toolboxParent": {
+      "type": "string",
+      "description": "Existing toolbox category key (e.g. CAT_BOARD) for subcategory or append."
+    },
+    "toolboxMode": {
+      "type": "string",
+      "enum": ["subcategory", "append"],
+      "description": "How to merge when toolboxParent is set. Default subcategory."
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "category": { "type": "string" },
+        "blocks": { "type": "string" }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "pinDropdowns": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["pwm", "digital", "analog"]
+      }
+    },
+    "levels": { "type": "string" },
+    "entrypoints": {
+      "type": "object",
+      "description": "Runtime uses *Js / JSON. .ts paths are authoring-only.",
+      "properties": {
+        "blocksJson": { "type": "string" },
+        "blocksJs": { "type": "string" },
+        "generatorArduinoJs": { "type": "string" },
+        "generatorMicropythonJs": { "type": "string" },
+        "blocksTs": { "type": "string" },
+        "generatorArduino": { "type": "string" },
+        "generatorMicropython": { "type": "string" },
+        "blockTypes": { "type": "string" },
+        "toolbox": { "type": "string" },
+        "theme": { "type": "string" },
+        "i18n": { "type": "string" }
+      }
+    },
+    "media": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

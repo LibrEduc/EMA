@@ -1,0 +1,19 @@
+{
+  "CAT_SERVO": "Servomoteurs",
+  "SERVO_DEFAULT_NAME": "SERVO",
+  "SERVO_PIN": "broche",
+  "SERVO_ATTACH1": "Attacher",
+  "SERVO_ATTACH2": "Servo",
+  "SERVO_ATTACH_TOOLTIP": "Attache une instance de servo nommée à une broche (setup).",
+  "SERVO_MOVE_INPUT": "orienter le servo-moteur",
+  "SERVO_MOVE_DEGREE": "d'un angle (0~180°) de",
+  "SERVO_MOVE_TOOLTIP": "rotation possible entre 0~180 degrés",
+  "SERVO_MOVE_HELPURL": "http://www.arduino.cc/playground/ComponentLib/servo",
+  "SERVO_READ_DEGREES_INPUT": "l'angle du servo-moteur",
+  "SERVO_READ_DEGREES_TOOLTIP": "renvoie le nombre de degrés de la dernière rotation",
+  "SERVO_READ_DEGREES_HELPURL": "http://www.arduino.cc/playground/ComponentLib/servo",
+  "SERVO_DETACH": "Détacher",
+  "SERVO_DETACH_TOOLTIP": "Libère la broche du pilotage servo.",
+  "SERVO_ATTACHED": "servo attaché ?",
+  "SERVO_ATTACHED_TOOLTIP": "vrai si le servo est attaché à une broche ; faux sinon."
+}

@@ -52,6 +52,9 @@ export class LazyMonacoEditor {
   private followUiTheme = true;
   private readOnly = false;
   private fontFamily = "Consolas, 'Courier New', monospace";
+  private fontSizePx = 14;
+  private lineHeightRatio = 1.45;
+  private onChangeListener: ((value: string) => void) | null = null;
 
   /**
    * Aligns Monaco with the application shell theme (ignored if a manual theme is set).
@@ -125,6 +128,30 @@ export class LazyMonacoEditor {
     this.editor?.updateOptions({ fontFamily: trimmed });
   }
 
+  /** Interligne et taille de police Monaco (accessibilité coque). */
+  setReadabilityOptions(options: {
+    fontSizePx?: number;
+    lineHeightRatio?: number;
+  }): void {
+    if (options.fontSizePx !== undefined && options.fontSizePx > 0) {
+      this.fontSizePx = options.fontSizePx;
+    }
+    if (options.lineHeightRatio !== undefined && options.lineHeightRatio > 0) {
+      this.lineHeightRatio = options.lineHeightRatio;
+    }
+    this.pushReadabilityToEditor();
+  }
+
+  private pushReadabilityToEditor(): void {
+    if (!this.editor) {
+      return;
+    }
+    this.editor.updateOptions({
+      fontSize: this.fontSizePx,
+      lineHeight: Math.max(12, Math.round(this.fontSizePx * this.lineHeightRatio)),
+    });
+  }
+
   /**
    * Initializes the Monaco editor if it is not already created.
    * @param container - DOM element that hosts the editor.
@@ -150,11 +177,21 @@ export class LazyMonacoEditor {
         scrollBeyondLastLine: false,
         theme: this.monacoTheme,
         fontFamily: this.fontFamily,
+        fontSize: this.fontSizePx,
+        lineHeight: Math.max(
+          12,
+          Math.round(this.fontSizePx * this.lineHeightRatio),
+        ),
       });
       container.setAttribute("dir", "ltr");
       if (this.pendingValue !== null) {
         this.editor.setValue(this.pendingValue);
         this.pendingValue = null;
+      }
+      if (this.onChangeListener) {
+        this.editor.onDidChangeModelContent(() => {
+          this.onChangeListener?.(this.getValue());
+        });
       }
     })();
     await this.initializing;
@@ -170,6 +207,26 @@ export class LazyMonacoEditor {
       return;
     }
     this.pendingValue = value;
+  }
+
+  /** Current editor text (empty string if not initialized). */
+  getValue(): string {
+    return this.editor?.getValue() ?? this.pendingValue ?? "";
+  }
+
+  /** Fired when the user (or program) changes editor content. */
+  setOnChange(listener: ((value: string) => void) | null): void {
+    this.onChangeListener = listener;
+  }
+
+  /** Switches Monaco syntax highlighting (e.g. javascript, cpp). */
+  setLanguage(languageId: string): void {
+    if (!this.editor) {
+      return;
+    }
+    void import("monaco-editor").then((monaco) => {
+      monaco.editor.setModelLanguage(this.editor!.getModel()!, languageId);
+    });
   }
 }
 

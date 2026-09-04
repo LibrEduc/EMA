@@ -6,7 +6,8 @@
  * Variables are one model with three Blockly kinds (forms):
  * - scalar (`""`) — ordinary typed variables
  * - list (`list`) — arrays declared by List toolbox blocks
- * - instance (`instance`) — reserved for future object/instance bindings
+ * - instance (`instance`) — reserved for FieldVariable-based bindings;
+ *   named hardware objects use FieldInstance / Instances (`src/instances/`) instead
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @license GPL-3.0-or-later
  * @version 1.0.0

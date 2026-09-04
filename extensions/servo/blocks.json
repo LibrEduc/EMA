@@ -1,0 +1,33 @@
+{
+  "$comment": "Référence déclarative. Le runtime charge blocks.js (FieldInstance). PIN/DEGREE = int.",
+  "blocks": [
+    {
+      "type": "servo_attach",
+      "style": "servo_blocks",
+      "previousStatement": null,
+      "nextStatement": null
+    },
+    {
+      "type": "servo_move",
+      "style": "servo_blocks",
+      "previousStatement": null,
+      "nextStatement": null
+    },
+    {
+      "type": "servo_read_degrees",
+      "style": "servo_blocks",
+      "output": "int"
+    },
+    {
+      "type": "servo_detach",
+      "style": "servo_blocks",
+      "previousStatement": null,
+      "nextStatement": null
+    },
+    {
+      "type": "servo_attached",
+      "style": "servo_blocks",
+      "output": "Boolean"
+    }
+  ]
+}

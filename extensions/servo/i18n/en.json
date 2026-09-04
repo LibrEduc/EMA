@@ -1,0 +1,19 @@
+{
+  "CAT_SERVO": "Servo",
+  "SERVO_DEFAULT_NAME": "SERVO",
+  "SERVO_PIN": "PIN#",
+  "SERVO_ATTACH1": "Attach",
+  "SERVO_ATTACH2": "Servo",
+  "SERVO_ATTACH_TOOLTIP": "Attach a named servo instance to a pin (setup).",
+  "SERVO_MOVE_INPUT": "rotate the Servomotor",
+  "SERVO_MOVE_DEGREE": "an angle (0~180°) of",
+  "SERVO_MOVE_TOOLTIP": "rotation possible between 0 ~ 180 degrees",
+  "SERVO_MOVE_HELPURL": "http://www.arduino.cc/playground/ComponentLib/servo",
+  "SERVO_READ_DEGREES_INPUT": "the angle of the servo motor",
+  "SERVO_READ_DEGREES_TOOLTIP": "returns the number of degrees the last rotation",
+  "SERVO_READ_DEGREES_HELPURL": "http://www.arduino.cc/playground/ComponentLib/servo",
+  "SERVO_DETACH": "Detach",
+  "SERVO_DETACH_TOOLTIP": "Release a pin from servo driving.",
+  "SERVO_ATTACHED": "servo attached?",
+  "SERVO_ATTACHED_TOOLTIP": "true if the servo is attached to pin; false otherwise."
+}

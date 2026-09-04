@@ -39,6 +39,10 @@ import {
   revalidateProcedureCallBlocks,
   revalidateTypedNumericBlocks,
 } from "../../categories/blockly/shared";
+import {
+  scheduleDeferredWorkspaceTask,
+  shouldDeferWorkspaceEnforcement,
+} from "../../core/workspace_event_utils";
 
 export type StrictTypeEnforcerMode = "warn" | "disconnect";
 export type StrictTypeEnforcerScope = "variables-only" | "extended";
@@ -52,6 +56,9 @@ type WorkspaceListener = (e: Blockly.Events.Abstract) => void;
 
 const INSTALLED = new WeakMap<Blockly.Workspace, WorkspaceListener>();
 
+/** Debounce after block moves settle (ms). */
+const STRICT_TYPE_DEBOUNCE_MS = 100;
+
 const isRelevantEvent = (e: Blockly.Events.Abstract): boolean =>
   e.type === Blockly.Events.BLOCK_MOVE ||
   e.type === Blockly.Events.BLOCK_CHANGE ||
@@ -60,6 +67,31 @@ const isRelevantEvent = (e: Blockly.Events.Abstract): boolean =>
   e.type === Blockly.Events.VAR_CREATE ||
   e.type === Blockly.Events.VAR_RENAME ||
   e.type === Blockly.Events.VAR_DELETE;
+
+const VARIABLE_SET_TYPES = new Set([
+  "variables_set",
+  "variables_set_dynamic",
+]);
+
+const revalidateVariablesSetBlocks = (
+  workspace: Blockly.Workspace,
+  event: Blockly.Events.Abstract,
+): void => {
+  const blockId =
+    "blockId" in event ? (event as { blockId?: string }).blockId : undefined;
+  if (blockId) {
+    const block = workspace.getBlockById(blockId);
+    if (block && VARIABLE_SET_TYPES.has(block.type)) {
+      handleVariablesSetChange(block, event, "strict_enforcer");
+      return;
+    }
+  }
+  for (const block of workspace.getAllBlocks(false)) {
+    if (VARIABLE_SET_TYPES.has(block.type)) {
+      handleVariablesSetChange(block, event, "strict_enforcer");
+    }
+  }
+};
 
 /**
  * Uninstalls a previously installed strict type enforcer.
@@ -87,37 +119,33 @@ export function installStrictTypeEnforcer(
   const mode = options.mode ?? "disconnect";
   const scope = options.scope ?? "variables-only";
 
-  let timer: number | null = null;
-
   const listener: WorkspaceListener = (e) => {
-    const wsSvg = workspace as Blockly.WorkspaceSvg;
-    if (e.isUiEvent || (wsSvg.isDragging && wsSvg.isDragging())) return;
-    if (e.type === Blockly.Events.FINISHED_LOADING) return;
-    if (!isRelevantEvent(e)) return;
-
-    if (timer !== null) {
-      window.clearTimeout(timer);
+    if (shouldDeferWorkspaceEnforcement(workspace, e)) {
+      return;
     }
-    // Defer until Blockly finishes endDrag/applyConnections/render cycle.
-    timer = window.setTimeout(() => {
-      timer = null;
-      revalidateLocalWrapperBlocks(workspace, e);
-      revalidateTypedNumericBlocks(workspace, e);
-      revalidateProcedureCallBlocks(workspace);
-      revalidateBoardIntInputBlocks(workspace, e);
-      const all = workspace.getAllBlocks(false);
-      for (const block of all) {
-        if (block.type === "variables_set" || block.type === "variables_set_dynamic") {
-          handleVariablesSetChange(block, e, "strict_enforcer");
+    if (e.type === Blockly.Events.FINISHED_LOADING) {
+      return;
+    }
+    if (!isRelevantEvent(e)) {
+      return;
+    }
+
+    scheduleDeferredWorkspaceTask(
+      workspace,
+      () => {
+        revalidateLocalWrapperBlocks(workspace, e);
+        revalidateTypedNumericBlocks(workspace, e);
+        revalidateProcedureCallBlocks(workspace);
+        revalidateBoardIntInputBlocks(workspace, e);
+        revalidateVariablesSetBlocks(workspace, e);
+        if (scope !== "variables-only" && mode === "warn") {
+          // mode reserved for future non-disconnecting behavior.
         }
-      }
-      if (scope !== "variables-only" && mode === "warn") {
-        // mode reserved for future non-disconnecting behavior.
-      }
-    }, 0);
+      },
+      STRICT_TYPE_DEBOUNCE_MS,
+    );
   };
 
   workspace.addChangeListener(listener);
   INSTALLED.set(workspace, listener);
 }
-

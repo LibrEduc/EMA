@@ -9,6 +9,9 @@
 Guide pas à pas pour ajouter une **nouvelle catégorie de blocs** dans µcBlockly v3 (Blockly 13), illustré avec **Servomoteur**.  
 À adapter pour toute autre catégorie matérielle (capteur, afficheur, etc.).
 
+> **Chemin recommandé** : pack runtime sans rebuild — [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) et [`extensions/servo/`](../extensions/servo/).  
+> Le guide ci-dessous est l’**intégration manuelle dans le noyau** (rebuild) si vous en avez besoin.
+
 Complète [ARCHITECTURE.md](./ARCHITECTURE.md), [CONTRIBUTING.md](./CONTRIBUTING.md) et [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md).
 
 ---

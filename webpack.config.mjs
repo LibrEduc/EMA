@@ -23,19 +23,23 @@ import WebpackObfuscator from "webpack-obfuscator";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function readPackageVersion() {
+  try {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(__dirname, "package.json"), "utf8"),
+    );
+    return pkg.version || "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
+
 /**
  * Build fingerprint (watermark) for this build: version + git short hash + ISO date.
  * Injected at compile time; exposed in app for tracing / leak detection.
  */
 function getBuildFingerprint() {
-  let version = "0.0.0";
-  try {
-    const pkgPath = path.join(__dirname, "package.json");
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-    version = pkg.version || version;
-  } catch (_) {
-    // ignore
-  }
+  const version = readPackageVersion();
   let gitHash = "";
   try {
     gitHash = execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
@@ -171,6 +175,7 @@ let config = {
   plugins: [
     new webpack.DefinePlugin({
       __UCB_BUILD_FINGERPRINT__: JSON.stringify(getBuildFingerprint()),
+      __UCB_APP_VERSION__: JSON.stringify(readPackageVersion()),
     }),
     new webpack.BannerPlugin({
       banner: () => {

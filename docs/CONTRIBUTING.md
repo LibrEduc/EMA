@@ -46,7 +46,9 @@ Thank you for considering contributing. This short guide will help you get start
 | Add a board or change pins | `src/boards.ts` |
 | Add or edit a language | `src/languages/` — then `npm run check-translations` |
 | Convert Blockly@rduino project | `npm run convert-rduino` — see [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) |
-| Add a new toolbox category (e.g. servo) | [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) |
+| Add a new toolbox category (e.g. servo) | **[AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md)** (pack runtime, recommandé) ; noyau = [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) |
+| Named instances (FieldInstance) | [INSTANCES.md](./INSTANCES.md) |
+| Add a runtime extension pack | [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) + `extensions/` |
 | Regenerate functions inventory | `npm run extract-functions` → `docs/functions-list.md` |
 
 ## Reporting issues and pull requests

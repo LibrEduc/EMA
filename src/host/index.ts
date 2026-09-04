@@ -49,7 +49,7 @@ export { registerToolboxSearchI18n } from "../toolbox_search_i18n";
 
 /** Board profiles + pin dropdown refresh. */
 export { BOARD_PROFILES, DEFAULT_BOARD_ID } from "../boards";
-export { refreshBoardPinDropdowns } from "../categories/blockly/board";
+export { refreshBoardPinDropdowns, registerExtensionPinDropdowns } from "../categories/blockly/board";
 
 /** Continuous toolbox metrics (register in host before enabling plugin). */
 export { ContinuousMetricsOverlayFlyout } from "../continuous_metrics_overlay_flyout";
@@ -70,3 +70,25 @@ export {
   refreshBlocklyA11yExtensions,
 } from "../blockly_a11y_extensions";
 export { registerKeyboardTutorial } from "../shell_keyboard_tutorial";
+
+/** Multi-workspace toolbar helpers (Factory, multi-panel embeds). */
+export {
+  WORKSPACE_TOOLBAR_LANGUAGES,
+  WORKSPACE_TOOLBAR_RENDERERS,
+  WORKSPACE_TOOLBAR_THEMES,
+  DEFAULT_WORKSPACE_TOOLBAR_SETTINGS,
+  normalizeWorkspaceToolbarSettings,
+  getWorkspaceToolbarMessage,
+  applyWorkspaceToolbarLocale,
+  resolveWorkspaceToolbarTheme,
+  applyThemeToWorkspaces,
+  applyToolboxLanguageToWorkspace,
+  undoWorkspaces,
+  redoWorkspaces,
+  mergeWorkspaceToolbarInjectOptions,
+  getStandardWorkspaceChromeOptions,
+  installWorkspaceChromePlugins,
+  type WorkspaceToolbarSettings,
+  type WorkspaceToolbarLanguage,
+  type WorkspaceToolbarRenderer,
+} from "./workspace_toolbar";

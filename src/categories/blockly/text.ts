@@ -33,9 +33,17 @@
  */
 
 import * as Blockly from "blockly";
-import { FieldDate } from "@blockly/field-date";
-import { FieldMultilineInput } from "@blockly/field-multilineinput";
+import * as FieldDateNS from "@blockly/field-date";
+import * as FieldMultilineInputNS from "@blockly/field-multilineinput";
+import { namedExportFromCjsPlugin } from "../../utils/blockly_plugin_export";
 import { getBlocklyMsgOr, validateSingleChar } from "./shared";
+
+const FieldDate = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-date").FieldDate
+>(FieldDateNS, "FieldDate");
+const FieldMultilineInput = namedExportFromCjsPlugin<
+  typeof import("@blockly/field-multilineinput").FieldMultilineInput
+>(FieldMultilineInputNS, "FieldMultilineInput");
 
 const TEXT_MULTILINE_DEFAULT = "µc\nblockly";
 

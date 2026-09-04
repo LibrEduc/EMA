@@ -1,0 +1,19 @@
+{
+  "CAT_SERVO": "سيرفو",
+  "SERVO_DEFAULT_NAME": "SERVO",
+  "SERVO_PIN": "رجل#",
+  "SERVO_ATTACH1": "توصيل",
+  "SERVO_ATTACH2": "Servo",
+  "SERVO_ATTACH_TOOLTIP": "يربط مثيل سيرفو مسمى برجل (setup).",
+  "SERVO_MOVE_INPUT": "تدوير محرك السيرفو",
+  "SERVO_MOVE_DEGREE": "بزاوية (0~180°) قدرها",
+  "SERVO_MOVE_TOOLTIP": "دوران ممكن بين 0 ~ 180 درجة",
+  "SERVO_MOVE_HELPURL": "http://www.arduino.cc/playground/ComponentLib/servo",
+  "SERVO_READ_DEGREES_INPUT": "زاوية محرك السيرفو",
+  "SERVO_READ_DEGREES_TOOLTIP": "يعيد عدد درجات آخر دوران",
+  "SERVO_READ_DEGREES_HELPURL": "http://www.arduino.cc/playground/ComponentLib/servo",
+  "SERVO_DETACH": "فصل",
+  "SERVO_DETACH_TOOLTIP": "يحرر الرجل من قيادة السيرفو.",
+  "SERVO_ATTACHED": "هل السيرفو متصل؟",
+  "SERVO_ATTACHED_TOOLTIP": "صحيح إذا كان السيرفو متصلاً بالرجل؛ خطأ خلاف ذلك."
+}

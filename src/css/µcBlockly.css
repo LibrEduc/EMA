@@ -493,9 +493,15 @@ label.plugin-option input[type="checkbox"]:focus-visible {
 }
 
 .ucb-about-dialog__title {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.35rem;
   font-size: 1.35rem;
   color: #006468;
+}
+
+.ucb-about-dialog__version {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: #5f6368;
 }
 
 .ucb-about-dialog__intro {

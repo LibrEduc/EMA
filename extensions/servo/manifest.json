@@ -1,0 +1,58 @@
+{
+  "id": "servo",
+  "version": "1.1.0",
+  "name": "Servomotor",
+  "description": "Servomoteurs style Blockly@rduino (instances FieldInstance + attach).",
+  "license": "Apache-2.0",
+  "authors": [
+    "Fred Lin (gasolin@gmail.com)",
+    "Sébastien Canet (scanet@libreduc.cc)"
+  ],
+  "legacy": {
+    "blocklyduino_v2": [
+      "blocklyduino/blocks/servo/servo.js",
+      "blocklyduino/arduino/addon/servo.js"
+    ],
+    "blocklyarduino": [
+      "blocks/servo/servo.js",
+      "generators/arduino/servo.js"
+    ],
+    "blockTypes": [
+      "servo_attach",
+      "servo_move",
+      "servo_read_degrees",
+      "servo_detach",
+      "servo_attached"
+    ]
+  },
+  "categoryKey": "CAT_SERVO",
+  "toolboxItemId": "SERVO",
+  "style": {
+    "category": "servo_category",
+    "blocks": "servo_blocks"
+  },
+  "blocks": [
+    "servo_attach",
+    "servo_move",
+    "servo_read_degrees",
+    "servo_detach",
+    "servo_attached"
+  ],
+  "levels": "1,2,3",
+  "entrypoints": {
+    "blocksJson": "blocks.json",
+    "blocksJs": "blocks.js",
+    "generatorArduinoJs": "generator.arduino.js",
+    "generatorMicropythonJs": "generator.micropython.js",
+    "blocksTs": "blocks.ts",
+    "generatorArduino": "generator.arduino.ts",
+    "generatorMicropython": "generator.micropython.ts",
+    "blockTypes": "block_types.json",
+    "toolbox": "toolbox.fragment.json",
+    "theme": "theme.json",
+    "i18n": "i18n"
+  },
+  "media": {
+    "icon": "servo.jpg"
+  }
+}

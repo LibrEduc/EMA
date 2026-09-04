@@ -35,9 +35,17 @@
 
 import * as Blockly from "blockly";
 import { isBlockOnMainWorkspace } from "./categories/blockly/shared";
+import {
+  isWorkspaceDragging,
+  scheduleDeferredWorkspaceTask,
+  shouldDeferWorkspaceEnforcement,
+} from "./core/workspace_event_utils";
 
 /** Blockly identifier for the "not connected" reason. */
 export const NOT_IN_PROGRAM_DISABLED_REASON = "ucb_not_in_program";
+
+/** Debounce after block moves settle (ms). */
+const PROGRAM_STRUCTURE_DEBOUNCE_MS = 80;
 
 type WorkspaceListener = (e: Blockly.Events.Abstract) => void;
 
@@ -99,23 +107,89 @@ export function isInActiveProgram(block: Blockly.Block): boolean {
   return true;
 }
 
+const applyProgramStructureState = (block: Blockly.Block): void => {
+  if (!isBlockOnMainWorkspace(block) || block.isShadow()) {
+    return;
+  }
+  const shouldDisable = !isInActiveProgram(block);
+  if (
+    shouldDisable === block.hasDisabledReason(NOT_IN_PROGRAM_DISABLED_REASON)
+  ) {
+    return;
+  }
+  block.setDisabledReason(shouldDisable, NOT_IN_PROGRAM_DISABLED_REASON);
+};
+
+const updateRootOrphanStacks = (workspace: Blockly.Workspace): void => {
+  for (const top of workspace.getTopBlocks(false)) {
+    if (top.previousConnection && !top.previousConnection.isConnected()) {
+      for (const block of top.getDescendants(false)) {
+        applyProgramStructureState(block);
+      }
+    }
+  }
+};
+
+const updateProgramStructureForMove = (
+  workspace: Blockly.Workspace,
+  event: Blockly.Events.BlockMove,
+): void => {
+  if (!event.blockId) {
+    updateProgramStructureDisabledState(workspace);
+    return;
+  }
+  const block = workspace.getBlockById(event.blockId);
+  if (!block) {
+    updateProgramStructureDisabledState(workspace);
+    return;
+  }
+  for (const descendant of block.getDescendants(false)) {
+    applyProgramStructureState(descendant);
+  }
+  updateRootOrphanStacks(workspace);
+};
+
+const updateProgramStructureForCreate = (
+  workspace: Blockly.Workspace,
+  event: Blockly.Events.BlockCreate,
+): void => {
+  if (!event.blockId) {
+    updateProgramStructureDisabledState(workspace);
+    return;
+  }
+  const block = workspace.getBlockById(event.blockId);
+  if (!block) {
+    updateProgramStructureDisabledState(workspace);
+    return;
+  }
+  for (const descendant of block.getDescendants(false)) {
+    applyProgramStructureState(descendant);
+  }
+  updateRootOrphanStacks(workspace);
+};
+
 /**
  * Met à jour l'état actif/inactif de tous les blocs du workspace principal.
  */
 export function updateProgramStructureDisabledState(
   workspace: Blockly.Workspace,
 ): void {
-  const wsSvg = workspace as Blockly.WorkspaceSvg;
-  if (wsSvg.isDragging?.()) {
+  if (isWorkspaceDragging(workspace)) {
     return;
   }
 
-  for (const block of workspace.getAllBlocks(false)) {
-    if (!isBlockOnMainWorkspace(block)) {
-      continue;
+  const recordUndo = Blockly.Events.isEnabled();
+  if (recordUndo) {
+    Blockly.Events.disable();
+  }
+  try {
+    for (const block of workspace.getAllBlocks(false)) {
+      applyProgramStructureState(block);
     }
-    const active = isInActiveProgram(block);
-    block.setDisabledReason(!active, NOT_IN_PROGRAM_DISABLED_REASON);
+  } finally {
+    if (recordUndo) {
+      Blockly.Events.enable();
+    }
   }
 }
 
@@ -125,9 +199,23 @@ export function updateProgramStructureDisabledState(
 export function clearProgramStructureDisabledState(
   workspace: Blockly.Workspace,
 ): void {
-  for (const block of workspace.getAllBlocks(false)) {
-    if (isBlockOnMainWorkspace(block)) {
+  const recordUndo = Blockly.Events.isEnabled();
+  if (recordUndo) {
+    Blockly.Events.disable();
+  }
+  try {
+    for (const block of workspace.getAllBlocks(false)) {
+      if (!isBlockOnMainWorkspace(block)) {
+        continue;
+      }
+      if (!block.hasDisabledReason(NOT_IN_PROGRAM_DISABLED_REASON)) {
+        continue;
+      }
       block.setDisabledReason(false, NOT_IN_PROGRAM_DISABLED_REASON);
+    }
+  } finally {
+    if (recordUndo) {
+      Blockly.Events.enable();
     }
   }
 }
@@ -170,30 +258,54 @@ export function installProgramStructureEnforcer(
 ): void {
   uninstallProgramStructureEnforcer(workspace);
 
-  let timer: number | null = null;
-
-  const scheduleUpdate = (): void => {
-    if (timer !== null) {
-      window.clearTimeout(timer);
+  const runUpdate = (event?: Blockly.Events.Abstract): void => {
+    if (isWorkspaceDragging(workspace)) {
+      return;
     }
-    timer = window.setTimeout(() => {
-      timer = null;
+    if (!event || event.type === Blockly.Events.FINISHED_LOADING) {
       updateProgramStructureDisabledState(workspace);
-    }, 0);
+      return;
+    }
+    if (event.type === Blockly.Events.BLOCK_MOVE) {
+      updateProgramStructureForMove(
+        workspace,
+        event as Blockly.Events.BlockMove,
+      );
+      return;
+    }
+    if (event.type === Blockly.Events.BLOCK_CREATE) {
+      updateProgramStructureForCreate(
+        workspace,
+        event as Blockly.Events.BlockCreate,
+      );
+      return;
+    }
+    if (event.type === Blockly.Events.BLOCK_DELETE) {
+      updateRootOrphanStacks(workspace);
+      return;
+    }
+    updateProgramStructureDisabledState(workspace);
   };
 
   const listener: WorkspaceListener = (e) => {
-    const wsSvg = workspace as Blockly.WorkspaceSvg;
-    if (e.isUiEvent || wsSvg.isDragging?.()) {
+    if (shouldDeferWorkspaceEnforcement(workspace, e)) {
       return;
     }
     if (!isRelevantEvent(e)) {
       return;
     }
-    scheduleUpdate();
+    scheduleDeferredWorkspaceTask(
+      workspace,
+      () => runUpdate(e),
+      PROGRAM_STRUCTURE_DEBOUNCE_MS,
+    );
   };
 
   workspace.addChangeListener(listener);
   INSTALLED.set(workspace, listener);
-  scheduleUpdate();
+  scheduleDeferredWorkspaceTask(
+    workspace,
+    () => runUpdate(),
+    PROGRAM_STRUCTURE_DEBOUNCE_MS,
+  );
 }
