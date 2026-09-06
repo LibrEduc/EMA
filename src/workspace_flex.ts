@@ -80,6 +80,9 @@ export const saveLayoutToSessionStorage = (): void => {
   }
 };
 
+/**
+ * Update Right Panel Toggle Button.
+ */
 export const updateRightPanelToggleButton = (): void => {
   const button = document.getElementById(RIGHT_PANEL_TOGGLE_BUTTON_ID) as HTMLButtonElement | null;
   const rightPanel = document.getElementById("flex_container_up_right") as HTMLElement | null;
@@ -98,6 +101,9 @@ export const updateRightPanelToggleButton = (): void => {
   button.setAttribute("aria-expanded", isOpen ? "true" : "false");
 };
 
+/**
+ * Update Bottom Panel Toggle Button.
+ */
 export const updateBottomPanelToggleButton = (): void => {
   const button = document.getElementById(BOTTOM_PANEL_TOGGLE_BUTTON_ID) as HTMLButtonElement | null;
   const bottomPanel = document.getElementById("flex_container_bottom") as HTMLElement | null;
@@ -178,6 +184,9 @@ const toggleBottomPanel = (): void => {
   µcB_workspaceOnResize();
 };
 
+/**
+ * Initialize Right Panel Toggle Button.
+ */
 export const initializeRightPanelToggleButton = (): void => {
   const horizontalResizer = document.querySelector(
     "#flex_container_up > flex-resizer",
@@ -209,6 +218,9 @@ export const initializeRightPanelToggleButton = (): void => {
   updateRightPanelToggleButton();
 };
 
+/**
+ * Initialize Bottom Panel Toggle Button.
+ */
 export const initializeBottomPanelToggleButton = (): void => {
   const verticalResizer = document.querySelector(
     "#container_page > flex-resizer",
@@ -240,6 +252,10 @@ export const initializeBottomPanelToggleButton = (): void => {
   updateBottomPanelToggleButton();
 };
 
+/**
+ * Update Resizer Aria Value.
+ * @param resizer - `resizer` value.
+ */
 export const updateResizerAriaValue = (resizer: HTMLElement): void => {
   const previous = resizer.previousElementSibling as HTMLElement | null;
   const next = resizer.nextElementSibling as HTMLElement | null;

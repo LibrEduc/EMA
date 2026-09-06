@@ -186,6 +186,7 @@ export function getArduinoType(typeName: string): ArduinoType | undefined {
  */
 /**
  * Returns the list of available Arduino type names.
+ * @returns Result string.
  */
 export function getArduinoTypeNames(): string[] {
   return Object.keys(ARDUINO_TYPES);

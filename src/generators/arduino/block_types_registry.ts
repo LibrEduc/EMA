@@ -55,8 +55,8 @@ export type VariableTypeForBlockResolver = (
 let resolveVariableTypeForBlockFn: VariableTypeForBlockResolver | null = null;
 
 /**
- * Wires the variable type resolver once category shared helpers have loaded.
- * Safe to call multiple times (last registration wins).
+ * Wires the variable type resolver once category shared helpers have loaded. Safe to call multiple times (last registration wins).
+ * @param fn - `fn` value.
  */
 export function registerVariableTypeForBlockResolver(
   fn: VariableTypeForBlockResolver,
@@ -105,7 +105,11 @@ function identifyNumber(numString: string | number | null | undefined): string {
   return 'int';
 }
 
-/** Infers int/float from a math_number field value. */
+/**
+ * Infers int/float from a math_number field value.
+ * @param numString - `numString` value.
+ * @returns Operation result.
+ */
 export function identifyMathNumberType(
   numString: string | number | null | undefined,
 ): "int" | "float" {
@@ -144,8 +148,10 @@ const inferArrayInputBlockType = (b: Blockly.Block | null): string | null => {
 };
 
 /**
- * Infers element type from named value inputs (e.g. Array_declare contenu/contenu2).
- * Numeric types unify (int + float → float); float literals promote to float.
+ * Infers element type from named value inputs (e.g. Array_declare contenu/contenu2). Numeric types unify (int + float → float); float literals promote to float.
+ * @param block - Blockly block instance.
+ * @param inputNames - `inputNames` value.
+ * @returns Result string.
  */
 export function inferArrayElementTypeFromInputs(
   block: Blockly.Block,
@@ -197,8 +203,9 @@ export function inferArrayElementTypeFromInputs(
 }
 
 /**
- * Infers the element type of an Array_with block from all connected inputs.
- * Numeric types unify (int + float → float); float literals promote to float.
+ * Infers the element type of an Array_with block from all connected inputs. Numeric types unify (int + float → float); float literals promote to float.
+ * @param block - Blockly block instance.
+ * @returns Result string.
  */
 export function inferArrayElementTypeFromBlock(block: Blockly.Block): string {
   const inputNames: string[] = [];
@@ -213,7 +220,11 @@ export function inferArrayElementTypeFromBlock(block: Blockly.Block): string {
   return inferArrayElementTypeFromInputs(block, inputNames);
 }
 
-/** True when at least one ADD input has a connected value block. */
+/**
+ * True when at least one ADD input has a connected value block.
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
+ */
 export function hasArrayListConnectedElements(block: Blockly.Block): boolean {
   let i = 0;
   while (block.getInput("ADD" + i)) {
@@ -227,6 +238,9 @@ export function hasArrayListConnectedElements(block: Blockly.Block): boolean {
 
 /**
  * All list declaration blocks that reference a given variable id (workspace order).
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns Result array.
  */
 export function findAllListDeclarationBlocks(
   workspace: Blockly.Workspace,
@@ -245,8 +259,10 @@ export function findAllListDeclarationBlocks(
 }
 
 /**
- * Finds the list declaration block for a workspace variable id.
- * Prefers the ownership claim (`__ucbDeclareBlockId`); otherwise first block.
+ * Finds the list declaration block for a workspace variable id. Prefers the ownership claim (`__ucbDeclareBlockId`); otherwise first block.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns Operation result.
  */
 export function findListDeclarationBlock(
   workspace: Blockly.Workspace,
@@ -269,8 +285,9 @@ export function findListDeclarationBlock(
 }
 
 /**
- * True when this block owns the exclusive list declaration (const-like).
- * Falls back to workspace order when ownership is not yet claimed.
+ * True when this block owns the exclusive list declaration (const-like). Falls back to workspace order when ownership is not yet claimed.
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
  */
 export function isPrimaryListDeclarationBlock(block: Blockly.Block): boolean {
   const variableId = block.getFieldValue("VAR");
@@ -294,6 +311,8 @@ export function isPrimaryListDeclarationBlock(block: Blockly.Block): boolean {
 
 /**
  * True when another list declaration block already owns the same variable.
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
  */
 export function hasDuplicateListDeclaration(block: Blockly.Block): boolean {
   const variableId = block.getFieldValue("VAR");
@@ -305,6 +324,9 @@ export function hasDuplicateListDeclaration(block: Blockly.Block): boolean {
 
 /**
  * Element type (int, char, …) of a list variable from its declaration block.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns Result string.
  */
 export function inferListVariableElementType(
   workspace: Blockly.Workspace | null,
@@ -330,6 +352,11 @@ export function inferListVariableElementType(
   return getInternalTypeForArduinoType(typeField);
 }
 
+/**
+ * Infer Array Get Index Element Type.
+ * @param block - Blockly block instance.
+ * @returns Result string.
+ */
 export function inferArrayGetIndexElementType(block: Blockly.Block): string {
   const variableId = block.getFieldValue("VAR");
   const elementType = inferListVariableElementType(block.workspace, variableId);

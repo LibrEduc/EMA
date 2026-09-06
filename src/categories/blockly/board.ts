@@ -108,8 +108,8 @@ const BLOCK_PIN_DROPDOWN: Record<string, "digital" | "pwm" | "analog"> = {
 };
 
 /**
- * Enregistre des dropdowns PIN pour des blocs d’extension (chargement runtime).
- * Appelé par le loader d’extensions ; pris en compte par `refreshBoardPinDropdowns`.
+ * Enregistre des dropdowns PIN pour des blocs d’extension (chargement runtime). Appelé par le loader d’extensions ; pris en compte par `refreshBoardPinDropdowns`.
+ * @param mapping - `mapping` value.
  */
 export function registerExtensionPinDropdowns(
   mapping: Record<string, "digital" | "pwm" | "analog">,
@@ -737,9 +737,8 @@ interface FieldDropdownLike {
 }
 
 /**
- * Updates all pin and serial dropdowns in the workspace to match the currently selected board.
- * Call this when the board menu selection changes.
- * Uses setOptions when available; otherwise updates the menu generator so the dropdown shows the new list.
+ * Updates all pin and serial dropdowns in the workspace to match the currently selected board. Call this when the board menu selection changes. Uses setOptions when available; otherwise updates the menu generator so the dropdown shows the new list.
+ * @param workspace - Blockly workspace.
  */
 export function refreshBoardPinDropdowns(workspace: Blockly.Workspace): void {
   const opts = getBoardDropdownOptions(getSelectedBoardId());

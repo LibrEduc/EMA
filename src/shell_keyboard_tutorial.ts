@@ -228,7 +228,10 @@ const renderStep = (): void => {
   }
 };
 
-/** Ouvre le tutoriel clavier à l'étape demandée (0 par défaut). */
+/**
+ * Ouvre le tutoriel clavier à l'étape demandée (0 par défaut).
+ * @param step - `step` value.
+ */
 export const openKeyboardTutorial = (step = 0): void => {
   const dialog = ensureDialog();
   currentStep = Math.max(0, Math.min(step, stepCount - 1));
@@ -277,7 +280,9 @@ export const registerKeyboardTutorial = (options?: {
   }
 };
 
-/** Met à jour les libellés du bouton (et du contenu si la modale est ouverte). */
+/**
+ * Met à jour les libellés du bouton (et du contenu si la modale est ouverte).
+ */
 export const refreshKeyboardTutorial = (): void => {
   refreshTutorialButton();
   const dialog = document.getElementById(DIALOG_ID) as HTMLDialogElement | null;

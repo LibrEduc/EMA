@@ -36,6 +36,7 @@ let workspaceSvgRef: Blockly.WorkspaceSvg | null = null;
 
 /**
  * Registers the Blockly workspace used for SVG resize (avoids circular import with index.ts).
+ * @param workspace - Blockly workspace.
  */
 export function registerWorkspaceForSvgResize(workspace: Blockly.Workspace): void {
   workspaceSvgRef = workspace as Blockly.WorkspaceSvg;
@@ -43,6 +44,7 @@ export function registerWorkspaceForSvgResize(workspace: Blockly.Workspace): voi
 
 /**
  * Returns the registered workspace, if any (e.g. for flex-resizer mouseup).
+ * @returns Operation result.
  */
 export function getWorkspaceSvgRef(): Blockly.WorkspaceSvg | null {
   return workspaceSvgRef;

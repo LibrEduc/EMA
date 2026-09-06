@@ -32,7 +32,10 @@ type InferConnectedValueTypeFn = (
 /** Bound from shared.ts after `inferConnectedValueType` exists (breaks import cycle). */
 let inferConnectedValueTypeRef: InferConnectedValueTypeFn = () => null;
 
-/** Called once from shared.ts once type inference is defined. */
+/**
+ * Called once from shared.ts once type inference is defined.
+ * @param fn - `fn` value.
+ */
 export function bindInferConnectedValueType(
   fn: InferConnectedValueTypeFn,
 ): void {
@@ -56,7 +59,10 @@ const isBlockDescendantOf = (
 
 /**
  * Returns the type declared on a procedure parameter (menu on procedures_def*), if any.
- * @param contextBlock - When set, only matches if this block lies inside that procedure.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @param contextBlock - `contextBlock` value.
+ * @returns Result string.
  */
 export const getProcedureParameterDeclaredType = (
   workspace: Blockly.Workspace,
@@ -101,6 +107,9 @@ export const getProcedureParameterDeclaredType = (
 
 /**
  * Declared type of a procedure definition argument (reads `${argId}_TYPE` on procedures_def*).
+ * @param defBlock - `defBlock` value.
+ * @param argIndex - `argIndex` value.
+ * @returns Result string.
  */
 export const getProcedureDefArgumentType = (
   defBlock: Blockly.Block,
@@ -124,6 +133,8 @@ export const getProcedureDefArgumentType = (
 
 /**
  * Infers the source type of a value plugged into a procedure call argument.
+ * @param sourceBlock - `sourceBlock` value.
+ * @returns Result string.
  */
 export const inferProcedureCallArgSourceType = (
   sourceBlock: Blockly.Block | null,
@@ -139,6 +150,7 @@ export const inferProcedureCallArgSourceType = (
 
 /**
  * Applies setCheck on each ARG input from the procedure definition parameter types.
+ * @param callBlock - `callBlock` value.
  */
 export const syncProcedureCallArgInputChecks = (
   callBlock: Blockly.Block,
@@ -195,6 +207,7 @@ export const syncProcedureCallArgInputChecks = (
 
 /**
  * Disconnects incompatible values on procedure call blocks and refreshes ARG input checks.
+ * @param workspace - Blockly workspace.
  */
 export const revalidateProcedureCallBlocks = (
   workspace: Blockly.Workspace,

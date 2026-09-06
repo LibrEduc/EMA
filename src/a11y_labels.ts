@@ -65,6 +65,8 @@ export type A11yLabelKey =
 
 /**
  * Returns a localized accessibility label for layout controls.
+ * @param key - Lookup key.
+ * @returns Result string.
  */
 export const getA11yLabel = (key: A11yLabelKey): string => {
   const lang = getSupportedLang();

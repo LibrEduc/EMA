@@ -438,12 +438,7 @@ class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
 }
 
 /**
- * Registers components needed for the continuous toolbox.
- * @public
- * @remarks
- * Registers ContinuousCategory, ContinuousMetrics, ContinuousFlyout,
- * ContinuousToolbox, and custom flyout inflaters. Also injects CSS
- * for the continuous toolbox appearance.
+ * Registers components needed for the continuous toolbox. Registers ContinuousCategory, ContinuousMetrics, ContinuousFlyout, ContinuousToolbox, and custom flyout inflaters. Also injects CSS for the continuous toolbox appearance.
  */
 export const registerContinuousToolboxComponents = (): void => {
   Blockly.registry.register(
@@ -516,11 +511,7 @@ export const registerContinuousToolboxComponents = (): void => {
 };
 
 /**
- * Unregisters continuous toolbox components and restores defaults.
- * @public
- * @remarks
- * Removes custom CSS styles, restores standard Blockly categories
- * and flyout inflaters, and unregisters the continuous toolbox components.
+ * Unregisters continuous toolbox components and restores defaults. Removes custom CSS styles, restores standard Blockly categories and flyout inflaters, and unregisters the continuous toolbox components.
  */
 export const unregisterContinuousToolboxComponents = (): void => {
   // Remove custom CSS styles to restore Blockly default style

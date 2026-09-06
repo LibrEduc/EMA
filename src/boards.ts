@@ -61,27 +61,63 @@ const getBoard = (boardId: BoardId = DEFAULT_BOARD_ID): BoardProfile => {
   return BOARD_PROFILES[boardId] ?? BOARD_PROFILES[DEFAULT_BOARD_ID];
 };
 
+/**
+ * Pin Digital Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinDigitalValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   return contains(toPinValues(getBoard(boardId).digital), text) ? text : null;
 };
 
+/**
+ * Pin Interrupt Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinInterruptValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   return contains(toPinValues(getBoard(boardId).interrupt), text) ? text : null;
 };
 
+/**
+ * Pin PWMValidator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinPWMValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   return contains(toPinValues(getBoard(boardId).PWM), text) ? text : null;
 };
 
+/**
+ * Pin Analog Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinAnalogValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   return contains(toPinValues(getBoard(boardId).analog), text) ? text : null;
 };
 
+/**
+ * Pin Soft Serial Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinSoftSerialValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   const serialPins = toPinValues(getBoard(boardId).serialPin);
   return contains(serialPins, text) ? text : null;
 };
 
+/**
+ * Pin Grove Digital Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinGroveDigitalValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   const digitalPins = toPinValues(getBoard(boardId).digital);
   if (!contains(digitalPins, text)) return null;
@@ -89,6 +125,12 @@ export const pinGroveDigitalValidator = (text: string, boardId: BoardId = DEFAUL
   return contains(digitalPins, nextPin) ? text : null;
 };
 
+/**
+ * Pin Grove Analog Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinGroveAnalogValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   const analogPins = toPinValues(getBoard(boardId).analog);
   if (!contains(analogPins, text)) return null;
@@ -97,6 +139,12 @@ export const pinGroveAnalogValidator = (text: string, boardId: BoardId = DEFAULT
   return contains(analogPins, nextPin) ? text : null;
 };
 
+/**
+ * Pin Dual Validator.
+ * @param text - Text content.
+ * @param boardId - Board identifier.
+ * @returns Result string.
+ */
 export const pinDualValidator = (text: string, boardId: BoardId = DEFAULT_BOARD_ID): string | null => {
   const board = getBoard(boardId);
   return contains(toPinValues(board.analog), text) || contains(toPinValues(board.digital), text) ? text : null;
@@ -111,7 +159,10 @@ function normalizeDropdownEntries(raw: unknown): [string, string][] {
   );
 }
 
-/** Board choices for embedded per-block board dropdowns (excludes "none"). */
+/**
+ * Board choices for embedded per-block board dropdowns (excludes "none").
+ * @returns Result string.
+ */
 export function getBoardProfileDropdownOptions(): [string, string][] {
   const options: [string, string][] = [];
   for (const [boardId, profile] of Object.entries(BOARD_PROFILES)) {
@@ -126,7 +177,10 @@ export function getBoardProfileDropdownOptions(): [string, string][] {
   return options;
 }
 
-/** Digital pin options per board id, for dependent-dropdown child menus. */
+/**
+ * Digital pin options per board id, for dependent-dropdown child menus.
+ * @returns Result string.
+ */
 export function getBoardDigitalPinOptionMapping(): Record<string, [string, string][]> {
   const mapping: Record<string, [string, string][]> = {};
   for (const boardId of Object.keys(BOARD_PROFILES)) {
@@ -137,8 +191,8 @@ export function getBoardDigitalPinOptionMapping(): Record<string, [string, strin
 }
 
 /**
- * Returns dropdown options (digital, PWM, analog, serial baud) for a given board.
- * Used so block pin dropdowns match the selected board.
+ * Returns dropdown options (digital, PWM, analog, serial baud) for a given board. Used so block pin dropdowns match the selected board.
+ * @param boardId - Board identifier.
  */
 export function getBoardDropdownOptions(boardId: BoardId): {
   digital: [string, string][];

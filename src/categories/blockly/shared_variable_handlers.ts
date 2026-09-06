@@ -47,7 +47,11 @@ import {
   isVariableUsedOutsideProcedureBodies,
 } from "./shared_var_scope";
 
-/** Re-runs onchange on variable get/set blocks referencing a variable. */
+/**
+ * Re-runs onchange on variable get/set blocks referencing a variable.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ */
 export const revalidateVariableBlocksForId = (
   workspace: Blockly.Workspace,
   variableId: string,
@@ -74,6 +78,9 @@ export const revalidateVariableBlocksForId = (
 
 /**
  * Determines whether a variable change event should be ignored.
+ * @param block - Blockly block instance.
+ * @param event - Blockly workspace event.
+ * @returns True when the condition holds.
  */
 export const shouldSkipVariableChange = (
   block: Blockly.Block,
@@ -96,8 +103,11 @@ export const shouldSkipVariableChange = (
 };
 
 /**
- * Checks whether a variable has any connected assignment blocks.
- * Uses getVariableUsesById to avoid iterating all blocks.
+ * Checks whether a variable has any connected assignment blocks. Uses getVariableUsesById to avoid iterating all blocks.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @param contextBlock - `contextBlock` value.
+ * @returns True when the condition holds.
  */
 export const hasConnectedAssignmentForVariable = (
   workspace: Blockly.Workspace,
@@ -138,6 +148,8 @@ export const hasConnectedAssignmentForVariable = (
 
 /**
  * Re-runs onchange on `variables_local` wrappers so their output type tracks inner values.
+ * @param workspace - Blockly workspace.
+ * @param event - Blockly workspace event.
  */
 export const revalidateLocalWrapperBlocks = (
   workspace: Blockly.Workspace,
@@ -155,8 +167,9 @@ export const revalidateLocalWrapperBlocks = (
 };
 
 /**
- * Re-runs onchange handlers for blocks whose variable typing depends on child values
- * (e.g. math_change when a math_number field is edited).
+ * Re-runs onchange handlers for blocks whose variable typing depends on child values (e.g. math_change when a math_number field is edited).
+ * @param workspace - Blockly workspace.
+ * @param event - Blockly workspace event.
  */
 export const revalidateTypedNumericBlocks = (
   workspace: Blockly.Workspace,

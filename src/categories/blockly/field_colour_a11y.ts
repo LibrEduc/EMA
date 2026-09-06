@@ -30,17 +30,24 @@
 
 import { getBlocklyMsgOr } from "./shared";
 
-/** Localized ARIA type name for a colour field. */
+/**
+ * Localized ARIA type name for a colour field.
+ * @returns Result string.
+ */
 export const getColourAriaTypeName = (): string =>
   getBlocklyMsgOr("FIELD_COLOUR_ARIA_TYPE", "Colour");
 
-/** ARIA value when the colour is missing or invalid. */
+/**
+ * ARIA value when the colour is missing or invalid.
+ * @returns Result string.
+ */
 export const getColourAriaEmptyValue = (): string =>
   getBlocklyMsgOr("FIELD_COLOUR_ARIA_EMPTY", "empty");
 
 /**
  * Normalizes a hexadecimal colour (#RRGGBB).
- * @returns Uppercase hex or null if invalid.
+ * @param raw - `raw` value.
+ * @returns Result string.
  */
 export const normalizeHexColour = (raw: string | null | undefined): string | null => {
   if (!raw || typeof raw !== "string") {
@@ -71,7 +78,8 @@ export const normalizeHexColour = (raw: string | null | undefined): string | nul
 
 /**
  * Screen-reader-friendly representation of a hex colour.
- * @remarks Used by custom colour fields' `getAriaValue` / `getText`.
+ * @param raw - `raw` value.
+ * @returns Result string.
  */
 export const formatColourAriaValue = (raw: string | null | undefined): string => {
   const hex = normalizeHexColour(raw);
@@ -87,10 +95,16 @@ export const formatColourAriaValue = (raw: string | null | undefined): string =>
     .replace("%2", rgb);
 };
 
-/** Libellé du groupe éditeur pipette iro.js. */
+/**
+ * Libellé du groupe éditeur pipette iro.js.
+ * @returns Result string.
+ */
 export const getColourPickerEditorLabel = (): string =>
   getBlocklyMsgOr("FIELD_COLOUR_PICKER_EDITOR_LABEL", "Colour picker");
 
-/** Libellé du groupe éditeur curseurs HSV. */
+/**
+ * Libellé du groupe éditeur curseurs HSV.
+ * @returns Result string.
+ */
 export const getColourHsvEditorLabel = (): string =>
   getBlocklyMsgOr("FIELD_COLOUR_HSV_EDITOR_LABEL", "Colour HSV sliders");

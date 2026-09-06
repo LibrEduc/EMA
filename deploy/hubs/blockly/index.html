@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Blockly LibrEduc — pédagogie par blocs : µcBlockly, BlocklyDuino, tutoriels et outils.">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Blockly — pédagogie LibrEduc</title>
+  <style>
+    :root {
+      --brand: #0b6e4f;
+      --panel-bg: #fff;
+      --panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      --radius: 8px;
+      --muted: #6c757d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #e9ecef; min-height: 100vh;
+    }
+    #stage {
+      position: fixed; inset: 0; z-index: 0;
+      background: linear-gradient(135deg, #f3faf6 0%, #e8f0ec 100%);
+    }
+    #stage iframe { width: 100%; height: 100%; border: none; }
+    .panel {
+      position: fixed; z-index: 1000; background: var(--panel-bg);
+      border-radius: var(--radius); box-shadow: var(--panel-shadow);
+      width: min(300px, calc(100vw - 24px));
+      max-height: calc(100vh - 24px);
+      display: flex; flex-direction: column; user-select: none;
+    }
+    #panel-nav { top: 12px; left: 12px; }
+    #panel-news { top: 12px; right: 12px; width: min(360px, calc(100vw - 24px)); }
+    .panel-header {
+      background: var(--brand); color: #fff; padding: 10px 14px;
+      border-radius: var(--radius) var(--radius) 0 0; font-weight: 700;
+      display: flex; align-items: center; gap: 8px; cursor: grab; flex-shrink: 0;
+    }
+    .panel-header:active { cursor: grabbing; }
+    .panel-header .grip { opacity: 0.7; font-size: 0.85rem; letter-spacing: -1px; }
+    .panel-header .title { flex: 1; text-align: center; }
+    .panel-toggle {
+      background: transparent; border: 0; color: #fff; font-size: 1.1rem;
+      line-height: 1; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+    }
+    .panel-toggle:hover, .panel-toggle:focus-visible { background: rgba(255,255,255,0.2); outline: none; }
+    .panel-body { padding: 12px 14px 16px; overflow-y: auto; flex: 1; min-height: 0; }
+    .panel.is-collapsed .panel-body { display: none; }
+    .nav-section { margin: 0 0 10px; padding: 0; list-style: none; }
+    .nav-label {
+      display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--muted); margin: 12px 0 6px;
+    }
+    .nav-label:first-child { margin-top: 0; }
+    .nav-section a {
+      display: block; color: var(--brand); text-decoration: none;
+      padding: 6px 8px; border-radius: 4px; line-height: 1.35; font-size: 0.95rem;
+    }
+    .nav-section a:hover, .nav-section a:focus-visible {
+      background: var(--brand); color: #fff; outline: none;
+    }
+    .nav-section a.external::after { content: " ↗"; font-size: 0.75em; opacity: 0.7; }
+    .nav-section.legacy a { color: var(--muted); font-size: 0.88rem; }
+    .nav-section.legacy a:hover, .nav-section.legacy a:focus-visible {
+      background: var(--muted); color: #fff;
+    }
+    .panel-actions { display: flex; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; }
+    .btn-reset {
+      flex: 1; border: 1px solid #dee2e6; background: #f8f9fa; border-radius: 4px;
+      padding: 6px 8px; font-size: 0.8rem; cursor: pointer; color: #495057;
+    }
+    .btn-reset:hover, .btn-reset:focus-visible { background: #e9ecef; outline: none; }
+    .news-intro { font-size: 0.85rem; color: #495057; margin: 0 0 10px; line-height: 1.4; }
+    .news-list { list-style: none; margin: 0; padding: 0; }
+    .news-list li { border-bottom: 1px solid #eee; }
+    .news-list a {
+      display: block; padding: 10px 4px; color: var(--brand);
+      text-decoration: none; font-size: 0.92rem; line-height: 1.35;
+    }
+    .news-list a:hover, .news-list a:focus-visible { background: #eef8f2; outline: none; }
+    .news-list .date { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+    .news-footer { margin-top: 12px; font-size: 0.85rem; }
+    .news-footer a { color: var(--brand); font-weight: 600; }
+    .news-status { font-size: 0.85rem; color: var(--muted); font-style: italic; }
+    .mobile-bar {
+      display: none; position: fixed; z-index: 1100; top: 0; left: 0; right: 0; height: 48px;
+      background: var(--brand); color: #fff; align-items: center; justify-content: space-between;
+      padding: 0 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .mobile-bar button {
+      background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #fff;
+      border-radius: 4px; padding: 6px 10px; font-size: 0.85rem; cursor: pointer;
+    }
+    .mobile-bar .brand { font-weight: 700; font-size: 0.95rem; }
+    .panel-backdrop { display: none; position: fixed; inset: 0; z-index: 1050; background: rgba(0,0,0,0.35); }
+    .panel-backdrop.is-open { display: block; }
+    @media (max-width: 768px) {
+      body { overflow: auto; }
+      .mobile-bar { display: flex; }
+      #stage { top: 48px; height: calc(100% - 48px); }
+      .panel {
+        position: fixed; top: 48px !important; bottom: 0; left: 0 !important; right: auto;
+        width: min(320px, 92vw) !important; max-height: none; height: calc(100% - 48px);
+        border-radius: 0; transform: translateX(-105%); transition: transform 0.22s ease;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.2);
+      }
+      #panel-news { left: auto !important; right: 0; transform: translateX(105%); }
+      .panel.drawer-open { transform: translateX(0); }
+      .panel-header { cursor: default; border-radius: 0; }
+      .panel-header .grip { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { .panel { transition: none; } }
+  </style>
+</head>
+<body>
+  <header class="mobile-bar" aria-label="Navigation mobile">
+    <button type="button" id="btn-open-nav" aria-controls="panel-nav" aria-expanded="false">Menu</button>
+    <span class="brand">Blockly</span>
+    <button type="button" id="btn-open-news" aria-controls="panel-news" aria-expanded="false">Actus</button>
+  </header>
+  <div class="panel-backdrop" id="panel-backdrop" hidden></div>
+
+  <div id="stage" aria-label="Contenu principal">
+    <iframe id="main-frame" title="Blog Blockly" src="https://libreduc.cc/blog/blockly/" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+
+  <aside id="panel-nav" class="panel" role="navigation" aria-label="Blockly pédagogie">
+    <div class="panel-header" data-drag-handle>
+      <span class="grip" aria-hidden="true">⠿</span>
+      <span class="title">Blockly — pédagogie</span>
+      <button type="button" class="panel-toggle" data-collapse aria-expanded="true" title="Replier">−</button>
+    </div>
+    <div class="panel-body">
+      <span class="nav-label">Ce site</span>
+      <ul class="nav-section">
+        <li><a href="https://libreduc.cc/blog/blockly/" data-embed>Blog Blockly</a></li>
+        <li><a href="https://libreduc.cc/blog/?page_id=65" data-embed>Écosystème (Arduino, ST, micro:Bit…)</a></li>
+        <li><a class="external" href="https://wiki.libreduc.cc/fr:arduino:ucblockly" data-blank>Doc µcBlockly</a></li>
+        <li><a class="external" href="https://forum.libreduc.cc/" data-blank>Forum (aide)</a></li>
+      </ul>
+
+      <span class="nav-label">Logiciels</span>
+      <ul class="nav-section">
+        <li><a class="external" href="https://github.com/A-S-T-U-C-E/ucBlockly" data-blank>µcBlockly (noyau)</a></li>
+        <li><a class="external" href="https://github.com/BlocklyDuino" data-blank>BlocklyDuino</a></li>
+        <li><a class="external" href="https://github.com/A-S-T-U-C-E/STudio4Education" data-blank>Studio4Education</a></li>
+      </ul>
+
+      <span class="nav-label">Outils Blockly</span>
+      <ul class="nav-section">
+        <li><a class="external" href="https://blockly.games/" data-blank>Jeux Blockly</a></li>
+        <li><a class="external" href="https://alainbusser.github.io/Sofus/Sofus_fr.html" data-blank>Tortue Sofus</a></li>
+        <li><a class="external" href="https://www.blockscad3d.com/editor/?lang=fr" data-blank>BlocksCAD</a></li>
+        <li><a class="external" href="https://google.github.io/blockly-samples/examples/developer-tools/index.html" data-blank>Création de blocs</a></li>
+      </ul>
+
+      <span class="nav-label">Legacy</span>
+      <ul class="nav-section legacy">
+        <li><a class="external" href="https://technologiescollege.github.io/Blockly-at-rduino/" data-blank>Blockly@rduino</a></li>
+        <li><a class="external" href="https://wiki.libreduc.cc/fr:arduino:ucblockly:convert_rduino" data-blank>Migrer vers v3</a></li>
+      </ul>
+
+      <span class="nav-label">Réseau LibrEduc</span>
+      <ul class="nav-section">
+        <li><a class="external" href="https://www.libreduc.cc/" data-blank>Portail LibrEduc</a></li>
+        <li><a class="external" href="https://wiki.libreduc.cc/" data-blank>Wiki</a></li>
+      </ul>
+
+      <div class="panel-actions">
+        <button type="button" class="btn-reset" id="btn-reset-layout">Réinitialiser la disposition</button>
+      </div>
+    </div>
+  </aside>
+
+  <aside id="panel-news" class="panel" aria-label="Actualités Blockly">
+    <div class="panel-header" data-drag-handle>
+      <span class="grip" aria-hidden="true">⠿</span>
+      <span class="title">Actus Blockly</span>
+      <button type="button" class="panel-toggle" data-collapse aria-expanded="true" title="Replier">−</button>
+    </div>
+    <div class="panel-body">
+      <p class="news-intro">Articles du blog Blockly (pédagogie).</p>
+      <p class="news-status" id="news-status">Chargement…</p>
+      <ul class="news-list" id="news-list" hidden></ul>
+      <p class="news-footer">
+        <a href="https://libreduc.cc/blog/blockly/" data-embed>Voir le blog Blockly →</a>
+      </p>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "blockly-portal-layout-v1";
+      const FEED_URL = "https://libreduc.cc/blog/blockly/feed/";
+      const mainFrame = document.getElementById("main-frame");
+      const newsList = document.getElementById("news-list");
+      const newsStatus = document.getElementById("news-status");
+      const backdrop = document.getElementById("panel-backdrop");
+      const isMobile = () => window.matchMedia("(max-width: 768px)").matches;
+
+      document.querySelectorAll("a[data-embed], a[data-blank]").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          const href = link.getAttribute("href");
+          if (!href) return;
+          if (link.hasAttribute("data-blank") || e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            window.open(href, "_blank", "noopener,noreferrer");
+            closeDrawers();
+            return;
+          }
+          if (link.hasAttribute("data-embed")) {
+            e.preventDefault();
+            mainFrame.src = href;
+            closeDrawers();
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-collapse]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const panel = btn.closest(".panel");
+          const collapsed = panel.classList.toggle("is-collapsed");
+          btn.setAttribute("aria-expanded", String(!collapsed));
+          btn.textContent = collapsed ? "+" : "−";
+        });
+      });
+
+      function makeDraggable(panel) {
+        const handle = panel.querySelector("[data-drag-handle]");
+        if (!handle) return;
+        let startX, startY, origLeft, origTop;
+        function onMove(e) {
+          if (isMobile()) return;
+          const maxL = window.innerWidth - panel.offsetWidth;
+          const maxT = window.innerHeight - 48;
+          panel.style.left = Math.max(0, Math.min(maxL, origLeft + e.clientX - startX)) + "px";
+          panel.style.top = Math.max(0, Math.min(maxT, origTop + e.clientY - startY)) + "px";
+          panel.style.right = "auto";
+        }
+        function onUp() {
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup", onUp);
+          saveLayout();
+        }
+        handle.addEventListener("mousedown", (e) => {
+          if (isMobile() || e.target.closest("[data-collapse]")) return;
+          e.preventDefault();
+          startX = e.clientX; startY = e.clientY;
+          const rect = panel.getBoundingClientRect();
+          origLeft = rect.left; origTop = rect.top;
+          panel.style.left = origLeft + "px";
+          panel.style.top = origTop + "px";
+          panel.style.right = "auto";
+          document.addEventListener("mousemove", onMove);
+          document.addEventListener("mouseup", onUp);
+        });
+      }
+      makeDraggable(document.getElementById("panel-nav"));
+      makeDraggable(document.getElementById("panel-news"));
+
+      function saveLayout() {
+        if (isMobile()) return;
+        const data = {};
+        ["panel-nav", "panel-news"].forEach((id) => {
+          const el = document.getElementById(id);
+          data[id] = { left: el.style.left || null, top: el.style.top || null, collapsed: el.classList.contains("is-collapsed") };
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
+      }
+      function loadLayout() {
+        if (isMobile()) return;
+        try {
+          const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (!data) return;
+          Object.keys(data).forEach((id) => {
+            const el = document.getElementById(id);
+            const conf = data[id];
+            if (!el || !conf) return;
+            if (conf.left) { el.style.left = conf.left; el.style.right = "auto"; }
+            if (conf.top) el.style.top = conf.top;
+            if (conf.collapsed) {
+              el.classList.add("is-collapsed");
+              const btn = el.querySelector("[data-collapse]");
+              if (btn) { btn.textContent = "+"; btn.setAttribute("aria-expanded", "false"); }
+            }
+          });
+        } catch (_) {}
+      }
+      function resetLayout() {
+        localStorage.removeItem(STORAGE_KEY);
+        ["panel-nav", "panel-news"].forEach((id) => {
+          const el = document.getElementById(id);
+          el.style.left = el.style.top = el.style.right = "";
+          el.classList.remove("is-collapsed", "drawer-open");
+          const btn = el.querySelector("[data-collapse]");
+          if (btn) { btn.textContent = "−"; btn.setAttribute("aria-expanded", "true"); }
+        });
+        closeDrawers();
+      }
+      document.getElementById("btn-reset-layout").addEventListener("click", resetLayout);
+      loadLayout();
+
+      function openDrawer(id) {
+        closeDrawers();
+        document.getElementById(id).classList.add("drawer-open");
+        backdrop.hidden = false;
+        backdrop.classList.add("is-open");
+      }
+      function closeDrawers() {
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("drawer-open"));
+        backdrop.hidden = true;
+        backdrop.classList.remove("is-open");
+        document.getElementById("btn-open-nav").setAttribute("aria-expanded", "false");
+        document.getElementById("btn-open-news").setAttribute("aria-expanded", "false");
+      }
+      document.getElementById("btn-open-nav").addEventListener("click", () => {
+        document.getElementById("btn-open-nav").setAttribute("aria-expanded", "true");
+        openDrawer("panel-nav");
+      });
+      document.getElementById("btn-open-news").addEventListener("click", () => {
+        document.getElementById("btn-open-news").setAttribute("aria-expanded", "true");
+        openDrawer("panel-news");
+      });
+      backdrop.addEventListener("click", closeDrawers);
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawers(); });
+
+      async function loadNews() {
+        try {
+          const res = await fetch(FEED_URL, { credentials: "omit" });
+          if (!res.ok) throw new Error("HTTP");
+          const doc = new DOMParser().parseFromString(await res.text(), "text/xml");
+          const items = [...doc.querySelectorAll("item")].slice(0, 5);
+          if (!items.length) throw new Error("empty");
+          newsList.innerHTML = "";
+          items.forEach((item) => {
+            const title = item.querySelector("title")?.textContent?.trim() || "Sans titre";
+            const link = item.querySelector("link")?.textContent?.trim() || "#";
+            const pub = item.querySelector("pubDate")?.textContent;
+            let dateLabel = "";
+            if (pub) {
+              const d = new Date(pub);
+              if (!Number.isNaN(d.getTime())) {
+                dateLabel = d.toLocaleDateString("fr-FR", { year: "numeric", month: "short", day: "numeric" });
+              }
+            }
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = link;
+            a.innerHTML = title + (dateLabel ? '<span class="date">' + dateLabel + "</span>" : "");
+            a.addEventListener("click", (e) => { e.preventDefault(); mainFrame.src = link; closeDrawers(); });
+            li.appendChild(a);
+            newsList.appendChild(li);
+          });
+          newsStatus.hidden = true;
+          newsList.hidden = false;
+        } catch (_) {
+          newsStatus.textContent = "Flux indisponible. Ouvrez le blog Blockly.";
+          newsList.hidden = true;
+        }
+      }
+      loadNews();
+    })();
+  </script>
+</body>
+</html>

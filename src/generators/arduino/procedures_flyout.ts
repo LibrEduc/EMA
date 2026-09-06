@@ -50,6 +50,8 @@ function withFlyoutBlockLevels(
 
 /**
  * Flyout: Arduino setup()/loop() blocks, then a separator, then Blockly procedures.
+ * @param workspace - Blockly workspace.
+ * @returns Result array.
  */
 export function createProceduresFlyout(
   workspace: Blockly.WorkspaceSvg,
@@ -68,6 +70,7 @@ export function createProceduresFlyout(
 
 /**
  * Enregistre le callback de la catégorie PROCEDURE dans la toolbox.
+ * @param workspace - Blockly workspace.
  */
 export function registerProceduresCategory(
   workspace: Blockly.WorkspaceSvg,

@@ -24,8 +24,11 @@ export {
 } from "./instances";
 
 /**
- * Warning on usage blocks when no other block declares the selected instance.
- * Call from block `onchange`.
+ * Warning on usage blocks when no other block declares the selected instance. Call from block `onchange`.
+ * @param block - Blockly block instance.
+ * @param fieldName - Field name on the block.
+ * @param instanceType - Logical instance type (e.g. `Servo`).
+ * @param componentLabel - `componentLabel` value.
  */
 export function updateInstancePresenceWarning(
   block: Blockly.Block,
@@ -66,7 +69,9 @@ type BlockWithInstances = Blockly.Block & {
   __ucbInstanceMethods?: boolean;
 };
 
-/** Patches `Block.prototype` with getInstances / renameInstance (@rduino API). */
+/**
+ * Patches `Block.prototype` with getInstances / renameInstance (@rduino API).
+ */
 export function installBlockInstanceMethods(): void {
   const proto = Blockly.Block.prototype as BlockWithInstances;
   if (proto.__ucbInstanceMethods) {

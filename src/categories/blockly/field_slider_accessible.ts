@@ -94,8 +94,7 @@ export class AccessibleFieldSlider extends FieldSlider {
 }
 
 /**
- * Registers (or overrides) `field_slider` with the ARIA wrapper.
- * Prefer override over unregister to avoid Blockly console warnings.
+ * Registers (or overrides) `field_slider` with the ARIA wrapper. Prefer override over unregister to avoid Blockly console warnings.
  */
 export const registerAccessibleFieldSlider = (): void => {
   // fieldRegistry.register already allows overrides.

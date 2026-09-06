@@ -126,6 +126,9 @@ const ensureContrast = (
 
 /**
  * Résout le mode coque (clair / sombre / contraste élevé) à partir du thème Blockly.
+ * @param themeKey - `themeKey` value.
+ * @param isDarkWorkspace - Boolean flag.
+ * @returns Operation result.
  */
 export const resolveUiThemeMode = (
   themeKey: string,

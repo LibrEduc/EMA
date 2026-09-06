@@ -8,6 +8,9 @@
 
 import * as Blockly from "blockly";
 
+/**
+ * Patch Field Variable Validation.
+ */
 export function patchFieldVariableValidation(): void {
   try {
     if (!Blockly.FieldVariable) return;

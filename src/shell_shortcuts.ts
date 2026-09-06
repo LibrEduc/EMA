@@ -39,8 +39,9 @@ const TEXT_INPUT_TYPES = new Set([
 ]);
 
 /**
- * Whether the target is a text input field (including Monaco).
- * File shortcuts must not intercept Ctrl+S / Ctrl+O in these areas.
+ * Whether the target is a text input field (including Monaco). File shortcuts must not intercept Ctrl+S / Ctrl+O in these areas.
+ * @param target - Target element or value.
+ * @returns True when the condition holds.
  */
 export const isTextEntryTarget = (target: EventTarget | null): boolean => {
   if (!(target instanceof HTMLElement)) {
@@ -65,11 +66,17 @@ export const isTextEntryTarget = (target: EventTarget | null): boolean => {
   return false;
 };
 
-/** Jeton WAI-ARIA pour la touche modificateur (Control ou Meta). */
+/**
+ * Jeton WAI-ARIA pour la touche modificateur (Control ou Meta).
+ * @returns Operation result.
+ */
 export const getModifierKeyToken = (): "Control" | "Meta" =>
   /Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? "Meta" : "Control";
 
-/** Libellé affiché du modificateur (Ctrl ou Cmd). */
+/**
+ * Libellé affiché du modificateur (Ctrl ou Cmd).
+ * @returns Result string.
+ */
 export const getModifierKeyLabel = (): string =>
   getModifierKeyToken() === "Meta" ? "Cmd" : "Ctrl";
 
@@ -79,8 +86,8 @@ export interface ShellFileShortcutHandlers {
 }
 
 /**
- * Enregistre Ctrl+S / Cmd+S (enregistrer) et Ctrl+O / Cmd+O (ouvrir),
- * sauf dans les champs de saisie texte.
+ * Enregistre Ctrl+S / Cmd+S (enregistrer) et Ctrl+O / Cmd+O (ouvrir), sauf dans les champs de saisie texte.
+ * @param handlers - `handlers` value.
  */
 export const registerShellFileShortcuts = (
   handlers: ShellFileShortcutHandlers,

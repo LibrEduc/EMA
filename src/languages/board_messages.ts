@@ -391,7 +391,10 @@ export const BOARD_MESSAGES: Record<string, Record<string, string>> = {
   },
 };
 
-/** Merge ARDUINO_* / SERIAL_* (s4e) messages into Blockly.Msg for the given language. */
+/**
+ * Merge ARDUINO_* / SERIAL_* (s4e) messages into Blockly.Msg for the given language.
+ * @param lang - Language code (e.g. `fr`, `en`).
+ */
 export function mergeBoardMessages(lang: string): void {
   const msgs = BOARD_MESSAGES[lang] ?? BOARD_MESSAGES["en"];
   Object.assign(Blockly.Msg as Record<string, string>, msgs);

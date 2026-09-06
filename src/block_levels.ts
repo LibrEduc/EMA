@@ -41,7 +41,8 @@ export type BlockDefinitionWithLevels = {
 
 /**
  * Applies levels to each Blockly.Blocks entry.
- * @param levels - CSV string (e.g. "1, 2, 3").
+ * @param levels - `levels` value.
+ * @returns Numeric result.
  */
 export function applyLevelsToAllBlockDefinitions(
   levels: string = DEFAULT_BLOCK_LEVELS,
@@ -60,6 +61,8 @@ export function applyLevelsToAllBlockDefinitions(
 
 /**
  * Retourne la chaîne levels d'un type de bloc, ou undefined.
+ * @param blockType - `blockType` value.
+ * @returns Result string.
  */
 export function getBlockDefinitionLevels(blockType: string): string | undefined {
   const def = Blockly.Blocks[blockType] as BlockDefinitionWithLevels | undefined;
@@ -68,6 +71,8 @@ export function getBlockDefinitionLevels(blockType: string): string | undefined 
 
 /**
  * Parse levels CSV en liste de numéros.
+ * @param levels - `levels` value.
+ * @returns Numeric result.
  */
 export function parseBlockLevels(levels: string | undefined): number[] {
   if (!levels?.trim()) {

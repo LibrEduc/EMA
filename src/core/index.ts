@@ -98,4 +98,5 @@ export type {
   ExtensionIo,
   LoadedExtension,
   LoadExtensionsOptions,
+  ExtensionMicropythonContext,
 } from "../extensions";

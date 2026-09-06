@@ -63,7 +63,10 @@ const INSTANCE_MESSAGES: Record<string, Record<string, string>> = {
   },
 };
 
-/** Merge FieldInstance messages into `Blockly.Msg`. */
+/**
+ * Merge FieldInstance messages into `Blockly.Msg`.
+ * @param lang - Language code (e.g. `fr`, `en`).
+ */
 export function mergeInstanceMessages(lang: string): void {
   const msgs = INSTANCE_MESSAGES[lang] ?? INSTANCE_MESSAGES.en;
   Object.assign(Blockly.Msg as Record<string, string>, msgs);

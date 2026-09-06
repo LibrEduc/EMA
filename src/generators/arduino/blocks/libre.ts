@@ -36,6 +36,9 @@ import { Order } from "../arduino_generator";
 
 /**
  * Generates a C++ comment from the block's TEXT field (if non-empty).
+ * @param block - Blockly block instance.
+ * @param fieldName - Field name on the block.
+ * @returns Result string.
  */
 export function commentFromField(block: Block, fieldName: string): string {
   const text = (block.getFieldValue(fieldName) as string) || "";
@@ -44,46 +47,106 @@ export function commentFromField(block: Block, fieldName: string): string {
   return "// " + trimmed.replace(/\n/g, "\n// ") + "\n";
 }
 
+/**
+ * Libre in.
+ * @param _block - Blockly block instance.
+ * @param _generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_in(_block: Block, _generator: ArduinoGenerator): [string, Order] {
   return ["0", Order.ATOMIC];
 }
 
+/**
+ * Libre out.
+ * @param block - Blockly block instance.
+ * @param _generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_out(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
+/**
+ * Libre in out.
+ * @param block - Blockly block instance.
+ * @param _generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_in_out(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
+/**
+ * Libre start.
+ * @param block - Blockly block instance.
+ * @param _generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_start(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
+/**
+ * Libre end.
+ * @param block - Blockly block instance.
+ * @param _generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_end(block: Block, _generator: ArduinoGenerator): string {
   return commentFromField(block, "TEXT");
 }
 
+/**
+ * Libre loop.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop(block: Block, generator: ArduinoGenerator): string {
   const loop = generator.statementToCode(block, "LOOP") || "";
   return commentFromField(block, "TEXT") + loop;
 }
 
+/**
+ * Libre loop with return.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop_with_return(block: Block, generator: ArduinoGenerator): string {
   const loop = generator.statementToCode(block, "LOOP") || "";
   return commentFromField(block, "TEXT") + loop;
 }
 
+/**
+ * Libre loop inside.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop_inside(block: Block, generator: ArduinoGenerator): string {
   const loop = generator.statementToCode(block, "LOOP") || "";
   return commentFromField(block, "TEXT") + loop;
 }
 
+/**
+ * Libre loop inside in.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop_inside_in(block: Block, generator: ArduinoGenerator): string {
   const loop = generator.statementToCode(block, "LOOP") || "";
   return commentFromField(block, "TEXT") + loop;
 }
 
+/**
+ * Libre loop inside in mutator.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop_inside_in_mutator(block: Block, generator: ArduinoGenerator): string {
   let code = commentFromField(block, "TEXT");
   for (let i = 0; ; i++) {
@@ -94,11 +157,23 @@ export function libre_loop_inside_in_mutator(block: Block, generator: ArduinoGen
   return code;
 }
 
+/**
+ * Libre loop do inside.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop_do_inside(block: Block, generator: ArduinoGenerator): string {
   const doBlock = generator.statementToCode(block, "DO") || "";
   return commentFromField(block, "TEXT") + doBlock;
 }
 
+/**
+ * Libre loop do inside in.
+ * @param block - Blockly block instance.
+ * @param generator - Code generator instance.
+ * @returns Result string.
+ */
 export function libre_loop_do_inside_in(block: Block, generator: ArduinoGenerator): string {
   const doBlock = generator.statementToCode(block, "DO") || "";
   return commentFromField(block, "TEXT") + doBlock;

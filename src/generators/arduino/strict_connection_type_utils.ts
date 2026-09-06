@@ -46,6 +46,9 @@ export type OutputInputPair = {
 
 /**
  * Returns the input name for a connection on a block, or null if not found.
+ * @param block - Blockly block instance.
+ * @param connection - `connection` value.
+ * @returns Result string.
  */
 export function getInputNameForConnection(
   block: Blockly.Block,
@@ -61,6 +64,8 @@ export function getInputNameForConnection(
 
 /**
  * True when the input connection is a `controls_switch` CASE* value input.
+ * @param inputConnection - `inputConnection` value.
+ * @returns True when the condition holds.
  */
 export function isSwitchCaseInput(inputConnection: Blockly.Connection): boolean {
   const targetBlock = inputConnection.getSourceBlock();
@@ -72,8 +77,9 @@ export function isSwitchCaseInput(inputConnection: Blockly.Connection): boolean 
 }
 
 /**
- * Resolves the semantic type of a source (output) block via getBlockType()
- * or the output connection check.
+ * Resolves the semantic type of a source (output) block via getBlockType() or the output connection check.
+ * @param sourceBlock - `sourceBlock` value.
+ * @returns Result string.
  */
 export function resolveSourceBlockType(
   sourceBlock: Blockly.Block | null,
@@ -104,6 +110,8 @@ export function resolveSourceBlockType(
 
 /**
  * Resolves semantic type for a block connecting to a switch case input.
+ * @param sourceBlock - `sourceBlock` value.
+ * @returns Operation result.
  */
 export function resolveSwitchCaseSourceType(
   sourceBlock: Blockly.Block | null,
@@ -163,8 +171,10 @@ export function checkSwitchCaseIntConnection(
 }
 
 /**
- * Checks if two types are compatible (exact match, null/undefined equality,
- * or registry rules).
+ * Checks if two types are compatible (exact match, null/undefined equality, or registry rules).
+ * @param sourceType - `sourceType` value.
+ * @param targetType - `targetType` value.
+ * @returns True when the condition holds.
  */
 export function checkTypeCompatibility(
   sourceType: string,

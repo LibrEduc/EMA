@@ -46,8 +46,7 @@ function getMsg(key: string, fallback: string): string {
 }
 
 /**
- * Registers the multilingual toolbox-search category.
- * Call once after importing `\@blockly/toolbox-search`.
+ * Registers the multilingual toolbox-search category. Call once after importing `\@blockly/toolbox-search`.
  */
 export function registerToolboxSearchI18n(): void {
   const Base = Blockly.registry.getClass(

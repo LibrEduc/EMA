@@ -493,7 +493,7 @@ export function math_random_int(
 
 /**
  * Generates Arduino code for a random float between 0 and 1.
- * @returns Code string with order.
+ * @returns Result string.
  */
 export function math_random_float(): [string, Order] {
   const code = "((double)random(0, 1000) / 1000.0)";

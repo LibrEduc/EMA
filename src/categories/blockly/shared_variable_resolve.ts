@@ -34,7 +34,11 @@ const shouldIncludeUseForVariableTyping = (
 const isVariableSetBlock = (block: Blockly.Block): boolean =>
   block.type === "variables_set_dynamic" || block.type === "variables_set";
 
-/** True when a set block assigns a global variable (no `local` wrapper). */
+/**
+ * True when a set block assigns a global variable (no `local` wrapper).
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
+ */
 export const isGlobalVariableAssignment = (block: Blockly.Block): boolean => {
   if (!isVariableSetBlock(block)) {
     return false;
@@ -42,7 +46,11 @@ export const isGlobalVariableAssignment = (block: Blockly.Block): boolean => {
   return !usesLocalVariableDeclaration(block.getInputTargetBlock("VALUE"));
 };
 
-/** Infers the value type inside a `variables_local` wrapper (or null). */
+/**
+ * Infers the value type inside a `variables_local` wrapper (or null).
+ * @param valueBlock - `valueBlock` value.
+ * @returns Result string.
+ */
 export const inferLocalAssignmentValueType = (
   valueBlock: Blockly.Block | null,
 ): string | null => {
@@ -90,6 +98,9 @@ const inferTypeFromScopedAssignments = (
 
 /**
  * Resolves the effective type of a variable for a specific block (scope-aware).
+ * @param block - Blockly block instance.
+ * @param variableId - Identifier.
+ * @returns Result string.
  */
 export const resolveVariableTypeForBlock = (
   block: Blockly.Block,
@@ -136,7 +147,12 @@ export const resolveVariableTypeForBlock = (
 // Wire registry `variableLookup` without importing shared from the registry.
 registerVariableTypeForBlockResolver(resolveVariableTypeForBlock);
 
-/** Resolves global variable type from global assignments only (ignores `local` wrappers). */
+/**
+ * Resolves global variable type from global assignments only (ignores `local` wrappers).
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns Result string.
+ */
 export const resolveGlobalVariableType = (
   workspace: Blockly.Workspace,
   variableId: string,

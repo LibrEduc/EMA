@@ -29,7 +29,10 @@ export const UCBLOCKLY_WORKSPACE_FILE_MIME = "application/json";
 export const UCBLOCKLY_WORKSPACE_FILE_ACCEPT =
   ".µcb,.json,application/json";
 
-/** Builds a dated default download name, e.g. `workspace_2026-08-20.µcb`. */
+/**
+ * Builds a dated default download name, e.g. `workspace_2026-08-20.µcb`.
+ * @param date - `date` value.
+ */
 export function defaultUcBlocklyWorkspaceFilename(
   date = new Date(),
 ): string {

@@ -37,8 +37,8 @@ import * as Blockly from "blockly";
 import { isBlockOnMainWorkspace } from "./categories/blockly/shared";
 import {
   isWorkspaceDragging,
+  queueWorkspaceEnforcement,
   scheduleDeferredWorkspaceTask,
-  shouldDeferWorkspaceEnforcement,
 } from "./core/workspace_event_utils";
 
 /** Blockly identifier for the "not connected" reason. */
@@ -77,6 +77,8 @@ function isStatementStackActive(block: Blockly.Block): boolean {
 
 /**
  * Indique si le bloc doit rester actif sur le workspace.
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
  */
 export function isInActiveProgram(block: Blockly.Block): boolean {
   if (block.isShadow()) {
@@ -170,6 +172,7 @@ const updateProgramStructureForCreate = (
 
 /**
  * Met à jour l'état actif/inactif de tous les blocs du workspace principal.
+ * @param workspace - Blockly workspace.
  */
 export function updateProgramStructureDisabledState(
   workspace: Blockly.Workspace,
@@ -195,6 +198,7 @@ export function updateProgramStructureDisabledState(
 
 /**
  * Retire la raison « hors programme » sans désinstaller l’écouteur.
+ * @param workspace - Blockly workspace.
  */
 export function clearProgramStructureDisabledState(
   workspace: Blockly.Workspace,
@@ -222,6 +226,8 @@ export function clearProgramStructureDisabledState(
 
 /**
  * Réapplique ou efface l’état après un load (remount, autosave, fichier).
+ * @param workspace - Blockly workspace.
+ * @param enabled - Whether the feature is enabled.
  */
 export function syncProgramStructureAfterLoad(
   workspace: Blockly.Workspace,
@@ -236,6 +242,7 @@ export function syncProgramStructureAfterLoad(
 
 /**
  * Désinstalle l'enforceur de structure de programme.
+ * @param workspace - Blockly workspace.
  */
 export function uninstallProgramStructureEnforcer(
   workspace: Blockly.Workspace,
@@ -252,6 +259,7 @@ export function uninstallProgramStructureEnforcer(
 
 /**
  * Installe l'enforceur : blocs non raccordés (previous ou output seul) → inactifs.
+ * @param workspace - Blockly workspace.
  */
 export function installProgramStructureEnforcer(
   workspace: Blockly.Workspace,
@@ -288,15 +296,11 @@ export function installProgramStructureEnforcer(
   };
 
   const listener: WorkspaceListener = (e) => {
-    if (shouldDeferWorkspaceEnforcement(workspace, e)) {
-      return;
-    }
-    if (!isRelevantEvent(e)) {
-      return;
-    }
-    scheduleDeferredWorkspaceTask(
+    queueWorkspaceEnforcement(
       workspace,
-      () => runUpdate(e),
+      e,
+      isRelevantEvent,
+      () => runUpdate(),
       PROGRAM_STRUCTURE_DEBOUNCE_MS,
     );
   };

@@ -78,7 +78,11 @@ export const LIST_DECLARE_BLOCK_TYPES = [
 
 export type ListDeclareBlockType = (typeof LIST_DECLARE_BLOCK_TYPES)[number];
 
-/** True when the block type is a list declaration block. */
+/**
+ * True when the block type is a list declaration block.
+ * @param blockType - `blockType` value.
+ * @returns Operation result.
+ */
 export function isListDeclareBlockType(
   blockType: string | null | undefined,
 ): blockType is ListDeclareBlockType {
@@ -97,7 +101,11 @@ export const VARIABLES_DEFINE_BLOCK_TYPE = "variables_define";
  */
 export const VARIABLES_DEFINE_LEGACY_BLOCK_TYPE = "variable_define";
 
-/** Indique si le type de bloc correspond à une déclaration globale typée. */
+/**
+ * Indique si le type de bloc correspond à une déclaration globale typée.
+ * @param blockType - `blockType` value.
+ * @returns True when the condition holds.
+ */
 export function isVariablesDefineBlock(
   blockType: string | null | undefined,
 ): boolean {
@@ -120,26 +128,51 @@ export type MutableVariableModel = Blockly.IVariableModel<Blockly.IVariableState
   __ucbDeclareBlockId?: string;
 };
 
+/**
+ * Is List Variable Type.
+ * @param type - Type identifier.
+ * @returns True when the condition holds.
+ */
 export function isListVariableType(type: string | null | undefined): boolean {
   return type === LIST_VARIABLE_TYPE;
 }
 
+/**
+ * Is Instance Variable Type.
+ * @param type - Type identifier.
+ * @returns True when the condition holds.
+ */
 export function isInstanceVariableType(
   type: string | null | undefined,
 ): boolean {
   return type === INSTANCE_VARIABLE_TYPE;
 }
 
+/**
+ * Is Scalar Variable Type.
+ * @param type - Type identifier.
+ * @returns True when the condition holds.
+ */
 export function isScalarVariableType(type: string | null | undefined): boolean {
   return !type || type === SCALAR_VARIABLE_TYPE;
 }
 
+/**
+ * Is List Variable.
+ * @param variable - Variable model.
+ * @returns True when the condition holds.
+ */
 export function isListVariable(
   variable: Blockly.IVariableModel<Blockly.IVariableState> | null | undefined,
 ): boolean {
   return isListVariableType(variable?.getType?.() ?? null);
 }
 
+/**
+ * Is Instance Variable.
+ * @param variable - Variable model.
+ * @returns True when the condition holds.
+ */
 export function isInstanceVariable(
   variable: Blockly.IVariableModel<Blockly.IVariableState> | null | undefined,
 ): boolean {
@@ -148,8 +181,9 @@ export function isInstanceVariable(
 
 /**
  * Sets a variable's type metadata and updates the model.
- * @param variable - Variable model to update.
- * @param type - New type string.
+ * @param variable - Variable model.
+ * @param type - Type identifier.
+ * @returns True when the condition holds.
  */
 export function setVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
@@ -179,6 +213,8 @@ export function setVariableType(
 
 /**
  * Tags a workspace variable as a list/array variable (`list`).
+ * @param variable - Variable model.
+ * @returns True when the condition holds.
  */
 export function tagVariableAsList(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
@@ -188,6 +224,8 @@ export function tagVariableAsList(
 
 /**
  * Tags a workspace variable as an instance variable (`instance`).
+ * @param variable - Variable model.
+ * @returns True when the condition holds.
  */
 export function tagVariableAsInstance(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
@@ -197,7 +235,8 @@ export function tagVariableAsInstance(
 
 /**
  * Clears a variable's type metadata (back to scalar kind).
- * @param variable - Variable model to update.
+ * @param variable - Variable model.
+ * @returns True when the condition holds.
  */
 export function clearVariableType(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
@@ -241,8 +280,10 @@ export function normalizeVariableType(
 }
 
 /**
- * True when `blockId` owns (or may claim) the exclusive declaration slot.
- * Unowned variables and stale owners (deleted blocks) are claimable.
+ * True when `blockId` owns (or may claim) the exclusive declaration slot. Unowned variables and stale owners (deleted blocks) are claimable.
+ * @param variable - Variable model.
+ * @param blockId - Identifier.
+ * @returns True when the condition holds.
  */
 export function isVariableDeclarationOwner(
   variable: Blockly.IVariableModel<Blockly.IVariableState> | null | undefined,
@@ -264,7 +305,9 @@ export function isVariableDeclarationOwner(
 
 /**
  * Claims exclusive declaration ownership, mirroring const `__ucbConstBlockId`.
- * @returns `owned_by_other` when another living block already declared this variable.
+ * @param variable - Variable model.
+ * @param blockId - Identifier.
+ * @returns Operation result.
  */
 export function claimVariableDeclaration(
   variable: Blockly.IVariableModel<Blockly.IVariableState>,
@@ -289,6 +332,8 @@ export function claimVariableDeclaration(
 
 /**
  * Releases declaration ownership when the owner block is deleted or retargeted.
+ * @param variable - Variable model.
+ * @param blockId - Identifier.
  */
 export function releaseVariableDeclaration(
   variable: Blockly.IVariableModel<Blockly.IVariableState> | null | undefined,
@@ -304,8 +349,11 @@ export function releaseVariableDeclaration(
 }
 
 /**
- * Gets or creates a variable of the given kind/name via Blockly's package helper
- * (name reuse follows VariableMap / `patchVariableMapCreateVariable`).
+ * Gets or creates a variable of the given kind/name via Blockly's package helper (name reuse follows VariableMap / `patchVariableMapCreateVariable`).
+ * @param workspace - Blockly workspace.
+ * @param name - Name string.
+ * @param kind - `kind` value.
+ * @returns Operation result.
  */
 export function getOrCreateKindedVariable(
   workspace: Blockly.Workspace,

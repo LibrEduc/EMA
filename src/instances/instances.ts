@@ -44,8 +44,10 @@ function allVariableNames(workspace: WorkspaceLike): string[] {
 }
 
 /**
- * Si `name` est déjà une variable du workspace, renvoie ce nom ; sinon `null`.
- * Comparaison insensible à la casse (comme Blockly).
+ * Si `name` est déjà une variable du workspace, renvoie ce nom ; sinon `null`. Comparaison insensible à la casse (comme Blockly).
+ * @param name - Name string.
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
  */
 export function findVariableNameCollision(
   name: string,
@@ -61,8 +63,10 @@ export function findVariableNameCollision(
 }
 
 /**
- * Si `name` est déjà une instance du workspace, renvoie ce nom ; sinon `null`.
- * Comparaison insensible à la casse.
+ * Si `name` est déjà une instance du workspace, renvoie ce nom ; sinon `null`. Comparaison insensible à la casse.
+ * @param name - Name string.
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
  */
 export function findInstanceNameCollision(
   name: string,
@@ -77,7 +81,11 @@ export function findInstanceNameCollision(
   return null;
 }
 
-/** True if the field exposes FieldInstance APIs. */
+/**
+ * True if the field exposes FieldInstance APIs.
+ * @param field - Blockly field instance.
+ * @returns Operation result.
+ */
 export function isInstanceField(
   field: Blockly.Field,
 ): field is Blockly.Field & InstanceFieldLike {
@@ -87,7 +95,9 @@ export function isInstanceField(
 
 /**
  * Instance names referenced by this block's FieldInstance fields.
- * @param opt_instanceType - If set, only fields of that type.
+ * @param block - Blockly block instance.
+ * @param opt_instanceType - `opt_instanceType` value.
+ * @returns Result string.
  */
 export function getInstancesFromBlock(
   block: Blockly.Block,
@@ -110,7 +120,13 @@ export function getInstancesFromBlock(
   return names;
 }
 
-/** Rename matching FieldInstance fields on a single block. */
+/**
+ * Rename matching FieldInstance fields on a single block.
+ * @param block - Blockly block instance.
+ * @param oldName - Previous name.
+ * @param newName - New name.
+ * @param instanceType - Logical instance type (e.g. `Servo`).
+ */
 export function renameInstancesOnBlock(
   block: Blockly.Block,
   oldName: string,
@@ -132,6 +148,9 @@ export function renameInstancesOnBlock(
 
 /**
  * Collect every instance name of the given type (or all types if omitted).
+ * @param instanceType - Logical instance type (e.g. `Servo`).
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
  */
 export function allInstancesOf(
   instanceType: string | undefined,
@@ -149,12 +168,21 @@ export function allInstancesOf(
   return Object.keys(instanceHash).map((key) => instanceHash[key]);
 }
 
-/** All instance names of every type. */
+/**
+ * All instance names of every type.
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
+ */
 export function allInstances(workspace: WorkspaceLike): string[] {
   return allInstancesOf(undefined, workspace);
 }
 
-/** First instance name of a given type, or undefined. */
+/**
+ * First instance name of a given type, or undefined.
+ * @param instanceType - Logical instance type (e.g. `Servo`).
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
+ */
 export function getAnyInstanceOf(
   instanceType: string,
   workspace: WorkspaceLike,
@@ -170,8 +198,11 @@ export function getAnyInstanceOf(
 }
 
 /**
- * True if another block (not `block`) already references this instance name.
- * Used by usage blocks to warn when no config/attach block exists.
+ * True if another block (not `block`) already references this instance name. Used by usage blocks to warn when no config/attach block exists.
+ * @param instanceName - Instance name.
+ * @param instanceType - Logical instance type (e.g. `Servo`).
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
  */
 export function isInstancePresent(
   instanceName: string,
@@ -193,7 +224,13 @@ export function isInstancePresent(
   return false;
 }
 
-/** Rename every matching FieldInstance on the workspace. */
+/**
+ * Rename every matching FieldInstance on the workspace.
+ * @param oldName - Previous name.
+ * @param newName - New name.
+ * @param instanceType - Logical instance type (e.g. `Servo`).
+ * @param workspace - Blockly workspace.
+ */
 export function renameInstance(
   oldName: string,
   newName: string,
@@ -212,8 +249,9 @@ export function renameInstance(
 }
 
 /**
- * Generate a short unique name unused by variables or instances
- * (`i`…`z`, then `i2`…).
+ * Generate a short unique name unused by variables or instances (`i`…`z`, then `i2`…).
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
  */
 export function generateUniqueName(workspace: WorkspaceLike): string {
   const ws = assertWorkspace(workspace);
@@ -257,7 +295,12 @@ function appendToName(instanceName: string, nameList: string[]): string {
   return newName;
 }
 
-/** Make `instanceName` unique among variables + instances on the workspace. */
+/**
+ * Make `instanceName` unique among variables + instances on the workspace.
+ * @param instanceName - Instance name.
+ * @param workspace - Blockly workspace.
+ * @returns Result string.
+ */
 export function convertToUniqueName(
   instanceName: string,
   workspace: WorkspaceLike,
@@ -271,8 +314,10 @@ export function convertToUniqueName(
 }
 
 /**
- * Make `instanceName` unique, ignoring fields on `block` itself
- * (used when dropping a uniqueName FieldInstance from the flyout).
+ * Make `instanceName` unique, ignoring fields on `block` itself (used when dropping a uniqueName FieldInstance from the flyout).
+ * @param instanceName - Instance name.
+ * @param block - Blockly block instance.
+ * @returns Result string.
  */
 export function convertToUniqueNameBlock(
   instanceName: string,

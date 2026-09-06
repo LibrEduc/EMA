@@ -358,7 +358,9 @@ function sanitizeInstanceName(raw: string | null): string | null {
   return cleaned;
 }
 
-/** Registers `field_instance` in Blockly's field registry (idempotent). */
+/**
+ * Registers `field_instance` in Blockly's field registry (idempotent).
+ */
 export function registerFieldInstance(): void {
   try {
     Blockly.fieldRegistry.register("field_instance", FieldInstance);

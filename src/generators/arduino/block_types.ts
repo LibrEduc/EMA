@@ -115,13 +115,19 @@ export const ARDUINO_TYPE_TO_CPP: Record<ArduinoTypeKey, string> = {
   float: 'float',
 };
 
-/** Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`). */
+/**
+ * Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`).
+ * @param typeKey - `typeKey` value.
+ * @returns Result string.
+ */
 export function getArduinoTypeLabelKey(typeKey: string): string {
   return `VAR_CAST_TYPE_${typeKey.toUpperCase()}`;
 }
 
 /**
  * Internal µcBlockly type for connection checking.
+ * @param typeKey - `typeKey` value.
+ * @returns Result string.
  */
 export function getInternalTypeForArduinoType(typeKey: string): string {
   if (typeKey === LIST_VARIABLE_TYPE) {
@@ -131,8 +137,9 @@ export function getInternalTypeForArduinoType(typeKey: string): string {
 }
 
 /**
- * Maps Blockly output/check types to internal µcBlockly types.
- * Colour blocks use Blockly check `Colour` but variables and arrays use `string`.
+ * Maps Blockly output/check types to internal µcBlockly types. Colour blocks use Blockly check `Colour` but variables and arrays use `string`.
+ * @param type - Type identifier.
+ * @returns Result string.
  */
 export function normalizeBlocklyCheckToInternalType(
   type: string | null | undefined,
@@ -157,6 +164,8 @@ export function normalizeBlocklyCheckToInternalType(
 
 /**
  * C++ type name emitted in generated Arduino code.
+ * @param typeKey - `typeKey` value.
+ * @returns Result string.
  */
 export function getCppTypeName(typeKey: string): string {
   return ARDUINO_TYPE_TO_CPP[typeKey as ArduinoTypeKey] ?? typeKey;
@@ -164,8 +173,9 @@ export function getCppTypeName(typeKey: string): string {
 
 /**
  * Vérifie qu'une valeur connectée en mode « contains » correspond au type du menu Array_declare.
- * @param sourceInternalType - Type interne µcBlockly du bloc source (int, float, bool, …).
- * @param arduinoTypeField - Clé du menu déroulant (int, float, uint, string, …).
+ * @param sourceInternalType - `sourceInternalType` value.
+ * @param arduinoTypeField - `arduinoTypeField` value.
+ * @returns True when the condition holds.
  */
 export function isDeclareContainsTypeCompatible(
   sourceInternalType: string,
@@ -177,6 +187,9 @@ export function isDeclareContainsTypeCompatible(
 
 /**
  * Compatibilité stricte pour les entrées des blocs liste (sans char ↔ string).
+ * @param sourceInternalType - `sourceInternalType` value.
+ * @param expectedInternalType - `expectedInternalType` value.
+ * @returns True when the condition holds.
  */
 export function isArrayElementTypeCompatible(
   sourceInternalType: string,
@@ -196,19 +209,25 @@ export function isArrayElementTypeCompatible(
 
 /**
  * Returns the ordered list of Arduino types for Blockly dropdown menus.
+ * @returns Result string.
  */
 export function getVariableTypeOptions(): string[] {
   return [...ARDUINO_TYPE_KEYS];
 }
 
-/** True when the type can appear in Arduino scalar type dropdowns (excludes `list`). */
+/**
+ * True when the type can appear in Arduino scalar type dropdowns (excludes `list`).
+ * @param type - Type identifier.
+ * @returns Operation result.
+ */
 export function isArduinoScalarType(type: string | null | undefined): type is ArduinoTypeKey {
   return Boolean(type) && (ARDUINO_TYPE_KEYS as readonly string[]).includes(type as string);
 }
 
 /**
- * Returns an Arduino scalar type for Blockly UI / generators, or null (= {@link __NO_TYPE__}).
- * Blockly-only types such as `list` are not Arduino types.
+ * Returns an Arduino scalar type for Blockly UI / generators, or null (= {@link __NO_TYPE__}). Blockly-only types such as `list` are not Arduino types.
+ * @param type - Type identifier.
+ * @returns Result string.
  */
 export function resolveArduinoScalarVariableType(
   type: string | null | undefined,

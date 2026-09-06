@@ -37,6 +37,7 @@ let getWorkspaceSvg: WorkspaceGetter | null = null;
 
 /**
  * Registers access to the active Blockly workspace (after inject or reboot).
+ * @param getter - Accessor callback.
  */
 export const registerShellBlocklyWorkspace = (getter: WorkspaceGetter): void => {
   getWorkspaceSvg = getter;
@@ -64,6 +65,7 @@ const scrollWorkspaceRegionIntoView = (): void => {
 
 /**
  * Place le focus Blockly sur le workspace (équivalent touche **W**).
+ * @returns True when the condition holds.
  */
 export const focusBlocklyWorkspace = (): boolean => {
   const workspace = resolveRegisteredWorkspace();
@@ -82,6 +84,7 @@ export const focusBlocklyWorkspace = (): boolean => {
 
 /**
  * Place le focus Blockly sur la toolbox ou le flyout (équivalent touche **T**).
+ * @returns True when the condition holds.
  */
 export const focusBlocklyToolbox = (): boolean => {
   const workspace = resolveRegisteredWorkspace();

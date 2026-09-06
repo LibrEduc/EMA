@@ -901,8 +901,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
 }
 
 /**
- * Registers the StrictConnectionChecker in Blockly's registry as the default checker.
- * MUST be called BEFORE Blockly.inject() so the workspace uses our checker from the start.
+ * Registers the StrictConnectionChecker in Blockly's registry as the default checker. MUST be called BEFORE Blockly.inject() so the workspace uses our checker from the start.
  */
 export function registerStrictConnectionCheckerInRegistry(): void {
   // Override the default connection checker so all workspaces (main + flyouts) use ours.

@@ -12,12 +12,17 @@
 
 import * as Blockly from "blockly";
 import { createHttpExtensionIo } from "./io_http";
-import { loadExtensionPack } from "./load_extension";
+import {
+  loadExtensionPack,
+  type ExtensionMicropythonContext,
+} from "./load_extension";
 import {
   getExtensionMessagesForLang,
   getLoadedExtensions,
 } from "./registry";
 import type { ExtensionIndex, ExtensionIo, LoadedExtension } from "./types";
+
+export type { ExtensionMicropythonContext };
 
 export type LoadExtensionsOptions = {
   /** Base URL of the extensions root (default `/extensions`). */
@@ -28,6 +33,11 @@ export type LoadExtensionsOptions = {
   language?: string;
   /** If true, missing index.json is not an error (default true). */
   optional?: boolean;
+  /**
+   * When set, loads each pack's `generatorMicropythonJs` against this generator.
+   * Provided by BlocklyDuino (MicroPython is outside the µcBlockly kernel).
+   */
+  micropython?: ExtensionMicropythonContext;
 };
 
 function joinUrl(base: string, part: string): string {
@@ -56,15 +66,19 @@ async function discoverPackIds(
   return ids;
 }
 
-/** Merge loaded extension messages into Blockly.Msg for the active language. */
+/**
+ * Merge loaded extension messages into Blockly.Msg for the active language.
+ * @param language - Language code (e.g. `fr`, `en`).
+ */
 export function applyExtensionMessages(language: string): void {
   const msgs = getExtensionMessagesForLang(language);
   Object.assign(Blockly.Msg as Record<string, string>, msgs);
 }
 
 /**
- * Loads every pack listed in `{baseUrl}/index.json`.
- * Safe to call once at app startup (web or Electron with static root).
+ * Loads every pack listed in `{baseUrl}/index.json`. Safe to call once at app startup (web or Electron with static root).
+ * @param options - Configuration options.
+ * @returns Promise resolving to the operation result.
  */
 export async function loadExtensions(
   options: LoadExtensionsOptions = {},
@@ -92,7 +106,9 @@ export async function loadExtensions(
   const loaded: LoadedExtension[] = [];
   for (const id of packIds) {
     try {
-      loaded.push(await loadExtensionPack(id, io));
+      loaded.push(
+        await loadExtensionPack(id, io, { micropython: options.micropython }),
+      );
     } catch (err) {
       console.warn(`[µcBlockly] Failed to load extension "${id}":`, err);
     }

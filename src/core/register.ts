@@ -53,8 +53,8 @@ function ensureCommentContextMenuRegistered(): void {
 }
 
 /**
- * Registers block definitions, types, and standard-block configuration.
- * Safe to call multiple times (subsequent calls are no-ops).
+ * Registers block definitions, types, and standard-block configuration. Safe to call multiple times (subsequent calls are no-ops).
+ * @param options - Configuration options.
  */
 export function registerUcBlocklyKernel(
   options: UcBlocklyRegistrationOptions = {},
@@ -90,7 +90,9 @@ export function registerUcBlocklyKernel(
   applyBlockDebugMetadata();
 }
 
-/** @internal Test helper — allows re-running registration in unit tests. */
+/**
+ * Reset Uc Blockly Kernel Registration For Tests.
+ */
 export function resetUcBlocklyKernelRegistrationForTests(): void {
   kernelRegistered = false;
   commentContextMenuRegistered = false;

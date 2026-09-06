@@ -40,6 +40,9 @@ const clampDim = (n: number): number => {
 
 /**
  * Builds an empty rows x cols grid of 0s.
+ * @param rows - `rows` value.
+ * @param cols - `cols` value.
+ * @returns Numeric result.
  */
 export const createEmptyBitmapGrid = (rows: number, cols: number): number[][] => {
   const safeRows = clampDim(rows);
@@ -51,6 +54,10 @@ export const createEmptyBitmapGrid = (rows: number, cols: number): number[][] =>
 
 /**
  * Resizes a bitmap grid, preserving overlapping pixels.
+ * @param value - Value to set.
+ * @param rows - `rows` value.
+ * @param cols - `cols` value.
+ * @returns Numeric result.
  */
 export const resizeBitmapGrid = (
   value: number[][] | null | undefined,

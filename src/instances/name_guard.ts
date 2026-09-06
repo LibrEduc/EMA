@@ -60,8 +60,7 @@ function alertCollidesWithInstance(name: string, then: () => void): void {
 }
 
 /**
- * Patches Blockly.Variables rename / create prompts so variable names
- * cannot match an existing FieldInstance name.
+ * Patches Blockly.Variables rename / create prompts so variable names cannot match an existing FieldInstance name.
  */
 export function patchVariableUiAgainstInstances(): void {
   const Variables = getVariablesNs();

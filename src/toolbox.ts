@@ -55,6 +55,9 @@ export type ToolboxBlockEntry = {
 
 /**
  * Ajoute la propriété levels à chaque entrée kind:"block" (récursif).
+ * @param toolbox - Toolbox configuration.
+ * @param levels - `levels` value.
+ * @returns Operation result.
  */
 export function applyToolboxBlockLevels(
   toolbox: ToolboxConfiguration,
@@ -987,7 +990,11 @@ type ToolboxCategoryNode = {
  * (category kept so the label can show « Carte : aucune »).
  * Used when no board is selected.
  */
-/** Retire la catégorie recherche (nécessite le plugin workspaceSearch). */
+/**
+ * Retire la catégorie recherche (nécessite le plugin workspaceSearch).
+ * @param toolbox - Toolbox configuration.
+ * @returns Operation result.
+ */
 export function getToolboxWithoutSearch(
   toolbox: ToolboxConfiguration,
 ): ToolboxConfiguration {
@@ -998,6 +1005,11 @@ export function getToolboxWithoutSearch(
   return clone;
 }
 
+/**
+ * Get Toolbox Without Board Category.
+ * @param toolbox - Toolbox configuration.
+ * @returns Operation result.
+ */
 export function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): ToolboxConfiguration {
   const clone = JSON.parse(JSON.stringify(toolbox)) as ToolboxConfiguration;
   if (Array.isArray(clone.contents)) {
@@ -1011,9 +1023,9 @@ export function getToolboxWithoutBoardCategory(toolbox: ToolboxConfiguration): T
 }
 
 /**
- * Returns the toolbox to use for the workspace: board category emptied if
- * no board is selected, otherwise a clone of the full toolbox.
- * Read the current selection from the board menu in the DOM.
+ * Returns the toolbox to use for the workspace: board category emptied if no board is selected, otherwise a clone of the full toolbox. Read the current selection from the board menu in the DOM.
+ * @param toolbox - Toolbox configuration.
+ * @returns Operation result.
  */
 export function getToolboxForCurrentBoard(toolbox: ToolboxConfiguration): ToolboxConfiguration {
   const menu = document.getElementById('boardMenu') as HTMLSelectElement | null;

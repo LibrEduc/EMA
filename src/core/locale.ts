@@ -36,7 +36,11 @@ import { mergeArrayMessages } from "../languages/array_messages";
 import { mergeBlocklyA11yMessages } from "../languages/blockly_a11y_messages";
 import { mergeBoardMessages } from "../languages/board_messages";
 
-/** Copies selected µcBlockly message keys into `Blockly.Msg`. */
+/**
+ * Copies selected µcBlockly message keys into `Blockly.Msg`.
+ * @param language - Language code (e.g. `fr`, `en`).
+ * @param keys - `keys` value.
+ */
 export function mergeCustomBlocklyMessages(language: string, keys: readonly string[]): void {
   const custom = languagesMap[language];
   if (!custom) {

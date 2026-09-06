@@ -143,6 +143,7 @@ export const configureScalarVariableField = (
 
 /**
  * Configures a FieldVariable for list/array variables only.
+ * @param field - Blockly field instance.
  */
 export const configureListVariableField = (
   field: Blockly.FieldVariable,
@@ -156,8 +157,8 @@ export const configureListVariableField = (
 };
 
 /**
- * Configures a FieldVariable for instance variables only
- * (FieldVariable type `instance` — distinct from {@link FieldInstance} dropdowns).
+ * Configures a FieldVariable for instance variables only (FieldVariable type `instance` — distinct from {@link FieldInstance} dropdowns).
+ * @param field - Blockly field instance.
  */
 export const configureInstanceVariableField = (
   field: Blockly.FieldVariable,
@@ -172,6 +173,8 @@ export const configureInstanceVariableField = (
 
 /**
  * Ensures the variable selected on a list-category block has Blockly type `list`.
+ * @param block - Blockly block instance.
+ * @param fieldName - Field name on the block.
  */
 export const syncListVariableFromField = (
   block: Blockly.Block,
@@ -189,5 +192,6 @@ export const syncListVariableFromField = (
 
 /**
  * Output check for variables_get when VAR is Blockly-only (`list`), not an Arduino type.
+ * @returns Result string.
  */
 export const getListVariableOutputCheck = (): string => "__NO_TYPE__";

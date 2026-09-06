@@ -56,9 +56,7 @@ export class LocalizedFieldColour extends FieldColour {
 }
 
 /**
- * Registers (or overrides) `field_colour` with the ARIA wrapper.
- * Do not unregister first: `@blockly/field-colour` does not auto-register on
- * import, and Blockly warns when unregistering a missing entry.
+ * Registers (or overrides) `field_colour` with the ARIA wrapper. Do not unregister first: `@blockly/field-colour` does not auto-register on import, and Blockly warns when unregistering a missing entry.
  */
 export const registerAccessibleFieldColour = (): void => {
   // fieldRegistry.register already allows overrides.

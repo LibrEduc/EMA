@@ -39,8 +39,7 @@ function isValueToConstInput(
 // ─── Extensions (µcBlockly features) ────────────────────────────────────────
 
 /**
- * Extends ConnectionChecker so that connecting any value block to variables_const
- * is always allowed.
+ * Extends ConnectionChecker so that connecting any value block to variables_const is always allowed.
  */
 export function patchConnectionCheckerForConstBlock(): void {
   try {

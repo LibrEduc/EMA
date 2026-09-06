@@ -224,6 +224,8 @@ export const applyShellLandmarks = (): void => {
 
 /**
  * Met à jour `lang`, `xml:lang` et `dir` sur `<html>` lors d'un changement de langue.
+ * @param lang - Language code (e.g. `fr`, `en`).
+ * @param rtl - Right-to-left layout flag.
  */
 export const applyDocumentLanguage = (lang: string, rtl: boolean): void => {
   const html = document.documentElement;
@@ -236,6 +238,8 @@ export const applyDocumentLanguage = (lang: string, rtl: boolean): void => {
 
 /**
  * Annonce un message bref aux lecteurs d'écran (région live dédiée).
+ * @param message - Message string.
+ * @param timeoutMs - `timeoutMs` value.
  */
 export const announceShellMessage = (message: string, timeoutMs = 3000): void => {
   const el = getAnnouncerEl();

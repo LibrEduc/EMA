@@ -64,6 +64,10 @@ export { createEmptyBitmapGrid, resizeBitmapGrid, clampDim } from "./array_bitma
 
 /**
  * Reads a dimension from a value input (prefers math_number NUM).
+ * @param block - Blockly block instance.
+ * @param inputName - Name string.
+ * @param fallback - `fallback` value.
+ * @returns Numeric result.
  */
 export const readBitmapDimInput = (
   block: Blockly.Block,

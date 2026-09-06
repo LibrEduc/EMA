@@ -203,7 +203,7 @@ export function logic_boolean(
 
 /**
  * Generates Arduino code for null literal.
- * @returns Generated code tuple.
+ * @returns Result string.
  */
 export function logic_null(): [string, Order] {
   // Null data type.

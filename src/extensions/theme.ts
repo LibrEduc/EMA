@@ -19,7 +19,10 @@ type MutableTheme = Blockly.Theme & {
   blockStyles: Record<string, Blockly.Theme.BlockStyle>;
 };
 
-/** Mutates registered themes so extension category/block styles resolve. */
+/**
+ * Mutates registered themes so extension category/block styles resolve.
+ * @param fragment - Theme or toolbox fragment.
+ */
 export function applyExtensionThemeFragment(
   fragment: ExtensionThemeFragment,
 ): void {

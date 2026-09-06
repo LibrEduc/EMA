@@ -62,7 +62,10 @@ const persistScreenreaderMode = (enabled: boolean): void => {
   }
 };
 
-/** Indique si le mode lecteur d'écran Blockly est actif. */
+/**
+ * Indique si le mode lecteur d'écran Blockly est actif.
+ * @returns True when the condition holds.
+ */
 export const getScreenreaderModeEnabled = (): boolean => screenreaderModeEnabled;
 
 const screenreaderToggleLabel = (): string => "Alt+Shift+A";
@@ -138,6 +141,7 @@ const initBlocklyA11yExtensionsOnce = (): void => {
 
 /**
  * Applique le mode lecteur d'écran mémorisé sur un workspace (y compris après reboot).
+ * @param workspace - Blockly workspace.
  */
 export const attachBlocklyA11yToWorkspace = (workspace: WorkspaceSvg): void => {
   if (screenreaderModeEnabled) {
@@ -147,6 +151,7 @@ export const attachBlocklyA11yToWorkspace = (workspace: WorkspaceSvg): void => {
 
 /**
  * Active les raccourcis de navigation avancés et la persistance du mode lecteur d'écran.
+ * @param getter - Accessor callback.
  */
 export const registerBlocklyA11yExtensions = (getter: WorkspaceGetter): void => {
   initBlocklyA11yExtensionsOnce();
@@ -159,12 +164,17 @@ export const registerBlocklyA11yExtensions = (getter: WorkspaceGetter): void => 
   refreshWorkspaceA11y();
 };
 
-/** Réapplique l'état a11y après recréation du workspace Blockly. */
+/**
+ * Réapplique l'état a11y après recréation du workspace Blockly.
+ */
 export const refreshBlocklyA11yExtensions = (): void => {
   refreshWorkspaceA11y?.();
 };
 
-/** Le tutoriel clavier a été marqué comme « ne plus afficher ». */
+/**
+ * Le tutoriel clavier a été marqué comme « ne plus afficher ».
+ * @returns True when the condition holds.
+ */
 export const isKeyboardTutorialDismissed = (): boolean => {
   try {
     return window.localStorage?.getItem(KEYBOARD_TUTORIAL_DISMISSED_KEY) === "1";
@@ -173,7 +183,9 @@ export const isKeyboardTutorialDismissed = (): boolean => {
   }
 };
 
-/** Mémorise que l'utilisateur ne souhaite plus le tutoriel automatique. */
+/**
+ * Mémorise que l'utilisateur ne souhaite plus le tutoriel automatique.
+ */
 export const dismissKeyboardTutorial = (): void => {
   try {
     window.localStorage?.setItem(KEYBOARD_TUTORIAL_DISMISSED_KEY, "1");

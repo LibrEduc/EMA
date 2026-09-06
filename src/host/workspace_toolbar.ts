@@ -63,7 +63,11 @@ function isWorkspaceToolbarRenderer(
   return (WORKSPACE_TOOLBAR_RENDERERS as readonly string[]).includes(value);
 }
 
-/** Returns a normalized copy of toolbar settings. */
+/**
+ * Returns a normalized copy of toolbar settings.
+ * @param partial - `partial` value.
+ * @returns Operation result.
+ */
 export function normalizeWorkspaceToolbarSettings(
   partial: Partial<WorkspaceToolbarSettings> = {},
 ): WorkspaceToolbarSettings {
@@ -81,7 +85,11 @@ export function normalizeWorkspaceToolbarSettings(
   };
 }
 
-/** Localized label from µcBlockly message catalog. */
+/**
+ * Localized label from µcBlockly message catalog.
+ * @param language - Language code (e.g. `fr`, `en`).
+ * @param key - Lookup key.
+ */
 export function getWorkspaceToolbarMessage(
   language: string,
   key: keyof (typeof languagesMap)["fr"],
@@ -90,17 +98,27 @@ export function getWorkspaceToolbarMessage(
   return lang[key] ?? languagesMap.fr[key] ?? String(key);
 }
 
-/** Applies Blockly + µcBlockly locale globally. */
+/**
+ * Applies Blockly + µcBlockly locale globally.
+ * @param language - Language code (e.g. `fr`, `en`).
+ */
 export function applyWorkspaceToolbarLocale(language: string): void {
   applyUcBlocklyLocale(language);
 }
 
-/** Resolves a theme key to a Blockly theme instance. */
+/**
+ * Resolves a theme key to a Blockly theme instance.
+ * @param themeKey - `themeKey` value.
+ * @returns Operation result.
+ */
 export function resolveWorkspaceToolbarTheme(themeKey: string): Blockly.Theme {
   return themeMappings[themeKey] ?? themeMappings.classic;
 }
 
-/** Standard Blockly inject options shared by Factory / embed workspaces. */
+/**
+ * Standard Blockly inject options shared by Factory / embed workspaces.
+ * @returns Operation result.
+ */
 export function getStandardWorkspaceChromeOptions(): Blockly.BlocklyOptions {
   return {
     scrollbars: true,
@@ -128,7 +146,11 @@ export function getStandardWorkspaceChromeOptions(): Blockly.BlocklyOptions {
   };
 }
 
-/** Applies a theme to every workspace in the list. */
+/**
+ * Applies a theme to every workspace in the list.
+ * @param workspaces - `workspaces` value.
+ * @param themeKey - `themeKey` value.
+ */
 export function applyThemeToWorkspaces(
   workspaces: Blockly.WorkspaceSvg[],
   themeKey: string,
@@ -140,7 +162,12 @@ export function applyThemeToWorkspaces(
   }
 }
 
-/** Updates toolbox on a workspace when language changes (optional µcBlockly toolbox). */
+/**
+ * Updates toolbox on a workspace when language changes (optional µcBlockly toolbox).
+ * @param workspace - Blockly workspace.
+ * @param toolbox - Toolbox configuration.
+ * @param language - Language code (e.g. `fr`, `en`).
+ */
 export function applyToolboxLanguageToWorkspace(
   workspace: Blockly.WorkspaceSvg,
   toolbox: ToolboxConfiguration,
@@ -149,14 +176,20 @@ export function applyToolboxLanguageToWorkspace(
   workspace.updateToolbox(changeLanguageToolbox(language, toolbox));
 }
 
-/** Undo one step on each workspace (each keeps its own stack). */
+/**
+ * Undo one step on each workspace (each keeps its own stack).
+ * @param workspaces - `workspaces` value.
+ */
 export function undoWorkspaces(workspaces: Blockly.WorkspaceSvg[]): void {
   for (const workspace of workspaces) {
     workspace.undo(false);
   }
 }
 
-/** Redo one step on each workspace. */
+/**
+ * Redo one step on each workspace.
+ * @param workspaces - `workspaces` value.
+ */
 export function redoWorkspaces(workspaces: Blockly.WorkspaceSvg[]): void {
   for (const workspace of workspaces) {
     workspace.undo(true);
@@ -165,7 +198,10 @@ export function redoWorkspaces(workspaces: Blockly.WorkspaceSvg[]): void {
 
 const installedChrome = new WeakSet<Blockly.WorkspaceSvg>();
 
-/** Zoom-to-fit + sound toggle (contrôles manquants des workspaces Factory). */
+/**
+ * Zoom-to-fit + sound toggle (contrôles manquants des workspaces Factory).
+ * @param workspace - Blockly workspace.
+ */
 export function installWorkspaceChromePlugins(
   workspace: Blockly.WorkspaceSvg,
 ): void {
@@ -178,6 +214,12 @@ export function installWorkspaceChromePlugins(
   const sound = new SoundToggleControl(workspace);
   sound.init();
 }
+/**
+ * Merge Workspace Toolbar Inject Options.
+ * @param settings - Settings object.
+ * @param options - Configuration options.
+ * @returns Operation result.
+ */
 export function mergeWorkspaceToolbarInjectOptions(
   settings: WorkspaceToolbarSettings,
   options: Blockly.BlocklyOptions = {},

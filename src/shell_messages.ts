@@ -63,6 +63,9 @@ const normalizeLang = (language?: string): string => {
 
 /**
  * Returns a localized shell/UI string for the given language (defaults from URL / menu).
+ * @param key - Lookup key.
+ * @param language - Language code (e.g. `fr`, `en`).
+ * @returns Result string.
  */
 export const getShellMessage = (key: ShellMessageKey, language?: string): string => {
   const lang = normalizeLang(language);
@@ -71,7 +74,11 @@ export const getShellMessage = (key: ShellMessageKey, language?: string): string
   return messages?.[key] ?? fallback[key] ?? key;
 };
 
-/** Maps a board profile id to a translated optgroup family label key. */
+/**
+ * Maps a board profile id to a translated optgroup family label key.
+ * @param boardId - Board identifier.
+ * @returns Operation result.
+ */
 export const getBoardFamilyMessageKey = (boardId: string): ShellMessageKey => {
   if (boardId === "none") {
     return "BOARD_FAMILY_OTHER";

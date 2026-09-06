@@ -20,7 +20,11 @@ export type ProcedureDefBlock = Blockly.Block & {
   getVarModels?: () => Blockly.VariableModel[];
 };
 
-/** True when the block is in setup/loop/global scope (not inside a procedure body). */
+/**
+ * True when the block is in setup/loop/global scope (not inside a procedure body).
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
+ */
 export const isVariableUseOutsideProcedureBody = (
   block: Blockly.Block,
 ): boolean => {
@@ -29,6 +33,9 @@ export const isVariableUseOutsideProcedureBody = (
 
 /**
  * Procedure def header / call shell: binds a parameter name without a global read/write.
+ * @param block - Blockly block instance.
+ * @param variableId - Identifier.
+ * @returns True when the condition holds.
  */
 export const isProcedureParameterBindingUse = (
   block: Blockly.Block,
@@ -55,7 +62,12 @@ export const isProcedureParameterBindingUse = (
   return false;
 };
 
-/** True when the variable is genuinely read/written in setup, loop, or global scope. */
+/**
+ * True when the variable is genuinely read/written in setup, loop, or global scope.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns True when the condition holds.
+ */
 export const hasRealGlobalVariableUse = (
   workspace: Blockly.Workspace,
   variableId: string,
@@ -73,13 +85,23 @@ export const hasRealGlobalVariableUse = (
   return false;
 };
 
-/** True when the variable appears in setup, loop, or global scope (not only as a procedure parameter). */
+/**
+ * True when the variable appears in setup, loop, or global scope (not only as a procedure parameter).
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns True when the condition holds.
+ */
 export const isVariableUsedOutsideProcedureBodies = (
   workspace: Blockly.Workspace,
   variableId: string,
 ): boolean => hasRealGlobalVariableUse(workspace, variableId);
 
-/** True when the variable is declared as a parameter on any procedure definition. */
+/**
+ * True when the variable is declared as a parameter on any procedure definition.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @returns True when the condition holds.
+ */
 export const isVariableProcedureParameter = (
   workspace: Blockly.Workspace,
   variableId: string,
@@ -105,8 +127,13 @@ export const isVariableProcedureParameter = (
 };
 
 /**
- * Returns true when a workspace variable must not receive a global declaration.
- * Procedure parameters are omitted unless they are also used as real globals.
+ * Returns true when a workspace variable must not receive a global declaration. Procedure parameters are omitted unless they are also used as real globals.
+ * @param workspace - Blockly workspace.
+ * @param variableId - Identifier.
+ * @param varName - Variable name.
+ * @param procedureArgIds - `procedureArgIds` value.
+ * @param normalizedProcedureArgNames - `normalizedProcedureArgNames` value.
+ * @returns True when the condition holds.
  */
 export const shouldOmitGlobalVariableDeclaration = (
   workspace: Blockly.Workspace,

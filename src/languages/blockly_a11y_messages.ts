@@ -296,7 +296,10 @@ export const BLOCKLY_A11Y_MESSAGES: Record<string, Record<string, string>> = {
   },
 };
 
-/** Fusionne les messages accessibilité Blockly 13 dans `Blockly.Msg`. */
+/**
+ * Fusionne les messages accessibilité Blockly 13 dans `Blockly.Msg`.
+ * @param lang - Language code (e.g. `fr`, `en`).
+ */
 export function mergeBlocklyA11yMessages(lang: string): void {
   const msgs = BLOCKLY_A11Y_MESSAGES[lang] ?? BLOCKLY_A11Y_MESSAGES.en;
   Object.assign(Blockly.Msg as Record<string, string>, msgs);

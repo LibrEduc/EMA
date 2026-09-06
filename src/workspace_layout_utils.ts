@@ -34,11 +34,22 @@ export const RIGHT_PANEL_TOGGLE_BUTTON_ID = "flex_up_right_toggle_button";
 export const BOTTOM_PANEL_TOGGLE_BUTTON_ID = "flex_bottom_toggle_button";
 export const FLEX_COLLAPSE_EPSILON = 0.01;
 
+/**
+ * Parse Positive Flex.
+ * @param rawValue - `rawValue` value.
+ * @param fallback - `fallback` value.
+ * @returns Numeric result.
+ */
 export const parsePositiveFlex = (rawValue: string | null | undefined, fallback = 0): number => {
   const parsed = Number(rawValue);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+/**
+ * Snap Near Zero Flex.
+ * @param previous - `previous` value.
+ * @param next - `next` value.
+ */
 export const snapNearZeroFlex = (previous: HTMLElement, next: HTMLElement): void => {
   const prevGrow = parsePositiveFlex(previous.style.flexGrow, 0);
   const nextGrow = parsePositiveFlex(next.style.flexGrow, 0);

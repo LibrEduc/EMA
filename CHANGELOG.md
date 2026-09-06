@@ -4,13 +4,17 @@
 
 Travaux depuis la release **3.0.0** (29 juillet 2026) — pas encore numérotés en version npm.
 
+### Performance (drag & drop)
+- Debounce / skip pendant le drag : événements workspace, enforceur de structure de programme, typage strict, checker de connexions.
+- Cache des métriques de contenu « live » par frame (`live_content_metrics`) pour alléger le highlight / flyout.
+
 ### Documentation et accessibilité
 - Documentation d’accessibilité et infobulles de langue enrichies.
-- Guide [docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md](docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md).
+- Guide [docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md](docs/AJOUTER_CATEGORIE_SERVOMOTEUR.md) ; chemin recommandé extensions runtime ([docs/AJOUTER_EXTENSION.md](docs/AJOUTER_EXTENSION.md)).
 - Mise à jour des docs d’architecture, intégration, noyau, contribution, inventaire des fonctions.
+- Hub statique LibrEduc (panneaux v3 / actus blog) : [deploy/libreduc-hub/](deploy/libreduc-hub/).
 
 ### Noyau et éditeur
-- Métriques de contenu « live » pour le plugin highlight / flyout (`live_content_metrics`, overlay continuous).
 - Raffinements plugins workspace, `createUcBlockly`, état de workspace.
 - Ajustements générateur Arduino, types de connexions, maths / variables / listes.
 

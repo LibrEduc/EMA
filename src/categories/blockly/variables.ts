@@ -62,13 +62,15 @@ import {
 
 /**
  * Returns the display label for an Arduino type (Blockly.Msg `VAR_CAST_TYPE_*`).
+ * @param type - Type identifier.
+ * @returns Result string.
  */
 export const getArduinoTypeLabel = (type: string): string =>
   getBlocklyMsgOr(getArduinoTypeLabelKey(type), type);
 
 /**
- * Shared Blockly menu options for every Arduino type dropdown
- * (variables_set_init, variables_set_type, variables_cast, procedures, lists).
+ * Shared Blockly menu options for every Arduino type dropdown (variables_set_init, variables_set_type, variables_cast, procedures, lists).
+ * @returns Result array.
  */
 export const getArduinoTypeDropdownOptions = (): Blockly.MenuOption[] =>
   getVariableTypeOptions().map((type) => [
@@ -97,7 +99,11 @@ const sanitizeArduinoTypeDropdown = (
   }
 };
 
-/** Arduino scalar type dropdown; maps invalid values (e.g. `list`) to `int` on load. */
+/**
+ * Arduino scalar type dropdown; maps invalid values (e.g. `list`) to `int` on load.
+ * @param fieldName - Field name on the block.
+ * @returns Operation result.
+ */
 export const createArduinoScalarTypeField = (
   fieldName: string,
 ): Blockly.FieldDropdown => {

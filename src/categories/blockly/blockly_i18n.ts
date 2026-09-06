@@ -45,11 +45,17 @@ export const validateSingleChar = (value: string): string => {
   return value.charAt(0);
 };
 
-/** Returns the warning text for untyped variables. */
+/**
+ * Returns the warning text for untyped variables.
+ * @returns Result string.
+ */
 export const getUntypedWarningText = (): string =>
   getBlocklyMsg("TYPED_VAR_UNTYPED_WARNING");
 
-/** Warning when a list block has no connected element values yet. */
+/**
+ * Warning when a list block has no connected element values yet.
+ * @returns Result string.
+ */
 export const getArrayListUntypedWarningText = (): string =>
   getBlocklyMsgOr(
     "ARRAY_LIST_UNTYPED_WARNING",
@@ -57,8 +63,8 @@ export const getArrayListUntypedWarningText = (): string =>
   );
 
 /**
- * Warning when several list declaration blocks share the same variable.
- * Same conflict idea as VARIABLES_CONST_WARNING for const ownership.
+ * Warning when several list declaration blocks share the same variable. Same conflict idea as VARIABLES_CONST_WARNING for const ownership.
+ * @returns Result string.
  */
 export const getDuplicateListDeclarationWarningText = (): string =>
   getBlocklyMsgOr(
@@ -80,6 +86,9 @@ export const getTypeMismatchWarningText = (
     .replace("%1", varType)
     .replace("%2", connectedType);
 
-/** Returns the warning text for const assignments. */
+/**
+ * Returns the warning text for const assignments.
+ * @returns Result string.
+ */
 export const getConstWarningText = (): string =>
   getBlocklyMsgOr("VARIABLES_CONST_WARNING", "const: cannot assign");

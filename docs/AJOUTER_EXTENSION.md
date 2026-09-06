@@ -49,7 +49,7 @@ extensions/<id>/
   manifest.json
   blocks.js                 # export function defineBlocks(ctx)
   generator.arduino.js      # export function registerArduinoGenerators(ctx)
-  generator.micropython.js  # optionnel
+  generator.micropython.js  # optionnel — chargé si loadExtensions({ micropython })
   toolbox.fragment.json
   theme.json                # optionnel
   block_types.json          # optionnel
@@ -230,6 +230,11 @@ export function defineBlocks({
 // generator.arduino.js
 export function registerArduinoGenerators({ arduinoGenerator, Order }) {
   arduinoGenerator.forBlock["servo_move"] = function (block) { /* … */ };
+}
+
+// generator.micropython.js (BlocklyDuino : loadExtensions({ micropython: { … } }))
+export function registerMicropythonGenerators({ micropythonGenerator, Order }) {
+  micropythonGenerator.forBlock["servo_attach"] = function (block) { /* … */ };
 }
 ```
 

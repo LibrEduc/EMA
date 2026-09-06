@@ -12,6 +12,10 @@ import {
   findInstanceNameCollision,
 } from "../instances/instances";
 
+/**
+ * Patch Variable Map Create Variable.
+ * @param workspace - Blockly workspace.
+ */
 export function patchVariableMapCreateVariable(workspace: Blockly.Workspace): void {
   try {
     const variableMap = workspace.getVariableMap();

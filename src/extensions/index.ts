@@ -21,7 +21,11 @@ export type {
 } from "./types";
 
 export { createHttpExtensionIo } from "./io_http";
-export { loadExtensionPack } from "./load_extension";
+export {
+  loadExtensionPack,
+  type ExtensionMicropythonContext,
+  type LoadExtensionPackOptions,
+} from "./load_extension";
 export {
   loadExtensions,
   applyExtensionMessages,

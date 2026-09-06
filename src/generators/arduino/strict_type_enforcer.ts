@@ -40,8 +40,7 @@ import {
   revalidateTypedNumericBlocks,
 } from "../../categories/blockly/shared";
 import {
-  scheduleDeferredWorkspaceTask,
-  shouldDeferWorkspaceEnforcement,
+  queueWorkspaceEnforcement,
 } from "../../core/workspace_event_utils";
 
 export type StrictTypeEnforcerMode = "warn" | "disconnect";
@@ -120,18 +119,13 @@ export function installStrictTypeEnforcer(
   const scope = options.scope ?? "variables-only";
 
   const listener: WorkspaceListener = (e) => {
-    if (shouldDeferWorkspaceEnforcement(workspace, e)) {
-      return;
-    }
     if (e.type === Blockly.Events.FINISHED_LOADING) {
       return;
     }
-    if (!isRelevantEvent(e)) {
-      return;
-    }
-
-    scheduleDeferredWorkspaceTask(
+    queueWorkspaceEnforcement(
       workspace,
+      e,
+      isRelevantEvent,
       () => {
         revalidateLocalWrapperBlocks(workspace, e);
         revalidateTypedNumericBlocks(workspace, e);

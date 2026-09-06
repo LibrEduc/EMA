@@ -200,7 +200,7 @@ const getTranslatedToolboxJson = (
 
 /**
  * Gets the language code from the URL query string.
- * @return Language code, defaulting to "en".
+ * @returns Result string.
  */
 export const getLangParamFromUrl = (): string => {
   const lang = new URLSearchParams(window.location.search).get('lang') ?? 'en';
@@ -215,7 +215,7 @@ export const getLangParamFromUrl = (): string => {
 
 /**
  * Gets the selected language from the dropdown and syncs the URL.
- * @return Selected language code.
+ * @returns Result string.
  */
 export const getLangParamFromDropdown = (): string => {
   const dropdownMenu = document.getElementById(
@@ -348,6 +348,9 @@ export const changeLanguageToolbox = (
 
 /**
  * Updates the top-level board category label from the current #boardMenu selection.
+ * @param toolbox - Toolbox configuration.
+ * @param language - Language code (e.g. `fr`, `en`).
+ * @returns Operation result.
  */
 export function applyBoardCategoryDisplayName(
   toolbox: ToolboxConfiguration,

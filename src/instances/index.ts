@@ -49,8 +49,7 @@ export { mergeInstanceMessages } from "./messages";
 export { patchVariableUiAgainstInstances } from "./name_guard";
 
 /**
- * Registers FieldInstance + Block.prototype helpers. Idempotent.
- * Called from `registerUcBlocklyKernel`.
+ * Registers FieldInstance + Block.prototype helpers. Idempotent. Called from `registerUcBlocklyKernel`.
  */
 export function registerUcBlocklyInstances(): void {
   registerFieldInstance();

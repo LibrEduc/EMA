@@ -101,7 +101,8 @@ function bindArrayWithDefaultVariable(block: Blockly.Block): void {
 
 /**
  * Claims / releases list declaration ownership (same pattern as variables_const).
- * @returns true when a duplicate-owner warning was set.
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
  */
 export const syncListDeclarationOwnership = (block: Blockly.Block): boolean => {
   if (!block.workspace || block.isInFlyout || !isListDeclareBlockType(block.type)) {
@@ -125,13 +126,17 @@ export const syncListDeclarationOwnership = (block: Blockly.Block): boolean => {
 
 /**
  * Affiche un avertissement si ce bloc n'est pas le propriétaire de la déclaration.
- * @returns true when a duplicate warning was set.
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
  */
 export const syncListDeclarationUniqueness = (block: Blockly.Block): boolean => {
   return syncListDeclarationOwnership(block);
 };
 
-/** Applique warning ownership (+ non typé pour Array_with). */
+/**
+ * Applique warning ownership (+ non typé pour Array_with).
+ * @param block - Blockly block instance.
+ */
 export const applyListDeclarationBlockWarning = (block: Blockly.Block): void => {
   if (syncListDeclarationOwnership(block)) {
     return;
@@ -145,7 +150,10 @@ export const applyListDeclarationBlockWarning = (block: Blockly.Block): void => 
   }
 };
 
-/** Revalide l'ownership des déclarations de listes sur tout le workspace. */
+/**
+ * Revalide l'ownership des déclarations de listes sur tout le workspace.
+ * @param workspace - Blockly workspace.
+ */
 export const revalidateListDeclarationUniqueness = (
   workspace: Blockly.Workspace,
 ): void => {
@@ -594,8 +602,7 @@ function registerArrayListMutator(
 }
 
 /**
- * Registers S4e-style array blocks (Array_create_with, Array_declare, Array_create,
- * Array_getIndex_in_list, Array_getIndex_in_array, Array_modify, Array_fix).
+ * Registers S4e-style array blocks (Array_create_with, Array_declare, Array_create, Array_getIndex_in_list, Array_getIndex_in_array, Array_modify, Array_fix).
  */
 export const defineArrayBlocks = (): void => {
   if (arrayBlocksRegistered) {

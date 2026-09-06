@@ -8,6 +8,9 @@
 
 import * as Blockly from "blockly";
 
+/**
+ * Patch Block Change For Procedure Compat.
+ */
 export function patchBlockChangeForProcedureCompat(): void {
   try {
     const BlockChange = Blockly.Events.BlockChange as typeof Blockly.Events.BlockChange & {

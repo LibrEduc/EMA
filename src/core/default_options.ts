@@ -54,14 +54,22 @@ export const DEFAULT_UCBLOCKLY_ENFORCERS: Required<UcBlocklyEnforcerOptions> = {
   strictConnectionChecker: false,
 };
 
-/** Merges partial plugin options with {@link DEFAULT_UCBLOCKLY_PLUGINS}. */
+/**
+ * Merges partial plugin options with {@link DEFAULT_UCBLOCKLY_PLUGINS}.
+ * @param options - Configuration options.
+ * @returns Operation result.
+ */
 export function resolvePluginOptions(
   options?: UcBlocklyPluginOptions,
 ): Required<UcBlocklyPluginOptions> {
   return { ...DEFAULT_UCBLOCKLY_PLUGINS, ...options };
 }
 
-/** Merges partial enforcer options with {@link DEFAULT_UCBLOCKLY_ENFORCERS}. */
+/**
+ * Merges partial enforcer options with {@link DEFAULT_UCBLOCKLY_ENFORCERS}.
+ * @param options - Configuration options.
+ * @returns Operation result.
+ */
 export function resolveEnforcerOptions(
   options?: UcBlocklyEnforcerOptions,
 ): Required<UcBlocklyEnforcerOptions> {

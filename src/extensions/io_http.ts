@@ -22,8 +22,9 @@ function joinUrl(base: string, ...parts: string[]): string {
 }
 
 /**
- * I/O based on `fetch` + dynamic `import()` — works for any static `/extensions` root
- * (webpack-dev-server, nginx, Electron `loadURL` + local static).
+ * I/O based on `fetch` + dynamic `import()` — works for any static `/extensions` root (webpack-dev-server, nginx, Electron `loadURL` + local static).
+ * @param baseUrl - Base URL for extension packs.
+ * @returns Operation result.
  */
 export function createHttpExtensionIo(baseUrl: string): ExtensionIo {
   const root = baseUrl.replace(/\/+$/, "") || "/extensions";

@@ -153,6 +153,8 @@ const arraysEqual = (a: string[], b: string[]): boolean =>
 
 /**
  * Human-readable label for a Blockly serialized key code (e.g. Control+67 → Ctrl+C).
+ * @param serialized - `serialized` value.
+ * @returns Result string.
  */
 export const formatSerializedKey = (serialized: string): string => {
   const parts = serialized.split("+");
@@ -187,6 +189,11 @@ export const formatSerializedKey = (serialized: string): string => {
   return [...formattedMods, keyLabel].join("+");
 };
 
+/**
+ * Format Serialized Keys.
+ * @param codes - `codes` value.
+ * @returns Result string.
+ */
 export const formatSerializedKeys = (codes: string[]): string =>
   [...new Set(codes.map(formatSerializedKey))].join(", ");
 
@@ -198,8 +205,9 @@ const getModifierKeyLabel = (): string =>
     : "Ctrl";
 
 /**
- * Build a Blockly serialized key from a KeyboardEvent.
- * Returns null for modifier-only presses.
+ * Build a Blockly serialized key from a KeyboardEvent. Returns null for modifier-only presses.
+ * @param event - Blockly workspace event.
+ * @returns Result string.
  */
 export const serializedKeyFromEvent = (event: KeyboardEvent): string | null => {
   const registry = Blockly.ShortcutRegistry.registry;
@@ -281,6 +289,9 @@ export type RebindConflict = {
 
 /**
  * Returns conflicting shortcut names for the proposed key codes (excluding `name`).
+ * @param name - Name string.
+ * @param keyCodes - `keyCodes` value.
+ * @returns Result array.
  */
 export const findRebindConflicts = (
   name: string,
@@ -301,6 +312,9 @@ export const findRebindConflicts = (
 
 /**
  * Rebind a registered shortcut to new serialized key codes.
+ * @param name - Name string.
+ * @param keyCodes - `keyCodes` value.
+ * @returns Result array.
  */
 export const rebindShortcut = (
   name: string,
@@ -332,20 +346,26 @@ export const rebindShortcut = (
 
 /**
  * Current effective key codes for a shortcut (registry live state).
+ * @param name - Name string.
+ * @returns Result string.
  */
 export const getEffectiveKeyCodes = (name: string): string[] => {
   const registry = Blockly.ShortcutRegistry.registry;
   return [...(registry.getKeyCodesByShortcutName(name) ?? [])];
 };
 
+/**
+ * Get Default Key Codes.
+ * @param name - Name string.
+ * @returns Result string.
+ */
 export const getDefaultKeyCodes = (name: string): string[] => {
   ensureDefaultsSnapshot();
   return [...(defaultKeyCodes.get(name) ?? getEffectiveKeyCodes(name))];
 };
 
 /**
- * Apply persisted overrides onto the live ShortcutRegistry.
- * Safe to call multiple times (e.g. after cross-tab copy/paste replaces C/X/V).
+ * Apply persisted overrides onto the live ShortcutRegistry. Safe to call multiple times (e.g. after cross-tab copy/paste replaces C/X/V).
  */
 export const applyShortcutPreferences = (): void => {
   ensureDefaultsSnapshot();
@@ -378,6 +398,9 @@ const expandModifierAliases = (keyCodes: string[]): string[] => {
 
 /**
  * Persist and apply a new binding for one shortcut.
+ * @param name - Name string.
+ * @param keyCodes - `keyCodes` value.
+ * @returns Result array.
  */
 export const setShortcutBinding = (
   name: string,
@@ -402,6 +425,7 @@ export const setShortcutBinding = (
 
 /**
  * Restore one shortcut to its factory binding.
+ * @param name - Name string.
  */
 export const resetShortcutBinding = (name: string): void => {
   ensureDefaultsSnapshot();
@@ -429,5 +453,9 @@ export const resetAllShortcutBindings = (): void => {
   writeStoredBindings({});
 };
 
+/**
+ * Has Custom Shortcut Bindings.
+ * @returns True when the condition holds.
+ */
 export const hasCustomShortcutBindings = (): boolean =>
   Object.keys(readStoredBindings()).length > 0;

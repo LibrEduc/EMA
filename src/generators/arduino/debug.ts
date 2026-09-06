@@ -34,7 +34,10 @@ type DebugGlobal = typeof globalThis & {
   __UCB_DEBUG__?: boolean;
 };
 
-/** Indique si le mode debug (switch UI ou localStorage) est actif. */
+/**
+ * Indique si le mode debug (switch UI ou localStorage) est actif.
+ * @returns True when the condition holds.
+ */
 export function isDebugEnabled(): boolean {
   const globalDebug = (globalThis as DebugGlobal).__UCB_DEBUG__;
   if (typeof globalDebug === "boolean") {

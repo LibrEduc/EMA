@@ -36,7 +36,11 @@ export type LocalVariableScope =
   | { kind: "setup" }
   | { kind: "loop" };
 
-/** List literal blocks (value plugged into variables_set or Array_declare). */
+/**
+ * List literal blocks (value plugged into variables_set or Array_declare).
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
+ */
 export function isArrayValueBlock(block: Block | null): boolean {
   return (
     block?.type === "Array_list_literal" ||
@@ -44,7 +48,11 @@ export function isArrayValueBlock(block: Block | null): boolean {
   );
 }
 
-/** List value connected to a set block (literal or local wrapping a literal). */
+/**
+ * List value connected to a set block (literal or local wrapping a literal).
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
+ */
 export function isArrayAssignmentValueBlock(block: Block | null): boolean {
   if (!block) {
     return false;
@@ -58,13 +66,19 @@ export function isArrayAssignmentValueBlock(block: Block | null): boolean {
   return false;
 }
 
-/** Bloc instruction « define variable as list » (déclaration globale). */
+/**
+ * Bloc instruction « define variable as list » (déclaration globale).
+ * @param block - Blockly block instance.
+ * @returns True when the condition holds.
+ */
 export function isArrayListStatementBlock(block: Block | null): boolean {
   return block?.type === "Array_with" || block?.type === "Array_bitmap";
 }
 
 /**
  * Déplie un bloc « local » pour atteindre la valeur réelle.
+ * @param block - Blockly block instance.
+ * @returns Operation result.
  */
 export function unwrapValueBlock(block: Block | null): Block | null {
   if (block?.type === "variables_local") {
@@ -75,6 +89,8 @@ export function unwrapValueBlock(block: Block | null): Block | null {
 
 /**
  * Affectation produisant une déclaration locale (wrapper « local » ou liste).
+ * @param valueBlock - `valueBlock` value.
+ * @returns True when the condition holds.
  */
 export function usesLocalVariableDeclaration(valueBlock: Block | null): boolean {
   if (!valueBlock) {
@@ -108,6 +124,8 @@ function isUnderInput(
 
 /**
  * Détermine si un bloc variables_set se trouve dans setup(), loop() ou une procédure.
+ * @param block - Blockly block instance.
+ * @returns Operation result.
  */
 export function resolveLocalVariableScope(block: Block): LocalVariableScope {
   let current: Block | null = block;
@@ -163,6 +181,10 @@ export function resolveLocalVariableScope(block: Block): LocalVariableScope {
 
 /**
  * Enregistre une déclaration locale dans le bon contexte Arduino.
+ * @param generator - Code generator instance.
+ * @param scope - Enforcement scope.
+ * @param tag - `tag` value.
+ * @param declaration - `declaration` value.
  */
 export function emitLocalDeclaration(
   generator: ArduinoGenerator,
@@ -183,6 +205,9 @@ export function emitLocalDeclaration(
 
 /**
  * Identifiant stable pour une déclaration locale.
+ * @param scope - Enforcement scope.
+ * @param varName - Variable name.
+ * @returns Result string.
  */
 export function localDeclarationTag(
   scope: LocalVariableScope,

@@ -26,18 +26,34 @@ type ToolboxNode = {
   [key: string]: unknown;
 };
 
+/**
+ * Get Loaded Extensions.
+ * @returns Result array.
+ */
 export function getLoadedExtensions(): LoadedExtension[] {
   return [...loaded.values()];
 }
 
+/**
+ * Get Loaded Extension.
+ * @param id - Identifier string.
+ * @returns Operation result.
+ */
 export function getLoadedExtension(id: string): LoadedExtension | undefined {
   return loaded.get(id);
 }
 
+/**
+ * Register Loaded Extension.
+ * @param ext - `ext` value.
+ */
 export function registerLoadedExtension(ext: LoadedExtension): void {
   loaded.set(ext.id, ext);
 }
 
+/**
+ * Clear Loaded Extensions For Tests.
+ */
 export function clearLoadedExtensionsForTests(): void {
   loaded.clear();
 }
@@ -134,7 +150,11 @@ function insertFragment(
   parent.contents.push(clean as ToolboxNode);
 }
 
-/** Deep-clones toolbox and merges each extension category / subcategory. */
+/**
+ * Deep-clones toolbox and merges each extension category / subcategory.
+ * @param base - Base toolbox configuration.
+ * @returns Operation result.
+ */
 export function mergeExtensionsIntoToolbox(
   base: ToolboxConfiguration,
 ): ToolboxConfiguration {
@@ -150,13 +170,21 @@ export function mergeExtensionsIntoToolbox(
   return clone;
 }
 
+/**
+ * Get Extension Theme Fragments.
+ * @returns Result array.
+ */
 export function getExtensionThemeFragments(): ExtensionThemeFragment[] {
   return Array.from(loaded.values())
     .map((e) => e.theme)
     .filter((t): t is ExtensionThemeFragment => Boolean(t));
 }
 
-/** Flatten i18n for one language from all loaded packs. */
+/**
+ * Flatten i18n for one language from all loaded packs.
+ * @param lang - Language code (e.g. `fr`, `en`).
+ * @returns Result string.
+ */
 export function getExtensionMessagesForLang(
   lang: string,
 ): Record<string, string> {

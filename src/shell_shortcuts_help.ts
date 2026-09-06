@@ -590,7 +590,9 @@ const renderDialogContent = (): void => {
   restoreFocus(focus);
 };
 
-/** Ouvre la modale d'aide des raccourcis. */
+/**
+ * Ouvre la modale d'aide des raccourcis.
+ */
 export const openShortcutsHelp = (): void => {
   applyShortcutPreferences();
   const dialog = ensureDialog();
@@ -603,7 +605,9 @@ export const openShortcutsHelp = (): void => {
   }
 };
 
-/** Met à jour les libellés du bouton et du contenu si la modale est ouverte. */
+/**
+ * Met à jour les libellés du bouton et du contenu si la modale est ouverte.
+ */
 export const refreshShortcutsHelp = (): void => {
   const button = document.getElementById(BUTTON_ID) as HTMLButtonElement | null;
   if (button) {

@@ -11,9 +11,10 @@
  */
 
 /**
- * Prépare le corps d'une fonction Arduino (setup/loop) : indente les lignes
- * brutes (ex. pinMode via addSetup) sans double-indenter le code issu de
- * statementToCode (chaque ligne commence déjà par INDENT).
+ * Prépare le corps d'une fonction Arduino (setup/loop) : indente les lignes brutes (ex. pinMode via addSetup) sans double-indenter le code issu de statementToCode (chaque ligne commence déjà par INDENT).
+ * @param content - `content` value.
+ * @param indent - `indent` value.
+ * @returns Result string.
  */
 export function formatFunctionBodyContent(
   content: string,
@@ -168,6 +169,8 @@ export function formatArduinoSketch(
 
 /**
  * Validate pin usage map and return warning messages.
+ * @param pinUsages - `pinUsages` value.
+ * @returns Result string.
  */
 export function validatePinUsageWarnings(
   pinUsages: Record<string, { number: string; mode: string; blockId: string }>,

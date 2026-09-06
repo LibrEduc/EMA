@@ -35,6 +35,18 @@ import type {
   LoadedExtension,
 } from "./types";
 
+/** Optional MicroPython registration (host: BlocklyDuino). */
+export type ExtensionMicropythonContext = {
+  /** Host MicroPython generator instance (`forBlock`, `addSetup`, …). */
+  micropythonGenerator: object;
+  /** Operator precedence enum from `blockly/python` (or compatible). */
+  Order: object;
+};
+
+export type LoadExtensionPackOptions = {
+  micropython?: ExtensionMicropythonContext;
+};
+
 const FALLBACK_BOARD = "arduino_uno";
 
 function getSelectedBoardId(): string {
@@ -77,11 +89,16 @@ async function loadI18n(
 }
 
 /**
- * Loads one pack: JSON assets + optional ESM `blocksJs` / `generatorArduinoJs`.
+ * Loads one pack: JSON assets + optional ESM `blocksJs` / generators.
+ * @param packId - Extension pack folder id.
+ * @param io - Extension I/O adapter.
+ * @param options - Configuration options.
+ * @returns Promise resolving to the operation result.
  */
 export async function loadExtensionPack(
   packId: string,
   io: ExtensionIo,
+  options: LoadExtensionPackOptions = {},
 ): Promise<LoadedExtension> {
   const manifestUrl = io.resolveUrl(packId, "manifest.json");
   const manifest = await readJson<ExtensionManifest>(io, manifestUrl);
@@ -163,6 +180,25 @@ export async function loadExtensionPack(
     if (typeof register === "function") {
       register({ arduinoGenerator, Order });
     }
+  }
+
+  if (ep.generatorMicropythonJs && options.micropython) {
+    const mod = await io.importModule(
+      io.resolveUrl(packId, ep.generatorMicropythonJs),
+    );
+    const register = mod.registerMicropythonGenerators as
+      | ((ctx: Record<string, unknown>) => void)
+      | undefined;
+    if (typeof register === "function") {
+      register({
+        micropythonGenerator: options.micropython.micropythonGenerator,
+        Order: options.micropython.Order,
+      });
+    }
+  } else if (ep.generatorMicropythonJs && !options.micropython) {
+    console.info(
+      `[µcBlockly] Extension "${packId}" has generatorMicropythonJs but no MicroPython context was provided — skipped.`,
+    );
   }
 
   if (manifest.pinDropdowns) {

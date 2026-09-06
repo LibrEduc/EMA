@@ -30,7 +30,10 @@
 
 import { NOT_IN_PROGRAM_DISABLED_REASON } from "../program_structure_enforcer";
 
-/** Coerces invalid block coordinates before save/load. */
+/**
+ * Coerces invalid block coordinates before save/load.
+ * @param state - Serialized state object.
+ */
 export function sanitizeSerializedWorkspaceState(state: unknown): void {
   const walk = (node: unknown): void => {
     if (Array.isArray(node)) {

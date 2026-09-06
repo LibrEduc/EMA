@@ -192,7 +192,10 @@ export const ARRAY_MESSAGES: Record<string, Record<string, string>> = {
 
 import * as Blockly from "blockly";
 
-/** Merge ARRAY_* messages into Blockly.Msg for the given language. */
+/**
+ * Merge ARRAY_* messages into Blockly.Msg for the given language.
+ * @param lang - Language code (e.g. `fr`, `en`).
+ */
 export function mergeArrayMessages(lang: string): void {
   const msgs = ARRAY_MESSAGES[lang] ?? ARRAY_MESSAGES["en"];
   Object.assign(Blockly.Msg as Record<string, string>, msgs);

@@ -65,9 +65,11 @@ function inferSourceTypeForIntInput(
 }
 
 /**
- * Enforces integer-only values on the given value inputs (setCheck + disconnect).
- * @returns Mismatch warning, `null` when inputs are OK, or `undefined` when the
- * event does not require revalidation (caller must leave existing warnings alone).
+ * Enforces integer-only values on the given value inputs (setCheck + disconnect). event does not require revalidation (caller must leave existing warnings alone).
+ * @param block - Blockly block instance.
+ * @param inputNames - `inputNames` value.
+ * @param event - Blockly workspace event.
+ * @returns Result string.
  */
 export const enforceIntOnlyValueInputs = (
   block: Blockly.Block,
@@ -106,6 +108,8 @@ export const enforceIntOnlyValueInputs = (
 
 /**
  * Enforces integer-only values on board block inputs (PWM, map, tone frequency).
+ * @param block - Blockly block instance.
+ * @param event - Blockly workspace event.
  */
 export const handleBoardIntInputBlockChange = (
   block: Blockly.Block,
@@ -121,7 +125,11 @@ export const handleBoardIntInputBlockChange = (
   }
 };
 
-/** Revalidates integer-only inputs on board blocks after workspace changes. */
+/**
+ * Revalidates integer-only inputs on board blocks after workspace changes.
+ * @param workspace - Blockly workspace.
+ * @param event - Blockly workspace event.
+ */
 export const revalidateBoardIntInputBlocks = (
   workspace: Blockly.Workspace,
   event: Blockly.Events.Abstract,

@@ -63,6 +63,8 @@ const metricsCache = new WeakMap<Blockly.WorkspaceSvg, MetricsCacheEntry>();
 
 /**
  * Bounding box of live top-level blocks/comments only (workspace coordinates).
+ * @param workspace - Blockly workspace.
+ * @returns Operation result.
  */
 export const getLiveBlocksBoundingBox = (
   workspace: Blockly.WorkspaceSvg,
@@ -113,8 +115,9 @@ const computeLiveContentMetrics = (
 
 /**
  * Content metrics from live elements only (same shape as MetricsManager.getContentMetrics).
- * @param workspace - Target workspace.
- * @param workspaceCoordinates - When true, values are in workspace units (not pixels).
+ * @param workspace - Blockly workspace.
+ * @param workspaceCoordinates - `workspaceCoordinates` value.
+ * @returns Operation result.
  */
 export const getLiveContentMetrics = (
   workspace: Blockly.WorkspaceSvg,
@@ -141,9 +144,7 @@ export const getLiveContentMetrics = (
 let blocksBoundingBoxPatched = false;
 
 /**
- * Patches {@link Blockly.WorkspaceSvg.getBlocksBoundingBox} to ignore disposing
- * elements. Lets the upstream content-highlight plugin (and other metrics
- * consumers) measure live content only — without forking that plugin.
+ * Patches {@link Blockly.WorkspaceSvg.getBlocksBoundingBox} to ignore disposing elements. Lets the upstream content-highlight plugin (and other metrics consumers) measure live content only — without forking that plugin.
  */
 export const installLiveBlocksBoundingBoxPatch = (): void => {
   if (blocksBoundingBoxPatched) {

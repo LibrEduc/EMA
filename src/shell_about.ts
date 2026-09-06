@@ -129,7 +129,9 @@ function refreshDialogLabels(dialog: HTMLDialogElement): void {
   }
 }
 
-/** Ouvre la modale à propos. */
+/**
+ * Ouvre la modale à propos.
+ */
 export function openAboutDialog(): void {
   const dialog = ensureDialog();
   refreshDialogLabels(dialog);
@@ -138,7 +140,9 @@ export function openAboutDialog(): void {
   }
 }
 
-/** Met à jour les libellés si la modale est ouverte (changement de langue). */
+/**
+ * Met à jour les libellés si la modale est ouverte (changement de langue).
+ */
 export function refreshAboutDialog(): void {
   const dialog = document.getElementById(DIALOG_ID) as HTMLDialogElement | null;
   if (dialog?.open) {
@@ -151,7 +155,9 @@ export function refreshAboutDialog(): void {
   }
 }
 
-/** Enregistre le bouton « à propos » et la modale. */
+/**
+ * Enregistre le bouton « à propos » et la modale.
+ */
 export function registerAboutDialog(): void {
   ensureDialog();
   const button = document.getElementById(BUTTON_ID);
