@@ -16,12 +16,9 @@
 import * as Blockly from "blockly";
 import { getInternalTypeForArduinoType } from "../../generators/arduino/block_types";
 import {
-  configureScalarVariableField,
   getBlocklyCompatibleChecks,
-  getBlocklyMsg,
   getBlocklyMsgOr,
   inferConnectedValueType,
-  setVariableTypeAndMarkManual,
   shouldSkipVariableChange,
 } from "./shared";
 import {

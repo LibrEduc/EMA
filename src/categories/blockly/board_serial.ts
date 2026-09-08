@@ -16,7 +16,6 @@
 import * as Blockly from "blockly";
 import {
   BOARD_STYLE,
-  getBlocklyCompatibleChecks,
   getBlocklyMsgOr,
   getSerialBaudDropdown,
 } from "./board_shared";

@@ -102,12 +102,12 @@ export class UcBlocklyPluginHost {
     | ((event: Blockly.Events.Abstract) => void)
     | null = null;
 
-  private pluginBackpack = new Backpack();
+  private pluginBackpack: Backpack | null = null;
   private pluginContentHighlight: ContentHighlight | null = null;
-  private pluginMinimap = new PositionedMinimap();
-  private pluginModal = new Modal();
+  private pluginMinimap: PositionedMinimap | null = null;
+  private pluginModal: Modal | null = null;
   private pluginWorkspaceSearch: { init: () => void; dispose: () => void } | null = null;
-  private pluginZoomToFit = new ZoomToFitControl();
+  private pluginZoomToFit: ZoomToFitControl | null = null;
   private pluginSoundToggle: SoundToggleControl | null = null;
 
   /** Updates plugin flags (e.g. from demo checkboxes) before init. */
@@ -178,14 +178,19 @@ export class UcBlocklyPluginHost {
         this.onMinimapResync = null;
       }
       this.minimapResyncGeneration += 1;
-      this.safeDispose(() => this.pluginMinimap.dispose());
+      this.safeDispose(() => this.pluginMinimap?.dispose());
       this.safeDispose(() => this.pluginContentHighlight?.dispose());
       this.pluginContentHighlight = null;
-      this.safeDispose(() => this.pluginBackpack.dispose());
-      this.safeDispose(() => this.pluginModal.dispose());
+      this.safeDispose(() => this.pluginBackpack?.dispose());
+      this.safeDispose(() => this.pluginModal?.dispose());
       this.safeDispose(() => this.pluginWorkspaceSearch?.dispose());
-      this.safeDispose(() => this.pluginZoomToFit.dispose());
+      this.safeDispose(() => this.pluginZoomToFit?.dispose());
       this.safeDispose(() => this.pluginSoundToggle?.dispose());
+      this.pluginBackpack = null;
+      this.pluginMinimap = null;
+      this.pluginModal = null;
+      this.pluginZoomToFit = null;
+      this.pluginWorkspaceSearch = null;
       this.pluginSoundToggle = null;
       this.pluginsInitialized = false;
       this.pluginsWorkspace = null;
@@ -212,7 +217,7 @@ export class UcBlocklyPluginHost {
       this.pluginBackpack.init();
     }
     if (opts.modal) {
-      this.pluginModal = new Modal(workspace);
+      this.pluginModal = new Modal(svgWorkspace);
       this.pluginModal.init();
     }
     if (opts.workspaceSearch) {
@@ -221,7 +226,7 @@ export class UcBlocklyPluginHost {
       this.pluginWorkspaceSearch = search;
     }
     if (opts.zoomToFit) {
-      this.pluginZoomToFit = new ZoomToFitControl(workspace);
+      this.pluginZoomToFit = new ZoomToFitControl(svgWorkspace);
       this.pluginZoomToFit.init();
     }
     if (opts.soundToggle) {
@@ -243,7 +248,7 @@ export class UcBlocklyPluginHost {
     const finishMinimap = (): void => {
       if (opts.minimap) {
         Blockly.svgResize(svgWorkspace);
-        this.pluginMinimap = new PositionedMinimap(workspace);
+        this.pluginMinimap = new PositionedMinimap(svgWorkspace);
         Blockly.svgResize(svgWorkspace);
         this.pluginMinimap.init();
         this.setMinimapVisible(opts.minimapVisible);

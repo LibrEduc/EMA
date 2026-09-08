@@ -360,7 +360,7 @@ export const applyShortcutPreferences = (): void => {
       continue;
     }
     const result = rebindShortcut(name, keyCodes);
-    if (!result.ok && result.reason === "conflict") {
+    if (result.ok === false && result.reason === "conflict") {
       // Drop stale conflicting override so the app keeps working.
       delete bindings[name];
       writeStoredBindings(bindings);

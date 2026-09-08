@@ -20,7 +20,6 @@ import {
   configureScalarVariableField,
   getBlocklyCompatibleChecks,
   getBlocklyMsg,
-  getBlocklyMsgOr,
   handleVariablesSetChange,
   resolveVariableTypeForBlock,
   shouldSkipVariableChange,

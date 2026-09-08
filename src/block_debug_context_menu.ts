@@ -117,10 +117,10 @@ export function installBlockDebugContextMenu(): void {
   registry.register({
     id: "ucb_debug_block_type",
     weight: -120,
-    preconditionFn(scope) {
+    preconditionFn(scope: Blockly.ContextMenuRegistry.Scope) {
       return debugPrecondition(scope);
     },
-    displayText(scope) {
+    displayText(scope: Blockly.ContextMenuRegistry.Scope) {
       const block = getContextBlock(scope);
       return block ? `type · ${block.type}` : "type · ?";
     },
@@ -132,14 +132,14 @@ export function installBlockDebugContextMenu(): void {
   registry.register({
     id: "ucb_debug_block_generator",
     weight: -119,
-    preconditionFn(scope) {
+    preconditionFn(scope: Blockly.ContextMenuRegistry.Scope) {
       if (!isDebugEnabled() || !isBlockContext(scope)) {
         return "hidden";
       }
       const block = getContextBlock(scope);
       return block && resolveGeneratorFn(block.type) ? "disabled" : "hidden";
     },
-    displayText(scope) {
+    displayText(scope: Blockly.ContextMenuRegistry.Scope) {
       const block = getContextBlock(scope);
       const gen = block ? resolveGeneratorFn(block.type) : null;
       return gen ? `generator · ${gen}` : "generator · —";
@@ -152,14 +152,14 @@ export function installBlockDebugContextMenu(): void {
   registry.register({
     id: "ucb_debug_block_definition",
     weight: -118,
-    preconditionFn(scope) {
+    preconditionFn(scope: Blockly.ContextMenuRegistry.Scope) {
       if (!isDebugEnabled() || !isBlockContext(scope)) {
         return "hidden";
       }
       const block = getContextBlock(scope);
       return block && resolveDefinitionFn(block.type) ? "disabled" : "hidden";
     },
-    displayText(scope) {
+    displayText(scope: Blockly.ContextMenuRegistry.Scope) {
       const block = getContextBlock(scope);
       const fn = block ? resolveDefinitionFn(block.type) : null;
       return fn ? `define · ${fn}` : "define · —";
@@ -172,7 +172,7 @@ export function installBlockDebugContextMenu(): void {
   registry.register({
     id: "ucb_debug_block_copy_type",
     weight: -117,
-    preconditionFn(scope) {
+    preconditionFn(scope: Blockly.ContextMenuRegistry.Scope) {
       if (!isDebugEnabled() || !isBlockContext(scope)) {
         return "hidden";
       }

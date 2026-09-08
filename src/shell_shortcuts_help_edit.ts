@@ -191,10 +191,10 @@ export const startListening = (
 
     const result = setShortcutBinding(name, [serialized]);
     stopListening();
-    if (!result.ok) {
+    if (result.ok === false) {
       if (result.reason === "conflict" && result.conflicts?.length) {
         const owners = result.conflicts
-          .map((c) => c.owners.join(", "))
+          .map((c: { owners: string[] }) => c.owners.join(", "))
           .join("; ");
         pendingFocus = { kind: "edit", name };
         setStatus(
