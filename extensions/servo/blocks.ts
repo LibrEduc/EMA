@@ -1,4 +1,10 @@
 /**
+ * @license
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
  * Définitions UI des blocs servo (pack d’extension).
  * Style Blockly@rduino : FieldInstance + bloc `servo_attach`.
  * Entrées PIN / DEGREE : entiers uniquement.

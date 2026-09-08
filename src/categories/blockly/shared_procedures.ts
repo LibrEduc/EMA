@@ -34,7 +34,7 @@ let inferConnectedValueTypeRef: InferConnectedValueTypeFn = () => null;
 
 /**
  * Called once from shared.ts once type inference is defined.
- * @param fn - `fn` value.
+ * @param fn - The `fn` argument.
  */
 export function bindInferConnectedValueType(
   fn: InferConnectedValueTypeFn,
@@ -61,7 +61,7 @@ const isBlockDescendantOf = (
  * Returns the type declared on a procedure parameter (menu on procedures_def*), if any.
  * @param workspace - Blockly workspace.
  * @param variableId - Identifier.
- * @param contextBlock - `contextBlock` value.
+ * @param contextBlock - The `contextBlock` argument.
  * @returns Result string.
  */
 export const getProcedureParameterDeclaredType = (
@@ -107,8 +107,8 @@ export const getProcedureParameterDeclaredType = (
 
 /**
  * Declared type of a procedure definition argument (reads `${argId}_TYPE` on procedures_def*).
- * @param defBlock - `defBlock` value.
- * @param argIndex - `argIndex` value.
+ * @param defBlock - The `defBlock` argument.
+ * @param argIndex - The `argIndex` argument.
  * @returns Result string.
  */
 export const getProcedureDefArgumentType = (
@@ -133,7 +133,7 @@ export const getProcedureDefArgumentType = (
 
 /**
  * Infers the source type of a value plugged into a procedure call argument.
- * @param sourceBlock - `sourceBlock` value.
+ * @param sourceBlock - The `sourceBlock` argument.
  * @returns Result string.
  */
 export const inferProcedureCallArgSourceType = (
@@ -150,7 +150,7 @@ export const inferProcedureCallArgSourceType = (
 
 /**
  * Applies setCheck on each ARG input from the procedure definition parameter types.
- * @param callBlock - `callBlock` value.
+ * @param callBlock - The `callBlock` argument.
  */
 export const syncProcedureCallArgInputChecks = (
   callBlock: Blockly.Block,

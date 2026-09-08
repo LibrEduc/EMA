@@ -5,7 +5,6 @@
  * @remarks
  * Extracted from shared helpers to keep loop/math typing utilities focused.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -13,20 +12,6 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -167,7 +152,7 @@ export const areLoopBoundTypesCompatible = (
 
 /**
  * Unifies loop bound types; any float bound promotes the counter to float.
- * @param types - `types` value.
+ * @param types - The `types` argument.
  * @returns Operation result.
  */
 export const unifyLoopBoundTypes = (
@@ -196,8 +181,8 @@ export const unifyLoopBoundTypes = (
 
 /**
  * Checks whether a variable type can serve as a loop counter of the given type.
- * @param variableType - `variableType` value.
- * @param counterType - `counterType` value.
+ * @param variableType - The `variableType` argument.
+ * @param counterType - The `counterType` argument.
  * @returns True when the condition holds.
  */
 export const isLoopCounterVariableCompatible = (
@@ -328,7 +313,7 @@ export const resolveMathChangeVariableId = (block: Blockly.Block): string | null
 
 /**
  * Infers int/float required by a math_change block from its DELTA input.
- * @param changeBlock - `changeBlock` value.
+ * @param changeBlock - The `changeBlock` argument.
  * @returns Operation result.
  */
 export const inferChangeByRequiredTypeFromBlock = (
@@ -345,7 +330,7 @@ export const inferChangeByRequiredTypeFromBlock = (
  * Infers int/float required by all math_change blocks using a variable.
  * @param workspace - Blockly workspace.
  * @param variableId - Identifier.
- * @param contextBlock - `contextBlock` value.
+ * @param contextBlock - The `contextBlock` argument.
  * @returns Operation result.
  */
 export const inferChangeByRequiredType = (
@@ -381,7 +366,7 @@ export const inferChangeByRequiredType = (
  * Aggregates int/float required by loop counters and change-by blocks for a variable.
  * @param workspace - Blockly workspace.
  * @param variableId - Identifier.
- * @param contextBlock - `contextBlock` value.
+ * @param contextBlock - The `contextBlock` argument.
  * @returns Operation result.
  */
 export const inferRequiredNumericTypeForVariable = (

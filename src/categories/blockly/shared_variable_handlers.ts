@@ -106,7 +106,7 @@ export const shouldSkipVariableChange = (
  * Checks whether a variable has any connected assignment blocks. Uses getVariableUsesById to avoid iterating all blocks.
  * @param workspace - Blockly workspace.
  * @param variableId - Identifier.
- * @param contextBlock - `contextBlock` value.
+ * @param contextBlock - The `contextBlock` argument.
  * @returns True when the condition holds.
  */
 export const hasConnectedAssignmentForVariable = (

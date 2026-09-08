@@ -7,7 +7,6 @@
  * The product extension `.µcb` identifies µcBlockly projects; `.json` remains
  * accepted on load for interoperability with plain Blockly exports.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  */
 
 /**
@@ -31,7 +30,7 @@ export const UCBLOCKLY_WORKSPACE_FILE_ACCEPT =
 
 /**
  * Builds a dated default download name, e.g. `workspace_2026-08-20.µcb`.
- * @param date - `date` value.
+ * @param date - The `date` argument.
  */
 export function defaultUcBlocklyWorkspaceFilename(
   date = new Date(),

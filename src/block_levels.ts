@@ -3,7 +3,6 @@
  * @module BlockLevels
  * @description Pedagogical levels (1, 2, 3) on Blockly block definitions.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -11,20 +10,6 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -41,7 +26,7 @@ export type BlockDefinitionWithLevels = {
 
 /**
  * Applies levels to each Blockly.Blocks entry.
- * @param levels - `levels` value.
+ * @param levels - The `levels` argument.
  * @returns Numeric result.
  */
 export function applyLevelsToAllBlockDefinitions(
@@ -61,7 +46,7 @@ export function applyLevelsToAllBlockDefinitions(
 
 /**
  * Retourne la chaîne levels d'un type de bloc, ou undefined.
- * @param blockType - `blockType` value.
+ * @param blockType - The `blockType` argument.
  * @returns Result string.
  */
 export function getBlockDefinitionLevels(blockType: string): string | undefined {
@@ -71,7 +56,7 @@ export function getBlockDefinitionLevels(blockType: string): string | undefined 
 
 /**
  * Parse levels CSV en liste de numéros.
- * @param levels - `levels` value.
+ * @param levels - The `levels` argument.
  * @returns Numeric result.
  */
 export function parseBlockLevels(levels: string | undefined): number[] {

@@ -5,7 +5,6 @@
  * @remarks
  * Implementations live under `src/blockly_patches/`. Re-test these at each Blockly bump.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  */
 
 /**

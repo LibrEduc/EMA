@@ -27,7 +27,7 @@ type ToolboxNode = {
 };
 
 /**
- * Get Loaded Extensions.
+ * Return all currently loaded extension packs.
  * @returns Result array.
  */
 export function getLoadedExtensions(): LoadedExtension[] {
@@ -35,7 +35,7 @@ export function getLoadedExtensions(): LoadedExtension[] {
 }
 
 /**
- * Get Loaded Extension.
+ * Return one loaded extension pack by id.
  * @param id - Identifier string.
  * @returns Operation result.
  */
@@ -45,7 +45,7 @@ export function getLoadedExtension(id: string): LoadedExtension | undefined {
 
 /**
  * Register Loaded Extension.
- * @param ext - `ext` value.
+ * @param ext - The `ext` argument.
  */
 export function registerLoadedExtension(ext: LoadedExtension): void {
   loaded.set(ext.id, ext);

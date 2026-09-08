@@ -2,7 +2,6 @@
  * @packageDocumentation
  * @module BoardProfiles
  * @description Board pin/CPU profiles (data only).
- * @license GPL-3.0-or-later
  */
 
 /**

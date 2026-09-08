@@ -6,7 +6,6 @@
  * Pure functions extracted from the connection checker: source-block type
  * resolution, switch-case input detection, and type-compatibility wrapping.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -14,26 +13,16 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import * as Blockly from "blockly";
 import { checkTypeCompatibility as sharedCheckTypeCompatibility } from "./block_types_registry";
 import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
+
+/** Blockly connection type constants (INPUT_VALUE=1, OUTPUT_VALUE=2). */
+const INPUT_VALUE_TYPE = 1;
+const OUTPUT_VALUE_TYPE = 2;
 
 /** Semantic type for a block connecting to a switch-case (or int-only) input. */
 export type SwitchCaseSourceType = "int" | "float" | "invalid" | null;
@@ -45,9 +34,47 @@ export type OutputInputPair = {
 };
 
 /**
+ * Identifies which connection is OUTPUT_VALUE vs INPUT_VALUE.
+ * @param a - First connection.
+ * @param b - Second connection.
+ * @returns Pair or null when either role is missing.
+ */
+export function resolveOutputInputPair(
+  a: Blockly.Connection,
+  b: Blockly.Connection,
+): OutputInputPair | null {
+  const aType = (a as { type: number }).type;
+  const bType = (b as { type: number }).type;
+  const out = aType === OUTPUT_VALUE_TYPE ? a : bType === OUTPUT_VALUE_TYPE ? b : null;
+  const inp = aType === INPUT_VALUE_TYPE ? a : bType === INPUT_VALUE_TYPE ? b : null;
+  if (!out || !inp) {
+    return null;
+  }
+  return { out, inp };
+}
+
+/**
+ * Maps Blockly display types (Boolean, String, Colour) to Arduino declare keys.
+ * @param sourceType - Raw type from getBlockType or connection check.
+ * @returns Normalized type key for declare/list compatibility.
+ */
+export function normalizeDeclareSourceType(sourceType: string): string {
+  if (sourceType === "Boolean") {
+    return "bool";
+  }
+  if (sourceType === "String") {
+    return "string";
+  }
+  if (sourceType === "Colour" || sourceType === "color" || sourceType === "colour") {
+    return "string";
+  }
+  return sourceType;
+}
+
+/**
  * Returns the input name for a connection on a block, or null if not found.
  * @param block - Blockly block instance.
- * @param connection - `connection` value.
+ * @param connection - The `connection` argument.
  * @returns Result string.
  */
 export function getInputNameForConnection(
@@ -64,7 +91,7 @@ export function getInputNameForConnection(
 
 /**
  * True when the input connection is a `controls_switch` CASE* value input.
- * @param inputConnection - `inputConnection` value.
+ * @param inputConnection - The `inputConnection` argument.
  * @returns True when the condition holds.
  */
 export function isSwitchCaseInput(inputConnection: Blockly.Connection): boolean {
@@ -78,7 +105,7 @@ export function isSwitchCaseInput(inputConnection: Blockly.Connection): boolean 
 
 /**
  * Resolves the semantic type of a source (output) block via getBlockType() or the output connection check.
- * @param sourceBlock - `sourceBlock` value.
+ * @param sourceBlock - The `sourceBlock` argument.
  * @returns Result string.
  */
 export function resolveSourceBlockType(
@@ -110,7 +137,7 @@ export function resolveSourceBlockType(
 
 /**
  * Resolves semantic type for a block connecting to a switch case input.
- * @param sourceBlock - `sourceBlock` value.
+ * @param sourceBlock - The `sourceBlock` argument.
  * @returns Operation result.
  */
 export function resolveSwitchCaseSourceType(
@@ -172,8 +199,8 @@ export function checkSwitchCaseIntConnection(
 
 /**
  * Checks if two types are compatible (exact match, null/undefined equality, or registry rules).
- * @param sourceType - `sourceType` value.
- * @param targetType - `targetType` value.
+ * @param sourceType - The `sourceType` argument.
+ * @param targetType - The `targetType` argument.
  * @returns True when the condition holds.
  */
 export function checkTypeCompatibility(

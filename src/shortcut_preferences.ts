@@ -3,7 +3,6 @@
  * @module ShortcutPreferences
  * @description Persist and rebind Blockly ShortcutRegistry keybindings.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -11,20 +10,6 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -153,7 +138,7 @@ const arraysEqual = (a: string[], b: string[]): boolean =>
 
 /**
  * Human-readable label for a Blockly serialized key code (e.g. Control+67 → Ctrl+C).
- * @param serialized - `serialized` value.
+ * @param serialized - The `serialized` argument.
  * @returns Result string.
  */
 export const formatSerializedKey = (serialized: string): string => {
@@ -191,7 +176,7 @@ export const formatSerializedKey = (serialized: string): string => {
 
 /**
  * Format Serialized Keys.
- * @param codes - `codes` value.
+ * @param codes - The `codes` argument.
  * @returns Result string.
  */
 export const formatSerializedKeys = (codes: string[]): string =>
@@ -290,7 +275,7 @@ export type RebindConflict = {
 /**
  * Returns conflicting shortcut names for the proposed key codes (excluding `name`).
  * @param name - Name string.
- * @param keyCodes - `keyCodes` value.
+ * @param keyCodes - The `keyCodes` argument.
  * @returns Result array.
  */
 export const findRebindConflicts = (
@@ -313,7 +298,7 @@ export const findRebindConflicts = (
 /**
  * Rebind a registered shortcut to new serialized key codes.
  * @param name - Name string.
- * @param keyCodes - `keyCodes` value.
+ * @param keyCodes - The `keyCodes` argument.
  * @returns Result array.
  */
 export const rebindShortcut = (
@@ -399,7 +384,7 @@ const expandModifierAliases = (keyCodes: string[]): string[] => {
 /**
  * Persist and apply a new binding for one shortcut.
  * @param name - Name string.
- * @param keyCodes - `keyCodes` value.
+ * @param keyCodes - The `keyCodes` argument.
  * @returns Result array.
  */
 export const setShortcutBinding = (

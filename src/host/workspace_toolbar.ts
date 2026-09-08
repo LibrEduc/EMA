@@ -65,7 +65,7 @@ function isWorkspaceToolbarRenderer(
 
 /**
  * Returns a normalized copy of toolbar settings.
- * @param partial - `partial` value.
+ * @param partial - The `partial` argument.
  * @returns Operation result.
  */
 export function normalizeWorkspaceToolbarSettings(
@@ -108,7 +108,7 @@ export function applyWorkspaceToolbarLocale(language: string): void {
 
 /**
  * Resolves a theme key to a Blockly theme instance.
- * @param themeKey - `themeKey` value.
+ * @param themeKey - The `themeKey` argument.
  * @returns Operation result.
  */
 export function resolveWorkspaceToolbarTheme(themeKey: string): Blockly.Theme {
@@ -148,8 +148,8 @@ export function getStandardWorkspaceChromeOptions(): Blockly.BlocklyOptions {
 
 /**
  * Applies a theme to every workspace in the list.
- * @param workspaces - `workspaces` value.
- * @param themeKey - `themeKey` value.
+ * @param workspaces - The `workspaces` argument.
+ * @param themeKey - The `themeKey` argument.
  */
 export function applyThemeToWorkspaces(
   workspaces: Blockly.WorkspaceSvg[],
@@ -178,7 +178,7 @@ export function applyToolboxLanguageToWorkspace(
 
 /**
  * Undo one step on each workspace (each keeps its own stack).
- * @param workspaces - `workspaces` value.
+ * @param workspaces - The `workspaces` argument.
  */
 export function undoWorkspaces(workspaces: Blockly.WorkspaceSvg[]): void {
   for (const workspace of workspaces) {
@@ -188,7 +188,7 @@ export function undoWorkspaces(workspaces: Blockly.WorkspaceSvg[]): void {
 
 /**
  * Redo one step on each workspace.
- * @param workspaces - `workspaces` value.
+ * @param workspaces - The `workspaces` argument.
  */
 export function redoWorkspaces(workspaces: Blockly.WorkspaceSvg[]): void {
   for (const workspace of workspaces) {

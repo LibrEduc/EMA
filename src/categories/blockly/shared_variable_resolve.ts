@@ -48,7 +48,7 @@ export const isGlobalVariableAssignment = (block: Blockly.Block): boolean => {
 
 /**
  * Infers the value type inside a `variables_local` wrapper (or null).
- * @param valueBlock - `valueBlock` value.
+ * @param valueBlock - The `valueBlock` argument.
  * @returns Result string.
  */
 export const inferLocalAssignmentValueType = (

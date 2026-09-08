@@ -1,7 +1,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: Apache-2.0
+ * SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Runtime ESM — définitions UI servo (Blockly@rduino / FieldInstance).
  * Contrat : export function defineBlocks(ctx)

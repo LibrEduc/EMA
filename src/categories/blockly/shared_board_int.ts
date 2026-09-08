@@ -67,7 +67,7 @@ function inferSourceTypeForIntInput(
 /**
  * Enforces integer-only values on the given value inputs (setCheck + disconnect). event does not require revalidation (caller must leave existing warnings alone).
  * @param block - Blockly block instance.
- * @param inputNames - `inputNames` value.
+ * @param inputNames - The `inputNames` argument.
  * @param event - Blockly workspace event.
  * @returns Result string.
  */

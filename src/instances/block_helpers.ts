@@ -28,7 +28,7 @@ export {
  * @param block - Blockly block instance.
  * @param fieldName - Field name on the block.
  * @param instanceType - Logical instance type (e.g. `Servo`).
- * @param componentLabel - `componentLabel` value.
+ * @param componentLabel - The `componentLabel` argument.
  */
 export function updateInstancePresenceWarning(
   block: Blockly.Block,

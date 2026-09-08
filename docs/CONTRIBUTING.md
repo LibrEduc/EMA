@@ -32,6 +32,7 @@ Thank you for considering contributing. This short guide will help you get start
    - `npm run build:lib` — ensure TypeScript compiles  
 
 4. **Code style**  
+   - See **[CONVENTIONS.md](./CONVENTIONS.md)** (shared with BlocklyDuino v3 and Factory v3): headers, file split, inline comments, TSDoc.  
    - Documentation comments (**TSDoc**, consumed by [TypeDoc](https://typedoc.org/)) in **English**  
    - Use `@packageDocumentation`, `@description`, `@remarks`, `@param`, `@returns` for public APIs (see [TYPEDOC.md](./TYPEDOC.md))  
 
@@ -42,7 +43,7 @@ Thank you for considering contributing. This short guide will help you get start
 | Add or change a block (UI) | `src/categories/blockly/` + `index.ts` |
 | Add or change code generation for a block | `src/generators/arduino/blocks/` + `src/generators/arduino.ts` |
 | Add block types / compatibility | `src/generators/arduino/block_types/`, `block_types.ts`, `block_types_registry.ts` — [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
-| Change toolbox or categories | `src/toolbox.ts` |
+| Change toolbox or categories | **[MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md)** → `src/toolbox/categories/` |
 | Add a board or change pins | `src/boards.ts` |
 | Add or edit a language | `src/languages/` — then `npm run check-translations` |
 | Convert Blockly@rduino project | `npm run convert-rduino` — see [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) |

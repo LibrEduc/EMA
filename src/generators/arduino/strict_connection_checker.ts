@@ -7,8 +7,8 @@
  * Custom ConnectionChecker that uses `getBlockType()` for type checking — more robust than the
  * default ConnectionChecker, especially for blocks with dynamic types (e.g. typed variables).
  * Compatibility rules: `docs/TYPES_ET_COMPATIBILITES.md`.
+ * Array/list and procedure-arg checks live in sibling modules.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -16,37 +16,25 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import * as Blockly from "blockly";
-import {
-  inferArrayElementTypeFromBlock,
-  inferListVariableElementType,
-} from "./block_types_registry";
-import { isDeclareContainsTypeCompatible, isTypeCompatible, normalizeBlocklyCheckToInternalType } from "./block_types";
-import { resolveMathNumberBlockType } from "../../categories/blockly/shared";
+import { normalizeBlocklyCheckToInternalType } from "./block_types";
 import { debugLog } from "./debug";
+import {
+  checkArrayDefineInputConnection,
+  checkArrayIndexInputConnection,
+  checkArrayListAssignValueInputConnection,
+  checkArrayListLiteralAddInputConnection,
+} from "./strict_connection_array";
+import { checkProcedureCallArgConnection } from "./strict_connection_procedure";
 import {
   checkSwitchCaseIntConnection,
   checkTypeCompatibility,
   getInputNameForConnection,
+  resolveOutputInputPair,
   resolveSourceBlockType,
-  resolveSwitchCaseSourceType,
 } from "./strict_connection_type_utils";
 import {
   isMathChangeCompatibleVariableType,
@@ -57,10 +45,6 @@ import {
  * Custom ConnectionChecker that extends Blockly's default ConnectionChecker
  * to use getBlockType() for source blocks, providing stricter type checking.
  */
-// Blockly connection type constants (INPUT_VALUE=1, OUTPUT_VALUE=2) for robust checks
-const INPUT_VALUE_TYPE = 1;
-const OUTPUT_VALUE_TYPE = 2;
-
 export class StrictConnectionChecker extends Blockly.ConnectionChecker {
   /**
    * Entry point when Blockly needs a reason code. Must allow const block before parent.
@@ -78,51 +62,51 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return Blockly.Connection.CAN_CONNECT;
     }
     if (a && b) {
-      const listAdd = this.checkArrayListLiteralAddInputConnection_(a, b);
+      const listAdd = checkArrayListLiteralAddInputConnection(a, b);
       if (listAdd === true) {
-        return this.finishArrayDeclareConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (listAdd === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
-      const arrayDefine = this.checkArrayDefineInputConnection_(a, b);
+      const arrayDefine = checkArrayDefineInputConnection(a, b);
       if (arrayDefine === true) {
-        return this.finishArrayDeclareConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (arrayDefine === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
-      const arrayAssign = this.checkArrayListAssignValueInputConnection_(a, b);
+      const arrayAssign = checkArrayListAssignValueInputConnection(a, b);
       if (arrayAssign === true) {
-        return this.finishArrayDeclareConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (arrayAssign === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
-      const arrayIndex = this.checkArrayIndexInputConnection_(a, b);
+      const arrayIndex = checkArrayIndexInputConnection(a, b);
       if (arrayIndex === true) {
-        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (arrayIndex === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
-      const procedureArg = this.checkProcedureCallArgConnection_(a, b);
+      const procedureArg = checkProcedureCallArgConnection(a, b);
       if (procedureArg === true) {
-        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (procedureArg === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
       const switchCase = this.checkSwitchCaseIntConnection_(a, b);
       if (switchCase === true) {
-        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (switchCase === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
       }
       const mathChangeVar = this.checkMathChangeVarConnection_(a, b);
       if (mathChangeVar === true) {
-        return this.finishSwitchCaseConnectWithReason_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnectWithReason_(a, b, isDragging, opt_distance);
       }
       if (mathChangeVar === false) {
         return Blockly.Connection.REASON_CHECKS_FAILED;
@@ -137,7 +121,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     b: Blockly.Connection,
   ): boolean | null {
     return checkSwitchCaseIntConnection(a, b, {
-      resolveOutputInputPair: (x, y) => this.resolveOutputInputPair_(x, y),
+      resolveOutputInputPair,
     });
   }
 
@@ -149,7 +133,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     a: Blockly.Connection,
     b: Blockly.Connection,
   ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
+    const pair = resolveOutputInputPair(a, b);
     if (!pair) {
       return null;
     }
@@ -190,51 +174,51 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       return true;
     }
     if (a && b) {
-      const listAdd = this.checkArrayListLiteralAddInputConnection_(a, b);
+      const listAdd = checkArrayListLiteralAddInputConnection(a, b);
       if (listAdd === true) {
-        return this.finishArrayDeclareConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (listAdd === false) {
         return false;
       }
-      const arrayDefine = this.checkArrayDefineInputConnection_(a, b);
+      const arrayDefine = checkArrayDefineInputConnection(a, b);
       if (arrayDefine === true) {
-        return this.finishArrayDeclareConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (arrayDefine === false) {
         return false;
       }
-      const arrayAssign = this.checkArrayListAssignValueInputConnection_(a, b);
+      const arrayAssign = checkArrayListAssignValueInputConnection(a, b);
       if (arrayAssign === true) {
-        return this.finishArrayDeclareConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (arrayAssign === false) {
         return false;
       }
-      const arrayIndex = this.checkArrayIndexInputConnection_(a, b);
+      const arrayIndex = checkArrayIndexInputConnection(a, b);
       if (arrayIndex === true) {
-        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (arrayIndex === false) {
         return false;
       }
-      const procedureArg = this.checkProcedureCallArgConnection_(a, b);
+      const procedureArg = checkProcedureCallArgConnection(a, b);
       if (procedureArg === true) {
-        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (procedureArg === false) {
         return false;
       }
       const switchCase = this.checkSwitchCaseIntConnection_(a, b);
       if (switchCase === true) {
-        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (switchCase === false) {
         return false;
       }
       const mathChangeVar = this.checkMathChangeVarConnection_(a, b);
       if (mathChangeVar === true) {
-        return this.finishSwitchCaseConnect_(a, b, isDragging, opt_distance);
+        return this.finishTypedConnect_(a, b, isDragging, opt_distance);
       }
       if (mathChangeVar === false) {
         return false;
@@ -265,11 +249,11 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
       a &&
       b &&
       (this.checkSwitchCaseIntConnection_(a, b) === true ||
-        this.checkArrayDefineInputConnection_(a, b) === true ||
-        this.checkArrayListLiteralAddInputConnection_(a, b) === true ||
-        this.checkArrayListAssignValueInputConnection_(a, b) === true ||
-        this.checkArrayIndexInputConnection_(a, b) === true ||
-        this.checkProcedureCallArgConnection_(a, b) === true)
+        checkArrayDefineInputConnection(a, b) === true ||
+        checkArrayListLiteralAddInputConnection(a, b) === true ||
+        checkArrayListAssignValueInputConnection(a, b) === true ||
+        checkArrayIndexInputConnection(a, b) === true ||
+        checkProcedureCallArgConnection(a, b) === true)
     ) {
       return Blockly.Connection.CAN_CONNECT;
     }
@@ -283,7 +267,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
    * Uses numeric type (1/2) so it works regardless of ConnectionType enum binding.
    */
   private allowValueToUncheckedInput_(a: Blockly.Connection, b: Blockly.Connection): boolean {
-    const pair = this.resolveOutputInputPair_(a, b);
+    const pair = resolveOutputInputPair(a, b);
     if (!pair) return false;
     const targetBlock = pair.inp.getSourceBlock();
     if (targetBlock && (targetBlock as Blockly.Block & { type: string }).type === "variables_const") return true;
@@ -291,391 +275,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     return !targetCheck || (Array.isArray(targetCheck) && targetCheck.length === 0);
   }
 
-  private resolveOutputInputPair_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): { out: Blockly.Connection; inp: Blockly.Connection } | null {
-    const aType = (a as { type: number }).type;
-    const bType = (b as { type: number }).type;
-    const out = aType === OUTPUT_VALUE_TYPE ? a : bType === OUTPUT_VALUE_TYPE ? b : null;
-    const inp = aType === INPUT_VALUE_TYPE ? a : bType === INPUT_VALUE_TYPE ? b : null;
-    if (!out || !inp) return null;
-    return { out, inp };
-  }
-
-  private resolveArrayDefineInputContext_(
-    inputConnection: Blockly.Connection,
-  ): { choix: string; typeField: string } | null {
-    const targetBlock = inputConnection.getSourceBlock();
-    if (!targetBlock) {
-      return null;
-    }
-    const inputName = getInputNameForConnection(targetBlock, inputConnection);
-    if (!inputName) {
-      return null;
-    }
-
-    if (targetBlock.type === "Array_declare") {
-      if (inputName !== "contenu" && inputName !== "contenu2") {
-        return null;
-      }
-      return {
-        choix: targetBlock.getFieldValue("choix"),
-        typeField: targetBlock.getFieldValue("type") || "int",
-      };
-    }
-
-    if (targetBlock.type === "Array_create") {
-      const match = /^D(\d+)$/.exec(inputName);
-      if (!match) {
-        return null;
-      }
-      const index = parseInt(match[1], 10);
-      const dim = parseInt(targetBlock.getFieldValue("dim") || "1", 10);
-      if (index >= dim) {
-        return null;
-      }
-      return {
-        choix: targetBlock.getFieldValue("choix"),
-        typeField: targetBlock.getFieldValue("type") || "int",
-      };
-    }
-
-    return null;
-  }
-
-  /**
-   * Entrées « value » de Array_modify / Array_fix : type imposé par le tableau (VAR).
-   */
-  private checkArrayListAssignValueInputConnection_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
-    if (!pair) {
-      return null;
-    }
-
-    const targetBlock = pair.inp.getSourceBlock();
-    if (
-      !targetBlock ||
-      (targetBlock.type !== "Array_modify" && targetBlock.type !== "Array_fix")
-    ) {
-      return null;
-    }
-    const inputName = getInputNameForConnection(targetBlock, pair.inp);
-    if (inputName !== "value") {
-      return null;
-    }
-
-    const varId = targetBlock.getFieldValue("VAR");
-    const elementType = inferListVariableElementType(targetBlock.workspace, varId);
-    if (!elementType || elementType === "__NO_TYPE__") {
-      return null;
-    }
-
-    const sourceBlock = pair.out.getSourceBlock();
-    if (!sourceBlock) {
-      return false;
-    }
-
-    if (sourceBlock.type === "math_number") {
-      const numType = resolveMathNumberBlockType(sourceBlock);
-      return this.isDeclareElementTypeCompatible_(numType, elementType);
-    }
-
-    const rawSourceType = resolveSourceBlockType(sourceBlock);
-    if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
-      return false;
-    }
-    const sourceType = this.normalizeDeclareSourceType_(rawSourceType);
-    return this.isDeclareElementTypeCompatible_(sourceType, elementType);
-  }
-
-  /**
-   * Entrées d'index D* de Array_fix / Array_getIndex_in_array : entiers uniquement.
-   */
-  private isArrayIndexInput_(inputConnection: Blockly.Connection): boolean {
-    const targetBlock = inputConnection.getSourceBlock();
-    if (!targetBlock) {
-      return false;
-    }
-    if (
-      targetBlock.type !== "Array_fix" &&
-      targetBlock.type !== "Array_getIndex_in_array"
-    ) {
-      return false;
-    }
-    const inputName = getInputNameForConnection(targetBlock, inputConnection);
-    return inputName !== null && /^D\d+$/.test(inputName);
-  }
-
-  private checkArrayIndexInputConnection_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
-    if (!pair || !this.isArrayIndexInput_(pair.inp)) {
-      return null;
-    }
-    const semanticType = resolveSwitchCaseSourceType(pair.out.getSourceBlock());
-    return semanticType === "int";
-  }
-
-  private isProcedureCallArgInput_(inputConnection: Blockly.Connection): boolean {
-    const targetBlock = inputConnection.getSourceBlock();
-    if (
-      !targetBlock ||
-      (targetBlock.type !== "procedures_callreturn" &&
-        targetBlock.type !== "procedures_callnoreturn")
-    ) {
-      return false;
-    }
-    const inputName = getInputNameForConnection(targetBlock, inputConnection);
-    return inputName !== null && /^ARG\d+$/.test(inputName);
-  }
-
-  private resolveProcedureCallArgSourceType_(
-    sourceBlock: Blockly.Block | null,
-  ): string | null {
-    if (!sourceBlock) {
-      return null;
-    }
-    if (sourceBlock.type === "math_number") {
-      return resolveMathNumberBlockType(sourceBlock);
-    }
-    const typed = sourceBlock as Blockly.Block & { getBlockType?: () => string | null };
-    const rawType = typed.getBlockType?.() ?? null;
-    const normalized = this.normalizeDeclareSourceType_(rawType || "");
-    if (normalized && normalized !== "__NO_TYPE__") {
-      return normalized;
-    }
-    const check = sourceBlock.outputConnection?.getCheck();
-    const checkNorm = this.normalizeDeclareSourceType_(
-      Array.isArray(check) ? (check[0] ?? "") : (check ?? ""),
-    );
-    return checkNorm && checkNorm !== "__NO_TYPE__" ? checkNorm : null;
-  }
-
-  /**
-   * Entrées ARG* des appels de procédure : int n'accepte que int, float accepte int+float.
-   */
-  private checkProcedureCallArgConnection_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
-    if (!pair || !this.isProcedureCallArgInput_(pair.inp)) {
-      return null;
-    }
-
-    const callBlock = pair.inp.getSourceBlock();
-    if (!callBlock?.workspace) {
-      return null;
-    }
-
-    const inputName = getInputNameForConnection(callBlock, pair.inp);
-    const argIndex = inputName ? parseInt(inputName.replace("ARG", ""), 10) : -1;
-    if (argIndex < 0 || Number.isNaN(argIndex)) {
-      return null;
-    }
-
-    type CallBlock = Blockly.Block & {
-      getProcedureCall?: () => string;
-      getVarModels?: () => Blockly.VariableModel[];
-      argumentVarModels_?: Blockly.VariableModel[];
-      argData_?: { argId: string; model: Blockly.VariableModel }[];
-    };
-    const typedCall = callBlock as CallBlock;
-    const defName = typedCall.getProcedureCall?.();
-    if (!defName) {
-      return null;
-    }
-
-    const defBlock = Blockly.Procedures.getDefinition(
-      defName,
-      callBlock.workspace,
-    ) as CallBlock | null;
-    if (!defBlock) {
-      return null;
-    }
-
-    const argModels =
-      defBlock.getVarModels?.() || defBlock.argumentVarModels_ || [];
-    const argDatum = defBlock.argData_?.[argIndex];
-    let argType = argModels[argIndex]?.getType?.() || "int";
-    if (argDatum?.argId) {
-      const fromField = defBlock.getFieldValue(`${argDatum.argId}_TYPE`);
-      if (fromField) {
-        argType = fromField;
-      }
-    }
-
-    const sourceType = this.resolveProcedureCallArgSourceType_(
-      pair.out.getSourceBlock(),
-    );
-    if (!sourceType || sourceType === "__NO_TYPE__") {
-      return false;
-    }
-
-    return isTypeCompatible(sourceType, argType);
-  }
-
-  /**
-   * Entrées valeur de Array_declare / Array_create : type imposé par le menu déroulant.
-   */
-  private checkArrayDefineInputConnection_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
-    if (!pair) {
-      return null;
-    }
-
-    const defineContext = this.resolveArrayDefineInputContext_(pair.inp);
-    if (!defineContext) {
-      return null;
-    }
-
-    const { choix, typeField } = defineContext;
-    const sourceBlock = pair.out.getSourceBlock();
-    if (!sourceBlock) {
-      return false;
-    }
-
-    if (choix === "c1") {
-      if (sourceBlock.type === "math_number") {
-        return resolveMathNumberBlockType(sourceBlock) === "int";
-      }
-      const sourceType = resolveSourceBlockType(sourceBlock);
-      return sourceType === "int";
-    }
-
-    if (
-      sourceBlock.type === "Array_list_literal" ||
-      sourceBlock.type === "Array_list_3"
-    ) {
-      const inferred = inferArrayElementTypeFromBlock(sourceBlock);
-      if (!inferred || inferred === "__NO_TYPE__") {
-        return true;
-      }
-      return this.isDeclareElementTypeCompatible_(inferred, typeField);
-    }
-
-    if (sourceBlock.type === "math_number") {
-      const numType = resolveMathNumberBlockType(sourceBlock);
-      return this.isDeclareElementTypeCompatible_(numType, typeField);
-    }
-
-    const rawSourceType = resolveSourceBlockType(sourceBlock);
-    if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
-      return false;
-    }
-    const sourceType = this.normalizeDeclareSourceType_(rawSourceType);
-    return this.isDeclareElementTypeCompatible_(sourceType, typeField);
-  }
-
-  private isArrayListElementAddInput_(inputConnection: Blockly.Connection): boolean {
-    const targetBlock = inputConnection.getSourceBlock();
-    if (!targetBlock) {
-      return false;
-    }
-    const inputName = getInputNameForConnection(targetBlock, inputConnection);
-    if (!inputName?.startsWith("ADD")) {
-      return false;
-    }
-    return (
-      targetBlock.type === "Array_with" ||
-      targetBlock.type === "Array_list_literal" ||
-      targetBlock.type === "Array_list_3"
-    );
-  }
-
-  private resolveArrayListElementTypeKey_(listBlock: Blockly.Block): string | null {
-    if (listBlock.type === "Array_with") {
-      const inferred = inferArrayElementTypeFromBlock(listBlock);
-      return inferred && inferred !== "__NO_TYPE__" ? inferred : null;
-    }
-    return this.getArrayListLiteralParentDeclareType_(listBlock);
-  }
-
-  private getArrayListLiteralParentDeclareType_(
-    listBlock: Blockly.Block,
-  ): string | null {
-    const parent = listBlock.outputConnection?.targetBlock?.() ?? null;
-    if (!parent || parent.getFieldValue("choix") !== "c2") {
-      return null;
-    }
-    if (parent.type !== "Array_declare" && parent.type !== "Array_create") {
-      return null;
-    }
-    const declaredType = parent.getFieldValue("type");
-    if (!declaredType || declaredType === "__NO_TYPE__") {
-      return null;
-    }
-    return declaredType;
-  }
-
-  /**
-   * Entrées ADD de Array_with / littéral de liste (type imposé ou inféré).
-   */
-  private checkArrayListLiteralAddInputConnection_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-  ): boolean | null {
-    const pair = this.resolveOutputInputPair_(a, b);
-    if (!pair || !this.isArrayListElementAddInput_(pair.inp)) {
-      return null;
-    }
-
-    const listBlock = pair.inp.getSourceBlock()!;
-    const typeKey = this.resolveArrayListElementTypeKey_(listBlock);
-    if (!typeKey) {
-      return null;
-    }
-
-    const sourceBlock = pair.out.getSourceBlock();
-    if (!sourceBlock) {
-      return false;
-    }
-
-    if (sourceBlock.type === "math_number") {
-      const numType = resolveMathNumberBlockType(sourceBlock);
-      return isDeclareContainsTypeCompatible(numType, typeKey);
-    }
-
-    const rawSourceType = resolveSourceBlockType(sourceBlock);
-    if (!rawSourceType || rawSourceType === "__NO_TYPE__" || rawSourceType === "undefined") {
-      return false;
-    }
-    return isDeclareContainsTypeCompatible(
-      this.normalizeDeclareSourceType_(rawSourceType),
-      typeKey,
-    );
-  }
-
-  private isDeclareElementTypeCompatible_(
-    sourceType: string,
-    arduinoTypeField: string,
-  ): boolean {
-    return isDeclareContainsTypeCompatible(sourceType, arduinoTypeField);
-  }
-
-  private normalizeDeclareSourceType_(sourceType: string): string {
-    if (sourceType === "Boolean") {
-      return "bool";
-    }
-    if (sourceType === "String") {
-      return "string";
-    }
-    if (sourceType === "Colour" || sourceType === "color" || sourceType === "colour") {
-      return "string";
-    }
-    return sourceType;
-  }
-
-  private finishArrayDeclareConnect_(
+  private finishTypedConnect_(
     a: Blockly.Connection,
     b: Blockly.Connection,
     isDragging: boolean,
@@ -695,50 +295,7 @@ export class StrictConnectionChecker extends Blockly.ConnectionChecker {
     return true;
   }
 
-  private finishArrayDeclareConnectWithReason_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-    isDragging: boolean,
-    opt_distance?: number,
-  ): number {
-    const safety = this.doSafetyChecks(a, b);
-    if (safety !== Blockly.Connection.CAN_CONNECT) {
-      return safety;
-    }
-    if (
-      isDragging &&
-      !this.doDragChecks(
-        a as Blockly.RenderedConnection,
-        b as Blockly.RenderedConnection,
-        opt_distance ?? 0,
-      )
-    ) {
-      return Blockly.Connection.REASON_DRAG_CHECKS_FAILED;
-    }
-    return Blockly.Connection.CAN_CONNECT;
-  }
-
-  private finishSwitchCaseConnect_(
-    a: Blockly.Connection,
-    b: Blockly.Connection,
-    isDragging: boolean,
-    opt_distance?: number,
-  ): boolean {
-    const safety = this.doSafetyChecks(a, b);
-    if (safety !== Blockly.Connection.CAN_CONNECT) {
-      return false;
-    }
-    if (isDragging) {
-      return this.doDragChecks(
-        a as Blockly.RenderedConnection,
-        b as Blockly.RenderedConnection,
-        opt_distance ?? 0,
-      );
-    }
-    return true;
-  }
-
-  private finishSwitchCaseConnectWithReason_(
+  private finishTypedConnectWithReason_(
     a: Blockly.Connection,
     b: Blockly.Connection,
     isDragging: boolean,

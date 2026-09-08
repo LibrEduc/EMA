@@ -76,13 +76,142 @@ Helper **`setVariableTypeAndMarkManual`** dans `shared`, utilisé dans `configur
 
 Découpage **`shared.ts`** : **terminé** pour l’objectif « god module ».
 
-### 3.2 `logic.ts` (≈ 456 lignes)
+### 3.1bis `array.ts` (définitions blocs) ✅
 
-Contient switch/case, mutator, `applySwitchCaseTyping`, tooltips, etc. On pourrait isoler la partie « switch » dans un `logic_switch.ts` et garder `logic.ts` pour le reste + orchestration. Optionnel, surtout si on touche souvent au switch.
+| Fichier | Rôle |
+|---------|------|
+| **`array_sync.ts`** | Ownership déclarations listes, sync types / index, handlers `onchange` |
+| **`array_mutators.ts`** | Mutators +/- `Array_with` / `Array_list_literal` |
+| **`array_list_defs.ts`** | with / literal / get / modify / set |
+| **`array_declare_defs.ts`** | declare / create / form / getIndex_in_array |
+| **`array_bitmap.ts`** (+ `_grid`) | Bitmap |
+| **`array.ts`** | Façade `defineArrayBlocks` + réexports sync publics |
 
-### 3.3 `variables.ts` (≈ 627 lignes)
+### 3.2 `logic.ts` ✅
 
-Beaucoup de définitions de blocs (get, set, local, const, init, define, set_type). Un découpage en `variables_get.ts`, `variables_set.ts`, `variables_const.ts`, etc. est possible, mais éparpille une logique déjà liée. À considérer seulement si le fichier devient difficile à maintenir.
+| Fichier | Rôle |
+|---------|------|
+| **`logic_switch.ts`** | Switch/case, mutator, typage des cases |
+| **`logic_if_extras.ts`** | Blocs logique hors switch (if extras, etc.) |
+| **`logic.ts`** | Façade + `defineControlsSwitchBlocks` |
+
+### 3.2bis `board.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`board_shared.ts`** | Helpers, styles, pin dropdowns, `registerExtensionPinDropdowns` |
+| **`board_structure.ts`** | setup / loop / comment / include / define |
+| **`board_io.ts`** | I/O digital/analog, pulse, map, tone |
+| **`board_time.ts`** | delay / millis |
+| **`board_conversion.ts`** | Conversions |
+| **`board_serial.ts`** | Série |
+| **`board_pins.ts`** | `refreshBoardPinDropdowns` |
+| **`board.ts`** | Façade `defineBoardBlocks` + réexports publics |
+
+### 3.3 `variables.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`variables_types.ts`** | Labels / dropdowns types Arduino |
+| **`variables_access.ts`** | get/set dynamique + extension blocs standards |
+| **`variables_declare.ts`** | set_type, const, set_init, define |
+| **`variables_cast_local.ts`** | cast + variables_local |
+| **`variables.ts`** | Façade (réexports) |
+
+### 3.4 `toolbox.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`toolbox/builder.ts`** | Helpers débutant `block()` / `category()` |
+| **`toolbox/categories/*.ts`** | Une catégorie = un fichier |
+| **`toolbox_data.ts`** | Ordre d’assemblage |
+| **`toolbox_types.ts`** / **`toolbox_filters.ts`** | Types + filtres |
+| **`toolbox.ts`** | Façade |
+
+Guide : [MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md).
+
+### 3.5 `configure_standard_blocks.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`configure_math_blocks.ts`** | `math_number` typé |
+| **`configure_logic_blocks.ts`** | `logic_compare` / `logic_ternary` (déjà extrait) |
+| **`configure_loop_blocks.ts`** | `controls_repeat_ext` / `controls_for` |
+| **`configure_text_blocks.ts`** | `text_append` |
+| **`configure_procedure_blocks.ts`** | defs / calls procédures + dropdowns types |
+| **`configure_standard_blocks.ts`** | Façade `configureStandardBlocks` |
+
+### 3.6 Générateur `blocks/array.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`array_helpers.ts`** | Littéraux, init texte, bitmap copy, erreurs globales |
+| **`array_list.ts`** | `Array_list_*`, `Array_with`, get/modify/set |
+| **`array_declare.ts`** | `Array_declare` / `create` / `fix` / `getIndex_in_array` |
+| **`array_bitmap.ts`** | `Array_bitmap` / `Array_bitmap_get` |
+| **`array.ts`** | Façade (réexports pour `arduino.ts`) |
+
+### 3.7 Définitions blocs `categories/blockly/array.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`array_list_defs.ts`** | with / literal / get / modify / set |
+| **`array_declare_defs.ts`** | declare / create / form / getIndex_in_array |
+| **`array_sync.ts`** / **`array_mutators.ts`** | Sync ownership + mutators +/- |
+| **`array_bitmap.ts`** (+ `_grid`) | Bitmap (déjà séparé) |
+| **`array.ts`** | Façade `defineArrayBlocks` + réexports sync |
+
+### 3.8 Générateur `blocks/board.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`board_structure.ts`** | setup / loop / comment / include / define |
+| **`board_io.ts`** | digital/analog I/O, pulseIn, map, tone |
+| **`board_time.ts`** | delay / millis |
+| **`board_serial.ts`** | Serial.* |
+| **`board_conversion.ts`** | toint / tofloat / constrain… |
+| **`board.ts`** | Façade (réexports pour `arduino.ts`) |
+
+### 3.9 Générateur `blocks/math.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`math_literals.ts`** | number / percent / angle / constant |
+| **`math_ops.ts`** | arithmetic / single / trig / round / modulo / constrain / atan2 / change |
+| **`math_checks.ts`** | interval / number_property |
+| **`math_list_random.ts`** | on_list / random_int / random_float |
+| **`math_helpers.ts`** | includes + helpers (déjà existant) |
+| **`math.ts`** | Façade (réexports pour `arduino.ts`) |
+
+### 3.10 Générateur `blocks/text.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`text_expr.ts`** | quote / toTextExpression / textExpression |
+| **`text_literals.ts`** | text / no_quote / multiline / date / char |
+| **`text_ops.ts`** | join / append / length / index / charAt / substring |
+| **`text_transform.ts`** | case / trim / count / replace / reverse |
+| **`text_io.ts`** | print / prompt_ext |
+| **`text_helpers.ts`** | helpers C++ injectés (déjà existant) |
+| **`text.ts`** | Façade (réexports pour `arduino.ts`) |
+
+### 3.11 `block_types_registry.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`block_types_array_infer.ts`** | Inférence types listes / math_number |
+| **`block_types_dynamic.ts`** | `DYNAMIC_TYPE_FUNCTIONS` + resolver variables |
+| **`block_types_compat.ts`** | `checkTypeCompatibility` / `getCompatibleTypesForCheck` |
+| **`block_types_registry.ts`** | Façade registry + `applyBlockTypesFromRegistry` |
+
+### 3.12 `strict_connection_checker.ts` ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`strict_connection_array.ts`** | Checks connexions Array_* / list literal |
+| **`strict_connection_procedure.ts`** | Checks ARG* appels de procédures |
+| **`strict_connection_type_utils.ts`** | resolve types / switch-case / helpers partagés |
+| **`strict_connection_checker.ts`** | Classe + orchestration + registration |
 
 ---
 
@@ -107,7 +236,7 @@ Beaucoup de définitions de blocs (get, set, local, const, init, define, set_typ
 ### Priorité 3 – Optionnel
 
 5. Extraction **`blockly_i18n`** / **`type_inference`** / handlers variables — ✅ FAIT (`shared_*.ts`).
-6. Découpage **`logic_switch`** / **`variables_*`** si besoin de clarté ou de collaboration sur des zones très ciblées.
+6. Découpage **`variables_*`**, **`logic_*`**, **`board_*`** ✅ FAIT.
 
 ---
 

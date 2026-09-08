@@ -30,7 +30,12 @@ src/
 ├── extensions/                 # Runtime pack loader (manifest, toolbox merge, theme) — see AJOUTER_EXTENSION.md
 ├── blockly_patches.ts          # Facade → `blockly_patches/` (const, variables, procedures, defensive)
 ├── blockly_patches/            # Per-patch modules (re-test at Blockly bumps)
-├── toolbox.ts                  # Toolbox structure: categories, block lists, board-specific toolbox
+├── toolbox.ts                  # Façade toolbox (réexports)
+├── toolbox_types.ts            # Types + applyToolboxBlockLevels
+├── toolbox_data.ts             # Assemblage des catégories
+├── toolbox_filters.ts          # Filtres board / search
+├── toolbox/builder.ts          # Helpers débutant: block(), category(), …
+├── toolbox/categories/         # Un fichier par catégorie (à éditer)
 ├── toolbox_search_i18n.ts      # i18n wrapper for @blockly/toolbox-search (Blockly.Msg)
 ├── options.ts                  # Theme extension (libre/board styles), themeMappings
 ├── tools.ts                    # URL/query helpers (addReplaceParamToUrl, setPluginsInURL)
@@ -52,10 +57,10 @@ src/
 ├── categories/blockly/         # Block *definitions* (UI blocks, fields, mutators)
 │   ├── index.ts                # Entry: defineBlocklyArduinoCompatBlocks, defineAllTypedVariableBlocks
 │   ├── array.ts, array_bitmap*.ts  # Array/list + bitmap blocks
-│   ├── board.ts                # Board blocks (pins, serial, etc.)
+│   ├── board.ts (+ board_*)    # Board blocks façade (pins, serial, …)
 │   ├── colour.ts               # Colour blocks
 │   ├── libre.ts                # “Libre” / free-text blocks (ex Blockly@rduino null category)
-│   ├── logic.ts, loops.ts      # Logic/compare + loops
+│   ├── logic.ts (+ logic_*), loops.ts  # Logic/compare + switch + loops
 │   ├── math.ts, text.ts
 │   ├── variables.ts            # Typed variables (get/set/define/local), extensions
 │   ├── shared.ts               # Facade → shared_*.ts / blockly_i18n.ts
@@ -119,8 +124,11 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 
 ## Conventions
 
-- **Comments (TSDoc / TypeDoc)**: In English. Use `@description`, `@remarks`, `@param`, `@returns` for public APIs. File-level `@packageDocumentation` (with optional `@module`) describes the module for the generated API site. Avoid legacy **`@fileoverview`** (JSDoc); fold that text into `@remarks` or `@description`.
-- **License header**: Each source file starts with `@packageDocumentation` where applicable, then the GPL-3.0-or-later license block. Author/copyright (e.g. ASTUCE) is kept as-is.
+Full shared guide (three projects): **[CONVENTIONS.md](./CONVENTIONS.md)**.
+
+- **Comments (TSDoc / TypeDoc)**: In English. Use `@description`, `@remarks`, `@param`, `@returns` for public APIs. File-level `@packageDocumentation` (with optional `@module`) describes the module for the generated API site. Avoid legacy **`@fileoverview`** (JSDoc); fold that text into `@remarks` or `@description`. Inline comments explain **why**, not obvious **what**.
+- **License header**: Each source file has `@packageDocumentation` where applicable, then a **compact** GPL-3.0-or-later `@license` block (no verbose GPL text in sources). Author/copyright (e.g. ASTUCE) is kept as-is.
+- **File split**: One responsibility per module; prefer &lt; ~400 lines; split past ~500–600 unless data tables.
 - **Block definitions vs code generation**:
   - **categories/blockly/** = what the user sees (block shape, fields, connections). Register with `Blockly.Blocks["block_type"] = { init() { … } }` or `Blockly.defineBlocksWithJsonArray`.
   - **generators/arduino/blocks/** = how each block becomes C++ (e.g. `arduinoGenerator.forBlock["block_type"] = function(block, generator) { return "code"; }`).
@@ -144,7 +152,7 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 | Named component instances (Servo, …) | [INSTANCES.md](./INSTANCES.md) + `src/instances/` |
 | Add block type / compatibility | `generators/arduino/block_types/` + `block_types.ts`, then `block_types_registry.ts` — see [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Generate code for a block | `generators/arduino/blocks/<category>.ts` + register in `generators/arduino.ts` |
-| Change toolbox structure | `toolbox.ts` (basic_toolbox, getToolboxForCurrentBoard) |
+| Change toolbox structure | **[MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md)** — fichiers `src/toolbox/categories/*.ts` |
 | Add a board | `board_profiles.ts` (+ helpers in `boards.ts` if needed) |
 | Patches to Blockly core | `blockly_patches.ts` → `blockly_patches/` |
 | New UI language | `languages/languageMap.ts` + new file `languages/<code>.ts`, merge messages |

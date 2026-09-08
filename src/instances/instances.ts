@@ -96,7 +96,7 @@ export function isInstanceField(
 /**
  * Instance names referenced by this block's FieldInstance fields.
  * @param block - Blockly block instance.
- * @param opt_instanceType - `opt_instanceType` value.
+ * @param opt_instanceType - The `opt_instanceType` argument.
  * @returns Result string.
  */
 export function getInstancesFromBlock(

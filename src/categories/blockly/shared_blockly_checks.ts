@@ -89,8 +89,8 @@ function buildArrayElementBlocklyChecks(
 
 /**
  * Checks Blockly pour l'entrée contenu d'Array_declare (size ou contains). Le filtrage sémantique int/float/etc. est complété par StrictConnectionChecker.
- * @param choix - `choix` value.
- * @param arduinoTypeField - `arduinoTypeField` value.
+ * @param choix - The `choix` argument.
+ * @param arduinoTypeField - The `arduinoTypeField` argument.
  * @returns Result string.
  */
 export const getDeclareContenuBlocklyChecks = (
@@ -106,7 +106,7 @@ export const getDeclareContenuBlocklyChecks = (
 
 /**
  * Checks Blockly pour les éléments d'un littéral de liste ou de Array_with.
- * @param internalType - `internalType` value.
+ * @param internalType - The `internalType` argument.
  * @returns Result string.
  */
 export const getDeclareElementBlocklyChecks = (

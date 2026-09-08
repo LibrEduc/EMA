@@ -131,8 +131,8 @@ export const isVariableProcedureParameter = (
  * @param workspace - Blockly workspace.
  * @param variableId - Identifier.
  * @param varName - Variable name.
- * @param procedureArgIds - `procedureArgIds` value.
- * @param normalizedProcedureArgNames - `normalizedProcedureArgNames` value.
+ * @param procedureArgIds - The `procedureArgIds` argument.
+ * @param normalizedProcedureArgNames - The `normalizedProcedureArgNames` argument.
  * @returns True when the condition holds.
  */
 export const shouldOmitGlobalVariableDeclaration = (

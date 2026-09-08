@@ -1,4 +1,10 @@
 /**
+ * @license
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
  * Runtime ESM — générateurs MicroPython servo (instances).
  * Contrat : export function registerMicropythonGenerators({ micropythonGenerator, Order })
  */

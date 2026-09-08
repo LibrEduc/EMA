@@ -6,7 +6,6 @@
  * Defines type compatibility rules for block connections.
  * Block type definitions live in `block_types/` (one file per category); the index aggregates them.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -14,20 +13,6 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see https://www.gnu.org/licenses/.
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -117,7 +102,7 @@ export const ARDUINO_TYPE_TO_CPP: Record<ArduinoTypeKey, string> = {
 
 /**
  * Blockly.Msg key for a type dropdown label (e.g. `byte` → `VAR_CAST_TYPE_BYTE`).
- * @param typeKey - `typeKey` value.
+ * @param typeKey - The `typeKey` argument.
  * @returns Result string.
  */
 export function getArduinoTypeLabelKey(typeKey: string): string {
@@ -126,7 +111,7 @@ export function getArduinoTypeLabelKey(typeKey: string): string {
 
 /**
  * Internal µcBlockly type for connection checking.
- * @param typeKey - `typeKey` value.
+ * @param typeKey - The `typeKey` argument.
  * @returns Result string.
  */
 export function getInternalTypeForArduinoType(typeKey: string): string {
@@ -164,7 +149,7 @@ export function normalizeBlocklyCheckToInternalType(
 
 /**
  * C++ type name emitted in generated Arduino code.
- * @param typeKey - `typeKey` value.
+ * @param typeKey - The `typeKey` argument.
  * @returns Result string.
  */
 export function getCppTypeName(typeKey: string): string {
@@ -173,8 +158,8 @@ export function getCppTypeName(typeKey: string): string {
 
 /**
  * Vérifie qu'une valeur connectée en mode « contains » correspond au type du menu Array_declare.
- * @param sourceInternalType - `sourceInternalType` value.
- * @param arduinoTypeField - `arduinoTypeField` value.
+ * @param sourceInternalType - The `sourceInternalType` argument.
+ * @param arduinoTypeField - The `arduinoTypeField` argument.
  * @returns True when the condition holds.
  */
 export function isDeclareContainsTypeCompatible(
@@ -187,8 +172,8 @@ export function isDeclareContainsTypeCompatible(
 
 /**
  * Compatibilité stricte pour les entrées des blocs liste (sans char ↔ string).
- * @param sourceInternalType - `sourceInternalType` value.
- * @param expectedInternalType - `expectedInternalType` value.
+ * @param sourceInternalType - The `sourceInternalType` argument.
+ * @param expectedInternalType - The `expectedInternalType` argument.
  * @returns True when the condition holds.
  */
 export function isArrayElementTypeCompatible(

@@ -74,7 +74,7 @@ export const getElementByIdOrNull = <T extends HTMLElement = HTMLElement>(
 
 /**
  * Resolves every demo-shell host once. Does not throw. Callers should abort boot when `ok` is false.
- * @param doc - `doc` value.
+ * @param doc - The `doc` argument.
  * @returns Operation result.
  */
 export const resolveDemoShellDom = (

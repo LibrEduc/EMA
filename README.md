@@ -17,7 +17,7 @@
   — génération de code Arduino/C++ à partir de blocs.
 </p>
 
-[Contribuer](docs/CONTRIBUTING.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md) · [Wiki](https://wiki.libreduc.cc/fr:arduino:ucblockly)
+[Contribuer](docs/CONTRIBUTING.md) · [Conventions](docs/CONVENTIONS.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md) · [Wiki](https://wiki.libreduc.cc/fr:arduino:ucblockly)
 
 </div>
 
@@ -59,6 +59,9 @@ Ouvrez l’URL affichée par Webpack (ou `public/index.html` après build) pour 
 | [CHANGELOG.md](CHANGELOG.md) | Journal des versions et ruptures de compatibilité |
 | [docs/KERNEL.md](docs/KERNEL.md) | Surface publique du noyau embeddable (`createUcBlockly`) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Structure du code, conventions, flux principaux |
+| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | Style code partagé (en-têtes, JSDoc, découpage) — 3 projets |
+| [docs/MODIFIER_TOOLBOX.md](docs/MODIFIER_TOOLBOX.md) | Modifier la toolbox (guide débutant) |
+| [docs/KERNEL.md](docs/KERNEL.md) | Frontière noyau / host / démo |
 | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) | Coque UI, raccourcis clavier, repères ARIA |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide pour les contributeurs |
 | [docs/TYPEDOC.md](docs/TYPEDOC.md) | Génération et conventions de la doc API |

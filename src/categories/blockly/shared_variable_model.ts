@@ -40,7 +40,7 @@ export const setVariableTypeAndMarkManual = (
 /**
  * Aligns a numeric variable with the type required by loops and change-by blocks. Promotes int ↔ float according to aggregated usage; never overrides manual types.
  * @param variable - Variable model.
- * @param requiredType - `requiredType` value.
+ * @param requiredType - The `requiredType` argument.
  */
 export const syncNumericVariableType = (
   variable: Blockly.IVariableModel<Blockly.IVariableState>,

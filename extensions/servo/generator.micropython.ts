@@ -1,4 +1,10 @@
 /**
+ * @license
+ * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+/**
  * Générateurs MicroPython pour le pack servo (instances).
  */
 
