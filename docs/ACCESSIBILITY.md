@@ -48,7 +48,7 @@ Au premier **Tab** après chargement, le lien **« Aller au workspace Blockly »
 | Console | `role="log"` + `aria-live="polite"` sur `#content_console` |
 | Séparateurs flex | `role="separator"` avec `aria-orientation` |
 
-Implémentation : `src/shell_a11y.ts`, `src/blockly_shell_focus.ts`, `src/a11y_labels.ts`, `src/index.ts` (`applyA11yAttributes`, `registerShellBlocklyWorkspace`).
+Implémentation : `src/shell_a11y.ts`, `src/blockly_shell_focus.ts`, `src/a11y_labels.ts`, `src/demo/demo_a11y_attrs.ts`, `src/demo/demo_lifecycle.ts`.
 
 ### Menu de zones (Ctrl+B / Cmd+B)
 

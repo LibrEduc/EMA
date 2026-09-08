@@ -17,7 +17,11 @@ src/toolbox/categories/
 src/toolbox_data.ts   ← ordre des catégories dans le menu
 ```
 
-> Pour de **nouveaux** blocs matériels (servo, capteurs…), le chemin recommandé reste un **pack** sous `extensions/` — voir [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md). Ce guide concerne surtout la toolbox **noyau** déjà compilée.
+> Pour de **nouveaux** blocs matériels (servo, capteurs…), le chemin recommandé reste un **pack** sous `extensions/` — voir [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md).  
+> Pour un **nouveau bloc noyau** (définition + C++ + type) : [AJOUTER_BLOC_NOYAU.md](./AJOUTER_BLOC_NOYAU.md).  
+> Carte d’entrée : [DEBUTER_CODE.md](./DEBUTER_CODE.md).
+>
+> Ce guide concerne surtout la toolbox **noyau** déjà compilée.
 
 ## Exemple : ajouter un bloc dans Logique
 

@@ -2,41 +2,60 @@
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Authoring source for the servo pack UI.
+ * Edit this file, then run: npm run build:extensions
+ * Runtime loads the generated sibling `blocks.js` (ESM, no kernel imports).
  */
+
+import type { ExtensionBlocksContext } from "../runtime_ctx";
+
+type ServoBlock = {
+  appendDummyInput: () => ServoInput;
+  appendValueInput: (name: string) => ServoInput;
+  setPreviousStatement: (v: boolean, check: null) => void;
+  setNextStatement: (v: boolean, check: null) => void;
+  setOutput: (v: boolean, check: string) => void;
+  setStyle: (style: string) => void;
+  setTooltip: (t: string) => void;
+  setHelpUrl: (u: string) => void;
+  setWarningText: (t: string | null) => void;
+};
+
+type ServoInput = {
+  setAlign: (align: number) => ServoInput;
+  setCheck: (checks: string[]) => ServoInput;
+  appendField: (field: unknown, name?: string) => ServoInput;
+};
 
 /**
- * Définitions UI des blocs servo (pack d’extension).
- * Style Blockly@rduino : FieldInstance + bloc `servo_attach`.
- * Entrées PIN / DEGREE : entiers uniquement.
+ * Registers servo UI blocks (FieldInstance). Loader injects `ctx`.
+ * @param ctx - Injected Blockly helpers (no imports from µcBlockly).
  */
+export function defineBlocks(ctx: ExtensionBlocksContext): void {
+  const {
+    Blockly,
+    getBlocklyMsgOr,
+    getBlocklyCompatibleChecks,
+    enforceIntOnlyValueInputs,
+    FieldInstance,
+    updateInstancePresenceWarning,
+    style = "servo_blocks",
+  } = ctx;
 
-import * as Blockly from "blockly";
-import {
-  enforceIntOnlyValueInputs,
-  getBlocklyCompatibleChecks,
-  getBlocklyMsgOr,
-} from "../../../src/categories/blockly/shared";
-import { FieldInstance } from "../../../src/instances";
-import { updateInstancePresenceWarning } from "../../../src/instances/block_helpers";
-
-const SERVO_STYLE = "servo_blocks";
-
-let servoBlocksRegistered = false;
-
-/**
- * Enregistre les blocs servo à instances.
- * Préférer le runtime `blocks.js` via le loader d’extensions.
- */
-export function defineServoExtensionBlocks(): void {
-  if (servoBlocksRegistered || Blockly.Blocks["servo_attach"]) {
+  if (Blockly.Blocks["servo_attach"]) {
     return;
   }
-  servoBlocksRegistered = true;
 
-  const intChecks = getBlocklyCompatibleChecks("int");
-  const defaultName = () => getBlocklyMsgOr("SERVO_DEFAULT_NAME", "SERVO");
+  const intChecks =
+    typeof getBlocklyCompatibleChecks === "function"
+      ? getBlocklyCompatibleChecks("int")
+      : ["int", "Number"];
 
-  const appendServoInstance = (input: Blockly.Input): void => {
+  const defaultName = (): string =>
+    getBlocklyMsgOr("SERVO_DEFAULT_NAME", "SERVO");
+
+  const appendServoInstance = (input: ServoInput): void => {
     input
       .setAlign(Blockly.inputs.Align.RIGHT)
       .appendField(
@@ -45,27 +64,32 @@ export function defineServoExtensionBlocks(): void {
       );
   };
 
-  const warnMissingAttach = function (this: Blockly.Block): void {
+  const warnMissingAttach = function (this: ServoBlock): void {
     updateInstancePresenceWarning(this, "SERVO_NAME", "Servo");
   };
 
-  const makeOnchange = (intInputNames: readonly string[]) => {
-    return function (this: Blockly.Block, event: Blockly.Events.Abstract): void {
-      const intWarning = enforceIntOnlyValueInputs(
-        this,
-        intInputNames,
-        event,
-      );
-      if (intWarning) {
-        this.setWarningText(intWarning);
-        return;
+  const makeOnchange = (intInputNames: string[]) => {
+    return function (this: ServoBlock, event: unknown): void {
+      if (
+        intInputNames?.length &&
+        typeof enforceIntOnlyValueInputs === "function"
+      ) {
+        const intWarning = enforceIntOnlyValueInputs(
+          this,
+          intInputNames,
+          event,
+        );
+        if (intWarning) {
+          this.setWarningText(intWarning);
+          return;
+        }
       }
       warnMissingAttach.call(this);
     };
   };
 
   Blockly.Blocks["servo_attach"] = {
-    init(this: Blockly.Block) {
+    init(this: ServoBlock) {
       this.appendDummyInput().appendField(
         getBlocklyMsgOr("SERVO_ATTACH1", "Attach"),
       );
@@ -80,27 +104,32 @@ export function defineServoExtensionBlocks(): void {
         .appendField(getBlocklyMsgOr("SERVO_PIN", "PIN#"));
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setStyle(SERVO_STYLE);
+      this.setStyle(style);
       this.setTooltip(
         getBlocklyMsgOr(
           "SERVO_ATTACH_TOOLTIP",
           "Attach a named servo instance to a pin (setup).",
         ),
       );
+      this.setHelpUrl(
+        getBlocklyMsgOr(
+          "SERVO_MOVE_HELPURL",
+          "http://www.arduino.cc/playground/ComponentLib/servo",
+        ),
+      );
     },
-    onchange(
-      this: Blockly.Block,
-      event: Blockly.Events.Abstract,
-    ): void {
-      const warning = enforceIntOnlyValueInputs(this, ["PIN"], event);
-      if (warning !== undefined) {
-        this.setWarningText(warning);
+    onchange(this: ServoBlock, event: unknown) {
+      if (typeof enforceIntOnlyValueInputs === "function") {
+        const warning = enforceIntOnlyValueInputs(this, ["PIN"], event);
+        if (warning !== undefined) {
+          this.setWarningText(warning);
+        }
       }
     },
   };
 
   Blockly.Blocks["servo_move"] = {
-    init(this: Blockly.Block) {
+    init(this: ServoBlock) {
       this.appendDummyInput().appendField(
         getBlocklyMsgOr("SERVO_MOVE_INPUT", "rotate the Servomotor"),
       );
@@ -113,11 +142,17 @@ export function defineServoExtensionBlocks(): void {
         );
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setStyle(SERVO_STYLE);
+      this.setStyle(style);
       this.setTooltip(
         getBlocklyMsgOr(
           "SERVO_MOVE_TOOLTIP",
           "rotation possible between 0 ~ 180 degrees",
+        ),
+      );
+      this.setHelpUrl(
+        getBlocklyMsgOr(
+          "SERVO_MOVE_HELPURL",
+          "http://www.arduino.cc/playground/ComponentLib/servo",
         ),
       );
     },
@@ -125,7 +160,7 @@ export function defineServoExtensionBlocks(): void {
   };
 
   Blockly.Blocks["servo_read_degrees"] = {
-    init(this: Blockly.Block) {
+    init(this: ServoBlock) {
       this.appendDummyInput().appendField(
         getBlocklyMsgOr(
           "SERVO_READ_DEGREES_INPUT",
@@ -134,11 +169,17 @@ export function defineServoExtensionBlocks(): void {
       );
       appendServoInstance(this.appendDummyInput());
       this.setOutput(true, "int");
-      this.setStyle(SERVO_STYLE);
+      this.setStyle(style);
       this.setTooltip(
         getBlocklyMsgOr(
           "SERVO_READ_DEGREES_TOOLTIP",
           "returns the number of degrees the last rotation",
+        ),
+      );
+      this.setHelpUrl(
+        getBlocklyMsgOr(
+          "SERVO_READ_DEGREES_HELPURL",
+          "http://www.arduino.cc/playground/ComponentLib/servo",
         ),
       );
     },
@@ -146,18 +187,24 @@ export function defineServoExtensionBlocks(): void {
   };
 
   Blockly.Blocks["servo_detach"] = {
-    init(this: Blockly.Block) {
+    init(this: ServoBlock) {
       this.appendDummyInput().appendField(
         getBlocklyMsgOr("SERVO_DETACH", "Detach"),
       );
       appendServoInstance(this.appendDummyInput());
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
-      this.setStyle(SERVO_STYLE);
+      this.setStyle(style);
       this.setTooltip(
         getBlocklyMsgOr(
           "SERVO_DETACH_TOOLTIP",
           "Release a pin from servo driving.",
+        ),
+      );
+      this.setHelpUrl(
+        getBlocklyMsgOr(
+          "SERVO_MOVE_HELPURL",
+          "http://www.arduino.cc/playground/ComponentLib/servo",
         ),
       );
     },
@@ -165,23 +212,26 @@ export function defineServoExtensionBlocks(): void {
   };
 
   Blockly.Blocks["servo_attached"] = {
-    init(this: Blockly.Block) {
+    init(this: ServoBlock) {
       this.appendDummyInput().appendField(
         getBlocklyMsgOr("SERVO_ATTACHED", "servo attached?"),
       );
       appendServoInstance(this.appendDummyInput());
       this.setOutput(true, "Boolean");
-      this.setStyle(SERVO_STYLE);
+      this.setStyle(style);
       this.setTooltip(
         getBlocklyMsgOr(
           "SERVO_ATTACHED_TOOLTIP",
           "true if the servo is attached to pin; false otherwise.",
         ),
       );
+      this.setHelpUrl(
+        getBlocklyMsgOr(
+          "SERVO_MOVE_HELPURL",
+          "http://www.arduino.cc/playground/ComponentLib/servo",
+        ),
+      );
     },
     onchange: warnMissingAttach,
   };
 }
-
-/** Plus de dropdown PIN dynamiques : la broche est sur `servo_attach` (value). */
-export const SERVO_PIN_DROPDOWNS: Record<string, "pwm"> = {};

@@ -8,6 +8,20 @@
 
 Thank you for considering contributing. This short guide will help you get started.
 
+> **Débutant ?** Commence par **[DEBUTER_CODE.md](./DEBUTER_CODE.md)** (carte des guides + dossiers).  
+> Glossaire : **[GLOSSAIRE.md](./GLOSSAIRE.md)**. Tutoriel micro-bloc : **[TUTORIEL_MICRO_BLOC.md](./TUTORIEL_MICRO_BLOC.md)**.
+
+## Checklist — 1ère contribution (≈ 15 min)
+
+1. `npm install`
+2. `npm run dev` — ouvrir la démo, créer 2–3 blocs, vérifier le code généré
+3. Lire [DEBUTER_CODE.md](./DEBUTER_CODE.md) (surtout « ne commence pas par `index.ts` »)
+4. Choisir **un** objectif dans le tableau ci-dessous (toolbox / extension / micro-bloc)
+5. Modifier **un seul** fichier concerné en premier (ex. une catégorie toolbox)
+6. `npm run build:lib` puis `npm run test`
+7. Si i18n touché : `npm run check-translations`
+8. PR courte : quoi + pourquoi ; lier le guide suivi
+
 ## Before you start
 
 **Compatibility:** µcBlockly **v3** requires **Blockly 13** (`blockly` ^13 and aligned `@blockly/*` plugins). See the root [README](../README.md) and [KERNEL.md](./KERNEL.md).
@@ -40,16 +54,19 @@ Thank you for considering contributing. This short guide will help you get start
 
 | Task | Where to look |
 |------|----------------|
-| Add or change a block (UI) | `src/categories/blockly/` + `index.ts` |
+| **Orient / beginner map** | **[DEBUTER_CODE.md](./DEBUTER_CODE.md)** |
+| Add or change a block (UI + C++ + type) | **[AJOUTER_BLOC_NOYAU.md](./AJOUTER_BLOC_NOYAU.md)** → `categories/blockly/` + `generators/arduino/blocks/` |
+| Add or change a block (UI only pointer) | `src/categories/blockly/` + `index.ts` |
 | Add or change code generation for a block | `src/generators/arduino/blocks/` + `src/generators/arduino.ts` |
 | Add block types / compatibility | `src/generators/arduino/block_types/`, `block_types.ts`, `block_types_registry.ts` — [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Change toolbox or categories | **[MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md)** → `src/toolbox/categories/` |
-| Add a board or change pins | `src/boards.ts` |
+| Add a board or change pins | `src/boards.ts` / `src/board_profiles/` |
 | Add or edit a language | `src/languages/` — then `npm run check-translations` |
 | Convert Blockly@rduino project | `npm run convert-rduino` — see [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) |
 | Add a new toolbox category (e.g. servo) | **[AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md)** (pack runtime, recommandé) ; noyau = [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) |
 | Named instances (FieldInstance) | [INSTANCES.md](./INSTANCES.md) |
-| Add a runtime extension pack | [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) + `extensions/` |
+| Add a runtime extension pack | [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) + `extensions/` + `npm run build:extensions` |
+| File split / where modules went | [REPARTITION_FICHIERS.md](./REPARTITION_FICHIERS.md) |
 | Regenerate functions inventory | `npm run extract-functions` → `docs/functions-list.md` |
 
 ## Reporting issues and pull requests

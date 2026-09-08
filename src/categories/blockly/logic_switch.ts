@@ -14,8 +14,6 @@
  */
 
 import * as Blockly from "blockly";
-import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
-import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { clearVariableType, setVariableType } from "../../generators/arduino/variable_utils";
 import {
   configureScalarVariableField,
@@ -25,6 +23,11 @@ import {
   inferConnectedValueType,
   VariableWithMutableType,
 } from "./shared";
+import {
+  createMinusField,
+  createPlusField,
+  registerMutatorOnce,
+} from "./plus_minus_mutator";
 
 type SwitchBlock = Blockly.Block & {
   casebreakCount_?: number;
@@ -272,14 +275,10 @@ const controlsSwitchPlusMinusMutator = {
 };
 
 const registerControlsSwitchPlusMinusMutator = (): void => {
-  const mutatorName = "controls_switch_plus_minus_mutator";
-  if (Blockly.Extensions.isRegistered(mutatorName)) {
-    return;
-  }
-  Blockly.Extensions.registerMutator(
-    mutatorName,
+  registerMutatorOnce(
+    "controls_switch_plus_minus_mutator",
     controlsSwitchPlusMinusMutator,
-    function (this: SwitchBlock) {
+    function (this: Blockly.Block) {
       this.getInput("CASE0")?.insertFieldAt(0, createPlusField(), "PLUS");
     },
   );

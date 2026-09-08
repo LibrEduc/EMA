@@ -2,25 +2,15 @@
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Authoring source — MicroPython generators for the servo pack.
+ * Edit this file, then run: npm run build:extensions
  */
 
-/**
- * Générateurs MicroPython pour le pack servo (instances).
- */
-
-type MpBlock = {
-  getFieldValue(name: string): string;
-};
-
-type MpGenerator = {
-  valueToCode(block: MpBlock, name: string, order: number): string;
-  ensureMachinePin(): void;
-  addGlobalAssignment(key: string, code: string): void;
-  addSetup(key: string, code: string): void;
-};
-
-const ORDER_NONE = 99;
-const ORDER_ATOMIC = 0;
+import type {
+  ExtensionBlock,
+  ExtensionMicropythonContext,
+} from "../runtime_ctx";
 
 function servoPyName(raw: string): string {
   const cleaned = String(raw || "SERVO").replace(/[^\w]/g, "_");
@@ -31,39 +21,56 @@ function angleToDuty(angleExpr: string): string {
   return `int(1638 + (${angleExpr}) * (8192 - 1638) / 180)`;
 }
 
-export function servo_attach(block: MpBlock, generator: MpGenerator): string {
-  const pin = generator.valueToCode(block, "PIN", ORDER_NONE) || "9";
-  const name = servoPyName(block.getFieldValue("SERVO_NAME"));
-  generator.ensureMachinePin();
-  generator.addGlobalAssignment("import_pwm", "from machine import PWM");
-  generator.addSetup(
-    `setup_servo_${name}`,
-    `${name} = PWM(Pin(${pin}), freq=50)\n`,
-  );
-  return "";
-}
+/**
+ * Registers MicroPython generators. Loader injects the generator + Order.
+ * @param ctx - Injected micropython context.
+ */
+export function registerMicropythonGenerators({
+  micropythonGenerator,
+  Order,
+}: ExtensionMicropythonContext): void {
+  const ORDER_NONE = Order?.NONE ?? 99;
+  const ORDER_ATOMIC = Order?.ATOMIC ?? 0;
 
-export function servo_move(block: MpBlock, generator: MpGenerator): string {
-  const degree = generator.valueToCode(block, "DEGREE", ORDER_NONE) || "0";
-  const name = servoPyName(block.getFieldValue("SERVO_NAME"));
-  return `${name}.duty_u16(${angleToDuty(degree)})\n`;
-}
+  micropythonGenerator.forBlock["servo_attach"] = function (
+    block: ExtensionBlock,
+  ) {
+    const pin =
+      micropythonGenerator.valueToCode(block, "PIN", ORDER_NONE) || "9";
+    const name = servoPyName(block.getFieldValue("SERVO_NAME"));
+    micropythonGenerator.ensureMachinePin();
+    micropythonGenerator.addGlobalAssignment(
+      "import_pwm",
+      "from machine import PWM",
+    );
+    micropythonGenerator.addSetup(
+      `setup_servo_${name}`,
+      `${name} = PWM(Pin(${pin}), freq=50)\n`,
+    );
+    return "";
+  };
 
-export function servo_read_degrees(
-  _block: MpBlock,
-  _generator: MpGenerator,
-): [string, number] {
-  return ["0", ORDER_ATOMIC];
-}
+  micropythonGenerator.forBlock["servo_move"] = function (
+    block: ExtensionBlock,
+  ) {
+    const degree =
+      micropythonGenerator.valueToCode(block, "DEGREE", ORDER_NONE) || "0";
+    const name = servoPyName(block.getFieldValue("SERVO_NAME"));
+    return `${name}.duty_u16(${angleToDuty(degree)})\n`;
+  };
 
-export function servo_detach(block: MpBlock, _generator: MpGenerator): string {
-  const name = servoPyName(block.getFieldValue("SERVO_NAME"));
-  return `${name}.deinit()\n`;
-}
+  micropythonGenerator.forBlock["servo_read_degrees"] = function () {
+    return ["0", ORDER_ATOMIC];
+  };
 
-export function servo_attached(
-  _block: MpBlock,
-  _generator: MpGenerator,
-): [string, number] {
-  return ["True", ORDER_ATOMIC];
+  micropythonGenerator.forBlock["servo_detach"] = function (
+    block: ExtensionBlock,
+  ) {
+    const name = servoPyName(block.getFieldValue("SERVO_NAME"));
+    return `${name}.deinit()\n`;
+  };
+
+  micropythonGenerator.forBlock["servo_attached"] = function () {
+    return ["True", ORDER_ATOMIC];
+  };
 }

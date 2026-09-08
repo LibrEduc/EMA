@@ -3,8 +3,7 @@
  * @module Boards
  * @description Pin validators and board dropdown helpers.
  * @remarks
- * Profile **data** lives in {@link ./board_profiles.ts}. Regenerate data via
- * `scripts/convert-boards-to-ts.mjs` when converting from legacy boards.js.
+ * Profile **data** lives in {@link ./board_profiles/index.ts} (one file per family).
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
  * @since 1.0.0

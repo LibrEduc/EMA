@@ -16,21 +16,19 @@
  */
 
 import * as Blockly from "blockly";
-import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
-import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { getBlocklyMsgOr } from "./shared";
+import {
+  createPartListPlusMinusMutator,
+  createPlusField,
+  registerMutatorOnce,
+  type CountablePlusMinusBlock,
+} from "./plus_minus_mutator";
 
 const LIBRE_STYLE = "libre_blocks";
 
-type LibreLoopMutatorBlock = Blockly.Block & {
+type LibreLoopMutatorBlock = CountablePlusMinusBlock & {
   loopCount_: number;
   topStatementInput_: Blockly.Input | null;
-  updateShape_: (targetCount: number) => void;
-  addPart_: () => void;
-  removePart_: () => void;
-  updateMinus_: () => void;
-  plus: () => void;
-  minus: () => void;
 };
 
 let libreBlocksRegistered = false;
@@ -176,77 +174,36 @@ export const defineLibreBlocks = (): void => {
     },
   ]);
 
-  const libreLoopInsideInMutator = {
-    loopCount_: 0,
-    topStatementInput_: null as Blockly.Input | null,
-    mutationToDom(this: Blockly.Block & { loopCount_: number }): Element {
-      const container = Blockly.utils.xml.createElement("mutation");
-      container.setAttribute("loops", String(this.loopCount_));
-      return container;
+  const libreLoopInsideInMutator = createPartListPlusMinusMutator({
+    countProperty: "loopCount_",
+    topInputProperty: "topStatementInput_",
+    xmlAttribute: "loops",
+    stateKey: "loopCount",
+    partInputName: (index) => "LOOP" + index,
+    minCount: 1,
+    emptyInputName: "EMPTY",
+    normalizeLoadedCount: (raw) => Math.max(1, raw || 1),
+    appendFirstPart: (block) =>
+      block
+        .appendStatementInput("LOOP0")
+        .appendField(createPlusField(), "PLUS")
+        .appendField(getBlocklyMsgOr("LIBRE_LOOP_DO", "faire")),
+    appendExtraPart: (block, index) => {
+      block.appendStatementInput("LOOP" + index);
     },
-    domToMutation(this: LibreLoopMutatorBlock, xmlElement: Element) {
-      const targetCount = Math.max(1, Number(xmlElement.getAttribute("loops") || 0) || 1);
-      this.updateShape_(targetCount);
-    },
-    saveExtraState(this: Blockly.Block & { loopCount_: number }) {
-      return { loopCount: this.loopCount_ };
-    },
-    loadExtraState(this: LibreLoopMutatorBlock, state: { loopCount?: number }) {
-      this.updateShape_(Math.max(1, state.loopCount ?? 1));
-    },
-    updateShape_(this: LibreLoopMutatorBlock, targetCount: number) {
-      while (this.loopCount_ < targetCount) this.addPart_();
-      while (this.loopCount_ > targetCount) this.removePart_();
-      this.updateMinus_();
-    },
-    plus(this: LibreLoopMutatorBlock) {
-      this.addPart_();
-      this.updateMinus_();
-    },
-    minus(this: LibreLoopMutatorBlock) {
-      if (this.loopCount_ <= 1) return;
-      this.removePart_();
-      this.updateMinus_();
-    },
-    addPart_(this: LibreLoopMutatorBlock) {
-      if (this.loopCount_ === 0) {
-        if (this.getInput("EMPTY")) this.removeInput("EMPTY");
-        this.topStatementInput_ = this.appendStatementInput("LOOP0")
-          .appendField(createPlusField(), "PLUS")
-          .appendField(getBlocklyMsgOr("LIBRE_LOOP_DO", "faire"));
-      } else {
-        this.appendStatementInput("LOOP" + this.loopCount_);
-      }
-      this.loopCount_++;
-    },
-    removePart_(this: LibreLoopMutatorBlock) {
-      this.loopCount_--;
-      this.removeInput("LOOP" + this.loopCount_);
-      if (this.loopCount_ === 0) {
-        this.topStatementInput_ = null;
-      }
-    },
-    updateMinus_(this: LibreLoopMutatorBlock) {
-      const minusField = this.getField("MINUS");
-      if (!minusField && this.loopCount_ > 1) {
-        this.topStatementInput_?.insertFieldAt(1, createMinusField(), "MINUS");
-      } else if (minusField && this.loopCount_ <= 1) {
-        this.topStatementInput_?.removeField("MINUS");
-      }
-    },
-  };
+  });
 
-  const libreLoopInsideInMutatorHelper = function (this: LibreLoopMutatorBlock) {
-    if (this.getInput("EMPTY")) this.removeInput("EMPTY");
-    this.appendValueInput("VALUE")
-      .appendField(new Blockly.FieldTextInput(""), "TEXT");
-    this.updateShape_(1);
-  };
-
-  Blockly.Extensions.registerMutator(
+  registerMutatorOnce(
     "libre_loop_inside_in_mutator",
     libreLoopInsideInMutator,
-    libreLoopInsideInMutatorHelper,
+    function (this: Blockly.Block) {
+      const block = this as LibreLoopMutatorBlock;
+      if (block.getInput("EMPTY")) block.removeInput("EMPTY");
+      block
+        .appendValueInput("VALUE")
+        .appendField(new Blockly.FieldTextInput(""), "TEXT");
+      block.updateShape_(1);
+    },
   );
 
   // "Do" loop block (field + DO statement with its own field)

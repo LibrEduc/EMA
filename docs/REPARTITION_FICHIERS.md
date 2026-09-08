@@ -213,6 +213,73 @@ Guide : [MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md).
 | **`strict_connection_type_utils.ts`** | resolve types / switch-case / helpers partagés |
 | **`strict_connection_checker.ts`** | Classe + orchestration + registration |
 
+### 3.13 `arduino_generator.ts` (lots A + B + C) ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`arduino_generator_pins.ts`** | `recordPinUsage` / types pin |
+| **`arduino_generator_scrub.ts`** | quote / scrub / format commentaires |
+| **`arduino_generator_init_vars.ts`** | collecte vars + déclarations globales (`init`) |
+| **`arduino_generator_validate.ts`** | validation soft + format user function |
+| **`arduino_generator_debug.ts`** | snapshot / reset bags |
+| **`arduino_code_format.ts`** | assemblage sketch (déjà) |
+| **`order.ts`** | précédence (déjà) |
+| **`arduino_generator.ts`** | Classe façade |
+
+Guides débutant : [DEBUTER_CODE.md](./DEBUTER_CODE.md), [GLOSSAIRE.md](./GLOSSAIRE.md), [TUTORIEL_MICRO_BLOC.md](./TUTORIEL_MICRO_BLOC.md), [AJOUTER_BLOC_NOYAU.md](./AJOUTER_BLOC_NOYAU.md), [MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md).
+
+### 3.14 Démo `index.ts` + profils cartes ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`demo/demo_globals.ts`** | Expose Blockly / générateur / Monaco sur `window` |
+| **`demo/demo_layout.ts`** | Layout session + dimensions host |
+| **`demo/demo_boards_menu.ts`** | Remplissage du menu cartes |
+| **`demo/demo_a11y_attrs.ts`** | ARIA régions démo |
+| **`demo/continuous_toolbox.ts`** | Register continuous toolbox |
+| **`demo/demo_ui_handlers.ts`** | Menus / boutons → `BlocklyApplication` |
+| **`demo/demo_lifecycle.ts`** | DOMContentLoaded / onload / beforeunload |
+| **`index.ts`** | Orchestration courte |
+| **`board_profiles/`** | Données pins par famille (`profiles_*.ts` + façade) |
+
+### 3.15 Extensions runtime + sync/variables/shell ✅
+
+| Fichier / script | Rôle |
+|------------------|------|
+| **`npm run build:extensions`** | Transpile `extensions/*/{blocks,generator.*}.ts` → `.js` |
+| **`extensions/runtime_ctx.d.ts`** | Types du `ctx` injecté (sans import noyau) |
+| **`array_sync_ownership` / `_access` / `_literal`** | Découpage sync listes |
+| **`variables_declare_*`** | Un fichier par bloc déclaratif |
+| **`shell_shortcuts_help_i18n.ts`** | Libellés / helpers i18n de l’aide raccourcis |
+
+### 3.16 Mutators +/- ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`plus_minus_mutator.ts`** | `createPartListPlusMinusMutator`, `registerMutatorOnce`, réexport +/- fields |
+| **`array_mutators.ts`** | Listes `Array_with` / `Array_list_literal` (config) |
+| **`libre.ts`** | Boucles libres multi-`LOOP` (config) |
+| **`logic_switch.ts`** | Switch/case (spécifique) + `registerMutatorOnce` |
+
+### 3.17 Vague moyenne (shell / procédures / array declare) ✅
+
+| Fichier | Rôle |
+|---------|------|
+| **`shell_shortcuts_help_dialog.ts`** | Chrome dialog + sections readonly |
+| **`shell_shortcuts_help_edit.ts`** | Capture clavier + section éditable |
+| **`shell_shortcuts_help.ts`** | Façade open / refresh / register |
+| **`configure_procedure_types.ts`** | Types / helpers procédures |
+| **`configure_procedure_plus_minus.ts`** | Patch +/- + ARG |
+| **`configure_procedure_defs.ts`** | defreturn / defnoreturn |
+| **`configure_procedure_calls.ts`** | callreturn / callnoreturn |
+| **`configure_procedure_blocks.ts`** | Façade |
+| **`array_declare_shared.ts`** | Helpers declare/create |
+| **`array_declare_declare.ts`** | `Array_declare` |
+| **`array_declare_create.ts`** | `Array_create` |
+| **`array_declare_fix.ts`** | `Array_fix` |
+| **`array_declare_get_index.ts`** | `Array_getIndex_in_array` |
+| **`array_declare_defs.ts`** | Façade `defineArrayDeclareBlocks` |
+
 ---
 
 ## 4. Plan d’action proposé

@@ -14,19 +14,17 @@
  */
 
 import * as Blockly from "blockly";
-import { createPlusField } from "@blockly/block-plus-minus/src/field_plus";
-import { createMinusField } from "@blockly/block-plus-minus/src/field_minus";
 import { getBlocklyMsgOr } from "./shared";
+import {
+  createPartListPlusMinusMutator,
+  createPlusField,
+  registerMutatorOnce,
+  type CountablePlusMinusBlock,
+} from "./plus_minus_mutator";
 
-export type ArrayWithMutatorBlock = Blockly.Block & {
+export type ArrayWithMutatorBlock = CountablePlusMinusBlock & {
   itemCount_: number;
   topInput_: Blockly.Input | null;
-  updateShape_: (targetCount: number) => void;
-  addPart_: () => void;
-  removePart_: () => void;
-  updateMinus_: () => void;
-  plus: () => void;
-  minus: () => void;
 };
 
 export const ARRAY_LIST_LITERAL_LABEL = (): string =>
@@ -35,88 +33,44 @@ export const ARRAY_LIST_LITERAL_LABEL = (): string =>
 export const ARRAY_WITH_CONTAINING_LABEL = (): string =>
   getBlocklyMsgOr("ARRAY_WITH_CONTAINING", "containing");
 
-function createArrayListMutator(listLabel: () => string) {
-  return {
-    itemCount_: 0,
-    topInput_: null as Blockly.Input | null,
-    mutationToDom: function (this: Blockly.Block & { itemCount_: number }): Element {
-      const container = Blockly.utils.xml.createElement("mutation");
-      container.setAttribute("items", String(this.itemCount_));
-      return container;
-    },
-    domToMutation: function (this: ArrayWithMutatorBlock, xmlElement: Element) {
-      const targetCount = Number(xmlElement.getAttribute("items") || 0);
-      this.updateShape_(targetCount);
-    },
-    saveExtraState: function (this: Blockly.Block & { itemCount_: number }) {
-      return { itemCount: this.itemCount_ };
-    },
-    loadExtraState: function (
-      this: ArrayWithMutatorBlock,
-      state: { itemCount?: number },
-    ) {
-      this.updateShape_(state.itemCount ?? 0);
-    },
-    updateShape_: function (this: ArrayWithMutatorBlock, targetCount: number) {
-      while (this.itemCount_ < targetCount) {
-        this.addPart_();
-      }
-      while (this.itemCount_ > targetCount) {
-        this.removePart_();
-      }
-      this.updateMinus_();
-    },
-    plus: function (this: ArrayWithMutatorBlock) {
-      this.addPart_();
-      this.updateMinus_();
-    },
-    minus: function (this: ArrayWithMutatorBlock) {
-      if (this.itemCount_ === 0) return;
-      this.removePart_();
-      this.updateMinus_();
-    },
-    addPart_: function (this: ArrayWithMutatorBlock) {
-      if (this.itemCount_ === 0) {
-        if (this.getInput("EMPTY")) {
-          this.removeInput("EMPTY");
-        }
-        this.topInput_ = this.appendValueInput("ADD" + this.itemCount_)
-          .setAlign(Blockly.inputs.Align.RIGHT)
-          .appendField(createPlusField(), "PLUS")
-          .appendField(listLabel());
-      } else {
-        this.appendValueInput("ADD" + this.itemCount_).setAlign(Blockly.inputs.Align.RIGHT);
-      }
-      this.itemCount_++;
-    },
-    removePart_: function (this: ArrayWithMutatorBlock) {
-      this.itemCount_--;
-      this.removeInput("ADD" + this.itemCount_);
-      if (this.itemCount_ === 0) {
-        this.topInput_ = this.appendDummyInput("EMPTY")
-          .appendField(createPlusField(), "PLUS")
-          .appendField(listLabel());
-      }
-    },
-    updateMinus_: function (this: ArrayWithMutatorBlock) {
-      const minusField = this.getField("MINUS");
-      if (!minusField && this.itemCount_ > 0) {
-        this.topInput_?.insertFieldAt(1, createMinusField(), "MINUS");
-      } else if (minusField && this.itemCount_ < 1) {
-        this.topInput_?.removeField("MINUS");
-      }
-    },
-  };
-}
-
+/**
+ * Registers a list-style +/- mutator (ADD0… / EMPTY).
+ * @param mutatorName - Extension registry name.
+ * @param listLabel - Label next to the PLUS field.
+ */
 export function registerArrayListMutator(
   mutatorName: string,
   listLabel: () => string,
 ): void {
-  const mutator = createArrayListMutator(listLabel);
-  const helper = function (this: ArrayWithMutatorBlock) {
-    this.getInput("EMPTY")?.insertFieldAt(0, createPlusField(), "PLUS");
-    this.updateShape_(0);
-  };
-  Blockly.Extensions.registerMutator(mutatorName, mutator, helper);
+  const mutator = createPartListPlusMinusMutator({
+    countProperty: "itemCount_",
+    topInputProperty: "topInput_",
+    xmlAttribute: "items",
+    stateKey: "itemCount",
+    partInputName: (index) => "ADD" + index,
+    minCount: 0,
+    emptyInputName: "EMPTY",
+    appendFirstPart: (block) =>
+      block
+        .appendValueInput("ADD0")
+        .setAlign(Blockly.inputs.Align.RIGHT)
+        .appendField(createPlusField(), "PLUS")
+        .appendField(listLabel()),
+    appendExtraPart: (block, index) => {
+      block
+        .appendValueInput("ADD" + index)
+        .setAlign(Blockly.inputs.Align.RIGHT);
+    },
+    appendEmptyState: (block) =>
+      block
+        .appendDummyInput("EMPTY")
+        .appendField(createPlusField(), "PLUS")
+        .appendField(listLabel()),
+  });
+
+  registerMutatorOnce(mutatorName, mutator, function (this: Blockly.Block) {
+    const block = this as ArrayWithMutatorBlock;
+    block.getInput("EMPTY")?.insertFieldAt(0, createPlusField(), "PLUS");
+    block.updateShape_(0);
+  });
 }

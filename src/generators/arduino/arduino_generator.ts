@@ -4,6 +4,7 @@
  * @description Complete helper functions for generating Arduino for blocks.
  * @remarks
  * Defines the Arduino generator and block-to-code mappings.
+ * Lot A/B/C split: pins, scrub, init vars, validate, debug helpers.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
  * @since 1.0.0
@@ -17,32 +18,29 @@
 
 import * as Blockly from "blockly";
 import {
-  isMathChangeCompatibleVariableType,
-  isVariableProcedureParameter,
-  isVariableUseOutsideProcedureBody,
-  resolveGlobalVariableType,
-  resolveMathChangeVariableId,
-  shouldOmitGlobalVariableDeclaration,
-} from "../../categories/blockly/shared";
-import { getArduinoType } from "./arduino_types";
-import {
   formatArduinoSketch,
   validatePinUsageWarnings,
 } from "./arduino_code_format";
 import { Order } from "./order";
+import { recordPinUsage, type PinUsageMap } from "./arduino_generator_pins";
+import {
+  multilineQuoteArduinoString,
+  quoteArduinoString,
+  scrubArduinoBlockCode,
+  scrubBlockCode,
+  scrubNakedValue as scrubNakedValueLine,
+} from "./arduino_generator_scrub";
+import { collectAndDeclareInitVariables } from "./arduino_generator_init_vars";
+import {
+  buildArduinoGeneratorDebugState,
+  createEmptyArduinoGeneratorBags,
+} from "./arduino_generator_debug";
+import {
+  formatUserFunctionDefinition,
+  validateGeneratedArduinoCode,
+} from "./arduino_generator_validate";
 
 export { Order } from "./order";
-import {
-  getCppTypeName,
-  isArduinoScalarType,
-  normalizeBlocklyCheckToInternalType,
-} from "./block_types";
-import { inferArrayElementTypeFromBlock } from "./block_types_registry";
-import {
-  unwrapValueBlock,
-  usesLocalVariableDeclaration,
-} from "./variable_scope";
-import { isVariablesDefineBlock, LIST_VARIABLE_TYPE } from "./variable_utils";
 
 /**
  * Arduino code generator class.
@@ -71,7 +69,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   // Create a dictionary of setups to be printed in the loop() function
   private loop_ = Object.create(null);
   // Create a dictionary of pins to check if their use conflicts
-  private pins_ = Object.create(null);
+  private pins_: PinUsageMap = Object.create(null);
   /** Array declarations from Array_declare and Array_create blocks. */
   private arrayDeclarations_: string[] = [];
   /** Lignes émises par le bloc « define » (commentaires, etc.) avant setup/loop. */
@@ -145,19 +143,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
   init(workspace: Blockly.Workspace) {
     super.init(workspace);
 
-    this.includes_ = Object.create(null);
-    this.defines_ = Object.create(null);
-    this.variables_ = Object.create(null);
-    this.variableTypes_ = Object.create(null);
-    this.arrayDeclarations_ = [];
-    this.preamble_ = Object.create(null);
-    this.localVariables_ = Object.create(null);
-    this.codeFunctions_ = Object.create(null);
-    this.userFunctions_ = Object.create(null);
-    this.functionNames_ = Object.create(null);
-    this.setups_ = Object.create(null);
-    this.loop_ = Object.create(null);
-    this.pins_ = Object.create(null);
+    this.resetGeneratorBags_();
 
     if (!this.nameDB_) {
       this.nameDB_ = new Blockly.Names(this.RESERVED_WORDS_);
@@ -169,410 +155,34 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     this.nameDB_.populateVariables(workspace);
     this.nameDB_.populateProcedures(workspace);
 
-    const declaredVariableIds = new Set<string>();
-    for (const block of workspace.getAllBlocks(false)) {
-      if (
-        block.type === "variables_const" ||
-        block.type === "variables_set_init" ||
-        isVariablesDefineBlock(block.type)
-      ) {
-        const varId = block.getFieldValue?.("VAR");
-        if (varId) {
-          declaredVariableIds.add(varId);
-        }
-      }
-    }
+    collectAndDeclareInitVariables(workspace, {
+      nameDB: this.nameDB_,
+      valueToCode: (block, name, order) =>
+        this.valueToCode(block, name, order) || "",
+      addArrayDeclaration: (declaration) =>
+        this.addArrayDeclaration(declaration),
+      setVariablesDefinition: (code) => {
+        this.definitions_["variables"] = code;
+      },
+    });
+  }
 
-    const procedureArgIds = new Set<string>();
-    const procedureArgNames = new Set<string>();
-    for (const block of workspace.getAllBlocks(false)) {
-      if (
-        block.type !== "procedures_defreturn" &&
-        block.type !== "procedures_defnoreturn"
-      ) {
-        continue;
-      }
-      const argModels = (block as Blockly.Block & {
-        argumentVarModels_?: Blockly.VariableModel[];
-        argData_?: { model: Blockly.VariableModel; argId: string }[];
-        getProcedureModel?: () =>
-          | (Blockly.Procedures.IProcedureModel & {
-            getParameters?: () => { getId?: () => string }[];
-          })
-          | null;
-      }).argumentVarModels_;
-      const procBlock = block as Blockly.Block & {
-        argumentVarModels_?: Blockly.VariableModel[];
-        argData_?: { model: Blockly.VariableModel; argId: string }[];
-        getProcedureModel?: () =>
-          | (Blockly.Procedures.IProcedureModel & {
-            getParameters?: () => { getId?: () => string; getName?: () => string }[];
-          })
-          | null;
-      };
-      if (argModels && argModels.length > 0) {
-        for (const model of argModels) {
-          if (model?.getId) {
-            procedureArgIds.add(model.getId());
-          }
-          const name = model?.getName?.();
-          if (name) {
-            procedureArgNames.add(name);
-          }
-        }
-      }
-      const argData = procBlock.argData_ || [];
-      for (const datum of argData) {
-        const id = datum.model?.getId?.();
-        if (id) {
-          procedureArgIds.add(id);
-        }
-        const name = datum.model?.getName?.();
-        if (name) {
-          procedureArgNames.add(name);
-        }
-      }
-      const procModel = procBlock.getProcedureModel?.();
-      const procParams = procModel?.getParameters?.() || [];
-      for (const param of procParams) {
-        const paramId = param?.getId?.();
-        if (paramId) {
-          procedureArgIds.add(paramId);
-        }
-        const paramName = param?.getName?.();
-        if (paramName) {
-          procedureArgNames.add(paramName);
-        }
-      }
-    }
-    const normalizedProcedureArgNames = new Set<string>();
-    for (const name of procedureArgNames) {
-      normalizedProcedureArgNames.add(
-        this.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
-      );
-    }
-
-    // Map to store variable names with their types
-    const variableNamesByType: Record<string, string[]> = {};
-
-    // Add developer variables (not created or named by the user).
-    const devVarList = Blockly.Variables.allDeveloperVariables(workspace);
-    for (const devVar of devVarList) {
-      const varName = this.nameDB_!.getName(
-        devVar,
-        Blockly.Names.NameType.DEVELOPER_VARIABLE,
-      );
-      // Developer variables default to 'int'
-      const varType = 'int';
-      if (!variableNamesByType[varType]) {
-        variableNamesByType[varType] = [];
-      }
-      variableNamesByType[varType].push(varName);
-    }
-
-    const localVariableIds = new Set<string>();
-    const globalVariableIds = new Set<string>();
-    for (const block of workspace.getAllBlocks(false)) {
-      if (block.type !== "variables_set_dynamic") {
-        continue;
-      }
-      const blockVarId = block.getFieldValue?.("VAR");
-      if (!blockVarId) {
-        continue;
-      }
-      const valueBlock = block.getInputTargetBlock?.("VALUE");
-      if (usesLocalVariableDeclaration(valueBlock)) {
-        localVariableIds.add(blockVarId);
-      } else {
-        globalVariableIds.add(blockVarId);
-      }
-    }
-
-    const normalizeBlocklyType = (rawType: string | null | undefined): string | null =>
-      normalizeBlocklyCheckToInternalType(rawType);
-
-    const getOutputBlockType = (valueBlock: Blockly.Block | null): string | null => {
-      if (!valueBlock) return null;
-      const typedBlock = valueBlock as Blockly.Block & { getBlockType?: () => string | null };
-      const rawType = typedBlock.getBlockType ? typedBlock.getBlockType() : null;
-      const normalized = normalizeBlocklyType(rawType || "");
-      if (normalized) return normalized;
-      const check = valueBlock.outputConnection?.getCheck();
-      if (Array.isArray(check)) {
-        return normalizeBlocklyType(check[0]);
-      }
-      return normalizeBlocklyType(check || null);
-    };
-
-    const inferredTypesByVarId = new Map<string, string>();
-    for (const block of workspace.getAllBlocks(false)) {
-      if (
-        block.type !== "variables_set_dynamic" &&
-        block.type !== "variables_set"
-      ) {
-        continue;
-      }
-      const varId = block.getFieldValue?.("VAR");
-      if (!varId) {
-        continue;
-      }
-      if (!isVariableUseOutsideProcedureBody(block)) {
-        continue;
-      }
-      const valueBlock = block.getInputTargetBlock?.("VALUE");
-      if (usesLocalVariableDeclaration(valueBlock)) {
-        continue;
-      }
-      const inferredType = getOutputBlockType(valueBlock);
-      if (inferredType) {
-        inferredTypesByVarId.set(varId, inferredType);
-      }
-    }
-
-    const inferMathChangeDeltaType = (deltaBlock: Blockly.Block | null): string | null => {
-      if (!deltaBlock) {
-        return null;
-      }
-      if (deltaBlock.type === "math_number") {
-        const num = Number(deltaBlock.getFieldValue("NUM"));
-        if (!Number.isNaN(num)) {
-          return Number.isInteger(num) ? "int" : "float";
-        }
-      }
-      return getOutputBlockType(deltaBlock);
-    };
-    for (const block of workspace.getAllBlocks(false)) {
-      if (block.type !== "math_change") {
-        continue;
-      }
-      const varId = resolveMathChangeVariableId(block);
-      if (!varId) {
-        continue;
-      }
-      if (!isVariableUseOutsideProcedureBody(block)) {
-        continue;
-      }
-      const existingInferred = inferredTypesByVarId.get(varId);
-      if (
-        existingInferred &&
-        !isMathChangeCompatibleVariableType(existingInferred)
-      ) {
-        // Keep String/bool/… from assignments; do not overwrite with change-by delta.
-        continue;
-      }
-      const variableModel = workspace.getVariableMap().getVariableById(varId);
-      const modelType = variableModel?.getType?.() ?? null;
-      if (modelType && !isMathChangeCompatibleVariableType(modelType)) {
-        continue;
-      }
-      const deltaType = inferMathChangeDeltaType(block.getInputTargetBlock("DELTA"));
-      if (deltaType === "float") {
-        inferredTypesByVarId.set(varId, "float");
-      } else if (deltaType === "int") {
-        const existing = inferredTypesByVarId.get(varId);
-        if (existing !== "float") {
-          inferredTypesByVarId.set(varId, "int");
-        }
-      }
-    }
-
-    // Variables assigned from a list block are declared as ElementType varName[] = {...};
-    const declaredAsArrayVariableIds = new Set<string>();
-    for (const block of workspace.getAllBlocks(false)) {
-      if (
-        block.type !== "variables_set_dynamic" &&
-        block.type !== "variables_set"
-      ) {
-        continue;
-      }
-      const valueBlock = block.getInputTargetBlock?.("VALUE");
-      const innerValueBlock = unwrapValueBlock(valueBlock);
-      if (
-        innerValueBlock?.type !== "Array_list_literal" &&
-        innerValueBlock?.type !== "Array_list_3"
-      ) {
-        continue;
-      }
-      if (usesLocalVariableDeclaration(valueBlock)) {
-        continue;
-      }
-      const varId = block.getFieldValue?.("VAR");
-      if (!varId || declaredAsArrayVariableIds.has(varId)) continue;
-      const varName = this.nameDB_!.getName(varId, Blockly.Names.NameType.VARIABLE);
-      const listCode = this.valueToCode(block, "VALUE", Order.ASSIGNMENT);
-      if (!listCode) continue;
-      let elementType = inferArrayElementTypeFromBlock(innerValueBlock);
-      if (!elementType || elementType === "__NO_TYPE__") elementType = "int";
-      const arduinoTypeKey = elementType === "bool" ? "boolean" : elementType;
-      const cppType = getArduinoType(arduinoTypeKey)?.cppName ?? elementType;
-      this.addArrayDeclaration(cppType + " " + varName + "[] = " + listCode + ";");
-      declaredAsArrayVariableIds.add(varId);
-    }
-
-    for (const block of workspace.getAllBlocks(false)) {
-      if (
-        block.type !== "Array_with" &&
-        block.type !== "Array_bitmap" &&
-        block.type !== "Array_declare" &&
-        block.type !== "Array_create"
-      ) {
-        continue;
-      }
-      const varId = block.getFieldValue?.("VAR");
-      if (varId) {
-        declaredAsArrayVariableIds.add(varId);
-      }
-    }
-
-    const getProcedureParamNames = (block: Blockly.Block): Set<string> => {
-      const names = new Set<string>();
-      const vars = (block as Blockly.Block & { getVars?: () => string[] | null }).getVars?.();
-      if (Array.isArray(vars)) {
-        for (const name of vars) {
-          if (name) {
-            names.add(name);
-            names.add(
-              this.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
-            );
-          }
-        }
-      }
-      const model = (block as Blockly.Block & {
-        getProcedureModel?: () =>
-          | (Blockly.Procedures.IProcedureModel & {
-            getParameters?: () => { getName?: () => string }[];
-          })
-          | null;
-      }).getProcedureModel?.();
-      const params = model?.getParameters?.() || [];
-      for (const param of params) {
-        const name = param?.getName?.();
-        if (name) {
-          names.add(name);
-          names.add(
-            this.nameDB_!.getName(name, Blockly.Names.NameType.VARIABLE),
-          );
-        }
-      }
-      return names;
-    };
-
-    const isUseWithinMatchingProcedure = (
-      block: Blockly.Block,
-      variableName: string,
-    ): boolean => {
-      if (
-        block.type === "procedures_defreturn" ||
-        block.type === "procedures_defnoreturn"
-      ) {
-        const paramNames = getProcedureParamNames(block);
-        return paramNames.has(variableName);
-      }
-      let parent = block.getSurroundParent?.() || null;
-      while (parent) {
-        if (
-          parent.type === "procedures_defreturn" ||
-          parent.type === "procedures_defnoreturn"
-        ) {
-          const paramNames = getProcedureParamNames(parent);
-          return paramNames.has(variableName);
-        }
-        parent = parent.getSurroundParent?.() || null;
-      }
-      return false;
-    };
-
-    // Add user variables, but only ones that are being used.
-    const variables = Blockly.Variables.allUsedVarModels(workspace);
-    for (const variable of variables) {
-      if (!variable) {
-        continue;
-      }
-      const variableUses = Blockly.Variables.getVariableUsesById(
-        workspace,
-        variable.getId(),
-      );
-      if (
-        variableUses &&
-        variableUses.length > 0 &&
-        variableUses.every((use) =>
-          isUseWithinMatchingProcedure(use, variable.getName()),
-        )
-      ) {
-        continue;
-      }
-      if (declaredVariableIds.has(variable.getId())) {
-        continue;
-      }
-      if (declaredAsArrayVariableIds.has(variable.getId())) {
-        continue;
-      }
-      if (variable.getType() === LIST_VARIABLE_TYPE) {
-        continue;
-      }
-      if (
-        localVariableIds.has(variable.getId()) &&
-        !globalVariableIds.has(variable.getId())
-      ) {
-        continue;
-      }
-      const varName = this.nameDB_!.getName(
-        variable.getId(),
-        Blockly.Names.NameType.VARIABLE,
-      );
-      if (
-        shouldOmitGlobalVariableDeclaration(
-          workspace,
-          variable.getId(),
-          varName,
-          procedureArgIds,
-          normalizedProcedureArgNames,
-        )
-      ) {
-        continue;
-      }
-
-      const globalType = resolveGlobalVariableType(workspace, variable.getId());
-      const inferredType = inferredTypesByVarId.get(variable.getId());
-      const rawType = variable.getType();
-      const sharedWithProcedureParam =
-        isVariableProcedureParameter(workspace, variable.getId()) &&
-        procedureArgIds.has(variable.getId());
-      let typeKey =
-        normalizeBlocklyType(globalType || "") ||
-        normalizeBlocklyType(inferredType || "") ||
-        (!sharedWithProcedureParam ? normalizeBlocklyType(rawType || "") : null) ||
-        "__NO_TYPE__";
-      if (inferredType === "float" && typeKey === "int") {
-        typeKey = "float";
-      } else if (inferredType === "int" && typeKey === "float") {
-        typeKey = "int";
-      }
-      if (typeKey !== "__NO_TYPE__" && !isArduinoScalarType(typeKey)) {
-        typeKey = "__NO_TYPE__";
-      }
-      if (!variableNamesByType[typeKey]) {
-        variableNamesByType[typeKey] = [];
-      }
-      variableNamesByType[typeKey].push(varName);
-    }
-
-    // Declare all of the variables.
-    if (Object.keys(variableNamesByType).length > 0) {
-      // Create typed variable declarations
-      const varDeclarations: string[] = [];
-      for (const [varType, varNames] of Object.entries(variableNamesByType)) {
-        if (varNames.length > 0) {
-          const cppType =
-            varType === "__NO_TYPE__" ? "int" : getCppTypeName(varType);
-          varDeclarations.push(`${cppType} ${varNames.join(", ")};`);
-        }
-      }
-
-      if (varDeclarations.length > 0) {
-        this.definitions_["variables"] = varDeclarations.join('\n');
-      }
-    }
+  /** Resets all mutable generator bags to empty dictionaries. */
+  private resetGeneratorBags_(): void {
+    const bags = createEmptyArduinoGeneratorBags();
+    this.includes_ = bags.includes;
+    this.defines_ = bags.defines;
+    this.variables_ = bags.variables;
+    this.variableTypes_ = bags.variableTypes;
+    this.arrayDeclarations_ = bags.arrayDeclarations;
+    this.preamble_ = bags.preamble;
+    this.localVariables_ = bags.localVariables;
+    this.codeFunctions_ = bags.codeFunctions;
+    this.userFunctions_ = bags.userFunctions;
+    this.functionNames_ = bags.functionNames;
+    this.setups_ = bags.setups;
+    this.loop_ = bags.loop;
+    this.pins_ = bags.pins;
   }
 
   /**
@@ -726,12 +336,15 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     body: string,
     blockId: string
   ): void {
-    const paramList = parameters.length > 0 ? parameters.join(', ') : '';
-    const functionCode = `${returnType} ${functionName}(${paramList}) {\n${body}\n}`;
+    const functionCode = formatUserFunctionDefinition(
+      functionName,
+      parameters,
+      returnType,
+      body,
+    );
 
     this.userFunctions_[`function_${functionName}_${blockId}`] = functionCode;
 
-    // Store function signature for validation
     if (!this.functionNames_[functionName]) {
       this.functionNames_[functionName] = {
         parameters: parameters,
@@ -759,77 +372,13 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     warnings: string[];
     errors: string[];
   } {
-    const warnings: string[] = [];
-    const errors: string[] = [];
-
-    // Check for undefined variables
-    const usedVariables = this.getUsedVariables();
-    for (const varName of usedVariables) {
-      if (!this.variables_[varName] && !this.isBuiltInVariable(varName)) {
-        warnings.push(`Variable '${varName}' is used but not declared`);
-      }
-    }
-
-    // Check for function calls to undefined functions
-    const calledFunctions = this.getCalledFunctions();
-    for (const funcName of calledFunctions) {
-      if (!this.isFunctionDefined(funcName) && !this.isBuiltInFunction(funcName)) {
-        warnings.push(`Function '${funcName}' is called but not defined`);
-      }
-    }
-
-    // Check pin usage conflicts
-    const pinWarnings = this.validatePinUsage();
-    warnings.push(...pinWarnings);
-
-    return {
-      isValid: errors.length === 0,
-      warnings,
-      errors
-    };
-  }
-
-  /**
-   * Get list of variables used in the code.
-   * @returns Array of variable names.
-   */
-  private getUsedVariables(): string[] {
-    // This would need to be implemented based on actual code analysis
-    // For now, return variables from the workspace
-    return Object.keys(this.variables_);
-  }
-
-  /**
-   * Get list of functions called in the code.
-   * @returns Array of function names.
-   */
-  private getCalledFunctions(): string[] {
-    // This would need to be implemented based on actual code analysis
-    // For now, return empty array
-    return [];
-  }
-
-  /**
-   * Check if a variable name is a built-in Arduino variable.
-   * @param varName - Variable name to check.
-   * @returns True if built-in, false otherwise.
-   */
-  private isBuiltInVariable(varName: string): boolean {
-    const builtInVars = ['HIGH', 'LOW', 'INPUT', 'OUTPUT', 'INPUT_PULLUP'];
-    return builtInVars.includes(varName);
-  }
-
-  /**
-   * Check if a function name is a built-in Arduino function.
-   * @param funcName - Function name to check.
-   * @returns True if built-in, false otherwise.
-   */
-  private isBuiltInFunction(funcName: string): boolean {
-    const builtInFuncs = [
-      'pinMode', 'digitalWrite', 'digitalRead', 'analogRead', 'analogWrite',
-      'delay', 'millis', 'Serial.begin', 'Serial.print', 'Serial.println'
-    ];
-    return builtInFuncs.includes(funcName);
+    return validateGeneratedArduinoCode(
+      Object.keys(this.variables_),
+      this.variables_,
+      [],
+      Object.keys(this.functionNames_),
+      this.validatePinUsage(),
+    );
   }
 
   addFunctionNames(tag: string, code: string): void {
@@ -858,29 +407,13 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * @returns True if pin can be used, false if conflict.
    */
   addPinUsage(pinNumber: string, pinMode: string, blockId: string): boolean {
-    const pinKey = `pin_${pinNumber}`;
-
-    if (this.pins_[pinKey]) {
-      const existingUsage = this.pins_[pinKey];
-      // Check if there's a conflict (different modes)
-      if (existingUsage.mode !== pinMode) {
-        console.warn(`Pin ${pinNumber} conflict: ${existingUsage.mode} vs ${pinMode}`);
-        return false;
-      }
-      // Pin already configured with same mode
-      return true;
+    const result = recordPinUsage(this.pins_, pinNumber, pinMode, blockId);
+    if (result.status === "conflict") {
+      return false;
     }
-
-    // New pin usage
-    this.pins_[pinKey] = {
-      number: pinNumber,
-      mode: pinMode,
-      blockId: blockId
-    };
-
-    // Add pinMode setup
-    this.addSetup(`pin_${pinNumber}_mode`, `pinMode(${pinNumber}, ${pinMode});`);
-
+    if (result.status === "new") {
+      this.addSetup(result.setupTag, result.setupCode);
+    }
     return true;
   }
 
@@ -888,7 +421,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * Get all pin usages for validation.
    * @returns Object containing pin usage information.
    */
-  getPinUsages(): Record<string, { number: string, mode: string, blockId: string }> {
+  getPinUsages(): PinUsageMap {
     return this.pins_;
   }
 
@@ -899,82 +432,39 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * @returns Legal line of code.
    */
   scrubNakedValue(line: string): string {
-    return line + "\n";
+    return scrubNakedValueLine(line);
   }
 
   /**
    * Encode a string as a properly escaped Arduino string, complete with quotes.
-   *
    * @param string - Text to encode.
    * @returns Arduino string.
    */
   quote_(string: string): string {
-    string = string.replace(/\\/g, "\\\\").replace(/\n/g, "\\\n");
-
-    let quote = "'";
-    if (string.indexOf("'") !== -1) {
-      if (string.indexOf('"') === -1) {
-        quote = '"';
-      } else {
-        string = string.replace(/'/g, "\\'");
-      }
-    }
-    return quote + string + quote;
+    return quoteArduinoString(string);
   }
 
   /**
    * Encode a string as a properly escaped multiline Arduino string, complete
    * with quotes.
-   *
    * @param string - Text to encode.
    * @returns Arduino string.
    */
   multiline_quote_(string: string): string {
-    const lines = string.split(/\n/g).map(this.quote_);
-    // Join with the following, plus a newline:
-    // + '\n' +
-    return lines.join(" + '\\n' + \n");
+    return multilineQuoteArduinoString(string);
   }
 
   /**
    * Common tasks for generating Arduino from blocks.
    * Handles comments for the specified block and any connected value blocks.
    * Calls any statements following this block.
-   *
    * @param block - The current block.
    * @param code - The Arduino code created for this block.
    * @param thisOnly - True to generate code for only this statement.
    * @returns Arduino code with comments and subsequent blocks added.
-
    */
   scrub_(block: Blockly.Block, code: string, thisOnly = false): string {
-    let commentCode = "";
-    // Only collect comments for blocks that aren't inline.
-    if (!block.outputConnection?.targetConnection) {
-      // Collect comment for this block.
-      let comment = block.getCommentText();
-      if (comment) {
-        comment = Blockly.utils.string.wrap(comment, this.COMMENT_WRAP - 3);
-        commentCode += this.prefixLines(comment + "\n", "// ");
-      }
-      // Collect comments for all value arguments.
-      // Don't collect comments for nested statements.
-      for (let i = 0; i < block.inputList.length; i++) {
-        if (block.inputList[i].type === Blockly.inputs.inputTypes.VALUE) {
-          const childBlock = block.inputList[i].connection!.targetBlock();
-          if (childBlock) {
-            comment = this.allNestedComments(childBlock);
-            if (comment) {
-              commentCode += this.prefixLines(comment, "// ");
-            }
-          }
-        }
-      }
-    }
-    const nextBlock =
-      block.nextConnection && block.nextConnection.targetBlock();
-    const nextCode = thisOnly ? "" : this.blockToCode(nextBlock);
-    return commentCode + code + nextCode;
+    return scrubBlockCode(this, block, code, thisOnly);
   }
 
   /**
@@ -985,87 +475,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * @returns Arduino code with enhanced comments and subsequent blocks added.
    */
   scrubArduino_(block: Blockly.Block, code: string, thisOnly = false): string {
-    let commentCode = "";
-
-    // Only collect comments for blocks that aren't inline.
-    if (!block.outputConnection?.targetConnection) {
-      // Collect comment for this block with enhanced formatting.
-      let comment = block.getCommentText();
-      if (comment) {
-        // Format comment for Arduino with proper wrapping
-        comment = this.formatArduinoComment(comment);
-        commentCode += this.prefixLines(comment + "\n", "// ");
-      }
-
-      // Add block type information for debugging
-      const blockType = block.type;
-      if (blockType && this.shouldAddBlockTypeComment(blockType)) {
-        commentCode += this.prefixLines(`Block type: ${blockType}\n`, "// ");
-      }
-
-      // Collect comments for all value arguments.
-      for (let i = 0; i < block.inputList.length; i++) {
-        if (block.inputList[i].type === Blockly.inputs.inputTypes.VALUE) {
-          const childBlock = block.inputList[i].connection!.targetBlock();
-          if (childBlock) {
-            const nestedComment = this.allNestedComments(childBlock);
-            if (nestedComment) {
-              commentCode += this.prefixLines(nestedComment, "// ");
-            }
-          }
-        }
-      }
-    }
-
-    const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
-    const nextCode = thisOnly ? "" : this.blockToCode(nextBlock);
-
-    return commentCode + code + nextCode;
-  }
-
-  /**
-   * Format comment text for Arduino with proper line breaks and wrapping.
-   * @param comment - Raw comment text.
-   * @returns Formatted comment text.
-   */
-  private formatArduinoComment(comment: string): string {
-    // Remove excessive whitespace and normalize line breaks
-    comment = comment.trim().replace(/\s+/g, ' ');
-
-    // Wrap long comments at appropriate length for Arduino IDE
-    const maxLineLength = 80;
-    if (comment.length <= maxLineLength) {
-      return comment;
-    }
-
-    // Simple word wrapping
-    const words = comment.split(' ');
-    const lines: string[] = [];
-    let currentLine = '';
-
-    for (const word of words) {
-      if ((currentLine + ' ' + word).length <= maxLineLength) {
-        currentLine += (currentLine ? ' ' : '') + word;
-      } else {
-        if (currentLine) lines.push(currentLine);
-        currentLine = word;
-      }
-    }
-
-    if (currentLine) lines.push(currentLine);
-
-    return lines.join('\n');
-  }
-
-  /**
-   * Determine if block type comment should be added.
-   * @param blockType - Type of the block.
-   * @returns True if comment should be added.
-   */
-  private shouldAddBlockTypeComment(blockType: string): boolean {
-    // Add block type comments for complex blocks that might need debugging
-    const complexBlocks = ['controls_if', 'controls_repeat', 'procedures_defreturn', 'variables_set'];
-    return complexBlocks.includes(blockType);
+    return scrubArduinoBlockCode(this, block, code, thisOnly);
   }
 
   /**
@@ -1087,21 +497,23 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
     localVariables: Record<string, Record<string, string>>;
     registeredGenerators: string[];
   } {
-    return {
-      includes: this.includes_,
-      defines: this.defines_,
-      preamble: this.preamble_,
-      variables: this.variables_,
-      codeFunctions: this.codeFunctions_,
-      userFunctions: this.userFunctions_,
-      functionNames: this.functionNames_,
-      setups: this.setups_,
-      loop: this.loop_,
-      pins: this.pins_,
-      variableTypes: this.variableTypes_,
-      localVariables: this.localVariables_,
-      registeredGenerators: Object.keys(this.forBlock)
-    };
+    return buildArduinoGeneratorDebugState(
+      {
+        includes: this.includes_,
+        defines: this.defines_,
+        preamble: this.preamble_,
+        variables: this.variables_,
+        codeFunctions: this.codeFunctions_,
+        userFunctions: this.userFunctions_,
+        functionNames: this.functionNames_,
+        setups: this.setups_,
+        loop: this.loop_,
+        pins: this.pins_,
+        variableTypes: this.variableTypes_,
+        localVariables: this.localVariables_,
+      },
+      Object.keys(this.forBlock),
+    );
   }
 
   /**
@@ -1125,20 +537,7 @@ export class ArduinoGenerator extends Blockly.CodeGenerator {
    * Reset generator state for debugging purposes.
    */
   resetForDebug(): void {
-    this.includes_ = Object.create(null);
-    this.defines_ = Object.create(null);
-    this.variables_ = Object.create(null);
-    this.variableTypes_ = Object.create(null);
-    this.arrayDeclarations_ = [];
-    this.preamble_ = Object.create(null);
-    this.codeFunctions_ = Object.create(null);
-    this.userFunctions_ = Object.create(null);
-    this.functionNames_ = Object.create(null);
-    this.setups_ = Object.create(null);
-    this.loop_ = Object.create(null);
-    this.pins_ = Object.create(null);
-    this.localVariables_ = Object.create(null);
-
+    this.resetGeneratorBags_();
     if (this.nameDB_) {
       this.nameDB_.reset();
     }

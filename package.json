@@ -22,6 +22,7 @@
     "convert-rduino": "node scripts/convert-rduino-workspace.mjs",
     "generate-favicon": "node scripts/generate-favicon.mjs",
     "extract-functions": "node scripts/extract-functions.js",
+    "build:extensions": "node scripts/build-extensions.mjs",
     "test": "tsx --test tests/**/*.test.ts",
     "dev": "webpack serve --open --mode development",
     "dev:embed": "webpack serve --config webpack.core.config.mjs --open --mode development"

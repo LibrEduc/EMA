@@ -10,7 +10,9 @@ This document helps new contributors understand the codebase layout, conventions
 
 > **Noyau vs démo** : pour l’API publique embed (`createUcBlockly`), les builds sans Monaco et la frontière interne/public, voir **[KERNEL.md](./KERNEL.md)**.
 >
-> **Ajouter des blocs** : chemin par défaut = **pack runtime** sous `extensions/` — [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) (ex. [`extensions/servo/`](../extensions/servo/)). Intégration compilée dans le noyau = [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) (secondaire).
+> **Débuter dans le code** : **[DEBUTER_CODE.md](./DEBUTER_CODE.md)**.
+>
+> **Ajouter des blocs** : chemin par défaut = **pack runtime** sous `extensions/` — [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) (ex. [`extensions/servo/`](../extensions/servo/)). Bloc noyau (4 couches) = [AJOUTER_BLOC_NOYAU.md](./AJOUTER_BLOC_NOYAU.md). Intégration catégorie compilée = [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) (secondaire).
 
 ## Overview
 
@@ -22,7 +24,8 @@ Public surfaces: **`µcBlockly/core`** (embed kernel), **`µcBlockly/host`** (pr
 
 ```
 src/
-├── index.ts                    # Demo entry: Blockly global exposure, workspace init, UI wiring
+├── index.ts                    # Demo orchestration only (see src/demo/)
+
 ├── blockly_application_type.ts # Re-export → demo/blockly_application_shell.ts
 ├── core/                       # **Public kernel** — createUcBlockly, workspace manager (see KERNEL.md)
 ├── host/                       # **Product helpers** — themes, a11y, Monaco wiring (not in lean kernel)
@@ -41,7 +44,11 @@ src/
 ├── tools.ts                    # URL/query helpers (addReplaceParamToUrl, setPluginsInURL)
 ├── language.ts                 # Language switching, toolbox translation, URL lang param
 ├── types.d.ts                  # Ambient declarations (Blockly plugins, Monaco, etc.)
-├── board_profiles.ts           # BOARD_PROFILES data (pins, PWM, serial, …)
+├── board_profiles/             # BOARD_PROFILES data by family (pins, PWM, serial, …)
+│   ├── types.ts
+│   ├── profiles_*.ts
+│   └── index.ts
+
 ├── boards.ts                   # Pin validators + dropdown helpers (re-exports profiles)
 ├── instances/                  # Named component instances (FieldInstance, Instances) — see INSTANCES.md
 ├── code_editor.ts              # Lazy Monaco editor (generated C++ panel); shared µcB_codeEditor
@@ -133,11 +140,11 @@ Full shared guide (three projects): **[CONVENTIONS.md](./CONVENTIONS.md)**.
   - **categories/blockly/** = what the user sees (block shape, fields, connections). Register with `Blockly.Blocks["block_type"] = { init() { … } }` or `Blockly.defineBlocksWithJsonArray`.
   - **generators/arduino/blocks/** = how each block becomes C++ (e.g. `arduinoGenerator.forBlock["block_type"] = function(block, generator) { return "code"; }`).
 - **Block types**: Typing (int/float/bool/string/char/long/…) is defined in **block_types/** and **block_types.ts** (`TYPE_COMPATIBILITY`, cast mapping). **block_types_registry.ts** applies types and runs `checkTypeCompatibility`. See **[TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md)** for the full matrix and cast rules.
-- **Board-specific behaviour**: **board_profiles.ts** holds board data; **boards.ts** exposes validators / dropdown helpers. **toolbox.ts** uses `getToolboxForCurrentBoard()`. Pin dropdowns are wired from **categories/blockly/board.ts** via `refreshBoardPinDropdowns`.
+- **Board-specific behaviour**: **`board_profiles/`** holds board data (one file per family); **boards.ts** exposes validators / dropdown helpers. **toolbox.ts** uses `getToolboxForCurrentBoard()`. Pin dropdowns are wired from **categories/blockly/board.ts** via `refreshBoardPinDropdowns`.
 
 ## Key flows
 
-1. **Startup**: `index.ts` exposes Blockly and arduinoGenerator on `window`, then loads the app (e.g. `BlocklyApplication`). Block definitions (categories/blockly), block types (block_types_registry), and standard block config (configure_standard_blocks) are applied when Blockly is ready.
+1. **Startup**: `index.ts` orchestrates the demo (`src/demo/*` for globals, boards menu, a11y, UI handlers, lifecycle). Block definitions (categories/blockly), block types (block_types_registry), and standard block config (configure_standard_blocks) are applied when the kernel registers.
 2. **Workspace inject**: the demo shell (`demo/blockly_application_shell.ts`) creates a `UcBlocklyWorkspaceManager`, injects the workspace (toolbox, theme, options), restores saved blocks if any, and registers plugins (minimap, backpack, search, etc.). Hosts can also use `createUcBlockly()` / `UcBlocklyWorkspaceManager` from `µcBlockly/core` without the demo shell.
 3. **Code generation**: User clicks “Generate code” (or equivalent) → `arduinoGenerator.workspaceToCode(workspace)` walks the block tree and calls the per-block generators in **generators/arduino/blocks/**.
 4. **Language**: `language.ts` and **languages/** handle UI language and toolbox translation; URL param and dropdown drive the current language.
@@ -146,14 +153,15 @@ Full shared guide (three projects): **[CONVENTIONS.md](./CONVENTIONS.md)**.
 
 | Goal | Main files |
 |------|------------|
-| Add a new block (UI) in the **kernel** | `categories/blockly/<category>.ts`, then register in `categories/blockly/index.ts` |
+| Add a new block (UI) in the **kernel** | `categories/blockly/<category>.ts`, then register in `categories/blockly/index.ts` — guide : [AJOUTER_BLOC_NOYAU.md](./AJOUTER_BLOC_NOYAU.md) |
 | **Add blocks without rebuild (recommended)** | [AJOUTER_EXTENSION.md](./AJOUTER_EXTENSION.md) + `extensions/<id>/` (see `extensions/servo/`) |
+| **Beginner map** of the repo | [DEBUTER_CODE.md](./DEBUTER_CODE.md) |
 | Add a whole category **compiled into the kernel** | [AJOUTER_CATEGORIE_SERVOMOTEUR.md](./AJOUTER_CATEGORIE_SERVOMOTEUR.md) (secondary path) |
 | Named component instances (Servo, …) | [INSTANCES.md](./INSTANCES.md) + `src/instances/` |
 | Add block type / compatibility | `generators/arduino/block_types/` + `block_types.ts`, then `block_types_registry.ts` — see [TYPES_ET_COMPATIBILITES.md](./TYPES_ET_COMPATIBILITES.md) |
 | Generate code for a block | `generators/arduino/blocks/<category>.ts` + register in `generators/arduino.ts` |
 | Change toolbox structure | **[MODIFIER_TOOLBOX.md](./MODIFIER_TOOLBOX.md)** — fichiers `src/toolbox/categories/*.ts` |
-| Add a board | `board_profiles.ts` (+ helpers in `boards.ts` if needed) |
+| Add a board | `board_profiles/profiles_*.ts` (+ helpers in `boards.ts` if needed) |
 | Patches to Blockly core | `blockly_patches.ts` → `blockly_patches/` |
 | New UI language | `languages/languageMap.ts` + new file `languages/<code>.ts`, merge messages |
 | Theme / colours | `options.ts`, `theme_black_and_white.ts`, `theme_seshat.ts`, `ui_palette_theme.ts` |

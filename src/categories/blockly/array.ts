@@ -4,7 +4,7 @@
  * @description S4e-style array blocks for Arduino (definitions + facade).
  * @remarks
  * Sync/ownership helpers live in `array_sync.ts`; plus/minus mutators in `array_mutators.ts`.
- * List defs: `array_list_defs.ts`; declare/create: `array_declare_defs.ts`; bitmap: `array_bitmap.ts`.
+ * List defs: `array_list_defs.ts`; declare façade: `array_declare_defs.ts` (declare/create/fix/get_index); bitmap: `array_bitmap.ts`.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
  * @since 1.0.0

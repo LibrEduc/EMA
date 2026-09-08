@@ -17,7 +17,7 @@
   — génération de code Arduino/C++ à partir de blocs.
 </p>
 
-[Contribuer](docs/CONTRIBUTING.md) · [Conventions](docs/CONVENTIONS.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md) · [Wiki](https://wiki.libreduc.cc/fr:arduino:ucblockly)
+[Contribuer](docs/CONTRIBUTING.md) · [Débuter](docs/DEBUTER_CODE.md) · [Conventions](docs/CONVENTIONS.md) · [Noyau](docs/KERNEL.md) · [Architecture](docs/ARCHITECTURE.md) · [Documentation API](docs/TYPEDOC.md) · [Changelog](CHANGELOG.md) · [Wiki](https://wiki.libreduc.cc/fr:arduino:ucblockly)
 
 </div>
 
@@ -60,7 +60,11 @@ Ouvrez l’URL affichée par Webpack (ou `public/index.html` après build) pour 
 | [docs/KERNEL.md](docs/KERNEL.md) | Surface publique du noyau embeddable (`createUcBlockly`) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Structure du code, conventions, flux principaux |
 | [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | Style code partagé (en-têtes, JSDoc, découpage) — 3 projets |
+| [docs/DEBUTER_CODE.md](docs/DEBUTER_CODE.md) | **Carte d’entrée** pour naviguer / contribuer |
+| [docs/GLOSSAIRE.md](docs/GLOSSAIRE.md) | Termes (toolbox, générateur, pack…) |
+| [docs/TUTORIEL_MICRO_BLOC.md](docs/TUTORIEL_MICRO_BLOC.md) | Pas à pas micro-bloc + smoke test |
 | [docs/MODIFIER_TOOLBOX.md](docs/MODIFIER_TOOLBOX.md) | Modifier la toolbox (guide débutant) |
+| [docs/AJOUTER_BLOC_NOYAU.md](docs/AJOUTER_BLOC_NOYAU.md) | Ajouter un bloc compilé (UI + C++ + type + menu) |
 | [docs/KERNEL.md](docs/KERNEL.md) | Frontière noyau / host / démo |
 | [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) | Coque UI, raccourcis clavier, repères ARIA |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Guide pour les contributeurs |

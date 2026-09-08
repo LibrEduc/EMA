@@ -30,14 +30,15 @@ extensions/
   index.json
   servo/                       # id === "servo"
     manifest.json
-    blocks.js
-    generator.arduino.js
+    blocks.ts / blocks.js      # .ts édité → npm run build:extensions
+    generator.arduino.ts /.js
     toolbox.fragment.json      # parent / mode pour sous-catégorie
     theme.json
     block_types.json
     i18n/{en,fr,es,ar}.json
-    *.ts                       # édition seule
 ```
+
+**Pipeline unique :** éditer les `.ts` (contrat `defineBlocks` / `register*Generators`), puis `npm run build:extensions`. Ne pas modifier les `.js` générés.
 
 ## Toolbox : `toolboxParent` / `toolboxMode`
 

@@ -49,18 +49,36 @@ Document de suivi **à jour pour la v3** (Blockly 13). Les anciennes notes de re
 - `generators/.../blocks/text_*` — découpage du générateur `text.ts` (expr / literals / ops / transform / io)
 - `block_types_array_infer` / `_dynamic` / `_compat` — découpage de `block_types_registry.ts`
 - `strict_connection_array` / `_procedure` (+ `_type_utils`) — découpage de `strict_connection_checker.ts`
+- `arduino_generator_pins` / `_scrub` — lot A de `arduino_generator.ts` (pins + scrub/quote)
+- `arduino_generator_init_vars` — lot B de `arduino_generator.ts` (collecte / déclarations globales dans `init`)
+- `arduino_generator_validate` / `_debug` — lot C (validation + snapshot bags)
+- Guides débutant : `DEBUTER_CODE.md`, `GLOSSAIRE.md`, `TUTORIEL_MICRO_BLOC.md`, `AJOUTER_BLOC_NOYAU.md` (+ toolbox / extension déjà là)
+- **`src/index.ts`** découpé → `src/demo/demo_*.ts` + `continuous_toolbox.ts`
+- **`board_profiles/`** par famille (façade `index.ts`) ; smoke `tests/add-block-smoke.test.ts`
+- **`npm run build:extensions`** ; smoke `tests/extension-pack-smoke.test.ts`
+- **`array_sync_*` / `variables_declare_*` / `shell_shortcuts_help_i18n`**
+- **`shell_shortcuts_help`** → dialog / edit / façade ; **`configure_procedure_*`** ; **`array_declare_*`** (declare/create/fix/get_index)
+
 - `order.ts` + `arduino_code_format.ts` — générateur
 - `shared.ts` ≈ **193 L** façade (était ~1250 L)
 
 | Priorité | Sujet | Notes |
 |----------|--------|--------|
 | Haute | ~~Boot DOM démo (`getElementById` + `!`)~~ | ✅ `demo/demo_dom.ts` — résolution unique + bandeau + abort |
-| Moyenne | Pipeline unique extensions `.ts` → `.js` | Éviter dérive dual (ex. `extensions/servo`) |
+| Moyenne | ~~Pipeline unique extensions `.ts` → `.js`~~ | ✅ `npm run build:extensions` + sources runtime-contrat (`extensions/servo/*.ts`) |
 | Moyenne | ~~Isoler `blockly_patches.ts`~~ | ✅ façade + `src/blockly_patches/*` |
-| Moyenne | ~~Extraire `BOARD_PROFILES` hors de `boards.ts`~~ | ✅ `board_profiles.ts` (données) / `boards.ts` (validateurs) |
+| Moyenne | ~~Extraire `BOARD_PROFILES` hors de `boards.ts`~~ | ✅ `board_profiles/` (familles) / `boards.ts` (validateurs) |
 | Moyenne | ~~Étendre `core-api.test.ts`~~ | ✅ boards + `createUcBlockly` (jsdom) ; interop CJS plugins |
-| Basse | Factoriser mutators `+/-` | `array` / `libre` / `logic` |
+| Basse | ~~Factoriser mutators `+/-`~~ | ✅ `plus_minus_mutator.ts` (`createPartListPlusMinusMutator` + `registerMutatorOnce`) ; array / libre / switch |
+
 | Basse | ~~Headers packs + `@version`~~ | ✅ SPDX sur `extensions/servo` runtime `.js` |
+| — | ~~`array_sync` / `variables_declare`~~ | ✅ façades + modules ownership/access/literal / declare_* |
+| — | ~~i18n aide raccourcis~~ | ✅ `shell_shortcuts_help_i18n.ts` |
+| Moyenne | ~~Shell help dialog / edit~~ | ✅ `shell_shortcuts_help_{dialog,edit}.ts` + façade |
+| Moyenne | ~~`configure_procedure_blocks`~~ | ✅ types / plus_minus / defs / calls |
+| Moyenne | ~~`array_declare_defs`~~ | ✅ declare / create / fix / get_index + shared |
+| — | `shortcut_preferences.ts` | Laissé (~413 L) : storage + apply trop entrelacés |
+| Basse | `ucblockly_workspace_manager` / `workspace_flex` / shell démo | Gros mais hors chemin blocs débutant |
 
 ### Produits dérivés (suivi croisé)
 

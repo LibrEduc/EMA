@@ -4,6 +4,8 @@ Pack déposable : dossier **`servo/`** + `manifest.id`: **`"servo"`** + entrée 
 
 Chargé au démarrage **sans rebuild**.
 
+**Édition :** modifier `blocks.ts` / `generator.*.ts`, puis `npm run build:extensions` (les `.js` sont générés).
+
 ### Placement toolbox (config actuelle)
 
 Sous-catégorie de `CAT_BOARD` :
