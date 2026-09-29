@@ -4,6 +4,9 @@
 
 Travaux depuis la release **3.0.0** (29 juillet 2026) — pas encore numérotés en version npm.
 
+### Licence
+- Relicensing **GPL-3.0-or-later → AGPL-3.0-or-later** (alignement SaaS / §13 AGPL, comme HackCable) : `LICENSE`, `package.json`, en-têtes SPDX, conventions.
+
 ### Performance (drag & drop)
 - Debounce / skip pendant le drag : événements workspace, enforceur de structure de programme, typage strict, checker de connexions.
 - Cache des métriques de contenu « live » par frame (`live_content_metrics`) pour alléger le highlight / flyout.

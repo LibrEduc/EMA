@@ -32,7 +32,7 @@ const FULL_GPL = `/**
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see https://www.gnu.org/licenses/.
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`;
 
 const ASTUCE_MODIFICATIONS_GPL = `/**
@@ -52,25 +52,25 @@ const ASTUCE_MODIFICATIONS_GPL = `/**
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see https://www.gnu.org/licenses/.
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`;
 
 const ABBREV_PATTERNS = [
   `/**
  * @license
  * Copyright 2023 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`,
   `/**
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`,
   `/**
  * @license
  * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany)
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`,
 ];
 
@@ -81,7 +81,7 @@ const APACHE_BLOCK = `/**
  */`;
 
 const APACHE_REMARK =
-  " * Original Blockly generator portions are under Apache-2.0. µcBlockly modifications under GPL-3.0-or-later.\n";
+  " * Original Blockly generator portions are under Apache-2.0. µcBlockly modifications under AGPL-3.0-or-later.\n";
 
 const GOOGLE_FILES = new Set([
   "src/generators/arduino/blocks/logic.ts",
@@ -137,8 +137,8 @@ const variableScopePath = "src/generators/arduino/variable_scope.ts";
 let variableScope = fs.readFileSync(variableScopePath, "utf8");
 if (!variableScope.includes("@author scanet")) {
   variableScope = variableScope.replace(
-    " * @license GPL-3.0-or-later\n */",
-    " * @author scanet@libreduc.cc (Sébastien Canet)\n * @license GPL-3.0-or-later\n * @version 1.0.0\n * @since 1.0.0\n */",
+    " * @license AGPL-3.0-or-later\n */",
+    " * @author scanet@libreduc.cc (Sébastien Canet)\n * @license AGPL-3.0-or-later\n * @version 1.0.0\n * @since 1.0.0\n */",
   );
   fs.writeFileSync(variableScopePath, variableScope);
 }
@@ -151,5 +151,5 @@ logic = logic.replace(
 );
 fs.writeFileSync(logicPath, logic);
 
-console.log(`Updated abbreviated GPL headers in ${abbrevFiles} file(s).`);
+console.log(`Updated abbreviated AGPL headers in ${abbrevFiles} file(s).`);
 console.log(`Added ASTUCE modification license to ${googleFiles} Google-derived file(s).`);

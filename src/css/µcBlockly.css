@@ -4,7 +4,7 @@
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
  * @since 1.0.0
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  */
 
 /**
@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see https://www.gnu.org/licenses/.
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #flex_container_up_right {
@@ -536,6 +536,9 @@ label.plugin-option input[type="checkbox"]:focus-visible {
 
 .ucb-about-dialog__links {
   margin: 0 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
 }
 
 .ucb-about-dialog__blockly {

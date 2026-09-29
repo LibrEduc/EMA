@@ -186,7 +186,7 @@ let config = {
           " * µcBlockly – " + (pkg.description || ""),
           " *",
           " * Copyright (C) 2023-2024 ASTUCE (Sébastien Canet microcompany).",
-          " * License: GPL-3.0-or-later. See https://www.gnu.org/licenses/gpl-3.0.html",
+          " * License: AGPL-3.0-or-later. See https://www.gnu.org/licenses/gpl-3.0.html",
           " *",
           " * This program is free software; you may redistribute and/or modify it under the terms of the GPLv3.",
           " * Copying, reverse-engineering, or redistribution of this bundle outside the license terms is prohibited.",

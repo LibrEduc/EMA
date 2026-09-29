@@ -3,7 +3,7 @@
  * @module Arduino.Generators.TextHelpers
  * @description Helper functions for text block generators.
  * @remarks
- * Original Blockly generator portions are under Apache-2.0. µcBlockly modifications under GPL-3.0-or-later.
+ * Original Blockly generator portions are under Apache-2.0. µcBlockly modifications under AGPL-3.0-or-later.
  * Shared helpers for the text generator implementation.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
@@ -13,7 +13,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import type { ArduinoGenerator } from "../arduino_generator";

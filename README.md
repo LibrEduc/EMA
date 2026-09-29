@@ -92,6 +92,6 @@ Pour régénérer les favicons après modification du logo : `npm run generate-f
 
 ## Licence
 
-GPL-3.0-or-later — voir les en-têtes des fichiers sources et [`LICENSE`](LICENSE).
+AGPL-3.0-or-later — voir les en-têtes des fichiers sources et [`LICENSE`](LICENSE).
 
 Journal des modifications : [CHANGELOG.md](CHANGELOG.md).

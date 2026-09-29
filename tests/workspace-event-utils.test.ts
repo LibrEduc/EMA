@@ -1,5 +1,5 @@
 /**
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * Unit tests for workspace event defer / queue helpers.
  */
 

@@ -6,7 +6,7 @@
  * Do not stub @blockly packages that already ship `.d.ts` (e.g. continuous-toolbox):
  * an empty `declare module` replaces real exports and breaks host typecheck.
  * @author scanet\@libreduc.cc (Sébastien Canet)
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -14,7 +14,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 declare module "@blockly/block-plus-minus";

@@ -1,5 +1,5 @@
 /**
- * @license GPL-3.0-or-later
+ * @license AGPL-3.0-or-later
  * Smoke test: ephemeral "add a block" pipeline (UI + generator + workspaceToCode).
  * Documents the beginner path in docs/TUTORIEL_MICRO_BLOC.md.
  */

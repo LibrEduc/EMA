@@ -1,7 +1,7 @@
 /**
  * Harmonise les en-têtes source vers le format CONVENTIONS.md :
  *   @packageDocumentation (+ @module / @description / @author / @version / @since)
- *   puis @license GPL compact.
+ *   puis @license AGPL compact.
  *
  * Usage:
  *   node scripts/harmonize-headers.mjs              # BD-v3 + Factory overlay
@@ -24,13 +24,13 @@ const AUTHOR = "scanet\\@libreduc.cc (Sébastien Canet)";
 const LICENSE_UCB = `/**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`;
 
 const LICENSE_BDUINO = `/**
  * @license
  * Copyright 2026 ASTUCE (Sébastien Canet) / BlocklyDuino
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`;
 
 function walk(d, acc = []) {

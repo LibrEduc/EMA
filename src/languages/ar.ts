@@ -12,7 +12,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import { LanguageMap } from './languageMap';
@@ -30,6 +30,7 @@ export const arLang: LanguageMap = {
     ABOUT_TEXT:
       "µcBlockly — بيئة برمجة مرئية للمتحكمات الدقيقة، مبنية على مكتبة كتل.",
     ABOUT_PROJECT: "صفحة المشروع على GitHub",
+    ABOUT_VIDEOS: "قناة فيديوهات العرض",
     ABOUT_BLOCKLY:
       "مبني باستخدام Blockly. Blockly مكتبة مفتوحة المصدر من مؤسسة Raspberry Pi Foundation، طُوِّرت في الأصل لدى Google. تُنشئ واجهة برمجة مرئية تعتمد على كتل السحب والإفلات.",
     ABOUT_BLOCKLY_DOCS: "دليل إسناد Blockly",

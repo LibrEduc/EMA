@@ -134,7 +134,7 @@ Voir [CONVERT_RDUINO.md](./CONVERT_RDUINO.md) pour la conversion de projets Bloc
 Full shared guide (three projects): **[CONVENTIONS.md](./CONVENTIONS.md)**.
 
 - **Comments (TSDoc / TypeDoc)**: In English. Use `@description`, `@remarks`, `@param`, `@returns` for public APIs. File-level `@packageDocumentation` (with optional `@module`) describes the module for the generated API site. Avoid legacy **`@fileoverview`** (JSDoc); fold that text into `@remarks` or `@description`. Inline comments explain **why**, not obvious **what**.
-- **License header**: Each source file has `@packageDocumentation` where applicable, then a **compact** GPL-3.0-or-later `@license` block (no verbose GPL text in sources). Author/copyright (e.g. ASTUCE) is kept as-is.
+- **License header**: Each source file has `@packageDocumentation` where applicable, then a **compact** AGPL-3.0-or-later `@license` block (no verbose GPL text in sources). Author/copyright (e.g. ASTUCE) is kept as-is.
 - **File split**: One responsibility per module; prefer &lt; ~400 lines; split past ~500–600 unless data tables.
 - **Block definitions vs code generation**:
   - **categories/blockly/** = what the user sees (block shape, fields, connections). Register with `Blockly.Blocks["block_type"] = { init() { … } }` or `Blockly.defineBlocksWithJsonArray`.

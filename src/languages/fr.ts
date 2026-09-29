@@ -12,7 +12,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import { LanguageMap } from './languageMap';
@@ -30,6 +30,7 @@ export const frLang: LanguageMap = {
     ABOUT_TEXT:
       "µcBlockly — environnement de programmation visuelle pour microcontrôleurs, basé sur une bibliothèque de blocs.",
     ABOUT_PROJECT: "Page du projet sur GitHub",
+    ABOUT_VIDEOS: "Chaîne de démos vidéo",
     ABOUT_BLOCKLY:
       "Construit avec Blockly. Blockly est une bibliothèque open source de la Raspberry Pi Foundation, développée à l’origine chez Google. Elle crée une interface de programmation visuelle par blocs à glisser-déposer.",
     ABOUT_BLOCKLY_DOCS: "Guide d’attribution Blockly",

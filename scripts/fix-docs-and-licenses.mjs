@@ -9,13 +9,13 @@ import path from "path";
 const ASTUCE_UCB = `/**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`;
 
 const ASTUCE_BDUINO = `/**
  * @license
  * Copyright 2026 ASTUCE (Sébastien Canet) / BlocklyDuino
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */`;
 
 const VERBOSE_GPL_RE =
@@ -25,7 +25,7 @@ const MODIFICATIONS_GPL_RE =
   /\/\*\*\s*\n \* @license\s*\n \* Modifications copyright \(C\) 2023-2024 ASTUCE \(Sébastien Canet microcompany\)\s*\n \*\s*\n \* This program is free software:[\s\S]*?SPDX-License-Identifier: GPL-3\.0-or-later\s*\n \*\/\s*/;
 
 const SHORT_LICENSE_IN_PACKAGE_RE =
-  /^(\/\*\*[\s\S]*?@packageDocumentation[\s\S]*?)( \* @license GPL-3\.0-or-later\s*\n)/m;
+  /^(\/\*\*[\s\S]*?@packageDocumentation[\s\S]*?)( \* @license A?GPL-3\.0-or-later\s*\n)/m;
 
 const HACKER_POLLUTION_RE =
   /\n \*\s*\n \* Hacker Mode block\/category palette \(Apache-2\.0, Google LLC 2023\):\s*\n \* SPDX-License-Identifier: Apache-2\.0\s*/;
@@ -79,13 +79,13 @@ function collapseUcBlocklyLicenses(content, filePath) {
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  * Hacker Mode palette derived from Google LLC theme-hackermode (Apache-2.0).
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */\n\n`
       : `${ASTUCE_UCB}\n\n`;
     s = s.replace(VERBOSE_GPL_RE, compact);
   }
 
-  // If packageDocumentation still has orphan @license GPL-3.0-or-later line, drop it
+  // If packageDocumentation still has orphan @license AGPL-3.0-or-later line, drop it
   // (SPDX lives in the compact block)
   s = s.replace(SHORT_LICENSE_IN_PACKAGE_RE, "$1");
 
@@ -212,7 +212,7 @@ function fixKnownJsdoc(content, filePath) {
 function fixServoLicense(content) {
   return content.replace(
     /SPDX-License-Identifier: Apache-2\.0/,
-    "SPDX-License-Identifier: GPL-3.0-or-later",
+    "SPDX-License-Identifier: AGPL-3.0-or-later",
   );
 }
 

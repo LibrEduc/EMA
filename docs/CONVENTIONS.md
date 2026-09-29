@@ -1,14 +1,15 @@
-# Conventions partagées — µcBlockly · BlocklyDuino v3 · Factory v3
+# Conventions partagées — µcBlockly · BlocklyDuino v3 · Factory v3 · BlocklyStudio
 
-Document **canonique** pour les trois dépôts. Les autres projets y renvoient ; en cas de divergence, ce fichier (dans µcBlockly) fait foi, avec les adaptations de copyright / arborescence indiquées ci-dessous.
+Document **canonique** pour l’écosystème. Les autres projets y renvoient ; en cas de divergence, ce fichier (dans µcBlockly) fait foi, avec les adaptations de copyright / arborescence indiquées ci-dessous.
 
 | Projet | Rôle | Racine code | Copyright en-tête |
 |--------|------|-------------|-------------------|
 | **µcBlockly** | Noyau Blockly + générateur Arduino | `src/`, `extensions/` | `Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)` |
 | **BlocklyDuino-v3** | Application hôte | `src/` | `Copyright 2026 ASTUCE (Sébastien Canet) / BlocklyDuino` |
-| **BlocklyDuinoFactory-v3** | Créateur de blocs | `overlay/` (+ fork `upstream/` GPL) | idem BlocklyDuino |
+| **BlocklyDuinoFactory-v3** | Créateur de blocs | `overlay/` (+ fork `upstream/` AGPL) | idem BlocklyDuino |
+| **BlocklyStudio** | Coquille page + modules | `src/`, `public/`, `scripts/` | `Copyright 2026 ASTUCE (Sébastien Canet) / BlocklyStudio` |
 
-Licence unique : **GPL-3.0-or-later** (`SPDX-License-Identifier: GPL-3.0-or-later`).
+Licence unique : **AGPL-3.0-or-later** (`SPDX-License-Identifier: AGPL-3.0-or-later`).
 
 ---
 
@@ -32,14 +33,14 @@ Ordre fixe, deux blocs distincts :
 /**
  * @license
  * Copyright … ASTUCE …
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 ```
 
 Règles :
 
-- **Pas** de GPL verbeux (« This program is free software… ») dans les sources — le texte complet est dans `LICENSE`.
-- **Pas** de copyright Google / Apache dans les sources produit (Factory : fork `upstream/` aussi en GPL ; provenance Apache uniquement dans `NOTICE`).
+- **Pas** de licence verbeuse (« This program is free software… ») dans les sources — le texte complet est dans `LICENSE`.
+- **Pas** de copyright Google / Apache dans les sources produit (Factory : fork `upstream/` aussi en AGPL ; provenance Apache uniquement dans `NOTICE`).
 - `@module` : PascalCase segments séparés par `.` (ex. `Arduino.Generators.Logic`, `Host.Settings`, `Factory.Overlay.Branding`).
 - Fichiers très petits (types-only, re-export) : `@packageDocumentation` + `@description` suffisent ; `@remarks` optionnel.
 - Extensions runtime (`.js` ESM) : en-tête licence compact + court commentaire de contrat d’export ; pas besoin de TypeDoc complet.
@@ -105,7 +106,7 @@ Autorisé : garde-fous non évidents, contournements Blockly, invariants, TODO d
 | **Façade** | `index.ts` / `foo.ts` réexporte ; logique dans `foo_*.ts`. |
 | **UI blocs ≠ génération** | Définitions blocs séparées des générateurs (µcBlockly : `categories/` vs `generators/`). |
 | **Host vs noyau** | Code produit (menus, settings, upload) hors du kernel embed. |
-| **Factory** | Personnalisations dans `overlay/` ; sync `upstream/` via script (relicense GPL). |
+| **Factory** | Personnalisations dans `overlay/` ; sync `upstream/` via script (relicense AGPL). |
 | **Nommage** | `snake_case.ts` pour les modules ; exports camelCase / PascalCase. |
 
 Quand ajouter un fichier : si deux concerns distincts, ou si un fichier mélange i18n + DOM + codegen.
@@ -140,7 +141,7 @@ Mettre à jour la doc **dans le même PR** qu’un changement de layout ou d’A
 
 ## 7. Checklist avant commit / PR
 
-1. En-tête `@packageDocumentation` + `@license` GPL compact présents.
+1. En-tête `@packageDocumentation` + `@license` AGPL compact présents.
 2. Symboles exportés documentés (anglais, params exacts).
 3. Commentaires internes = pourquoi.
 4. Fichier pas devenu un « god module » (>600 L sans raison).
@@ -154,3 +155,4 @@ Mettre à jour la doc **dans le même PR** qu’un changement de layout ou d’A
 - µcBlockly : [ARCHITECTURE.md](./ARCHITECTURE.md), [CONTRIBUTING.md](./CONTRIBUTING.md), [KERNEL.md](./KERNEL.md)
 - BlocklyDuino-v3 : `docs/CONTRIBUTING.md`, `README.md`
 - Factory v3 : `docs/CONTRIBUTING.md`, `NOTICE`, `UPSTREAM.md`
+- BlocklyStudio : `docs/CONTRIBUTING.md`, `docs/CONVENTIONS.md`, `docs/INVENTAIRE_HOST_STUDIO.md`

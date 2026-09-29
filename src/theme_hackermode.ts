@@ -15,7 +15,7 @@
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
  * Hacker Mode palette derived from Google LLC theme-hackermode (Apache-2.0).
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import * as Blockly from "blockly";

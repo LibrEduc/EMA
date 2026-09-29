@@ -13,7 +13,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import { arLang } from './ar';
@@ -68,6 +68,7 @@ export interface LanguageItem {
   ABOUT_TOOLTIP: string;
   ABOUT_TEXT: string;
   ABOUT_PROJECT: string;
+  ABOUT_VIDEOS: string;
   ABOUT_BLOCKLY: string;
   ABOUT_BLOCKLY_DOCS: string;
   ABOUT_BLOCKLY_BADGE_ALT: string;

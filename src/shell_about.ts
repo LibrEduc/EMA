@@ -8,7 +8,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import { getLangParamFromUrl } from "./language";
@@ -20,6 +20,8 @@ declare const __UCB_APP_VERSION__: string;
 const DIALOG_ID = "ucb-about-dialog";
 const BUTTON_ID = "aboutButton";
 const PROJECT_URL = "https://github.com/A-S-T-U-C-E/ucBlockly";
+const VIDEOS_URL =
+  "https://tube-sciences-technologies.apps.education.fr/c/ucblockly/videos";
 const BLOCKLY_HOME = "https://www.blockly.com";
 const BLOCKLY_ATTR_DOCS =
   "https://docs.blockly.com/guides/get-started/what-is-blockly/";
@@ -57,6 +59,7 @@ function ensureDialog(): HTMLDialogElement {
     </div>
     <p class="ucb-about-dialog__links">
       <a class="ucb-about-dialog__project" href="${PROJECT_URL}" target="_blank" rel="noopener noreferrer" data-i18n="ABOUT_PROJECT"></a>
+      <a class="ucb-about-dialog__videos" href="${VIDEOS_URL}" target="_blank" rel="noopener noreferrer" data-i18n="ABOUT_VIDEOS"></a>
     </p>
     <div class="ucb-about-dialog__blockly">
       <p data-i18n="ABOUT_BLOCKLY"></p>

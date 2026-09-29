@@ -3,7 +3,7 @@
  * @module Arduino.Generators.MathHelpers
  * @description Helper functions for math block generators.
  * @remarks
- * Original Blockly generator portions are under Apache-2.0. µcBlockly modifications under GPL-3.0-or-later.
+ * Original Blockly generator portions are under Apache-2.0. µcBlockly modifications under AGPL-3.0-or-later.
  * Shared helpers for the math generator implementation.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
@@ -13,7 +13,7 @@
 /**
  * @license
  * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 import type { ArduinoGenerator } from "../arduino_generator";
