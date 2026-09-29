@@ -40,13 +40,24 @@ import {
   resolveEnforcerOptions,
 } from "../core/default_options";
 import type { UcBlocklyPluginOptions } from "../core/types";
-import { UcBlocklyWorkspaceManager } from "../core/ucblockly_workspace_manager";
+import type { UcBlocklyWorkspaceManager } from "../core/ucblockly_workspace_manager";
 import { applyDemoBlocklyLocale } from "./demo_locale";
 import { getShellMessage } from "../shell_messages";
 
 patchConnectionCheckerForConstBlock();
 patchBlockChangeForProcedureCompat();
 patchBlocklyDefensive();
+
+/**
+ * Sync lazy load — avoids TDZ when webpack evaluates the workspace manager
+ * while the demo entry is still initializing (circular live bindings).
+ * @returns Workspace manager constructor.
+ */
+function loadWorkspaceManager(): typeof import("../core/ucblockly_workspace_manager").UcBlocklyWorkspaceManager {
+  // webpack replaces require() with a sync chunk require at call time
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require("../core/ucblockly_workspace_manager").UcBlocklyWorkspaceManager;
+}
 
 function readPluginOptionsFromDom(): UcBlocklyPluginOptions {
   const highlight = document.getElementById(
@@ -130,7 +141,8 @@ export class BlocklyApplication implements BlocklyApplicationType {
     const themeKey = resolveInitialThemeKey();
     workspaceOptions.theme = themeMappings[themeKey] ?? themeMappings.classic;
 
-    this.ws = new UcBlocklyWorkspaceManager({
+    const WorkspaceManager = loadWorkspaceManager();
+    this.ws = new WorkspaceManager({
       baseToolbox: toolbox,
       workspaceOptions,
       language: getLangParamFromUrl(),

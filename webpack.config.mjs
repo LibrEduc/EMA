@@ -90,6 +90,11 @@ let config = {
     assetModuleFilename: "assets/[name].[contenthash][ext][query]",
     path: path.resolve(__dirname, "dist/bundle"),
     clean: true,
+    // GitHub Pages project site: prefer relative "./" (absolute "/ucBlockly/"
+    // breaks css-loader `new URL(asset, publicPath)` which needs an absolute base).
+    ...(process.env.UCB_PUBLIC_PATH
+      ? { publicPath: process.env.UCB_PUBLIC_PATH }
+      : {}),
   },
   // Enable webpack-dev-server to get hot refresh of the app.
   devServer: {
@@ -140,6 +145,11 @@ let config = {
   optimization: {
     runtimeChunk: "single",
     moduleIds: "deterministic",
+    // Scope hoisting concatenates flyouts + UcBlocklyWorkspaceManager into one
+    // module; a circular init then leaves the class export in TDZ forever
+    // ("Cannot access 'P' before initialization") and the GitHub Pages demo
+    // boots with no CSS / no Blockly inject. Keep modules separate.
+    concatenateModules: false,
     splitChunks: {
       chunks: "all",
       cacheGroups: {
@@ -198,7 +208,6 @@ let config = {
       raw: true,
       entryOnly: true,
     }),
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new HtmlWebpackPlugin({
       template: "public/index.html",
       chunks: ["main"],
