@@ -35,7 +35,7 @@ export type ShellMessageKey =
   | "BOARD_FAMILY_PEGUINO"
   | "BOARD_FAMILY_KITS";
 
-const DEFAULT_LANG = "en";
+export const DEFAULT_LANG = "fr";
 
 const normalizeLang = (language?: string): string => {
   const fromMenu = document.getElementById("languageMenu") as HTMLSelectElement | null;

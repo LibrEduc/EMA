@@ -23,6 +23,7 @@ import { refreshShortcutsHelp } from './shell_shortcuts_help';
 import { refreshKeyboardTutorial } from './shell_keyboard_tutorial';
 import * as Blockly from 'blockly';
 import { getExtensionMessagesForLang } from './extensions/registry';
+import {DEFAULT_LANG} from './shell_messages.ts';
 
 const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'lki']);
 import { ToolboxConfiguration } from "./toolbox";
@@ -188,7 +189,7 @@ const getTranslatedToolboxJson = (
  * @returns Result string.
  */
 export const getLangParamFromUrl = (): string => {
-  const lang = new URLSearchParams(window.location.search).get('lang') ?? 'en';
+  const lang = new URLSearchParams(window.location.search).get('lang') ?? DEFAULT_LANG;
   const languageMenu = document.getElementById(
     'languageMenu',
   ) as HTMLSelectElement | null;
