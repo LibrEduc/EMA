@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EMA — robot MAE</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#ema-workspace">Aller au workspace</a>
+    <header class="ema-header">
+      <p class="ema-brand">EMA</p>
+      <p class="ema-tagline">Environnement MAE · µcBlockly (Zelos)</p>
+
+      <fieldset class="ema-target">
+        <legend class="visually-hidden">Langage généré</legend>
+        <label class="ema-target-option">
+          <input type="radio" name="ema-code-target" value="arduino" checked />
+          <span>C Arduino</span>
+        </label>
+        <label class="ema-target-option">
+          <input type="radio" name="ema-code-target" value="micropython" />
+          <span>MicroPython</span>
+        </label>
+      </fieldset>
+
+      <label class="ema-flyout-toggle" title="Garde le panneau de blocs ouvert">
+        <input
+          id="ema-flyout-open"
+          type="checkbox"
+          switch
+          aria-describedby="ema-flyout-open-hint"
+        />
+        <span>Flyout ouvert</span>
+      </label>
+      <span id="ema-flyout-open-hint" class="visually-hidden">
+        Active pour garder la liste des blocs toujours visible.
+      </span>
+    </header>
+    <main class="ema-main">
+      <div
+        id="ema-workspace"
+        role="application"
+        aria-label="Workspace Blockly EMA"
+      ></div>
+      <section class="ema-code-panel" aria-labelledby="ema-code-title">
+        <h2 id="ema-code-title">C Arduino</h2>
+        <pre id="ema-code" tabindex="0"></pre>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

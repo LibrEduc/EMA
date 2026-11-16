@@ -1,0 +1,198 @@
+:root {
+  color-scheme: light;
+  --ema-ink: #1a2332;
+  --ema-paper: #eef2f6;
+  --ema-panel: #ffffff;
+  --ema-accent: #0b6e4f;
+  --ema-line: #c5d0db;
+  --ema-code-bg: #0f1720;
+  --ema-code-fg: #d7e0ea;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-block-size: 100%;
+  block-size: 100%;
+  background: var(--ema-paper);
+  color: var(--ema-ink);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  inset-block-start: 0.75rem;
+  transform: translateY(-200%);
+  padding: 0.5rem 0.75rem;
+  background: var(--ema-accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 0.25rem;
+  z-index: 10;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.ema-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.65rem 1rem;
+  background: linear-gradient(120deg, #0b6e4f 0%, #14532d 55%, #1a2332 100%);
+  color: #f4faf7;
+}
+
+.ema-brand {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.ema-tagline {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.ema-target {
+  display: inline-flex;
+  gap: 0.15rem;
+  margin: 0 0 0 auto;
+  padding: 0.15rem;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 0.4rem;
+  min-inline-size: 0;
+}
+
+.ema-target-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.3rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ema-target-option:has(input:checked) {
+  background: rgb(255 255 255 / 16%);
+}
+
+.ema-target-option input {
+  accent-color: #8fd6b5;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ema-target-option input:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 2px;
+}
+
+.ema-flyout-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 0.35rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ema-flyout-toggle input {
+  accent-color: #8fd6b5;
+  inline-size: 1.15em;
+  aspect-ratio: 1;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ema-flyout-toggle input:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: clip;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ema-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr);
+  min-block-size: 0;
+}
+
+#ema-workspace {
+  position: relative;
+  min-block-size: 0;
+  background: var(--ema-panel);
+  border-inline-end: 1px solid var(--ema-line);
+}
+
+.ema-code-panel {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  background: var(--ema-code-bg);
+  color: var(--ema-code-fg);
+}
+
+.ema-code-panel h2 {
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-block-end: 1px solid #243041;
+}
+
+#ema-code {
+  flex: 1;
+  margin: 0;
+  padding: 0.9rem;
+  overflow: auto;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 900px) {
+  .ema-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(55dvh, 1fr) minmax(12rem, 0.45fr);
+  }
+
+  #ema-workspace {
+    border-inline-end: none;
+    border-block-end: 1px solid var(--ema-line);
+  }
+}

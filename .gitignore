@@ -1,0 +1,7 @@
+node_modules/
+vendor/ucBlockly/node_modules/
+dist/
+public/media/
+.DS_Store
+*.log
+.vite/
