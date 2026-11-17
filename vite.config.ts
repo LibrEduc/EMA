@@ -1,5 +1,5 @@
 import path from "node:path";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 const ucbRoot = path.resolve(__dirname, "vendor/ucBlockly");
 
@@ -23,6 +23,10 @@ export default defineConfig({
     outDir: "dist",
     emptyOutDir: true,
     sourcemap: true,
+  },
+  test: {
+    // Skip the submodule's own tests.
+    include: ["src/**/*.test.ts"],
   },
   optimizeDeps: {
     include: [

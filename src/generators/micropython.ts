@@ -118,22 +118,31 @@ function pinExpr(block: Block, gen: MicroPythonGenerator, name = "PIN"): string 
   return gen.valueToCode(block, name, Order.ATOMIC) || "0";
 }
 
+// statementToCode indents its body, but setup runs at module level and
+// finish() indents the loop itself.
+function unindentedStatements(
+  block: Block,
+  inputName: string,
+  gen: MicroPythonGenerator,
+): string {
+  const leadingIndent = new RegExp(`^${gen.INDENT}`, "gm");
+  return gen.statementToCode(block, inputName).replace(leadingIndent, "");
+}
+
 function registerBoardGenerators(gen: MicroPythonGenerator): void {
   register(gen, "board_base_setup", (block, g) => {
-    const body = g.statementToCode(block, "SETUP") || "";
-    g.addSetup("base_setup", body);
+    g.addSetup("base_setup", unindentedStatements(block, "SETUP", g));
     return "";
   });
 
   register(gen, "board_base_loop", (block, g) => {
-    const body = g.statementToCode(block, "LOOP") || "";
-    g.addLoop("base_loop", body);
+    g.addLoop("base_loop", unindentedStatements(block, "LOOP", g));
     return "";
   });
 
   register(gen, "board_base_setup_loop", (block, g) => {
-    g.addSetup("base_setup", g.statementToCode(block, "SETUP") || "");
-    g.addLoop("base_loop", g.statementToCode(block, "LOOP") || "");
+    g.addSetup("base_setup", unindentedStatements(block, "SETUP", g));
+    g.addLoop("base_loop", unindentedStatements(block, "LOOP", g));
     return "";
   });
 
