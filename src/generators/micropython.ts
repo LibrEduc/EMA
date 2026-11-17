@@ -13,6 +13,8 @@ type ValueFn = (
   generator: MicroPythonGenerator,
 ) => [string, number];
 
+const IMPORT_LINE = /^(from\s+\S+\s+)?import\s+\S+/;
+
 export class MicroPythonGenerator extends PythonGenerator {
   setups_: Record<string, string> = {};
   loops_: Record<string, string> = {};
@@ -23,6 +25,7 @@ export class MicroPythonGenerator extends PythonGenerator {
     // Réutilise les générateurs standard Blockly Python (logique, math, texte…).
     Object.assign(this.forBlock, pythonGenerator.forBlock);
     registerBoardGenerators(this);
+    registerCoreOverrides(this);
   }
 
   addSetup(key: string, code: string): void {
@@ -59,9 +62,26 @@ export class MicroPythonGenerator extends PythonGenerator {
     const loopBody = [loopFromTags, loose].filter(Boolean).join("\n");
     const emitLoop = hasLoopTag || Boolean(loose);
 
+    const variables = String(this.definitions_["variables"] ?? "").trim();
+    const definitions: string[] = [];
+    for (const definition of Object.values(this.definitions_)) {
+      if (definition === this.definitions_["variables"] || !definition) continue;
+      if (IMPORT_LINE.test(definition)) {
+        this.imports_.add(definition.trim());
+      } else {
+        definitions.push(definition.trim());
+      }
+    }
+
+    // Only called for its reset of generator state: it wipes definitions_.
     super.finish(code);
 
-    if (!hasSetupTag && !emitLoop && this.imports_.size === 0) {
+    if (
+      !hasSetupTag &&
+      !emitLoop &&
+      this.imports_.size === 0 &&
+      definitions.length === 0
+    ) {
       return "";
     }
 
@@ -74,6 +94,14 @@ export class MicroPythonGenerator extends PythonGenerator {
     const imports = [...this.imports_].sort();
     if (imports.length > 0) {
       lines.push(...imports, "");
+    }
+
+    if (variables) {
+      lines.push(variables, "");
+    }
+
+    for (const definition of definitions) {
+      lines.push(definition, "");
     }
 
     if (hasSetupTag) {
@@ -242,5 +270,16 @@ function registerBoardGenerators(gen: MicroPythonGenerator): void {
   register(gen, "comment", (block) => {
     const text = String(block.getFieldValue("TEXT") ?? "").replace(/\n/g, " ");
     return `# ${text}\n`;
+  });
+}
+
+function registerCoreOverrides(gen: MicroPythonGenerator): void {
+  // µcBlockly's math_change takes the variable as a value input, which the
+  // stock Python generator does not read.
+  register(gen, "math_change", (block, g) => {
+    const target = block.getInput("VAR") ? g.valueToCode(block, "VAR", Order.NONE) : "";
+    if (!target) return "";
+    const delta = g.valueToCode(block, "DELTA", Order.ADDITIVE) || "0";
+    return `${target} += ${delta}\n`;
   });
 }
