@@ -43,3 +43,13 @@ URL prévue : https://libreduc.github.io/EMA/
 Prérequis :
 1. Dépôt **public** (Pages gratuit) *ou* plan qui autorise Pages sur dépôt privé
 2. **Settings → Pages → Source = GitHub Actions**
+3. Secret `UCBLOCKLY_READ_TOKEN` (voir ci-dessous)
+
+## Accès au sous-module depuis GitHub Actions
+
+`A-S-T-U-C-E/ucBlockly` est privé : le jeton par défaut d'Actions ne peut pas le cloner. Les workflows `ci.yml` et `pages.yml` lisent un secret `UCBLOCKLY_READ_TOKEN`.
+
+1. Créer un jeton *fine-grained* limité au dépôt `A-S-T-U-C-E/ucBlockly`, permission **Contents : Read-only**
+2. L'enregistrer dans **Settings → Secrets and variables → Actions** sous le nom `UCBLOCKLY_READ_TOKEN`
+
+Si ucBlockly devient public, le secret et l'étape « Fetch ucBlockly » ne servent plus.
