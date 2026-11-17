@@ -5,14 +5,20 @@
   "type": "module",
   "description": "Coquille EMA autour de µcBlockly (Zelos + toolbox continue)",
   "scripts": {
+    "prepare": "husky",
     "sync": "npm install --prefix vendor/ucBlockly",
     "media": "node scripts/copy-media.mjs",
     "postinstall": "npm run sync && npm run media",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "electron:build": "vite build --base=./",
+    "electron:start": "electron electron/main.mjs",
+    "electron:run": "npm run electron:build && npm run electron:start",
+    "test:electron": "npm run electron:build && electron tests/electron-smoke.cjs",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run && node --test tests/electron-menu.test.mjs",
+    "test:electron-menu": "node --test tests/electron-menu.test.mjs"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -47,6 +53,10 @@
     "blockly": "^13.4.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "electron": "^45.3.4",
+    "husky": "^9.1.7",
     "typescript": "~5.9.3",
     "vite": "^7.3.8",
     "vitest": "^4.1.12"

@@ -8,7 +8,10 @@ import {
   applyUcBlocklyLocale,
   basic_toolbox,
   getToolboxWithoutBoardCategory,
+  defaultUcBlocklyWorkspaceFilename,
+  sanitizeSerializedWorkspaceState,
   UcBlocklyWorkspaceManager,
+  wrapWorkspaceFilePayload,
 } from "µcBlockly/core";
 import { registerToolboxSearchI18n } from "../vendor/ucBlockly/src/toolbox_search_i18n";
 import { changeLanguageToolbox } from "../vendor/ucBlockly/src/language";
@@ -32,6 +35,7 @@ import {
   isUiLanguage,
   loadUiLanguage,
   saveUiLanguage,
+  UI_LANGUAGES,
   type UiLanguage,
 } from "./i18n";
 import {
@@ -41,6 +45,7 @@ import {
 } from "../vendor/ucBlockly/src/blockly_a11y_extensions";
 import { registerKeyboardTutorial } from "../vendor/ucBlockly/src/shell_keyboard_tutorial";
 import { registerShortcutsHelp } from "../vendor/ucBlockly/src/shell_shortcuts_help";
+import { getShellMessage } from "../vendor/ucBlockly/src/shell_messages";
 import { resolveWorkspaceToolbarTheme } from "µcBlockly/host";
 import {
   applyBlocklyTypography,
@@ -55,6 +60,17 @@ import {
   installToolboxIconRailToggle,
   setToolboxCollapseCopy,
 } from "./toolbox_collapse";
+import {
+  publishDesktopMenuState,
+  subscribeDesktopMenuCommands,
+  openDesktopWorkspace,
+  saveDesktopWorkspace,
+  type DesktopMenuCommand,
+  type DesktopMenuState,
+} from "./electron_menu";
+
+const isElectronShell = Boolean(window.emaDesktop);
+document.documentElement.classList.toggle("ema-electron", isElectronShell);
 
 registerToolboxSearchI18n();
 registerContinuousToolbox();
@@ -427,3 +443,218 @@ codeDrawer?.addEventListener("toggle", () => {
 syncCodeDrawerLabel();
 
 window.addEventListener("resize", resizeWorkspace);
+
+const MENU_COPY = {
+  fr: { file: "Fichier", open: "Ouvrir…", save: "Enregistrer", quit: "Quitter", edit: "Édition", redo: "Refaire", view: "Affichage", code: "Code", settings: "Réglages", codeTarget: "Type de code", accessibility: "Accessibilité", textSize: "Taille du texte", font: "Police", help: "Aide" },
+  en: { file: "File", open: "Open…", save: "Save As…", quit: "Quit", edit: "Edit", redo: "Redo", view: "View", code: "Code", settings: "Settings", codeTarget: "Code type", accessibility: "Accessibility", textSize: "Text size", font: "Font", help: "Help" },
+  es: { file: "Archivo", open: "Abrir…", save: "Guardar como…", quit: "Salir", edit: "Editar", redo: "Rehacer", view: "Ver", code: "Código", settings: "Ajustes", codeTarget: "Tipo de código", accessibility: "Accesibilidad", textSize: "Tamaño del texto", font: "Fuente", help: "Ayuda" },
+  ar: { file: "ملف", open: "فتح…", save: "حفظ باسم…", quit: "خروج", edit: "تحرير", redo: "إعادة", view: "عرض", code: "الرمز", settings: "الإعدادات", codeTarget: "نوع الرمز", accessibility: "إمكانية الوصول", textSize: "حجم النص", font: "الخط", help: "مساعدة" },
+} satisfies Record<UiLanguage, Record<string, string>>;
+
+const syncDesktopMenu = (): void => {
+  if (!window.emaDesktop) return;
+  const copy = getShellCopy(uiLanguage);
+  const menuCopy = MENU_COPY[uiLanguage];
+  const fontSelect = document.getElementById("ema-font") as HTMLSelectElement | null;
+  if (!fontSelect || !textSizeSlider) return;
+
+  const labels = {
+    ...menuCopy,
+    undo: copy.undo,
+    restart: copy.restart,
+    codeOpen: copy.codeSummaryShow,
+    codeClosed: copy.codeSummaryHide,
+    flyout: copy.flyoutOpen,
+    language: copy.langLabel,
+    highContrast: copy.highContrast,
+    screenreader: copy.screenreader,
+    shortcuts: copy.shortcutsHelp,
+    tutorial: copy.keyboardTutorial,
+  };
+  const state: DesktopMenuState = {
+    language: uiLanguage,
+    labels,
+    toggles: {
+      codeOpen: codeDrawer?.open ?? false,
+      flyoutOpen: flyoutOpenToggle?.checked ?? true,
+      highContrast: highContrastToggle?.checked ?? false,
+      screenreader: screenreaderToggle?.checked ?? false,
+    },
+    selects: {
+      language: {
+        value: uiLanguage,
+        options: UI_LANGUAGES.map(({ code, label }) => ({ value: code, label })),
+      },
+      codeTarget: {
+        value: codeTarget,
+        options: Array.from(targetRadios, (radio) => ({
+          value: radio.value,
+          label: radio.parentElement?.querySelector("span")?.textContent?.trim() || radio.value,
+        })),
+      },
+      font: {
+        value: uiFont,
+        options: [
+          { value: "system", label: copy.fontSystem },
+          { value: "atkinson", label: copy.fontAtkinson },
+          { value: "lexend", label: copy.fontLexend },
+          { value: "opendyslexic", label: copy.fontOpenDyslexic },
+          { value: "verdana", label: copy.fontVerdana },
+        ],
+      },
+      textSize: {
+        value: String(textSizePercent),
+        options: Array.from({ length: 21 }, (_, index) => 100 + index * 5).map((value) => ({
+          value: String(value),
+          label: `${value} %`,
+        })),
+      },
+    },
+  };
+  publishDesktopMenuState(state);
+};
+
+const scheduleDesktopMenuSync = (): void => {
+  requestAnimationFrame(syncDesktopMenu);
+};
+
+const dispatchChange = (element: HTMLInputElement | HTMLSelectElement): void => {
+  element.dispatchEvent(new Event("change", { bubbles: true }));
+};
+
+const handleDesktopMenuCommand = (command: DesktopMenuCommand): void => {
+  if (command.type === "action") {
+    if (command.id === "save") {
+      void saveWorkspaceFile();
+    } else if (command.id === "open") {
+      void openWorkspaceFile();
+    } else if (command.id === "redo") {
+      manager.workspace.undo(true);
+      refreshCode();
+    } else if (command.id === "undo") {
+      undoBtn?.click();
+    } else {
+      const buttonId = command.id === "restart"
+        ? "ema-restart"
+        : command.id === "shortcuts"
+          ? "shortcutsHelpButton"
+          : "keyboardTutorialButton";
+      document.getElementById(buttonId)?.click();
+    }
+  } else if (command.type === "toggle") {
+    if (command.id === "toggle-code" && codeDrawer) {
+      codeDrawer.open = command.checked;
+    } else {
+      const control = command.id === "toggle-flyout"
+        ? flyoutOpenToggle
+        : command.id === "toggle-contrast"
+          ? highContrastToggle
+          : screenreaderToggle;
+      if (control && control.checked !== command.checked) {
+        control.checked = command.checked;
+        dispatchChange(control);
+      }
+    }
+  } else if (command.type === "select") {
+    if (command.id === "language" && langSelect && isUiLanguage(command.value)) {
+      langSelect.value = command.value;
+      dispatchChange(langSelect);
+    } else if (command.id === "code-target") {
+      const radio = Array.from(targetRadios).find((item) => item.value === command.value);
+      if (radio) {
+        radio.checked = true;
+        dispatchChange(radio);
+      }
+    } else if (command.id === "font" && isUiFontId(command.value)) {
+      const select = document.getElementById("ema-font") as HTMLSelectElement | null;
+      if (select) {
+        select.value = command.value;
+        dispatchChange(select);
+      }
+    } else if (command.id === "text-size" && textSizeSlider) {
+      const value = Number(command.value);
+      if (value >= 100 && value <= 200 && value % 5 === 0) {
+        textSizeSlider.value = String(value);
+        textSizeSlider.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+  }
+  scheduleDesktopMenuSync();
+};
+
+const saveWorkspaceFile = async (): Promise<void> => {
+  try {
+    const workspaceState = Blockly.serialization.workspaces.save(manager.workspace);
+    sanitizeSerializedWorkspaceState(workspaceState);
+    const contents = JSON.stringify(
+      wrapWorkspaceFilePayload(workspaceState, { language: uiLanguage, codeTarget }),
+      null,
+      2,
+    );
+    await saveDesktopWorkspace(contents, defaultUcBlocklyWorkspaceFilename());
+  } catch (error) {
+    console.error("[EMA] save workspace:", error);
+    window.alert(getShellMessage("FILE_SAVE_ERROR", uiLanguage));
+  }
+};
+
+const applyLoadedProjectPreferences = (contents: string): void => {
+  const parsed = JSON.parse(contents) as {
+    language?: unknown;
+    codeTarget?: unknown;
+    urlParams?: Record<string, unknown>;
+  };
+  const loadedLanguage = parsed.language ?? parsed.urlParams?.lang;
+  if (typeof loadedLanguage === "string" && isUiLanguage(loadedLanguage) && loadedLanguage !== uiLanguage) {
+    applyLanguage(loadedLanguage);
+  }
+  const loadedCodeTarget = parsed.codeTarget ?? parsed.urlParams?.codeTarget;
+  if (loadedCodeTarget === "arduino" || loadedCodeTarget === "micropython") {
+    codeTarget = loadedCodeTarget;
+    saveCodeTarget(codeTarget);
+    for (const radio of targetRadios) {
+      radio.checked = radio.value === codeTarget;
+    }
+    applyShellStrings(uiLanguage, codeTarget);
+  }
+};
+
+const openWorkspaceFile = async (): Promise<void> => {
+  try {
+    const result = await openDesktopWorkspace();
+    if (result.canceled || !result.text) return;
+    const hasUserBlocks = manager.workspace
+      .getAllBlocks(false)
+      .some((block) => block.type !== "board_base_setup_loop");
+    const merge = hasUserBlocks && window.confirm(
+      getShellMessage("LOAD_MERGE_CONFIRM", uiLanguage),
+    );
+    const loaded = await manager.workspaceLoadFromJsonTextAsync(
+      result.text,
+      merge,
+      () => refreshCode(),
+    );
+    if (!loaded) return;
+    applyLoadedProjectPreferences(result.text);
+    refreshCode();
+    resizeWorkspace();
+    applyFlyoutOpen(readFlyoutOpen());
+  } catch (error) {
+    console.error("[EMA] open workspace:", error);
+    window.alert(getShellMessage("FILE_READ_ERROR", uiLanguage));
+  }
+};
+
+subscribeDesktopMenuCommands(handleDesktopMenuCommand);
+document.addEventListener("change", scheduleDesktopMenuSync);
+document.addEventListener("input", scheduleDesktopMenuSync);
+codeDrawer?.addEventListener("toggle", scheduleDesktopMenuSync);
+const shellHeader = document.querySelector(".ema-header");
+if (shellHeader) {
+  new MutationObserver(scheduleDesktopMenuSync).observe(shellHeader, {
+    subtree: true,
+    childList: true,
+    characterData: true,
+  });
+}
+syncDesktopMenu();

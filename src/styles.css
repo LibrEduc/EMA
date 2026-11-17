@@ -142,6 +142,10 @@ body {
   color: #f4faf7;
 }
 
+html.ema-electron .ema-header {
+  display: none;
+}
+
 .ema-brand-block {
   display: flex;
   flex-direction: column;
