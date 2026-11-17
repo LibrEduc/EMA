@@ -32,10 +32,7 @@ export function loadUiLanguage(): UiLanguage {
   } catch {
     // ignore
   }
-  const nav = (navigator.language || "fr").slice(0, 2).toLowerCase();
-  if (isUiLanguage(nav) && languagesMap[nav]) {
-    return nav;
-  }
+  // Not the browser language: school computers are often set up in English.
   return "fr";
 }
 
