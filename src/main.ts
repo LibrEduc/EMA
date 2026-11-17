@@ -42,6 +42,19 @@ import {
 import { registerKeyboardTutorial } from "../vendor/ucBlockly/src/shell_keyboard_tutorial";
 import { registerShortcutsHelp } from "../vendor/ucBlockly/src/shell_shortcuts_help";
 import { resolveWorkspaceToolbarTheme } from "µcBlockly/host";
+import {
+  applyBlocklyTypography,
+  applyShellTypography,
+  isUiFontId,
+  loadTextSizePercent,
+  loadUiFont,
+  TEXT_SIZE_DEFAULT,
+  type UiFontId,
+} from "./a11y_typography";
+import {
+  installToolboxIconRailToggle,
+  setToolboxCollapseCopy,
+} from "./toolbox_collapse";
 
 registerToolboxSearchI18n();
 registerContinuousToolbox();
@@ -140,11 +153,21 @@ const resizeWorkspace = (): void => {
   Blockly.svgResize(manager.workspace as Blockly.WorkspaceSvg);
 };
 
+const syncToolboxCollapseLabels = (): void => {
+  const copy = getShellCopy(uiLanguage);
+  setToolboxCollapseCopy({
+    collapse: copy.toolboxCollapse,
+    expand: copy.toolboxExpand,
+  });
+};
+
 const wireWorkspaceUi = (): void => {
   const workspace = manager.workspace as Blockly.WorkspaceSvg;
   seedProgramStructure(workspace);
   refreshCode = bindCodePanel(workspace, codeRoot, () => codeTarget);
   applyFlyoutOpen(readFlyoutOpen());
+  installToolboxIconRailToggle(workspace);
+  syncToolboxCollapseLabels();
   resizeWorkspace();
   refreshCode();
 };
@@ -157,10 +180,15 @@ registerBlocklyA11yExtensions(
   () => manager.workspace as Blockly.WorkspaceSvg,
 );
 
-const TEXT_SCALE_KEY = "ema.textScale";
 const HIGH_CONTRAST_KEY = "ema.highContrast";
-const textScaleSelect = document.getElementById(
-  "ema-text-scale",
+const textSizeSlider = document.getElementById(
+  "ema-text-size",
+) as HTMLInputElement | null;
+const textSizeValue = document.getElementById(
+  "ema-text-size-value",
+) as HTMLOutputElement | null;
+const fontSelect = document.getElementById(
+  "ema-font",
 ) as HTMLSelectElement | null;
 const highContrastToggle = document.getElementById(
   "ema-high-contrast",
@@ -169,25 +197,35 @@ const screenreaderToggle = document.getElementById(
   "ema-screenreader",
 ) as HTMLInputElement | null;
 
-const readTextScale = (): string => {
-  try {
-    const raw = window.localStorage.getItem(TEXT_SCALE_KEY);
-    if (raw === "1" || raw === "1.15" || raw === "1.35") {
-      return raw;
-    }
-  } catch {
-    // ignore
+let textSizePercent = loadTextSizePercent();
+let uiFont: UiFontId = loadUiFont();
+
+const syncTextSizeUi = (percent: number): void => {
+  if (textSizeSlider) {
+    textSizeSlider.value = String(percent);
+    textSizeSlider.style.setProperty("--attr-min", textSizeSlider.min || "100");
+    textSizeSlider.style.setProperty("--attr-max", textSizeSlider.max || "200");
+    textSizeSlider.style.setProperty("--control-value", String(percent));
+    textSizeSlider.setAttribute("aria-valuenow", String(percent));
+    textSizeSlider.setAttribute("aria-valuetext", `${percent} %`);
   }
-  return "1";
+  if (textSizeValue) {
+    textSizeValue.value = `${percent} %`;
+    textSizeValue.textContent = `${percent} %`;
+  }
 };
 
-const applyTextScale = (scale: string): void => {
-  document.documentElement.style.setProperty("--ema-text-scale", scale);
-  try {
-    window.localStorage.setItem(TEXT_SCALE_KEY, scale);
-  } catch {
-    // ignore
-  }
+const applyTypography = (percent: number, fontId: UiFontId): void => {
+  textSizePercent = percent;
+  uiFont = fontId;
+  applyShellTypography(percent, fontId);
+  syncTextSizeUi(percent);
+  applyBlocklyTypography(
+    manager.workspace as Blockly.WorkspaceSvg,
+    percent,
+    fontId,
+  );
+  resizeWorkspace();
 };
 
 const readHighContrast = (): boolean => {
@@ -204,6 +242,7 @@ const applyHighContrast = (enabled: boolean): void => {
   const themeKey = enabled ? "high_contrast" : "zelos";
   workspace.setTheme(resolveWorkspaceToolbarTheme(themeKey));
   workspace.refreshTheme();
+  applyBlocklyTypography(workspace, textSizePercent, uiFont);
   try {
     window.localStorage.setItem(HIGH_CONTRAST_KEY, enabled ? "true" : "false");
   } catch {
@@ -233,13 +272,21 @@ const fireScreenreaderShortcut = (): void => {
   syncScreenreaderCheckbox();
 };
 
-applyTextScale(readTextScale());
-if (textScaleSelect) {
-  textScaleSelect.value = readTextScale();
-  textScaleSelect.addEventListener("change", () => {
-    applyTextScale(textScaleSelect.value);
+applyTypography(textSizePercent, uiFont);
+if (fontSelect) {
+  fontSelect.value = uiFont;
+  fontSelect.addEventListener("change", () => {
+    const next = fontSelect.value;
+    if (!isUiFontId(next)) {
+      return;
+    }
+    applyTypography(textSizePercent, next);
   });
 }
+textSizeSlider?.addEventListener("input", () => {
+  const next = Number(textSizeSlider.value) || TEXT_SIZE_DEFAULT;
+  applyTypography(next, uiFont);
+});
 
 const highContrastOn = readHighContrast();
 if (highContrastToggle) {
@@ -321,6 +368,7 @@ const applyLanguage = (language: UiLanguage): void => {
   applyDocumentDirection(language);
   applyUcBlocklyLocale(language);
   applyShellStrings(language, codeTarget);
+  syncToolboxCollapseLabels();
 
   const nextToolbox = buildToolbox(language);
   manager.setLanguage(language);
@@ -342,6 +390,8 @@ const applyLanguage = (language: UiLanguage): void => {
   wireWorkspaceUi();
   if (readHighContrast()) {
     applyHighContrast(true);
+  } else {
+    applyTypography(textSizePercent, uiFont);
   }
   syncScreenreaderCheckbox();
 };

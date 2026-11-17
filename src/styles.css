@@ -10,8 +10,31 @@
   --ema-code-fg: #d7e0ea;
   --ema-focus: #ffd166;
   --ema-text-scale: 1;
+  --ema-ui-font: system-ui, "Segoe UI", "Helvetica Neue", sans-serif;
   --target-size: 2.75rem; /* 44px @ 16px root */
-  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  font-family: var(--ema-ui-font);
+}
+
+html {
+  /* Le % est piloté par le slider a11y (G178 jusqu’à 200 %). */
+  font-size: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+summary,
+label,
+.blocklyWidgetDiv,
+.blocklyDropDownDiv,
+.blocklyToolboxDiv,
+.blocklyMenuItem,
+.blocklyHtmlInput,
+.blocklyTextInput,
+dialog {
+  font-family: var(--ema-ui-font);
 }
 
 html.ema-high-contrast {
@@ -22,6 +45,46 @@ html.ema-high-contrast {
   --ema-accent: #000000;
   --ema-accent-strong: #000000;
   --ema-focus: #ffff00;
+}
+
+html.ema-high-contrast .blocklyToolboxDiv {
+  background: #ffffff !important;
+  border-inline-end: 3px solid #000000 !important;
+}
+
+html.ema-high-contrast .blocklyToolboxCategory,
+html.ema-high-contrast .blocklyTreeRow {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+html.ema-high-contrast .emaCategory--hover:not(.emaCategory--selected),
+html.ema-high-contrast .blocklyToolboxCategory:hover:not(.emaCategory--selected),
+html.ema-high-contrast .blocklyTreeRow:hover:not(.emaCategory--selected) {
+  background: color-mix(
+    in srgb,
+    var(--ema-cat-colour, #000000) 40%,
+    #ffffff
+  ) !important;
+  outline: 3px solid #000000;
+}
+
+html.ema-high-contrast .emaCategory--selected.blocklyToolboxCategory,
+html.ema-high-contrast .emaCategory--selected.blocklyTreeRow,
+html.ema-high-contrast .blocklyTreeSelected {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  box-shadow: inset 8px 0 0 #000000 !important;
+}
+
+html.ema-high-contrast .blocklyFlyoutLabelText {
+  fill: #ffffff !important;
+}
+
+html.ema-high-contrast .blocklyFlyoutLabelBackground {
+  fill: #000000 !important;
+  stroke: #ffffff !important;
 }
 
 @media (pointer: fine) {
@@ -262,8 +325,29 @@ body {
   min-block-size: var(--target-size);
   padding: 0.25rem 0.4rem;
   border-radius: 0.4rem;
-  font-size: calc(1rem * var(--ema-text-scale));
+  font-size: 1rem;
   cursor: pointer;
+}
+
+.ema-a11y-option--stack {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+.ema-a11y-scale-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+#ema-text-size-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--ema-accent-strong);
 }
 
 .ema-a11y-option input[type="checkbox"] {
@@ -274,7 +358,7 @@ body {
   flex-shrink: 0;
 }
 
-#ema-text-scale {
+#ema-font {
   min-block-size: var(--target-size);
   padding: 0.25rem 0.45rem;
   border: 1px solid var(--ema-line);
@@ -284,6 +368,87 @@ body {
   font: inherit;
   font-size: 1rem;
   cursor: pointer;
+}
+
+/* Slider taille texte — native range + accent EMA */
+#ema-text-size {
+  --slider-track-size: 0.5rem;
+  --slider-thumb-size: 1.35rem;
+  --slider-track-radius: 999px;
+  --slider-thumb-radius: 50%;
+  --slider-track-color: #d5dde6;
+  --slider-fill-color: var(--ema-accent);
+  --slider-thumb-color: var(--ema-accent-strong);
+  --slider-direction: to right;
+  --attr-min: 100;
+  --attr-max: 200;
+  --control-value: 100;
+  --slider-progress: calc(
+    (var(--control-value) - var(--attr-min)) /
+      (var(--attr-max) - var(--attr-min)) * 100%
+  );
+
+  appearance: none;
+  inline-size: 100%;
+  block-size: var(--target-size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--ema-accent);
+  cursor: pointer;
+}
+
+#ema-text-size:dir(rtl) {
+  --slider-direction: to left;
+}
+
+#ema-text-size:focus-visible {
+  outline: 3px solid var(--ema-accent);
+  outline-offset: 4px;
+}
+
+#ema-text-size::-webkit-slider-runnable-track {
+  block-size: var(--slider-track-size);
+  border-radius: var(--slider-track-radius);
+  background: linear-gradient(
+    var(--slider-direction),
+    var(--slider-fill-color) var(--slider-progress),
+    var(--slider-track-color) var(--slider-progress)
+  );
+}
+
+#ema-text-size::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: var(--slider-thumb-size);
+  block-size: var(--slider-thumb-size);
+  margin-block-start: calc(
+    (var(--slider-track-size) - var(--slider-thumb-size)) / 2
+  );
+  border: 2px solid #1a2332;
+  border-radius: var(--slider-thumb-radius);
+  background: var(--slider-thumb-color);
+}
+
+#ema-text-size::-moz-range-track {
+  block-size: var(--slider-track-size);
+  border-radius: var(--slider-track-radius);
+  background: var(--slider-track-color);
+}
+
+#ema-text-size::-moz-range-progress {
+  block-size: var(--slider-track-size);
+  border-radius: var(--slider-track-radius);
+  background: var(--slider-fill-color);
+}
+
+#ema-text-size::-moz-range-thumb {
+  inline-size: var(--slider-thumb-size);
+  block-size: var(--slider-thumb-size);
+  border: 2px solid #1a2332;
+  border-radius: var(--slider-thumb-radius);
+  background: var(--slider-thumb-color);
 }
 
 .ema-a11y-actions {
@@ -352,31 +517,75 @@ body {
   background: var(--ema-panel);
 }
 
-/* Catégories du flyout continu — plus lisibles pour 7–12 ans */
+/*
+ * Une seule échelle texte Blockly :
+ * toolbox = flyout = blocs = --ema-blockly-font (suit html N%).
+ */
+:root {
+  --ema-blockly-font: 0.875rem; /* ≈ 14px @ 100 % — cohérent partout */
+}
+
+.blocklyText,
+.blocklyFlyoutLabelText,
+.blocklyToolboxCategoryLabel,
+.blocklyTreeLabel,
+.blocklyHtmlInput,
+.blocklyMenuItemContent,
+.blocklyDropDownDiv,
+.blocklyWidgetDiv,
+.blocklyTooltipDiv {
+  font-family: var(--ema-ui-font) !important;
+}
+
+.blocklyText,
+.blocklyFlyoutLabelText,
+.blocklyToolboxCategoryLabel,
+.blocklyTreeLabel,
+.blocklyHtmlInput,
+.blocklyMenuItemContent {
+  font-size: var(--ema-blockly-font) !important;
+}
+
+/* Catégories du flyout — badge (vars couleur en JS) */
 .blocklyFlyoutLabelText {
-  fill: #0b6e4f !important;
-  font-size: 18px !important;
+  fill: var(--ema-flyout-label-fg, #ffffff) !important;
+  stroke: none !important;
+  stroke-width: 0 !important;
   font-weight: 800 !important;
   letter-spacing: 0.02em;
 }
 
 .blocklyFlyoutLabelBackground {
-  fill: #ffffff !important;
-  stroke: #0b6e4f !important;
-  stroke-width: 2px !important;
+  fill: var(--ema-flyout-label-bg, #1a2332) !important;
+  stroke: #1a2332 !important;
+  stroke-width: 3px !important;
   opacity: 1 !important;
 }
 
-/* Libellés verticaux de la barre de catégories (icônes) */
+/* Libellés toolbox — centrés, même corps que les blocs */
 .blocklyToolboxCategoryLabel,
-.blocklyTreeLabel {
-  font-size: calc(0.95rem * var(--ema-text-scale, 1)) !important;
+.blocklyTreeLabel,
+.emaCategoryLabel {
+  display: block !important;
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+  margin-inline: auto !important;
+  text-align: center !important;
   font-weight: 800 !important;
   color: #1a2332 !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal !important;
+}
+
+.blocklyTreeRowContentContainer {
+  inline-size: 100%;
+  align-items: center;
+  text-align: center;
 }
 
 .blocklyToolboxDiv {
-  font-size: calc(1rem * var(--ema-text-scale, 1));
+  font-size: var(--ema-blockly-font);
 }
 
 .ema-code-drawer {

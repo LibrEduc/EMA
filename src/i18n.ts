@@ -73,14 +73,19 @@ type ShellCopy = {
   actionsLabel: string;
   workspaceLabel: string;
   a11yLegend: string;
-  textScaleLabel: string;
-  textScaleNormal: string;
-  textScaleLarge: string;
-  textScaleXLarge: string;
+  textSizeLabel: string;
+  fontLabel: string;
+  fontSystem: string;
+  fontAtkinson: string;
+  fontLexend: string;
+  fontOpenDyslexic: string;
+  fontVerdana: string;
   highContrast: string;
   screenreader: string;
   keyboardTutorial: string;
   shortcutsHelp: string;
+  toolboxCollapse: string;
+  toolboxExpand: string;
 };
 
 const SHELL: Record<UiLanguage, ShellCopy> = {
@@ -104,14 +109,19 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     actionsLabel: "Actions",
     workspaceLabel: "Zone des blocs",
     a11yLegend: "Accessibilité",
-    textScaleLabel: "Taille du texte",
-    textScaleNormal: "Normale",
-    textScaleLarge: "Grande",
-    textScaleXLarge: "Très grande",
+    textSizeLabel: "Taille du texte",
+    fontLabel: "Police",
+    fontSystem: "Système",
+    fontAtkinson: "Atkinson Hyperlegible",
+    fontLexend: "Lexend",
+    fontOpenDyslexic: "OpenDyslexic",
+    fontVerdana: "Verdana",
     highContrast: "Contraste élevé",
     screenreader: "Mode lecteur d’écran (Alt+Shift+A)",
     keyboardTutorial: "Tutoriel clavier",
     shortcutsHelp: "Raccourcis",
+    toolboxCollapse: "Icônes seules",
+    toolboxExpand: "Afficher les noms",
   },
   en: {
     title: "Program your MAE robot",
@@ -133,14 +143,19 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     actionsLabel: "Actions",
     workspaceLabel: "Blocks area",
     a11yLegend: "Accessibility",
-    textScaleLabel: "Text size",
-    textScaleNormal: "Normal",
-    textScaleLarge: "Large",
-    textScaleXLarge: "Extra large",
+    textSizeLabel: "Text size",
+    fontLabel: "Font",
+    fontSystem: "System",
+    fontAtkinson: "Atkinson Hyperlegible",
+    fontLexend: "Lexend",
+    fontOpenDyslexic: "OpenDyslexic",
+    fontVerdana: "Verdana",
     highContrast: "High contrast",
     screenreader: "Screen reader mode (Alt+Shift+A)",
     keyboardTutorial: "Keyboard tutorial",
     shortcutsHelp: "Shortcuts",
+    toolboxCollapse: "Icons only",
+    toolboxExpand: "Show names",
   },
   es: {
     title: "Programa tu robot MAE",
@@ -162,14 +177,19 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     actionsLabel: "Acciones",
     workspaceLabel: "Zona de bloques",
     a11yLegend: "Accesibilidad",
-    textScaleLabel: "Tamaño del texto",
-    textScaleNormal: "Normal",
-    textScaleLarge: "Grande",
-    textScaleXLarge: "Muy grande",
+    textSizeLabel: "Tamaño del texto",
+    fontLabel: "Fuente",
+    fontSystem: "Sistema",
+    fontAtkinson: "Atkinson Hyperlegible",
+    fontLexend: "Lexend",
+    fontOpenDyslexic: "OpenDyslexic",
+    fontVerdana: "Verdana",
     highContrast: "Alto contraste",
     screenreader: "Modo lector de pantalla (Alt+Shift+A)",
     keyboardTutorial: "Tutorial de teclado",
     shortcutsHelp: "Atajos",
+    toolboxCollapse: "Solo iconos",
+    toolboxExpand: "Mostrar nombres",
   },
   ar: {
     title: "برمِج روبوت MAE",
@@ -191,14 +211,19 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     actionsLabel: "إجراءات",
     workspaceLabel: "منطقة الكتل",
     a11yLegend: "إمكانية الوصول",
-    textScaleLabel: "حجم النص",
-    textScaleNormal: "عادي",
-    textScaleLarge: "كبير",
-    textScaleXLarge: "كبير جدًا",
+    textSizeLabel: "حجم النص",
+    fontLabel: "الخط",
+    fontSystem: "النظام",
+    fontAtkinson: "Atkinson Hyperlegible",
+    fontLexend: "Lexend",
+    fontOpenDyslexic: "OpenDyslexic",
+    fontVerdana: "Verdana",
     highContrast: "تباين عالٍ",
     screenreader: "وضع قارئ الشاشة (Alt+Shift+A)",
     keyboardTutorial: "دليل لوحة المفاتيح",
     shortcutsHelp: "الاختصارات",
+    toolboxCollapse: "أيقونات فقط",
+    toolboxExpand: "إظهار الأسماء",
   },
 };
 
@@ -261,23 +286,29 @@ export function applyShellStrings(
   workspace?.setAttribute("aria-label", t.workspaceLabel);
 
   setText("#ema-a11y-legend", t.a11yLegend);
-  setText("#ema-text-scale-label", t.textScaleLabel);
+  setText("#ema-text-size-label", t.textSizeLabel);
+  setText("#ema-font-label", t.fontLabel);
   setText("#ema-high-contrast-label", t.highContrast);
   setText("#ema-screenreader-label", t.screenreader);
   setText("#keyboardTutorialButton", t.keyboardTutorial);
   setText("#shortcutsHelpButton", t.shortcutsHelp);
 
-  const textScale = document.getElementById(
-    "ema-text-scale",
+  const fontSelect = document.getElementById(
+    "ema-font",
   ) as HTMLSelectElement | null;
-  if (textScale) {
-    const labels = [
-      t.textScaleNormal,
-      t.textScaleLarge,
-      t.textScaleXLarge,
-    ] as const;
-    for (let i = 0; i < textScale.options.length && i < labels.length; i++) {
-      textScale.options[i].textContent = labels[i];
+  if (fontSelect) {
+    const fontLabels: Record<string, string> = {
+      system: t.fontSystem,
+      atkinson: t.fontAtkinson,
+      lexend: t.fontLexend,
+      opendyslexic: t.fontOpenDyslexic,
+      verdana: t.fontVerdana,
+    };
+    for (const option of Array.from(fontSelect.options)) {
+      const label = fontLabels[option.value];
+      if (label) {
+        option.textContent = label;
+      }
     }
   }
 

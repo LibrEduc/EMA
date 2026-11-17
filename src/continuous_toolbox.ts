@@ -85,9 +85,52 @@ type FlyoutInternals = {
   scrollPositions: Map<string, number>;
 };
 
+/** Parse `#rgb` / `#rrggbb` → [r,g,b] 0–255. */
+function parseCssColour(input: string): [number, number, number] | null {
+  const raw = input.trim();
+  const short = /^#([\da-f])([\da-f])([\da-f])$/i.exec(raw);
+  if (short) {
+    return [
+      Number.parseInt(short[1] + short[1], 16),
+      Number.parseInt(short[2] + short[2], 16),
+      Number.parseInt(short[3] + short[3], 16),
+    ];
+  }
+  const full = /^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(raw);
+  if (full) {
+    return [
+      Number.parseInt(full[1], 16),
+      Number.parseInt(full[2], 16),
+      Number.parseInt(full[3], 16),
+    ];
+  }
+  const rgb = /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i.exec(raw);
+  if (rgb) {
+    return [
+      Number(rgb[1]),
+      Number(rgb[2]),
+      Number(rgb[3]),
+    ];
+  }
+  return null;
+}
+
+/** Encre lisible sur fond catégorie (seuil luminance relative ~WCAG). */
+function contrastingInk(background: string): string {
+  const rgb = parseCssColour(background);
+  if (!rgb) {
+    return "#ffffff";
+  }
+  const [r, g, b] = rgb.map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance > 0.45 ? "#1a2332" : "#ffffff";
+}
+
 /**
- * Flyout continu : la sélection toolbox avance dès qu’une catégorie occupe
- * le haut du viewport (évite Tableaux sélectionné alors que Couleur est visible).
+ * Flyout continu : sync scroll→sélection + badges de catégorie colorés.
  */
 export class EmaContinuousFlyout extends ContinuousFlyout {
   constructor(workspaceOptions: Blockly.Options) {
@@ -97,6 +140,111 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
         this.selectCategoryWithLead(-this.getWorkspace().scrollY);
       }
     });
+  }
+
+  override show(
+    flyoutDef: Blockly.utils.toolbox.FlyoutDefinition | string,
+  ): void {
+    super.show(flyoutDef);
+    this.styleCategoryLabels_();
+  }
+
+  /**
+   * Badges flyout : couleur catégorie, padding confortable, largeur = flyout.
+   * (Les labels Blockly n’appliquent pas TEXT_MARGIN — on agrandit après layout.)
+   * À n’appeler qu’après un `show()` frais (sinon le décalage Y se cumule).
+   */
+  private styleCategoryLabels_(): void {
+    const toolbox = this.targetWorkspace.getToolbox();
+    if (!(toolbox instanceof ContinuousToolbox)) {
+      return;
+    }
+
+    const viewWidth = this.getWorkspace().getMetrics().viewWidth;
+    const sideMargin = 10;
+    const radius = 10;
+    const rootPx = Number.parseFloat(
+      getComputedStyle(document.documentElement).fontSize,
+    );
+    // Padding vertical ≈ 0.45rem de chaque côté (cohérent avec la police unique).
+    const padY = Number.isFinite(rootPx) ? rootPx * 0.45 : 8;
+    const contents = this.getContents();
+    let yShift = 0;
+
+    for (const item of contents) {
+      const element = item.getElement();
+      if (yShift !== 0 && "moveBy" in element) {
+        (element as Blockly.IBoundedElement & { moveBy: (dx: number, dy: number) => void }).moveBy(
+          0,
+          yShift,
+        );
+      }
+
+      if (
+        !(element instanceof Blockly.FlyoutButton) ||
+        !element.isLabel()
+      ) {
+        continue;
+      }
+
+      const name = element.getButtonText();
+      const category = toolbox.getCategoryByName(name) as
+        | Blockly.ToolboxCategory
+        | null
+        | undefined;
+      const colour = category?.getColour?.() || "#0b6e4f";
+      const ink = contrastingInk(colour);
+      const root = element.getSvgRoot();
+      root.style.setProperty("--ema-flyout-label-bg", colour);
+      root.style.setProperty("--ema-flyout-label-fg", ink);
+      root.classList.add("emaFlyoutCategoryLabel");
+
+      const oldHeight = element.height;
+      const pos = element.getPosition();
+      const fullWidth = Math.max(
+        element.width + 32,
+        Math.max(80, viewWidth - sideMargin * 2),
+      );
+      // Hauteur ≈ ligne de texte (--ema-blockly-font) + padding, pas un bandeau XXL.
+      const linePx = Number.isFinite(rootPx) ? rootPx * 0.875 : 14;
+      const fullHeight = Math.max(oldHeight + padY * 2, linePx + padY * 2, 28);
+      const bgX = sideMargin - pos.x;
+
+      const bg = root.querySelector(".blocklyFlyoutLabelBackground");
+      const text = root.querySelector(".blocklyFlyoutLabelText");
+      if (bg instanceof SVGElement) {
+        bg.setAttribute("x", String(bgX));
+        bg.setAttribute("y", "0");
+        bg.setAttribute("width", String(fullWidth));
+        bg.setAttribute("height", String(fullHeight));
+        bg.setAttribute("rx", String(radius));
+        bg.setAttribute("ry", String(radius));
+        bg.style.setProperty("fill", colour, "important");
+        bg.style.setProperty("stroke", "#1a2332", "important");
+        bg.style.setProperty("stroke-width", "3px", "important");
+        bg.style.setProperty("opacity", "1", "important");
+      }
+      if (text instanceof SVGTextElement) {
+        text.style.setProperty("fill", ink, "important");
+        text.style.setProperty("stroke", "none", "important");
+        text.style.setProperty("stroke-width", "0", "important");
+        text.removeAttribute("stroke");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "central");
+        text.setAttribute("x", String(bgX + fullWidth / 2));
+        text.setAttribute("y", String(fullHeight / 2));
+      }
+
+      element.width = fullWidth;
+      element.height = fullHeight;
+      yShift += fullHeight - oldHeight;
+    }
+
+    // Recalcule les ancres de scroll après le décalage vertical.
+    const internals = this as unknown as FlyoutInternals & {
+      recordScrollPositions?: () => void;
+    };
+    internals.recordScrollPositions?.();
   }
 
   /** Sélection avec avance (~40 % de la hauteur visible). */
@@ -132,11 +280,60 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
 
 /** Catégorie continue avec icône SVG colorée (à la place de la pastille). */
 export class EmaContinuousCategory extends ContinuousCategory {
+  private hoverBound_ = false;
+
+  override init(): void {
+    super.init();
+    this.applyCategoryColourVar_();
+    this.bindHoverHandlers_();
+  }
+
+  /** Couleur de catégorie en CSS var (hover + barre de sélection). */
+  private applyCategoryColourVar_(): void {
+    const colour = this.colour_ || "#5c6b7a";
+    this.rowDiv_?.style.setProperty("--ema-cat-colour", colour);
+    this.htmlDiv_?.style.setProperty("--ema-cat-colour", colour);
+  }
+
+  /**
+   * Hover via classe JS : plus fiable que :hover seul (Blockly / overlay).
+   */
+  private bindHoverHandlers_(): void {
+    if (this.hoverBound_ || !this.htmlDiv_) {
+      return;
+    }
+    this.hoverBound_ = true;
+    const root = this.htmlDiv_;
+    const row = this.rowDiv_;
+    const setHover = (on: boolean): void => {
+      root.classList.toggle("emaCategory--hover", on);
+      row?.classList.toggle("emaCategory--hover", on);
+    };
+    // Un seul écouteur sur le conteneur (évite le flicker row↔label).
+    root.addEventListener("pointerenter", () => setHover(true));
+    root.addEventListener("pointerleave", () => setHover(false));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  override createLabelDom_(name: string): Element {
+    const label = document.createElement("div");
+    label.setAttribute("id", `${this.getId()}.label`);
+    label.textContent = name;
+    label.classList.add(this.cssConfig_["label"] ?? "");
+    label.classList.add("emaCategoryLabel");
+    // Infobulle quand la toolbox est en mode icônes seules.
+    this.rowDiv_?.setAttribute("title", name);
+    this.htmlDiv_?.setAttribute("title", name);
+    return label;
+  }
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   override createIconDom_(): Element {
+    const colour = this.colour_ || "#5c6b7a";
     const icon = document.createElement("div");
     icon.classList.add("emaCategoryIcon");
-    icon.style.color = this.colour_ || "#5c6b7a";
+    icon.style.color = colour;
+    this.applyCategoryColourVar_();
 
     const cssIcon = (this.cssConfig_?.icon ?? "").toString();
     const fromCss = cssIcon.match(/fa-[\w-]+/)?.[0];
@@ -156,20 +353,27 @@ export class EmaContinuousCategory extends ContinuousCategory {
     if (!this.rowDiv_ || !this.htmlDiv_) {
       return;
     }
+    this.applyCategoryColourVar_();
+
+    const selectedClass = this.cssConfig_["selected"] ?? "";
+    // Évite le fond « gray » inline de ContinuousCategory.
+    this.rowDiv_.style.backgroundColor = "";
+    this.rowDiv_.style.boxShadow = "";
+    this.htmlDiv_.style.backgroundColor = "";
+
     if (isSelected) {
-      this.rowDiv_.style.backgroundColor = "#d7dee6";
-      this.rowDiv_.style.boxShadow = `inset 3px 0 0 ${this.colour_ || "#1a2332"}`;
-      Blockly.utils.dom.addClass(
-        this.rowDiv_,
-        this.cssConfig_["selected"] ?? "",
-      );
+      Blockly.utils.dom.addClass(this.rowDiv_, selectedClass);
+      Blockly.utils.dom.addClass(this.rowDiv_, "emaCategory--selected");
+      Blockly.utils.dom.addClass(this.htmlDiv_, "emaCategory--selected");
+      const tint = `color-mix(in srgb, ${this.colour_ || "#5c6b7a"} 22%, #ffffff)`;
+      this.rowDiv_.style.setProperty("background-color", tint, "important");
+      this.htmlDiv_.style.setProperty("background-color", tint, "important");
     } else {
-      this.rowDiv_.style.backgroundColor = "";
-      this.rowDiv_.style.boxShadow = "";
-      Blockly.utils.dom.removeClass(
-        this.rowDiv_,
-        this.cssConfig_["selected"] ?? "",
-      );
+      Blockly.utils.dom.removeClass(this.rowDiv_, selectedClass);
+      Blockly.utils.dom.removeClass(this.rowDiv_, "emaCategory--selected");
+      Blockly.utils.dom.removeClass(this.htmlDiv_, "emaCategory--selected");
+      this.rowDiv_.style.removeProperty("background-color");
+      this.htmlDiv_.style.removeProperty("background-color");
     }
     Blockly.utils.aria.setState(
       this.htmlDiv_,
@@ -186,6 +390,11 @@ export function registerContinuousToolbox(): void {
   if (registered) {
     return;
   }
+
+  // Les labels n’utilisent pas ces marges, mais les boutons du flyout oui.
+  Blockly.FlyoutButton.TEXT_MARGIN_X = 16;
+  Blockly.FlyoutButton.TEXT_MARGIN_Y = 10;
+  Blockly.FlyoutButton.BORDER_RADIUS = 12;
 
   Blockly.registry.register(
     Blockly.registry.Type.TOOLBOX_ITEM,
@@ -230,49 +439,298 @@ export function registerContinuousToolbox(): void {
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 0.25rem;
-      width: 1.85rem;
-      height: 1.85rem;
+      margin: 0 auto 0.3rem;
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 0.55rem;
+      background: color-mix(in srgb, var(--ema-cat-colour, #5c6b7a) 16%, #fff);
+      flex-shrink: 0;
+      transition:
+        transform 160ms ease,
+        background-color 160ms ease,
+        box-shadow 160ms ease;
     }
     .emaCategoryIcon svg {
       width: 100%;
       height: 100%;
       display: block;
     }
-    .blocklyToolboxCategory {
+    .blocklyToolboxDiv {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch;
+      block-size: 100% !important;
+      background:
+        linear-gradient(180deg, #edf2f7 0%, #d9e2ec 100%) !important;
+      border-inline-end: 1px solid #b7c4d2;
+      box-sizing: border-box;
+      overflow: hidden !important;
+    }
+    .blocklyToolboxContents {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-block-size: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .blocklyToolboxCategory,
+    .blocklyTreeRow {
       height: initial;
-      padding: 0.45rem 0.2rem;
-      border-radius: 0.35rem;
+      min-block-size: 2.75rem;
+      margin: 0.28rem auto;
+      padding: 0.5rem 0.4rem;
+      border-radius: 0.7rem;
+      border: 2px solid transparent;
+      background: rgb(255 255 255 / 72%);
+      cursor: pointer;
+      box-sizing: border-box;
+      inline-size: calc(100% - 0.6rem);
+      max-inline-size: 100%;
+      transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
     }
     .blocklyTreeRowContentContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-    .blocklyTreeLabel {
-      margin: auto;
-      font-weight: 800;
-      color: #1a2332;
-    }
-    .blocklyToolboxCategoryLabel {
+      justify-content: center;
+      inline-size: 100%;
       text-align: center;
-      font-size: calc(0.95rem * var(--ema-text-scale, 1));
-      line-height: 1.15;
+    }
+    .emaCategoryIcon {
+      margin-inline: auto;
+    }
+    .blocklyTreeLabel,
+    .blocklyToolboxCategoryLabel,
+    .emaCategoryLabel {
+      display: block;
+      margin: 0 auto;
+      padding-inline: 0.2rem;
+      inline-size: 100%;
+      max-inline-size: 100%;
+      box-sizing: border-box;
+      text-align: center !important;
+      font-size: var(--ema-blockly-font, 0.875rem);
+      line-height: 1.2;
       font-weight: 800;
       color: #1a2332;
-      max-inline-size: 5.5rem;
       overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
+      white-space: normal;
     }
-    .blocklyFlyoutLabelText {
-      fill: #0b6e4f !important;
-      font-size: calc(20px * var(--ema-text-scale, 1)) !important;
+
+    /* Bouton collé en bas de la toolbox (juste au-dessus de « Voir le code ») */
+    .emaToolboxRailToggle {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      margin: auto 0.35rem 0.25rem;
+      min-block-size: 2.75rem;
+      padding: 0.35rem 0.45rem;
+      border: 2px solid #1a2332;
+      border-radius: 0.7rem;
+      background: #ffffff;
+      color: #1a2332;
+      font: inherit;
+      font-size: var(--ema-blockly-font, 0.875rem);
+      font-weight: 800;
+      cursor: pointer;
+      position: sticky;
+      bottom: 0;
+      z-index: 3;
+      box-shadow: 0 -0.4rem 0.75rem rgb(237 242 247 / 90%);
+    }
+    .emaToolboxRailToggle:focus-visible {
+      outline: 3px solid #0b6e4f;
+      outline-offset: 2px;
+    }
+    .emaToolboxRailToggle-icon {
+      display: inline-flex;
+      inline-size: 1.25rem;
+      block-size: 1.25rem;
+    }
+    .emaToolboxRailToggle-icon svg {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+    html.ema-toolbox-icons-only .emaToolboxRailToggle-label {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    html.ema-toolbox-icons-only .blocklyToolboxCategoryLabel,
+    html.ema-toolbox-icons-only .blocklyTreeLabel,
+    html.ema-toolbox-icons-only .emaCategoryLabel {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    html.ema-toolbox-icons-only .emaCategoryIcon {
+      margin-block-end: 0;
+    }
+    html.ema-toolbox-icons-only .blocklyToolboxCategory,
+    html.ema-toolbox-icons-only .blocklyTreeRow {
+      min-block-size: 2.75rem;
+      padding: 0.4rem 0.2rem;
+    }
+    html.ema-toolbox-icons-only .blocklyToolboxDiv {
+      width: 3.75rem !important;
+      max-width: 3.75rem !important;
+    }
+
+    /* Hover = teinte de la catégorie (lisible) + bordure pleine + ombre */
+    .emaCategory--hover:not(.emaCategory--selected),
+    .blocklyToolboxCategory:hover:not(.emaCategory--selected),
+    .blocklyTreeRow:hover:not(.emaCategory--selected) {
+      background: color-mix(
+        in srgb,
+        var(--ema-cat-colour, #5c6b7a) 46%,
+        #ffffff
+      ) !important;
+      border-color: var(--ema-cat-colour, #1a2332) !important;
+      box-shadow: 0 4px 12px rgb(26 35 50 / 16%);
+    }
+    .emaCategory--hover:not(.emaCategory--selected) .emaCategoryIcon,
+    .blocklyToolboxCategory:hover:not(.emaCategory--selected) .emaCategoryIcon,
+    .blocklyTreeRow:hover:not(.emaCategory--selected) .emaCategoryIcon {
+      background: #ffffff;
+      box-shadow: 0 0 0 2px var(--ema-cat-colour, #1a2332);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .emaCategory--hover:not(.emaCategory--selected),
+      .blocklyToolboxCategory:hover:not(.emaCategory--selected),
+      .blocklyTreeRow:hover:not(.emaCategory--selected) {
+        transform: translateX(3px);
+      }
+      .emaCategory--hover:not(.emaCategory--selected) .emaCategoryIcon,
+      .blocklyToolboxCategory:hover:not(.emaCategory--selected) .emaCategoryIcon,
+      .blocklyTreeRow:hover:not(.emaCategory--selected) .emaCategoryIcon {
+        transform: scale(1.08);
+      }
+      .blocklyToolboxCategory:active:not(.emaCategory--selected),
+      .blocklyTreeRow:active:not(.emaCategory--selected) {
+        transform: scale(0.97);
+      }
+    }
+
+    /* Focus clavier : anneau sombre (contraste 3:1, indépendant de la teinte) */
+    .blocklyToolboxCategory:focus-visible,
+    .blocklyTreeRow:focus-visible,
+    .blocklyToolboxCategory:focus-within:not(.emaCategory--selected) {
+      outline: 3px solid #1a2332;
+      outline-offset: 2px;
+    }
+
+    /* Sélection : teinte légère + barre pleine (padding symétrique pour centrer) */
+    .emaCategory--selected.blocklyToolboxCategory,
+    .emaCategory--selected.blocklyTreeRow,
+    .blocklyToolboxCategory.emaCategory--selected,
+    .blocklyTreeRow.emaCategory--selected,
+    .blocklyTreeSelected {
+      background: color-mix(
+        in srgb,
+        var(--ema-cat-colour, #5c6b7a) 22%,
+        #ffffff
+      ) !important;
+      border-color: #1a2332 !important;
+      padding-inline: 0.55rem !important;
+      box-shadow:
+        inset 6px 0 0 var(--ema-cat-colour, #0b6e4f),
+        0 6px 14px rgb(26 35 50 / 16%) !important;
+      transform: none;
+    }
+    .emaCategory--selected .emaCategoryIcon {
+      background: #ffffff;
+      box-shadow: 0 0 0 2px var(--ema-cat-colour, #1a2332);
+    }
+    .emaCategory--selected .blocklyToolboxCategoryLabel,
+    .emaCategory--selected .blocklyTreeLabel {
+      font-weight: 800;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 0.18em;
+    }
+
+    /* Flyout : même taille que toolbox + blocs (--ema-blockly-font) */
+    .blocklyFlyoutLabelText,
+    .emaFlyoutCategoryLabel .blocklyFlyoutLabelText {
+      fill: var(--ema-flyout-label-fg, #ffffff) !important;
+      stroke: none !important;
+      stroke-width: 0 !important;
+      font-size: var(--ema-blockly-font, 0.875rem) !important;
       font-weight: 800 !important;
+      letter-spacing: 0.02em;
+      paint-order: fill;
     }
-    .blocklyFlyoutLabelBackground {
-      fill: #ffffff !important;
-      stroke: #0b6e4f !important;
-      stroke-width: 2px !important;
+    .blocklyFlyoutLabelBackground,
+    .emaFlyoutCategoryLabel .blocklyFlyoutLabelBackground {
+      fill: var(--ema-flyout-label-bg, #1a2332) !important;
+      stroke: #1a2332 !important;
+      stroke-width: 3px !important;
       opacity: 1 !important;
+    }
+
+    @media (forced-colors: active) {
+      .blocklyToolboxCategory,
+      .blocklyTreeRow {
+        border: 2px solid ButtonText;
+        background: Canvas;
+        forced-color-adjust: none;
+      }
+      .emaCategory--hover:not(.emaCategory--selected),
+      .blocklyToolboxCategory:hover:not(.emaCategory--selected) {
+        outline: 3px solid Highlight;
+        background: Canvas;
+      }
+      .emaCategory--selected,
+      .blocklyTreeSelected {
+        outline: 3px solid Highlight;
+        border-color: Highlight;
+        background: Canvas;
+      }
+      .blocklyFlyoutLabelText { fill: Canvas !important; }
+      .blocklyFlyoutLabelBackground {
+        fill: Highlight !important;
+        stroke: CanvasText !important;
+      }
+    }
+
+    @media (prefers-contrast: more) {
+      .blocklyToolboxCategory,
+      .blocklyTreeRow {
+        border-color: #1a2332;
+        background: #ffffff;
+      }
+      .emaCategory--hover:not(.emaCategory--selected),
+      .blocklyToolboxCategory:hover:not(.emaCategory--selected) {
+        background: #b8ebd6 !important;
+        border-width: 3px;
+      }
+      .emaCategory--selected {
+        background: #ffffff !important;
+        border-width: 3px;
+        box-shadow: inset 8px 0 0 #000000, 0 0 0 2px #000000 !important;
+      }
     }
   `;
   document.head.appendChild(style);

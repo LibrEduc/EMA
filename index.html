@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EMA — Programme ton robot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fontsource/opendyslexic@5.2.5/index.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <a class="skip-link" href="#ema-title">Aller au titre</a>
@@ -71,12 +81,40 @@
 
           <fieldset class="ema-a11y">
             <legend id="ema-a11y-legend">Accessibilité</legend>
-            <label class="ema-a11y-option" for="ema-text-scale">
-              <span id="ema-text-scale-label">Taille du texte</span>
-              <select id="ema-text-scale" name="text-scale" autocomplete="off">
-                <option value="1">Normale</option>
-                <option value="1.15">Grande</option>
-                <option value="1.35">Très grande</option>
+            <div class="ema-a11y-option ema-a11y-option--stack">
+              <div class="ema-a11y-scale-head">
+                <label id="ema-text-size-label" for="ema-text-size"
+                  >Taille du texte</label
+                >
+                <output
+                  id="ema-text-size-value"
+                  for="ema-text-size"
+                  aria-live="polite"
+                  >100 %</output
+                >
+              </div>
+              <input
+                id="ema-text-size"
+                name="text-size"
+                type="range"
+                min="100"
+                max="200"
+                step="5"
+                value="100"
+                aria-valuemin="100"
+                aria-valuemax="200"
+                aria-valuenow="100"
+                aria-valuetext="100 pour cent"
+              />
+            </div>
+            <label class="ema-a11y-option ema-a11y-option--stack" for="ema-font">
+              <span id="ema-font-label">Police</span>
+              <select id="ema-font" name="font" autocomplete="off">
+                <option value="system">Système</option>
+                <option value="atkinson">Atkinson Hyperlegible</option>
+                <option value="lexend">Lexend</option>
+                <option value="opendyslexic">OpenDyslexic</option>
+                <option value="verdana">Verdana</option>
               </select>
             </label>
             <label class="ema-a11y-option">
