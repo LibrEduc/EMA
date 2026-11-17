@@ -33,6 +33,7 @@ npm run dev
 | `npm run typecheck` | Vérification des types TypeScript           |
 | `npm test`          | Tests du générateur MicroPython (Vitest)    |
 | `npm run media`     | Recopie les médias Blockly dans `public/`   |
+| `npm run electron:run` | Build avec chemins relatifs puis lance l'application de bureau (Electron) |
 
 ## GitHub Pages
 
