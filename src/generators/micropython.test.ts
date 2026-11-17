@@ -149,4 +149,14 @@ describe("MicroPython generator", () => {
       "",
     ]);
   });
+
+  // Reading an input the block does not define throws, which blanks the whole output.
+  const boardBlockTypes = Object.keys(micropythonGenerator.forBlock).filter((type) =>
+    type.startsWith("board_"),
+  );
+
+  it.each(boardBlockTypes)("generates %s without throwing", (type) => {
+    micropythonGenerator.init(workspace);
+    expect(() => micropythonGenerator.blockToCode(workspace.newBlock(type))).not.toThrow();
+  });
 });
