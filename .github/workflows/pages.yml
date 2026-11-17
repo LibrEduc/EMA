@@ -21,7 +21,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          persist-credentials: false
+
+      # ucBlockly is private: the default Actions token cannot clone it.
+      - name: Fetch ucBlockly
+        env:
+          UCBLOCKLY_READ_TOKEN: ${{ secrets.UCBLOCKLY_READ_TOKEN }}
+        run: >
+          git -c url."https://x-access-token:${UCBLOCKLY_READ_TOKEN}@github.com/".insteadOf="https://github.com/"
+          submodule update --init --recursive --depth 1
 
       - name: Setup Node
         uses: actions/setup-node@v4
