@@ -1,7 +1,8 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { buildMenuTemplate, isMenuState } from "./menu.mjs";
 
 const electronDirectory = path.dirname(fileURLToPath(import.meta.url));
 const rendererPath = path.resolve(electronDirectory, "../dist/bundle/index.html");
@@ -31,6 +32,7 @@ function createMainWindow() {
     minWidth: 900,
     minHeight: 600,
     show: false,
+    icon: path.resolve(electronDirectory, "../public/assets/favicon-32x32.png"),
     webPreferences: {
       preload: path.join(electronDirectory, "preload.cjs"),
       contextIsolation: true,
@@ -38,6 +40,27 @@ function createMainWindow() {
       sandbox: true,
     },
   });
+
+  const updateMenu = (event, state) => {
+    if (event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame || !isMenuState(state)) return;
+    const template = buildMenuTemplate(
+      state,
+      (command) => {
+        if (command.type === "action" && (command.id === "loadButton" || command.id === "saveButton")) {
+          const script = command.id === "loadButton"
+            ? 'document.getElementById("loadButton")?.click()'
+            : 'document.getElementById("saveButton")?.click()';
+          void mainWindow.webContents.executeJavaScript(script, true).catch(() => {});
+          return;
+        }
+        mainWindow.webContents.send("desktop:menu-command", command);
+      },
+      () => openExternalUrl("https://www.linkedin.com/in/sebcanet/"),
+    );
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+  };
+  ipcMain.on("desktop:menu-state", updateMenu);
+  mainWindow.once("closed", () => ipcMain.removeListener("desktop:menu-state", updateMenu));
 
   mainWindow.once("ready-to-show", () => mainWindow.show());
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

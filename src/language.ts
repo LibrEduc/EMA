@@ -23,7 +23,7 @@ import { refreshShortcutsHelp } from './shell_shortcuts_help';
 import { refreshKeyboardTutorial } from './shell_keyboard_tutorial';
 import * as Blockly from 'blockly';
 import { getExtensionMessagesForLang } from './extensions/registry';
-import {DEFAULT_LANG} from './shell_messages.ts';
+import {DEFAULT_LANG} from './shell_messages';
 
 const RTL_LANGUAGES = new Set(['ar', 'fa', 'he', 'lki']);
 import { ToolboxConfiguration } from "./toolbox";
@@ -232,7 +232,7 @@ export const HTML_changeLanguage = (newLang: string, rtl?: boolean): void => {
 
   const langElements = document.querySelectorAll<HTMLElement>('.lang');
   langElements.forEach((element) => {
-    const key = element.getAttribute('key');
+    const key = element.getAttribute('data-i18n') ?? element.getAttribute('key');
     if (key && Object.prototype.hasOwnProperty.call(selectedLangItem, key)) {
       const rawValue = selectedLangItem[key as keyof LanguageItem];
       const value = normalizeLangValue(rawValue);

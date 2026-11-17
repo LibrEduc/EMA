@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module Languages.BlocklyA11yMessages
- * @description µcBlockly translations for Blockly 13 messages (shortcuts, hints, screen reader).
+ * @description EMA translations for Blockly 13 messages (shortcuts, hints, screen reader).
  * @remarks Merged into `Blockly.Msg` after `setLocale` to override untranslated keys.
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0

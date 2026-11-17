@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module LanguageMap
- * @description Language map definitions for µcBlockly
+ * @description Language map definitions for EMA
  * @remarks
  * Centralizes the main application types and wiring logic for Blockly,
  * used by the runtime initialization and toolbox integration.

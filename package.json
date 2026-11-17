@@ -12,6 +12,7 @@
   },
   "type": "module",
   "scripts": {
+    "prepare": "husky",
     "audit": "npm audit",
     "build:lib": "tsc -p tsconfig.json",
     "build:core": "tsc -p tsconfig.core.json",
@@ -26,6 +27,7 @@
     "build:prod-hardened": "cross-env UCB_HARDENED=1 webpack --mode production",
     "docs": "typedoc",
     "lint": "eslint src --fix",
+    "lint:check": "eslint src",
     "check-translations": "node scripts/check-translations.cjs",
     "convert-rduino": "node scripts/convert-rduino-workspace.mjs",
     "generate-favicon": "node scripts/generate-favicon.mjs",
@@ -74,9 +76,13 @@
     }
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "10.0.1",
     "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "~8.71.0",
     "@typescript-eslint/parser": "~8.71.0",
     "@xmldom/xmldom": "^0.9.12",
@@ -90,6 +96,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-tsdoc": "^0.5.3",
     "html-webpack-plugin": "^5.6.8",
+    "husky": "^9.1.7",
     "javascript-obfuscator": "^5.8.0",
     "jsdom": "^27.4.0",
     "monaco-editor-webpack-plugin": "^7.1.1",
@@ -134,7 +141,9 @@
     "@blockly/zoom-to-fit": "^13.3.0",
     "@jaames/iro": "^5.5.2",
     "blockly": "^13.3.0",
-    "monaco-editor": "^0.57.0"
+    "monaco-editor": "^0.57.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "overrides": {
     "typescript": "$typescript",

@@ -440,7 +440,7 @@ export class BlocklyApplication implements BlocklyApplicationType {
           return;
         }
         el.checked = true;
-        el.dispatchEvent(new Event("change"));
+        el.dispatchEvent(new Event("change", { bubbles: true }));
       }
     };
 

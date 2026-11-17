@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module Languages.BlocklyCustomMessageKeys
- * @description µcBlockly keys merged into Blockly.Msg (blocks + plugins).
+ * @description EMA keys merged into Blockly.Msg (blocks + plugins).
  * @author scanet\@libreduc.cc (Sébastien Canet)
  * @version 1.0.0
  * @since 1.0.0

@@ -24,12 +24,13 @@ Public surfaces: **`µcBlockly/core`** (embed kernel), **`µcBlockly/host`** (pr
 
 ```
 src/
-├── index.ts                    # Demo orchestration only (see src/demo/)
+├── index.ts                    # React demo entry point
+├── react-app/                  # React shell components and demo bootstrap
 
 ├── blockly_application_type.ts # Re-export → demo/blockly_application_shell.ts
 ├── core/                       # **Public kernel** — createUcBlockly, workspace manager (see KERNEL.md)
 ├── host/                       # **Product helpers** — themes, a11y, Monaco wiring (not in lean kernel)
-├── demo/                       # Demo shell + embed example (internal)
+├── demo/                       # Demo services, lifecycle, menus, handlers, embed example
 ├── extensions/                 # Runtime pack loader (manifest, toolbox merge, theme) — see AJOUTER_EXTENSION.md
 ├── blockly_patches.ts          # Facade → `blockly_patches/` (const, variables, procedures, defensive)
 ├── blockly_patches/            # Per-patch modules (re-test at Blockly bumps)
@@ -144,7 +145,7 @@ Full shared guide (three projects): **[CONVENTIONS.md](./CONVENTIONS.md)**.
 
 ## Key flows
 
-1. **Startup**: `index.ts` orchestrates the demo (`src/demo/*` for globals, boards menu, a11y, UI handlers, lifecycle). Block definitions (categories/blockly), block types (block_types_registry), and standard block config (configure_standard_blocks) are applied when the kernel registers.
+1. **Startup**: `index.ts` mounts the React shell in `react-app/`. Its components render the toolbar, workspace hosts, code panel, and console; typed actions in `demo/demo_ui_handlers.ts` connect React events to existing demo services. Block definitions (categories/blockly), block types (block_types_registry), and standard block config (configure_standard_blocks) are applied when the kernel registers.
 2. **Workspace inject**: the demo shell (`demo/blockly_application_shell.ts`) creates a `UcBlocklyWorkspaceManager`, injects the workspace (toolbox, theme, options), restores saved blocks if any, and registers plugins (minimap, backpack, search, etc.). Hosts can also use `createUcBlockly()` / `UcBlocklyWorkspaceManager` from `µcBlockly/core` without the demo shell.
 3. **Code generation**: User clicks “Generate code” (or equivalent) → `arduinoGenerator.workspaceToCode(workspace)` walks the block tree and calls the per-block generators in **generators/arduino/blocks/**.
 4. **Language**: `language.ts` and **languages/** handle UI language and toolbox translation; URL param and dropdown drive the current language.

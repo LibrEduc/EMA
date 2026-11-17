@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module Language.Ar
- * @description Arabic translations for µcBlockly.
+ * @description Arabic translations for EMA.
  * @remarks
  * Locale strings used by the language map.
  * @author scanet\@libreduc.cc (Sébastien Canet)
@@ -19,16 +19,16 @@ import { LanguageMap } from './languageMap';
 
 export const arLang: LanguageMap = {
   'ar': {
-    HOME: "µcBlockly",
+    HOME: "EMA",
     ABOUT: "في ما يخص",
     CONTACT: "اتصال",
     UNDO: "تراجع",
     REDO: "إعادة",
     SAVE: "حفظ",
     LOAD: "فتح",
-    ABOUT_TOOLTIP: "حول µcBlockly",
+    ABOUT_TOOLTIP: "حول EMA",
     ABOUT_TEXT:
-      "µcBlockly — بيئة برمجة مرئية للمتحكمات الدقيقة، مبنية على مكتبة كتل.",
+      "EMA — بيئة برمجة مرئية للمتحكمات الدقيقة، مبنية على مكتبة كتل.",
     ABOUT_PROJECT: "صفحة المشروع على GitHub",
     ABOUT_VIDEOS: "قناة فيديوهات العرض",
     ABOUT_BLOCKLY:
@@ -76,20 +76,20 @@ export const arLang: LanguageMap = {
     CAT_COLOR: "لون",
     CAT_VARIABLES: "متغيرات",
     CAT_FUNCTIONS: "إجراءات",
-    THEME_CLASSIC: "classic",
-    THEME_MODERN: "modern",
-    THEME_DEUTERANOPIA: "deuteranopia",
-    THEME_TRITANOPIA: "tritanopia",
-    THEME_ZELOS: "zelos",
-    THEME_HIGHCONTRAST: "high contrast",
-    THEME_DARK: "dark",
-    THEME_HACKER: "hacker",
-    THEME_SESHAT: "seshat",
-    THEME_BLACKWHITE: "black and white",
-    RENDERER_GERAS: "geras",
-    RENDERER_THRASOS: "thrasos",
-    RENDERER_ZELOS: "zelos",
-    RENDERER_MINI: "minimalist",
+    THEME_CLASSIC: "Classic",
+    THEME_MODERN: "Modern",
+    THEME_DEUTERANOPIA: "Deuteranopia",
+    THEME_TRITANOPIA: "Tritanopia",
+    THEME_ZELOS: "Zelos",
+    THEME_HIGHCONTRAST: "High contrast",
+    THEME_DARK: "Dark",
+    THEME_HACKER: "Hacker",
+    THEME_SESHAT: "Seshat",
+    THEME_BLACKWHITE: "Black and white",
+    RENDERER_GERAS: "Geras",
+    RENDERER_THRASOS: "Thrasos",
+    RENDERER_ZELOS: "Zelos",
+    RENDERER_MINI: "Minimalist",
     BOARD_NONE: "بدون",
     A11Y_SKIP_TO_WORKSPACE: "الانتقال إلى مساحة عمل Blockly",
     A11Y_AREA_MENU_HINT:
@@ -138,7 +138,7 @@ export const arLang: LanguageMap = {
     KEYBOARD_TUTORIAL_DONT_SHOW: "عدم العرض عند البدء",
     KEYBOARD_TUTORIAL_STEP_1_TITLE: "مرحباً",
     KEYBOARD_TUTORIAL_STEP_1_BODY:
-      "يمكن استخدام µcBlockly بالكامل بلوحة المفاتيح. يعرض هذا الدليل التنقل الأساسي في الواجهة ومساحة عمل Blockly.",
+      "يمكن استخدام EMA بالكامل بلوحة المفاتيح. يعرض هذا الدليل التنقل الأساسي في الواجهة ومساحة عمل Blockly.",
     KEYBOARD_TUTORIAL_STEP_2_TITLE: "التركيز على مساحة العمل",
     KEYBOARD_TUTORIAL_STEP_2_BODY:
       "اضغط W للتركيز على مساحة عمل Blockly. رابط التخطي (أول Tab) وقائمة المناطق (%MOD%+B ثم 3) يؤديان إلى نفس المكان.",

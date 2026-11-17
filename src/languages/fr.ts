@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  * @module Language.Fr
- * @description French translations for µcBlockly.
+ * @description French translations for EMA.
  * @remarks
  * Locale strings used by the language map.
  * @author scanet\@libreduc.cc (Sébastien Canet)
@@ -19,16 +19,16 @@ import { LanguageMap } from './languageMap';
 
 export const frLang: LanguageMap = {
   'fr': {
-    HOME: "µcBlockly",
-    ABOUT: "à propos",
-    CONTACT: "contacter",
-    UNDO: "annuler",
-    REDO: "refaire",
-    SAVE: "enregistrer",
-    LOAD: "ouvrir",
-    ABOUT_TOOLTIP: "À propos de µcBlockly",
+    HOME: "EMA",
+    ABOUT: "À propos",
+    CONTACT: "Contacter",
+    UNDO: "Annuler",
+    REDO: "Refaire",
+    SAVE: "Enregistrer",
+    LOAD: "Ouvrir",
+    ABOUT_TOOLTIP: "À propos de EMA",
     ABOUT_TEXT:
-      "µcBlockly — environnement de programmation visuelle pour microcontrôleurs, basé sur une bibliothèque de blocs.",
+      "EMA — environnement de programmation visuelle pour microcontrôleurs, basé sur une bibliothèque de blocs.",
     ABOUT_PROJECT: "Page du projet sur GitHub",
     ABOUT_VIDEOS: "Chaîne de démos vidéo",
     ABOUT_BLOCKLY:
@@ -64,7 +64,7 @@ export const frLang: LanguageMap = {
     CAT_LISTS: "Tableaux",
     CAT_LIBRE: "Libre",
     CAT_BOARD: "Carte",
-    CAT_BOARD_NONE: "aucune",
+    CAT_BOARD_NONE: "Aucune",
     CAT_BOARD_BASE: "Base",
     CAT_BOARD_IN: "Entrées",
     CAT_BOARD_OUT: "Sorties",
@@ -76,21 +76,21 @@ export const frLang: LanguageMap = {
     CAT_COLOR: "Couleur",
     CAT_VARIABLES: "Variables",
     CAT_FUNCTIONS: "Procédures & Fonctions",
-    THEME_CLASSIC: "classique",
-    THEME_MODERN: "moderne",
-    THEME_DEUTERANOPIA: "deuteranopia",
-    THEME_TRITANOPIA: "tritanopia",
-    THEME_ZELOS: "zelos",
-    THEME_HIGHCONTRAST: "contraste élevé",
-    THEME_DARK: "sombre",
-    THEME_HACKER: "hacker",
-    THEME_SESHAT: "seshat",
-    THEME_BLACKWHITE: "noir et blanc",
-    RENDERER_GERAS: "geras",
-    RENDERER_THRASOS: "thrasos",
-    RENDERER_ZELOS: "zelos",
-    RENDERER_MINI: "minimaliste",
-    BOARD_NONE: "aucune carte",
+    THEME_CLASSIC: "Classique",
+    THEME_MODERN: "Moderne",
+    THEME_DEUTERANOPIA: "Deuteranopia",
+    THEME_TRITANOPIA: "Tritanopia",
+    THEME_ZELOS: "Zelos",
+    THEME_HIGHCONTRAST: "Contraste élevé",
+    THEME_DARK: "Sombre",
+    THEME_HACKER: "Hacker",
+    THEME_SESHAT: "Seshat",
+    THEME_BLACKWHITE: "Noir et blanc",
+    RENDERER_GERAS: "Geras",
+    RENDERER_THRASOS: "Thrasos",
+    RENDERER_ZELOS: "Zelos",
+    RENDERER_MINI: "Minimaliste",
+    BOARD_NONE: "Aucune carte",
     A11Y_SKIP_TO_WORKSPACE: "Aller au workspace Blockly",
     A11Y_AREA_MENU_HINT:
       "Navigation par zone : 1 barre d'outils, 2 boîte à outils, 3 workspace, 4 code, 5 console",
@@ -108,7 +108,7 @@ export const frLang: LanguageMap = {
     A11Y_EXTERNAL_LINK_SUFFIX: "(ouvre un nouvel onglet)",
     A11Y_SHORTCUT_SUFFIX: "(%1)",
     A11Y_SAVE_ANNOUNCED: "Fichier enregistre",
-    SHORTCUTS_HELP_BUTTON: "raccourcis",
+    SHORTCUTS_HELP_BUTTON: "Raccourcis",
     SHORTCUTS_HELP_TOOLTIP: "Raccourcis clavier (F1 ou ?)",
     SHORTCUTS_HELP_TITLE: "Raccourcis clavier",
     SHORTCUTS_HELP_CLOSE: "Fermer",
@@ -128,7 +128,7 @@ export const frLang: LanguageMap = {
     SHORTCUTS_HELP_KEYS_DELETE: "Suppr, Retour arrière",
     SHORTCUTS_HELP_KEYS_CONFIRM: "Entrée, Espace",
     SHORTCUTS_HELP_SECTION_NAV_ADVANCED: "Navigation avancée (sauts)",
-    KEYBOARD_TUTORIAL_BUTTON: "tutoriel",
+    KEYBOARD_TUTORIAL_BUTTON: "Tutoriel",
     KEYBOARD_TUTORIAL_TOOLTIP: "Tutoriel clavier",
     KEYBOARD_TUTORIAL_TITLE: "Tutoriel clavier",
     KEYBOARD_TUTORIAL_CLOSE: "Fermer",
@@ -138,7 +138,7 @@ export const frLang: LanguageMap = {
     KEYBOARD_TUTORIAL_DONT_SHOW: "Ne plus afficher au démarrage",
     KEYBOARD_TUTORIAL_STEP_1_TITLE: "Bienvenue",
     KEYBOARD_TUTORIAL_STEP_1_BODY:
-      "µcBlockly se pilote entièrement au clavier. Ce tutoriel présente les gestes essentiels pour naviguer dans la coque et le workspace Blockly.",
+      "EMA se pilote entièrement au clavier. Ce tutoriel présente les gestes essentiels pour naviguer dans la coque et le workspace Blockly.",
     KEYBOARD_TUTORIAL_STEP_2_TITLE: "Focus workspace",
     KEYBOARD_TUTORIAL_STEP_2_BODY:
       "Appuyez sur W pour placer le focus dans le workspace Blockly. Le lien d'évitement (premier Tab) et le menu zones (%MOD%+B puis 3) mènent au même endroit.",

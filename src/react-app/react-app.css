@@ -1,0 +1,299 @@
+:root {
+  color-scheme: light;
+  font-family: "Aptos", "Segoe UI Variable", "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --app-ink: #192b29;
+  --app-muted: #687a73;
+  --app-line: #dce5df;
+  --app-canvas: #edf2ee;
+  --app-white: #fbfdfb;
+  --app-green: #287267;
+  --app-lime: #d4ef6a;
+  --app-coral: #d46d54;
+  --app-mono: "Cascadia Code", "Consolas", monospace;
+}
+
+html,
+body,
+#react-app-root,
+#container_page {
+  width: 100%;
+  height: 100%;
+  min-width: 320px;
+  margin: 0;
+}
+
+body {
+  color: var(--app-ink);
+  background: var(--app-canvas);
+  background-image: repeating-linear-gradient(135deg, transparent 0 17px, rgb(45 81 67 / 2%) 17px 18px);
+  overflow: hidden;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+#container_page.wrapper_global {
+  min-height: 0;
+  background: var(--app-canvas);
+}
+
+#app_topbar.app-topbar {
+  position: relative;
+  z-index: 4;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand actions settings"
+    "plugins plugins plugins";
+  align-items: center;
+  gap: 9px 18px;
+  padding: 11px 20px 10px;
+  color: var(--app-ink);
+  background: var(--app-white);
+  border-bottom: 1px solid var(--app-line);
+  box-shadow: 0 2px 8px rgb(26 49 40 / 4%);
+  width: auto;
+}
+
+#app_topbar.app-topbar::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  content: "";
+  background: linear-gradient(90deg, var(--app-green) 0 19%, var(--app-lime) 19% 34%, transparent 34%);
+  pointer-events: none;
+}
+
+.divTableCell.app-topbar > div {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+}
+
+.toolbar-brand-group { grid-area: brand; gap: 12px; }
+.app-title { gap: 8px; white-space: nowrap; font-size: 15px; font-weight: 800; }
+.app-title__logo { width: 31px; height: 31px; object-fit: contain; }
+.toolbar-actions { grid-area: actions; justify-content: center; gap: 3px; }
+.toolbar-settings { grid-area: settings; gap: 5px; }
+.toolbar-plugin-options {
+  grid-area: plugins;
+  justify-content: flex-end;
+  gap: 4px 14px;
+  min-width: 0;
+  padding-top: 6px !important;
+  border-top: 1px solid #e8eee9;
+}
+
+#app_topbar .toolbar-btn,
+#app_topbar .toolbar-select,
+#app_topbar > a,
+#pluginOptions .plugin-option {
+  min-height: 32px;
+  padding: 6px 9px;
+  color: var(--app-ink);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 11px;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+#app_topbar .toolbar-btn:hover,
+#app_topbar > a:hover,
+#pluginOptions .plugin-option:hover {
+  background: #edf4ef;
+  border-color: #d6e4da;
+}
+
+#app_topbar .toolbar-btn:focus-visible,
+#app_topbar .toolbar-select:focus-visible,
+#app_topbar > a:focus-visible,
+#pluginOptions .plugin-option:focus-within {
+  outline: 2px solid var(--app-green);
+  outline-offset: 2px;
+}
+
+#app_topbar .toolbar-select {
+  max-width: 150px;
+  padding-right: 23px;
+  background-color: #f3f7f3;
+  border-color: #e0e8e2;
+  appearance: auto;
+}
+
+#app_topbar .toolbar-select:hover { background-color: #e8f1eb; }
+#app_topbar .toolbar-select option,
+#app_topbar .toolbar-select optgroup { color: #172625; background: #fff; }
+#pluginOptions .plugin-option { display: inline-flex; align-items: center; gap: 6px; min-height: 25px; padding: 3px 6px; color: var(--app-muted); font-size: 10px; }
+#pluginOptions .plugin-option input { width: 14px; height: 14px; margin: 0; accent-color: var(--app-green); }
+#pluginOptions .plugin-option .lang { display: inline; padding: 0; text-align: left; color: inherit; font: inherit; }
+
+#flex_container_up.wrapper_element {
+  flex: 1 1 0;
+  min-height: 0;
+  gap: 0;
+  background: var(--app-white);
+}
+
+#flex_container_up_left,
+#flex_container_up_right,
+#flex_container_bottom,
+#flex_content_code {
+  min-width: 0;
+  min-height: 0;
+}
+
+#flex_container_up_left {
+  position: relative;
+  overflow: hidden;
+  background: #f7faf7;
+}
+
+#blockly-workspace-main {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f7faf7;
+  background-image: radial-gradient(#cfdcd2 0.75px, transparent 0.75px);
+  background-size: 18px 18px;
+}
+
+#div_workspace_content_area {
+  position: absolute;
+  inset: 0;
+}
+
+#div_workspace_content_blockly {
+  position: absolute;
+  z-index: 1;
+}
+
+#flex_container_up_right {
+  background: var(--app-white);
+  border-left: 1px solid var(--app-line);
+}
+
+#flex_content_code {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+#div_content_code,
+#content_console {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin: 0;
+  padding: 18px 20px;
+  color: #d9e8dc;
+  background: #1d302d;
+  font: 11px/1.7 var(--app-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+}
+
+#div_content_code code,
+#content_console code { font: inherit; }
+#div_content_monacoEditor { min-height: 0; }
+#flex_container_bottom { background: #1d302d; border-top: 1px solid #384e47; }
+#content_console { color: #d7e5d9; background: #1d302d; }
+
+#flex_container_up > flex-resizer,
+#container_page > flex-resizer {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 9px;
+  background: #e5ede7;
+  border-right: 1px solid #d5e0d8;
+  border-left: 1px solid #d5e0d8;
+}
+
+#container_page > flex-resizer { border: 0; border-top: 1px solid #d5e0d8; }
+#flex_container_up > flex-resizer:hover,
+#container_page > flex-resizer:hover { background: #cfdfd2; }
+
+.flex-panel-toggle-button {
+  display: grid;
+  width: 25px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  color: var(--app-ink);
+  background: var(--app-white);
+  border: 1px solid #cbd9ce;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgb(20 49 38 / 12%);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.flex-panel-toggle-button:hover { color: #fff; background: var(--app-green); border-color: var(--app-green); }
+.flex-panel-toggle-button:focus-visible { outline: 2px solid var(--app-green); outline-offset: 2px; }
+.skip-link { z-index: 10; }
+
+@media (max-width: 1100px) {
+  #app_topbar.app-topbar {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "brand settings" "actions actions" "plugins plugins";
+    gap: 7px 12px;
+    padding: 8px 12px;
+  }
+  .toolbar-actions { justify-content: flex-start; }
+  .toolbar-settings { justify-content: flex-end; }
+  #app_topbar .toolbar-btn,
+  #app_topbar .toolbar-select,
+  #app_topbar > a { min-height: 29px; padding: 5px 7px; font-size: 10px; }
+}
+
+@media (max-width: 700px) {
+  #app_topbar.app-topbar {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "brand" "actions" "settings" "plugins";
+    gap: 6px;
+    padding: 7px 9px 8px;
+  }
+  .toolbar-brand-group { justify-content: space-between; }
+  .toolbar-actions,
+  .toolbar-settings,
+  .toolbar-plugin-options { justify-content: flex-start; overflow-x: auto; }
+  .toolbar-settings { flex-wrap: wrap; }
+  #app_topbar .toolbar-select { max-width: 130px; }
+  #pluginOptions .plugin-option { flex: 0 0 auto; }
+  #flex_container_up.wrapper_element { flex-direction: column; }
+  #flex_container_up_left { flex: 1 1 0 !important; min-height: 180px; }
+  #flex_container_up_right { flex: 0 0 0 !important; min-height: 0; border-top: 1px solid var(--app-line); border-left: 0; }
+  #flex_container_up > flex-resizer { flex-basis: 8px; }
+  #container_page > flex-resizer { flex-basis: 8px; }
+  #flex_container_bottom { min-height: 0; }
+  #div_content_code, #content_console { padding: 12px; font-size: 10px; }
+}
+
+@media (max-width: 420px) {
+  .app-title { font-size: 13px; }
+  .toolbar-brand-group { gap: 4px; }
+  #app_topbar .toolbar-btn,
+  #app_topbar > a { padding: 5px; font-size: 9px; }
+  #app_topbar .toolbar-select { max-width: 112px; }
+  #pluginOptions .plugin-option { gap: 4px; padding-right: 3px; padding-left: 3px; font-size: 9px; }
+}

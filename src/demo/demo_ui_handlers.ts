@@ -1,18 +1,4 @@
-/**
- * @packageDocumentation
- * @module Demo.UiHandlers
- * @description Wire demo toolbar menus and buttons to BlocklyApplication.
- * @author scanet\@libreduc.cc (Sébastien Canet)
- * @version 1.0.0
- * @since 1.0.0
- */
-
-/**
- * @license
- * Copyright (C) 2023-2026 ASTUCE (Sébastien Canet microcompany)
- * SPDX-License-Identifier: AGPL-3.0-or-later
- */
-
+import type { ChangeEvent } from "react";
 import * as Blockly from "blockly";
 import { refreshBoardPinDropdowns } from "../categories/blockly";
 import type { BlocklyApplication } from "../blockly_application_type";
@@ -25,10 +11,7 @@ import { announceShellMessage } from "../shell_a11y";
 import { refreshAboutDialog } from "../shell_about";
 import { registerShellFileShortcuts } from "../shell_shortcuts";
 import { pushStateReplaceSearchParam, setPluginsInURL } from "../tools";
-import {
-  basic_toolbox,
-  getToolboxForCurrentBoard,
-} from "../toolbox";
+import { basic_toolbox, getToolboxForCurrentBoard } from "../toolbox";
 import { syncUiPaletteTheme } from "../ui_palette_theme";
 import { defaultUcBlocklyWorkspaceFilename } from "../workspace_file";
 import { applyA11yAttributes } from "./demo_a11y_attrs";
@@ -44,177 +27,149 @@ export interface DemoUiHandlersContext {
   elements: DemoShellDom;
 }
 
-/**
- * Wires UI controls (menus, toggles) to application behavior.
- * @param ctx - Application + resolved demo DOM.
- */
-export const wireDemoUiHandlers = (ctx: DemoUiHandlersContext): void => {
-  const { µcB, elements } = ctx;
-  let shellFileShortcutsRegistered = false;
+export interface DemoUiActions {
+  save: () => void;
+  openFilePicker: () => void;
+  loadFile: (event: ChangeEvent<HTMLInputElement>) => void;
+  undo: () => void;
+  redo: () => void;
+  changeLanguage: (event: ChangeEvent<HTMLSelectElement>) => void;
+  changeTheme: (event: ChangeEvent<HTMLSelectElement>) => void;
+  changeRenderer: (event: ChangeEvent<HTMLSelectElement>) => void;
+  changeBoard: (event: ChangeEvent<HTMLSelectElement>) => void;
+  toggleMinimap: (event: ChangeEvent<HTMLInputElement>) => void;
+  toggleHighlight: (event: ChangeEvent<HTMLInputElement>) => void;
+  toggleContinuousToolbox: (event: ChangeEvent<HTMLInputElement>) => void;
+  togglePinnedFlyout: (event: ChangeEvent<HTMLInputElement>) => void;
+  toggleCodeEditor: (event: ChangeEvent<HTMLInputElement>) => void;
+  toggleDebug: (event: ChangeEvent<HTMLInputElement>) => void;
+}
 
-  const triggerWorkspaceSave = (): void => {
+export function createDemoUiActions({ µcB, elements }: DemoUiHandlersContext): DemoUiActions {
+  const save = (): void => {
     µcB.workspaceSaveToFile(defaultUcBlocklyWorkspaceFilename());
     announceShellMessage(getA11yLabel("A11Y_SAVE_ANNOUNCED"));
   };
 
-  elements.languageMenu.onchange = () => {
-    const selectedBoardBeforeLanguageChange = elements.boardMenu.value;
-    HTML_populateBoards(elements);
-    if (
-      selectedBoardBeforeLanguageChange &&
-      BOARD_PROFILES[selectedBoardBeforeLanguageChange] !== undefined
-    ) {
-      elements.boardMenu.value = selectedBoardBeforeLanguageChange;
-    }
-    const rtl: boolean = µcB.changeLanguage(true);
-    µcB.WORKSPACE_OPTIONS["rtl"] = rtl;
-    applyA11yAttributes(elements);
-    refreshAboutDialog();
-    µcB.workspaceReboot();
-  };
-
-  elements.themeMenu.onchange = () => {
-    syncUiPaletteTheme();
-    µcB.changeTheme(elements.themeMenu.value);
-  };
-
-  elements.rendererMenu.onchange = () => {
-    µcB.changeRenderer(elements.rendererMenu.value);
-  };
-
-  elements.boardMenu.onchange = () => {
-    const boardValue = elements.boardMenu.value;
-    window.sessionStorage?.setItem("paramBoard", boardValue);
-    pushStateReplaceSearchParam("board", boardValue);
-    const lang = getLangParamFromUrl();
-    const toolboxForBoard = changeLanguageToolbox(
-      lang,
-      getToolboxForCurrentBoard(basic_toolbox),
-    );
-    µcB.WORKSPACE_OPTIONS.toolbox = toolboxForBoard;
-    (µcB.workspace as Blockly.WorkspaceSvg).updateToolbox(toolboxForBoard);
-    refreshBoardPinDropdowns(µcB.workspace);
-  };
-
-  elements.pluginMinimap.onchange = () => {
-    const minimap = document.getElementsByClassName(
-      "blockly-minimap",
-    )[0] as HTMLElement | undefined;
-    if (minimap) {
-      minimap.style.visibility = elements.pluginMinimap.checked
-        ? "visible"
-        : "hidden";
-    }
-    setPluginsInURL("pluginMinimap", "minimap");
-  };
-
-  elements.pluginHighlight.onchange = () => {
-    µcB.setContentHighlight(elements.pluginHighlight.checked);
-    setPluginsInURL("pluginHighlight", "highlight");
-  };
-
-  if (elements.saveButton) {
-    elements.saveButton.onclick = () => {
-      triggerWorkspaceSave();
-    };
-  }
-
-  if (elements.loadButton && elements.loadFileInput) {
-    elements.loadButton.onclick = () => {
-      elements.loadFileInput.click();
-    };
-
-    elements.loadFileInput.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
+  const actions: DemoUiActions = {
+    save,
+    openFilePicker: () => elements.loadFileInput.click(),
+    loadFile: (event) => {
+      const target = event.currentTarget;
       const file = target.files?.[0];
-      if (file) {
-        const hasExistingBlocks = µcB.workspaceHasAnyBlocks();
-        const currentLang = getLangParamFromUrl();
-        const mergeMessage = getShellMessage("LOAD_MERGE_CONFIRM", currentLang);
-        const merge = hasExistingBlocks ? confirm(mergeMessage) : false;
-        µcB.workspaceLoadFromFile(file, merge);
-        target.value = "";
+      if (!file) return;
+      const currentLang = getLangParamFromUrl();
+      const mergeMessage = getShellMessage("LOAD_MERGE_CONFIRM", currentLang);
+      const merge = µcB.workspaceHasAnyBlocks() ? confirm(mergeMessage) : false;
+      µcB.workspaceLoadFromFile(file, merge);
+      target.value = "";
+    },
+    undo: () => (µcB.workspace as Blockly.WorkspaceSvg).undo(false),
+    redo: () => (µcB.workspace as Blockly.WorkspaceSvg).undo(true),
+    changeLanguage: () => {
+      const selectedBoard = elements.boardMenu.value;
+      HTML_populateBoards(elements);
+      if (selectedBoard && BOARD_PROFILES[selectedBoard] !== undefined) {
+        elements.boardMenu.value = selectedBoard;
       }
-    };
-  }
-
-  elements.undoButton.onclick = () => {
-    const workspace = µcB.workspace as Blockly.WorkspaceSvg | undefined;
-    if (workspace) {
-      workspace.undo(false);
-    }
-  };
-
-  elements.redoButton.onclick = () => {
-    const workspace = µcB.workspace as Blockly.WorkspaceSvg | undefined;
-    if (workspace) {
-      workspace.undo(true);
-    }
-  };
-
-  elements.pluginContinuousToolbox.onchange = () => {
-    if (elements.pluginContinuousToolbox.checked) {
-      registerContinuousToolboxComponents();
-      µcB.WORKSPACE_OPTIONS["plugins"] = {
-        flyoutsVerticalToolbox: "ContinuousFlyout",
-        metricsManager: "ContinuousMetrics",
-        toolbox: "ContinuousToolbox",
-      };
-    } else {
-      unregisterContinuousToolboxComponents();
-      delete µcB.WORKSPACE_OPTIONS["plugins"];
-    }
-    setPluginsInURL("pluginContinuousToolbox", "ctoolbox");
-    µcB.workspaceReboot();
-  };
-
-  elements.alwaysOpenedToolboxFlyout.onchange = () => {
-    µcB.applyAlwaysOpenedToolboxFlyout();
-    setPluginsInURL("alwaysOpenedToolboxFlyout", "flyout");
-  };
-
-  elements.codeEditorSwitch.onchange = () => {
-    if (elements.codeEditorSwitch.checked) {
-      if (elements.contentCode) elements.contentCode.style.display = "none";
-      if (elements.contentMonacoEditor) {
+      const rtl = µcB.changeLanguage(true);
+      µcB.WORKSPACE_OPTIONS.rtl = rtl;
+      applyA11yAttributes(elements);
+      refreshAboutDialog();
+      µcB.workspaceReboot();
+    },
+    changeTheme: (event) => {
+      syncUiPaletteTheme();
+      µcB.changeTheme(event.currentTarget.value);
+    },
+    changeRenderer: (event) => µcB.changeRenderer(event.currentTarget.value),
+    changeBoard: (event) => {
+      const boardValue = event.currentTarget.value;
+      window.sessionStorage?.setItem("paramBoard", boardValue);
+      pushStateReplaceSearchParam("board", boardValue);
+      const toolboxForBoard = changeLanguageToolbox(
+        getLangParamFromUrl(),
+        getToolboxForCurrentBoard(basic_toolbox),
+      );
+      µcB.WORKSPACE_OPTIONS.toolbox = toolboxForBoard;
+      (µcB.workspace as Blockly.WorkspaceSvg).updateToolbox(toolboxForBoard);
+      refreshBoardPinDropdowns(µcB.workspace);
+    },
+    toggleMinimap: (event) => {
+      const minimap = document.getElementsByClassName("blockly-minimap")[0] as HTMLElement | undefined;
+      if (minimap) minimap.style.visibility = event.currentTarget.checked ? "visible" : "hidden";
+      setPluginsInURL("pluginMinimap", "minimap");
+    },
+    toggleHighlight: (event) => {
+      µcB.setContentHighlight(event.currentTarget.checked);
+      setPluginsInURL("pluginHighlight", "highlight");
+    },
+    toggleContinuousToolbox: (event) => {
+      if (event.currentTarget.checked) {
+        registerContinuousToolboxComponents();
+        µcB.WORKSPACE_OPTIONS.plugins = {
+          flyoutsVerticalToolbox: "ContinuousFlyout",
+          metricsManager: "ContinuousMetrics",
+          toolbox: "ContinuousToolbox",
+        };
+      } else {
+        unregisterContinuousToolboxComponents();
+        delete µcB.WORKSPACE_OPTIONS.plugins;
+      }
+      setPluginsInURL("pluginContinuousToolbox", "ctoolbox");
+      µcB.workspaceReboot();
+    },
+    togglePinnedFlyout: () => {
+      µcB.applyAlwaysOpenedToolboxFlyout();
+      setPluginsInURL("alwaysOpenedToolboxFlyout", "flyout");
+    },
+    toggleCodeEditor: (event) => {
+      if (event.currentTarget.checked) {
+        elements.contentCode.style.display = "none";
         elements.contentMonacoEditor.style.display = "block";
         elements.contentMonacoEditor.style.height = "100%";
         elements.contentMonacoEditor.style.width = "100%";
         void µcB_codeEditor.ensureInitialized(elements.contentMonacoEditor);
-      }
-    } else {
-      if (elements.contentCode) elements.contentCode.style.display = "block";
-      if (elements.contentMonacoEditor) {
+      } else {
+        elements.contentCode.style.display = "block";
         elements.contentMonacoEditor.style.display = "none";
       }
-    }
-    setPluginsInURL("codeEditorSwitch", "codeEditor");
-  };
-
-  elements.debugSwitch.onchange = () => {
-    const enabled = elements.debugSwitch.checked;
-    (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ = enabled;
-    try {
-      if (enabled) {
-        window.localStorage?.setItem("ucbDebug", "1");
-      } else {
-        window.localStorage?.removeItem("ucbDebug");
+      setPluginsInURL("codeEditorSwitch", "codeEditor");
+    },
+    toggleDebug: (event) => {
+      const enabled = event.currentTarget.checked;
+      (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ = enabled;
+      try {
+        if (enabled) window.localStorage?.setItem("ucbDebug", "1");
+        else window.localStorage?.removeItem("ucbDebug");
+      } catch {
+        // Ignore storage errors.
       }
-    } catch {
-      // Ignore storage errors
-    }
-    setPluginsInURL("debugSwitch", "debug");
+      setPluginsInURL("debugSwitch", "debug");
+    },
   };
-  (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ =
-    elements.debugSwitch.checked;
 
-  if (!shellFileShortcutsRegistered) {
-    shellFileShortcutsRegistered = true;
-    registerShellFileShortcuts({
-      onSave: triggerWorkspaceSave,
-      onLoad: () => {
-        elements.loadButton?.click();
-      },
-    });
-  }
+  registerShellFileShortcuts({ onSave: save, onLoad: actions.openFilePicker });
+  (globalThis as { __UCB_DEBUG__?: boolean }).__UCB_DEBUG__ = elements.debugSwitch.checked;
+  return actions;
+}
+
+export const wireDemoUiHandlers = (context: DemoUiHandlersContext): void => {
+  const { elements } = context;
+  const actions = createDemoUiActions(context);
+  elements.languageMenu.onchange = (event) => actions.changeLanguage(event as unknown as ChangeEvent<HTMLSelectElement>);
+  elements.themeMenu.onchange = (event) => actions.changeTheme(event as unknown as ChangeEvent<HTMLSelectElement>);
+  elements.rendererMenu.onchange = (event) => actions.changeRenderer(event as unknown as ChangeEvent<HTMLSelectElement>);
+  elements.boardMenu.onchange = (event) => actions.changeBoard(event as unknown as ChangeEvent<HTMLSelectElement>);
+  elements.pluginMinimap.onchange = (event) => actions.toggleMinimap(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.pluginHighlight.onchange = (event) => actions.toggleHighlight(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.pluginContinuousToolbox.onchange = (event) => actions.toggleContinuousToolbox(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.alwaysOpenedToolboxFlyout.onchange = (event) => actions.togglePinnedFlyout(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.codeEditorSwitch.onchange = (event) => actions.toggleCodeEditor(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.debugSwitch.onchange = (event) => actions.toggleDebug(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.saveButton.onclick = actions.save;
+  elements.loadButton.onclick = actions.openFilePicker;
+  elements.loadFileInput.onchange = (event) => actions.loadFile(event as unknown as ChangeEvent<HTMLInputElement>);
+  elements.undoButton.onclick = actions.undo;
+  elements.redoButton.onclick = actions.redo;
 };

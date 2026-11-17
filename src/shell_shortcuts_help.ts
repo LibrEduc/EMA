@@ -17,74 +17,25 @@ import { isTextEntryTarget } from "./shell_shortcuts";
 import {
   BUTTON_ID,
   CLOSE_ID,
-  CONTENT_ID,
   DIALOG_ID,
-  TITLE_ID,
-  addReadonlySection,
-  ensureDialog,
-  navigationHintRows,
-  shellRows,
 } from "./shell_shortcuts_help_dialog";
 import {
-  addEditableSection,
-  cancelListeningCapture,
   clearEditSession,
   isListening,
-  restoreFocus,
   setPendingFocus,
   stopListening,
-  takePendingFocus,
 } from "./shell_shortcuts_help_edit";
-import { blocklyMsg, t } from "./shell_shortcuts_help_i18n";
+import { t } from "./shell_shortcuts_help_i18n";
 import {
   applyShortcutPreferences,
   type EditableShortcutName,
 } from "./shortcut_preferences";
 
-const dialogHooks = {
-  stopListening,
-  isListening,
-  onCancelListening: (): void => {
-    cancelListeningCapture(renderDialogContent);
-  },
-  onDialogClosed: clearEditSession,
-};
+export const SHORTCUTS_HELP_OPEN_EVENT = "ucb:shortcuts-help-open";
+export const SHORTCUTS_HELP_REFRESH_EVENT = "ucb:shortcuts-help-refresh";
 
-const renderDialogContent = (): void => {
-  const title = document.getElementById(TITLE_ID);
-  const content = document.getElementById(CONTENT_ID);
-  const closeButton = document.getElementById(CLOSE_ID) as HTMLButtonElement | null;
-  if (!title || !content) {
-    return;
-  }
-
-  title.textContent = t("SHORTCUTS_HELP_TITLE");
-  if (closeButton) {
-    closeButton.textContent = t("SHORTCUTS_HELP_CLOSE");
-    closeButton.setAttribute("aria-label", t("SHORTCUTS_HELP_CLOSE"));
-  }
-
-  content.replaceChildren();
-  const colAction = t("SHORTCUTS_HELP_COL_ACTION");
-  const colKeys = t("SHORTCUTS_HELP_COL_KEYS");
-
-  addReadonlySection(
-    content,
-    t("SHORTCUTS_HELP_SECTION_SHELL"),
-    shellRows(),
-    colAction,
-    colKeys,
-  );
-  addReadonlySection(
-    content,
-    blocklyMsg("SHORTCUTS_CODE_NAVIGATION"),
-    navigationHintRows(),
-    colAction,
-    colKeys,
-  );
-  addEditableSection(content, renderDialogContent);
-
-  restoreFocus(takePendingFocus());
+const requestRefresh = (): void => {
+  window.dispatchEvent(new Event(SHORTCUTS_HELP_REFRESH_EVENT));
 };
 
 /**
@@ -92,14 +43,7 @@ const renderDialogContent = (): void => {
  */
 export const openShortcutsHelp = (): void => {
   applyShortcutPreferences();
-  const dialog = ensureDialog(dialogHooks);
-  const wasOpen = dialog.open;
-  renderDialogContent();
-  if (!wasOpen) {
-    dialog.showModal();
-    document.getElementById(BUTTON_ID)?.classList.add("is-active");
-    restoreFocus({ kind: "close" });
-  }
+  window.dispatchEvent(new Event(SHORTCUTS_HELP_OPEN_EVENT));
 };
 
 /**
@@ -135,7 +79,7 @@ export const refreshShortcutsHelp = (): void => {
     } else if (active?.id === CLOSE_ID) {
       setPendingFocus({ kind: "close" });
     }
-    renderDialogContent();
+    requestRefresh();
   }
 };
 
@@ -143,7 +87,6 @@ export const refreshShortcutsHelp = (): void => {
  * Register the toolbar button, dialog, and F1 / ? open shortcuts.
  */
 export const registerShortcutsHelp = (): void => {
-  ensureDialog(dialogHooks);
   applyShortcutPreferences();
 
   const button = document.getElementById(BUTTON_ID);
@@ -168,4 +111,9 @@ export const registerShortcutsHelp = (): void => {
   });
 
   refreshShortcutsHelp();
+};
+
+export const closeShortcutsHelp = (): void => {
+  stopListening();
+  clearEditSession();
 };

@@ -44,13 +44,14 @@ import {
 import { µcB_workspaceOnResize } from "../workspace_resize";
 import { applyA11yAttributes } from "./demo_a11y_attrs";
 import { HTML_populateBoards } from "./demo_boards_menu";
+import { wireDemoUiHandlers } from "./demo_ui_handlers";
 import type { DemoShellDom } from "./demo_dom";
 import { restoreLayoutFromSessionStorage } from "./demo_layout";
-import { wireDemoUiHandlers } from "./demo_ui_handlers";
 
 export interface DemoLifecycleContext {
   µcB: BlocklyApplication;
   elements: DemoShellDom;
+  wireUiHandlers?: boolean;
 }
 
 /**
@@ -126,7 +127,7 @@ export const resetAllParameters = (
  * @param ctx - Application + resolved demo DOM.
  */
 export const startDemoLifecycle = (ctx: DemoLifecycleContext): void => {
-  const { µcB, elements } = ctx;
+  const { µcB, elements, wireUiHandlers = true } = ctx;
   let skipUnloadWorkspaceSave = false;
 
   DomIsLoaded((): void => {
@@ -161,7 +162,9 @@ export const startDemoLifecycle = (ctx: DemoLifecycleContext): void => {
   window.onload = (): void => {
     debugLog("🔄 window.onload - Checking components...");
 
-    wireDemoUiHandlers({ µcB, elements });
+    if (wireUiHandlers) {
+      wireDemoUiHandlers({ µcB, elements });
+    }
     const code = arduinoGenerator.workspaceToCode(µcB.workspace);
     µcB_codeEditor.setValue(code);
     if (elements.contentCode) {

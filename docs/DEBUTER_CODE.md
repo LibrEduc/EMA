@@ -9,9 +9,9 @@ Guide d’orientation pour **entrer dans le dépôt**, le maintenir et y ajouter
 3. Respecter [CONVENTIONS.md](./CONVENTIONS.md) (en-têtes, découpage fichiers, TSDoc).
 4. Garder [GLOSSAIRE.md](./GLOSSAIRE.md) sous la main.
 
-## Ne commence **pas** par `src/index.ts`
+## Où modifier l’interface ?
 
-`index.ts` + `src/demo/` = **boot de la démo** (DOM, menus, a11y, plugins, resize). Ce n’est **pas** le cœur des blocs.
+La coque de la démo est rendue par React : `src/react-app/components/` contient les composants d’interface, `src/react-app/ReactDemoApplication.tsx` monte le workspace, et `src/demo/` conserve les services de langue, cartes, accessibilité, plugins et persistance. Ce n’est **pas** le cœur des blocs.
 
 | Si tu veux… | Ouvre plutôt… |
 |-------------|----------------|
@@ -22,6 +22,7 @@ Guide d’orientation pour **entrer dans le dépôt**, le maintenir et y ajouter
 | Pins d’une carte | `src/board_profiles/` (données) + `boards.ts` (validateurs) |
 | Matériel (servo…) | `extensions/` |
 | Embed produit | `src/core/` ([KERNEL.md](./KERNEL.md)) |
+| Coque React de la démo | `src/react-app/` + actions `src/demo/demo_ui_handlers.ts` |
 
 ## Que veux-tu faire ?
 
