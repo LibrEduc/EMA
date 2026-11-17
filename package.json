@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "electron:build": "vite build --base ./",
+    "electron:build": "vite build --base ./ --outDir dist-electron",
     "electron:start": "electron electron/main.mjs",
     "electron:run": "npm run electron:build && npm run electron:start",
     "typecheck": "tsc --noEmit",

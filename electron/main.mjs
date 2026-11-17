@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const electronDirectory = path.dirname(fileURLToPath(import.meta.url));
-const rendererPath = path.resolve(electronDirectory, "../dist/index.html");
+const rendererPath = path.resolve(electronDirectory, "../dist-electron/index.html");
 const rendererUrl = new URL(pathToFileURL(rendererPath));
 
 function openExternalUrl(value) {
@@ -49,6 +49,7 @@ function createMainWindow() {
       const destination = new URL(value);
       const isRendererPage =
         destination.protocol === "file:" &&
+        destination.host === rendererUrl.host &&
         destination.pathname === rendererUrl.pathname;
       if (isRendererPage) {
         return;

@@ -44,6 +44,13 @@ export function saveUiLanguage(language: UiLanguage): void {
   }
 }
 
+// µcBlockly dialogs (keyboard tutorial, shortcuts, a11y labels) read the language from `?lang=`.
+export function shareLanguageWithUcBlockly(language: UiLanguage): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set("lang", language);
+  window.history.replaceState(window.history.state, "", url.href);
+}
+
 export function applyDocumentDirection(language: string): void {
   const rtl = isRtlLanguage(language);
   document.documentElement.lang = language;
