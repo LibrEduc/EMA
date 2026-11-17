@@ -4,10 +4,93 @@
   --ema-paper: #eef2f6;
   --ema-panel: #ffffff;
   --ema-accent: #0b6e4f;
+  --ema-accent-strong: #086347;
   --ema-line: #c5d0db;
   --ema-code-bg: #0f1720;
   --ema-code-fg: #d7e0ea;
-  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  --ema-focus: #ffd166;
+  --ema-text-scale: 1;
+  --ema-ui-font: system-ui, "Segoe UI", "Helvetica Neue", sans-serif;
+  --target-size: 2.75rem; /* 44px @ 16px root */
+  font-family: var(--ema-ui-font);
+}
+
+html {
+  /* Le % est piloté par le slider a11y (G178 jusqu’à 200 %). */
+  font-size: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+summary,
+label,
+.blocklyWidgetDiv,
+.blocklyDropDownDiv,
+.blocklyToolboxDiv,
+.blocklyMenuItem,
+.blocklyHtmlInput,
+.blocklyTextInput,
+dialog {
+  font-family: var(--ema-ui-font);
+}
+
+html.ema-high-contrast {
+  --ema-ink: #000000;
+  --ema-paper: #ffffff;
+  --ema-panel: #ffffff;
+  --ema-line: #000000;
+  --ema-accent: #000000;
+  --ema-accent-strong: #000000;
+  --ema-focus: #ffff00;
+}
+
+html.ema-high-contrast .blocklyToolboxDiv {
+  background: #ffffff !important;
+  border-inline-end: 3px solid #000000 !important;
+}
+
+html.ema-high-contrast .blocklyToolboxCategory,
+html.ema-high-contrast .blocklyTreeRow {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+html.ema-high-contrast .emaCategory--hover:not(.emaCategory--selected),
+html.ema-high-contrast .blocklyToolboxCategory:hover:not(.emaCategory--selected),
+html.ema-high-contrast .blocklyTreeRow:hover:not(.emaCategory--selected) {
+  background: color-mix(
+    in srgb,
+    var(--ema-cat-colour, #000000) 40%,
+    #ffffff
+  ) !important;
+  outline: 3px solid #000000;
+}
+
+html.ema-high-contrast .emaCategory--selected.blocklyToolboxCategory,
+html.ema-high-contrast .emaCategory--selected.blocklyTreeRow,
+html.ema-high-contrast .blocklyTreeSelected {
+  background: #ffffff !important;
+  border: 3px solid #000000 !important;
+  box-shadow: inset 8px 0 0 #000000 !important;
+}
+
+html.ema-high-contrast .blocklyFlyoutLabelText {
+  fill: #ffffff !important;
+}
+
+html.ema-high-contrast .blocklyFlyoutLabelBackground {
+  fill: #000000 !important;
+  stroke: #ffffff !important;
+}
+
+@media (pointer: fine) {
+  :root {
+    --target-size: 2rem; /* 32px — souris / trackpad */
+  }
 }
 
 *,
@@ -36,12 +119,13 @@ body {
   inset-inline-start: 0.75rem;
   inset-block-start: 0.75rem;
   transform: translateY(-200%);
-  padding: 0.5rem 0.75rem;
+  padding: 0.65rem 0.9rem;
   background: var(--ema-accent);
   color: #fff;
   text-decoration: none;
-  border-radius: 0.25rem;
+  border-radius: 0.35rem;
   z-index: 10;
+  font-size: 1rem;
 }
 
 .skip-link:focus {
@@ -51,85 +135,355 @@ body {
 .ema-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.75rem 1rem;
   flex-wrap: wrap;
-  padding: 0.65rem 1rem;
+  padding: 0.75rem 1rem;
   background: linear-gradient(120deg, #0b6e4f 0%, #14532d 55%, #1a2332 100%);
   color: #f4faf7;
 }
 
+.ema-brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-inline-size: 0;
+}
+
 .ema-brand {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   letter-spacing: 0.04em;
+  line-height: 1.1;
 }
 
 .ema-tagline {
   margin: 0;
-  font-size: 0.9rem;
-  opacity: 0.9;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-.ema-target {
-  display: inline-flex;
-  gap: 0.15rem;
-  margin: 0 0 0 auto;
-  padding: 0.15rem;
-  border: 1px solid rgb(255 255 255 / 28%);
-  border-radius: 0.4rem;
-  min-inline-size: 0;
-}
-
-.ema-target-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.55rem;
-  border-radius: 0.3rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  user-select: none;
-}
-
-.ema-target-option:has(input:checked) {
-  background: rgb(255 255 255 / 16%);
-}
-
-.ema-target-option input {
-  accent-color: #8fd6b5;
+.ema-help {
   margin: 0;
+  flex: 1 1 12rem;
+  font-size: 1rem;
+  line-height: 1.35;
+  opacity: 0.95;
+}
+
+.ema-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ema-btn {
+  min-block-size: var(--target-size);
+  min-inline-size: var(--target-size);
+  padding: 0.45rem 0.9rem;
+  border: 2px solid rgb(255 255 255 / 55%);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--ema-accent-strong);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.ema-target-option input:focus-visible {
-  outline: 3px solid #ffd166;
-  outline-offset: 2px;
+.ema-btn:focus-visible,
+.ema-flyout-toggle input:focus-visible,
+#ema-lang:focus-visible,
+.ema-target-option input:focus-visible,
+.ema-settings > summary:focus-visible,
+.ema-code-drawer > summary:focus-visible {
+  outline: 3px solid var(--ema-focus);
+  outline-offset: 3px;
+}
+
+.ema-btn-quiet {
+  background: transparent;
+  color: #fff;
+  border-color: rgb(255 255 255 / 40%);
+  font-weight: 600;
 }
 
 .ema-flyout-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.25rem 0.55rem;
+  gap: 0.5rem;
+  min-block-size: var(--target-size);
+  padding: 0.35rem 0.7rem;
   border: 1px solid rgb(255 255 255 / 28%);
-  border-radius: 0.35rem;
-  font-size: 0.85rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
   cursor: pointer;
   user-select: none;
 }
 
 .ema-flyout-toggle input {
   accent-color: #8fd6b5;
-  inline-size: 1.15em;
-  aspect-ratio: 1;
+  inline-size: 1.35em;
+  block-size: 1.35em;
   margin: 0;
   cursor: pointer;
 }
 
-.ema-flyout-toggle input:focus-visible {
-  outline: 3px solid #ffd166;
-  outline-offset: 3px;
+.ema-settings {
+  margin-inline-start: auto;
+  position: relative;
+}
+
+.ema-settings > summary {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--target-size);
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ema-settings > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ema-settings-panel {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: calc(100% + 0.35rem);
+  z-index: 20;
+  display: grid;
+  gap: 0.75rem;
+  min-inline-size: min(18rem, 90vw);
+  padding: 0.85rem;
+  border: 1px solid var(--ema-line);
+  border-radius: 0.6rem;
+  background: #fff;
+  color: var(--ema-ink);
+  box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 18%);
+}
+
+.ema-lang {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#ema-lang {
+  display: block;
+  inline-size: 100%;
+  min-block-size: var(--target-size);
+  margin-block-start: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--ema-line);
+  border-radius: 0.45rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ema-target {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ema-target legend {
+  margin-block-end: 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ema-a11y {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ema-a11y legend {
+  margin-block-end: 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ema-a11y-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-block-size: var(--target-size);
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.4rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ema-a11y-option--stack {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+.ema-a11y-scale-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+#ema-text-size-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--ema-accent-strong);
+}
+
+.ema-a11y-option input[type="checkbox"] {
+  accent-color: var(--ema-accent);
+  inline-size: 1.35em;
+  block-size: 1.35em;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+#ema-font {
+  min-block-size: var(--target-size);
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--ema-line);
+  border-radius: 0.45rem;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Slider taille texte — native range + accent EMA */
+#ema-text-size {
+  --slider-track-size: 0.5rem;
+  --slider-thumb-size: 1.35rem;
+  --slider-track-radius: 999px;
+  --slider-thumb-radius: 50%;
+  --slider-track-color: #d5dde6;
+  --slider-fill-color: var(--ema-accent);
+  --slider-thumb-color: var(--ema-accent-strong);
+  --slider-direction: to right;
+  --attr-min: 100;
+  --attr-max: 200;
+  --control-value: 100;
+  --slider-progress: calc(
+    (var(--control-value) - var(--attr-min)) /
+      (var(--attr-max) - var(--attr-min)) * 100%
+  );
+
+  appearance: none;
+  inline-size: 100%;
+  block-size: var(--target-size);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: var(--ema-accent);
+  cursor: pointer;
+}
+
+#ema-text-size:dir(rtl) {
+  --slider-direction: to left;
+}
+
+#ema-text-size:focus-visible {
+  outline: 3px solid var(--ema-accent);
+  outline-offset: 4px;
+}
+
+#ema-text-size::-webkit-slider-runnable-track {
+  block-size: var(--slider-track-size);
+  border-radius: var(--slider-track-radius);
+  background: linear-gradient(
+    var(--slider-direction),
+    var(--slider-fill-color) var(--slider-progress),
+    var(--slider-track-color) var(--slider-progress)
+  );
+}
+
+#ema-text-size::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: var(--slider-thumb-size);
+  block-size: var(--slider-thumb-size);
+  margin-block-start: calc(
+    (var(--slider-track-size) - var(--slider-thumb-size)) / 2
+  );
+  border: 2px solid #1a2332;
+  border-radius: var(--slider-thumb-radius);
+  background: var(--slider-thumb-color);
+}
+
+#ema-text-size::-moz-range-track {
+  block-size: var(--slider-track-size);
+  border-radius: var(--slider-track-radius);
+  background: var(--slider-track-color);
+}
+
+#ema-text-size::-moz-range-progress {
+  block-size: var(--slider-track-size);
+  border-radius: var(--slider-track-radius);
+  background: var(--slider-fill-color);
+}
+
+#ema-text-size::-moz-range-thumb {
+  inline-size: var(--slider-thumb-size);
+  block-size: var(--slider-thumb-size);
+  border: 2px solid #1a2332;
+  border-radius: var(--slider-thumb-radius);
+  background: var(--slider-thumb-color);
+}
+
+.ema-a11y-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.ema-a11y-actions .ema-btn {
+  color: var(--ema-ink);
+  background: #f3f6f9;
+  border-color: var(--ema-line);
+}
+
+.ema-target-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: var(--target-size);
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.4rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ema-target-option:has(input:checked) {
+  background: rgb(11 110 79 / 12%);
+}
+
+.ema-target-option input {
+  accent-color: var(--ema-accent);
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  margin: 0;
+  cursor: pointer;
 }
 
 .visually-hidden {
@@ -147,31 +501,128 @@ body {
 .ema-main {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
   min-block-size: 0;
+}
+
+.ema-main:has(.ema-code-drawer[open]) {
+  grid-template-columns: minmax(0, 1.35fr) minmax(14rem, 0.75fr);
+  grid-template-rows: minmax(0, 1fr);
 }
 
 #ema-workspace {
   position: relative;
   min-block-size: 0;
   background: var(--ema-panel);
-  border-inline-end: 1px solid var(--ema-line);
+}
+
+/*
+ * Une seule échelle texte Blockly :
+ * toolbox = flyout = blocs = --ema-blockly-font (suit html N%).
+ */
+:root {
+  --ema-blockly-font: 0.875rem; /* ≈ 14px @ 100 % — cohérent partout */
+}
+
+.blocklyText,
+.blocklyFlyoutLabelText,
+.blocklyToolboxCategoryLabel,
+.blocklyTreeLabel,
+.blocklyHtmlInput,
+.blocklyMenuItemContent,
+.blocklyDropDownDiv,
+.blocklyWidgetDiv,
+.blocklyTooltipDiv {
+  font-family: var(--ema-ui-font) !important;
+}
+
+.blocklyText,
+.blocklyFlyoutLabelText,
+.blocklyToolboxCategoryLabel,
+.blocklyTreeLabel,
+.blocklyHtmlInput,
+.blocklyMenuItemContent {
+  font-size: var(--ema-blockly-font) !important;
+}
+
+/* Catégories du flyout — badge (vars couleur en JS) */
+.blocklyFlyoutLabelText {
+  fill: var(--ema-flyout-label-fg, #ffffff) !important;
+  stroke: none !important;
+  stroke-width: 0 !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em;
+}
+
+.blocklyFlyoutLabelBackground {
+  fill: var(--ema-flyout-label-bg, #1a2332) !important;
+  stroke: #1a2332 !important;
+  stroke-width: 3px !important;
+  opacity: 1 !important;
+}
+
+/* Libellés toolbox — centrés, même corps que les blocs */
+.blocklyToolboxCategoryLabel,
+.blocklyTreeLabel,
+.emaCategoryLabel {
+  display: block !important;
+  inline-size: 100% !important;
+  max-inline-size: 100% !important;
+  margin-inline: auto !important;
+  text-align: center !important;
+  font-weight: 800 !important;
+  color: #1a2332 !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal !important;
+}
+
+.blocklyTreeRowContentContainer {
+  inline-size: 100%;
+  align-items: center;
+  text-align: center;
+}
+
+.blocklyToolboxDiv {
+  font-size: var(--ema-blockly-font);
+}
+
+.ema-code-drawer {
+  border-block-start: 1px solid var(--ema-line);
+  background: var(--ema-code-bg);
+  color: var(--ema-code-fg);
+  min-block-size: 0;
+}
+
+.ema-main:has(.ema-code-drawer[open]) .ema-code-drawer {
+  border-block-start: none;
+  border-inline-start: 1px solid #243041;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.ema-code-drawer > summary {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--target-size);
+  padding: 0.55rem 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ema-code-drawer > summary::-webkit-details-marker {
+  display: none;
 }
 
 .ema-code-panel {
   display: flex;
   flex-direction: column;
   min-block-size: 0;
-  background: var(--ema-code-bg);
-  color: var(--ema-code-fg);
-}
-
-.ema-code-panel h2 {
-  margin: 0;
-  padding: 0.55rem 0.9rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border-block-end: 1px solid #243041;
+  flex: 1;
 }
 
 #ema-code {
@@ -180,19 +631,28 @@ body {
   padding: 0.9rem;
   overflow: auto;
   font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   line-height: 1.45;
   white-space: pre-wrap;
+  max-block-size: 40dvh;
+}
+
+.ema-main:has(.ema-code-drawer[open]) #ema-code {
+  max-block-size: none;
 }
 
 @media (max-width: 900px) {
-  .ema-main {
+  .ema-main:has(.ema-code-drawer[open]) {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(55dvh, 1fr) minmax(12rem, 0.45fr);
+    grid-template-rows: minmax(50dvh, 1fr) minmax(10rem, 0.4fr);
   }
 
-  #ema-workspace {
-    border-inline-end: none;
-    border-block-end: 1px solid var(--ema-line);
+  .ema-main:has(.ema-code-drawer[open]) .ema-code-drawer {
+    border-inline-start: none;
+    border-block-start: 1px solid #243041;
+  }
+
+  .ema-settings {
+    margin-inline-start: 0;
   }
 }

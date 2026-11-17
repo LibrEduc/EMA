@@ -3,50 +3,167 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EMA — robot MAE</title>
+    <title>EMA — Programme ton robot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fontsource/opendyslexic@5.2.5/index.min.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <a class="skip-link" href="#ema-workspace">Aller au workspace</a>
+    <a class="skip-link" href="#ema-title">Aller au titre</a>
+
     <header class="ema-header">
-      <p class="ema-brand">EMA</p>
-      <p class="ema-tagline">Environnement MAE · µcBlockly (Zelos)</p>
+      <div class="ema-brand-block">
+        <p class="ema-brand">EMA</p>
+        <h1 id="ema-title" class="ema-tagline" tabindex="-1">
+          Programme ton robot MAE
+        </h1>
+      </div>
 
-      <fieldset class="ema-target">
-        <legend class="visually-hidden">Langage généré</legend>
-        <label class="ema-target-option">
-          <input type="radio" name="ema-code-target" value="arduino" checked />
-          <span>C Arduino</span>
-        </label>
-        <label class="ema-target-option">
-          <input type="radio" name="ema-code-target" value="micropython" />
-          <span>MicroPython</span>
-        </label>
-      </fieldset>
+      <p class="ema-help" id="ema-help">
+        Glisse des blocs dans la boucle pour faire bouger le robot.
+      </p>
 
-      <label class="ema-flyout-toggle" title="Garde le panneau de blocs ouvert">
-        <input
-          id="ema-flyout-open"
-          type="checkbox"
-          switch
-          aria-describedby="ema-flyout-open-hint"
-        />
-        <span>Flyout ouvert</span>
-      </label>
-      <span id="ema-flyout-open-hint" class="visually-hidden">
-        Active pour garder la liste des blocs toujours visible.
-      </span>
+      <div class="ema-actions" role="toolbar" aria-label="Actions">
+        <button type="button" id="ema-undo" class="ema-btn">Annuler</button>
+        <button type="button" id="ema-restart" class="ema-btn ema-btn-quiet">
+          Recommencer
+        </button>
+
+        <label class="ema-flyout-toggle">
+          <input
+            id="ema-flyout-open"
+            type="checkbox"
+            switch
+            checked
+            aria-describedby="ema-flyout-open-hint"
+          />
+          <span>Garder les blocs ouverts</span>
+        </label>
+        <span id="ema-flyout-open-hint" class="visually-hidden">
+          Garde la liste des blocs toujours visible à l’écran.
+        </span>
+      </div>
+
+      <details class="ema-settings">
+        <summary>Réglages</summary>
+        <div class="ema-settings-panel">
+          <label class="ema-lang" for="ema-lang">Langue</label>
+          <select id="ema-lang" name="lang" autocomplete="off">
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="ar">العربية</option>
+          </select>
+
+          <fieldset class="ema-target">
+            <legend>Type de code</legend>
+            <label class="ema-target-option">
+              <input
+                type="radio"
+                name="ema-code-target"
+                value="arduino"
+                checked
+              />
+              <span>Robot (C)</span>
+            </label>
+            <label class="ema-target-option">
+              <input type="radio" name="ema-code-target" value="micropython" />
+              <span>Robot (Python)</span>
+            </label>
+          </fieldset>
+
+          <fieldset class="ema-a11y">
+            <legend id="ema-a11y-legend">Accessibilité</legend>
+            <div class="ema-a11y-option ema-a11y-option--stack">
+              <div class="ema-a11y-scale-head">
+                <label id="ema-text-size-label" for="ema-text-size"
+                  >Taille du texte</label
+                >
+                <output
+                  id="ema-text-size-value"
+                  for="ema-text-size"
+                  aria-live="polite"
+                  >100 %</output
+                >
+              </div>
+              <input
+                id="ema-text-size"
+                name="text-size"
+                type="range"
+                min="100"
+                max="200"
+                step="5"
+                value="100"
+                aria-valuemin="100"
+                aria-valuemax="200"
+                aria-valuenow="100"
+                aria-valuetext="100 pour cent"
+              />
+            </div>
+            <label class="ema-a11y-option ema-a11y-option--stack" for="ema-font">
+              <span id="ema-font-label">Police</span>
+              <select id="ema-font" name="font" autocomplete="off">
+                <option value="system">Système</option>
+                <option value="atkinson">Atkinson Hyperlegible</option>
+                <option value="lexend">Lexend</option>
+                <option value="opendyslexic">OpenDyslexic</option>
+                <option value="verdana">Verdana</option>
+              </select>
+            </label>
+            <label class="ema-a11y-option">
+              <input id="ema-high-contrast" type="checkbox" />
+              <span id="ema-high-contrast-label">Contraste élevé</span>
+            </label>
+            <label class="ema-a11y-option">
+              <input id="ema-screenreader" type="checkbox" />
+              <span id="ema-screenreader-label"
+                >Mode lecteur d’écran (Alt+Shift+A)</span
+              >
+            </label>
+            <div class="ema-a11y-actions">
+              <button
+                type="button"
+                id="keyboardTutorialButton"
+                class="ema-btn ema-btn-quiet"
+              >
+                Tutoriel clavier
+              </button>
+              <button
+                type="button"
+                id="shortcutsHelpButton"
+                class="ema-btn ema-btn-quiet"
+              >
+                Raccourcis
+              </button>
+            </div>
+          </fieldset>
+        </div>
+      </details>
     </header>
+
     <main class="ema-main">
       <div
         id="ema-workspace"
         role="application"
-        aria-label="Workspace Blockly EMA"
+        aria-label="Zone des blocs"
       ></div>
-      <section class="ema-code-panel" aria-labelledby="ema-code-title">
-        <h2 id="ema-code-title">C Arduino</h2>
-        <pre id="ema-code" tabindex="0"></pre>
-      </section>
+
+      <details class="ema-code-drawer">
+        <summary id="ema-code-summary">Voir le code</summary>
+        <section class="ema-code-panel" aria-labelledby="ema-code-title">
+          <h2 id="ema-code-title" class="visually-hidden">Code généré</h2>
+          <pre id="ema-code" tabindex="0"></pre>
+        </section>
+      </details>
     </main>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
