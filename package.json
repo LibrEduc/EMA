@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "npm run typecheck",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
@@ -48,6 +49,7 @@
     "blockly": "^13.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "typescript": "~5.9.3",
     "vite": "^8.3.8",
     "vitest": "^5.1.1"

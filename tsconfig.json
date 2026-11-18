@@ -16,5 +16,5 @@
       "blockly/*": ["./node_modules/blockly/*"]
     }
   },
-  "include": ["src", "vendor/ucBlockly/src/types.d.ts"]
+  "include": ["src", "e2e", "vendor/ucBlockly/src/types.d.ts"]
 }
