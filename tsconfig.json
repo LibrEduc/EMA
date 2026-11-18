@@ -12,7 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "µcBlockly/core": ["./vendor/ucBlockly/src/core/index.ts"],
-      "µcBlockly/host": ["./vendor/ucBlockly/src/host/index.ts"],
       "blockly": ["./node_modules/blockly"],
       "blockly/*": ["./node_modules/blockly/*"]
     }

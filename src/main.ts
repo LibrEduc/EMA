@@ -41,7 +41,7 @@ import {
 } from "../vendor/ucBlockly/src/blockly_a11y_extensions";
 import { registerKeyboardTutorial } from "../vendor/ucBlockly/src/shell_keyboard_tutorial";
 import { registerShortcutsHelp } from "../vendor/ucBlockly/src/shell_shortcuts_help";
-import { resolveWorkspaceToolbarTheme } from "µcBlockly/host";
+import { resolveWorkspaceToolbarTheme } from "../vendor/ucBlockly/src/host/workspace_toolbar";
 import {
   applyBlocklyTypography,
   applyShellTypography,
