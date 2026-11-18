@@ -30,9 +30,15 @@ npm run dev
 | ------------------- | ------------------------------------------- |
 | `npm run dev`       | Serveur de développement Vite               |
 | `npm run build`     | Build production                            |
+| `npm run electron:build` | Build du renderer pour chargement `file://` |
+| `npm run electron:start` | Lance l'app Electron après le build         |
+| `npm run electron:run` | Build et lance l'application Electron      |
+| `npm run test:electron` | Build et smoke test des menus Electron     |
 | `npm run typecheck` | Vérification des types TypeScript           |
-| `npm test`          | Tests du générateur MicroPython (Vitest)    |
+| `npm test`          | Tests MicroPython (Vitest) et menus Electron |
 | `npm run media`     | Recopie les médias Blockly dans `public/`   |
+
+L’application Electron reprend les actions disponibles dans la coquille EMA : annulation/rétablissement, redémarrage, ouverture/enregistrement des espaces Blockly `.µcb`/JSON (`Ctrl/Cmd+O`, `Ctrl/Cmd+S`), cible de code, langue, affichage et accessibilité. Le bandeau web est masqué dans la fenêtre Electron ; les mêmes réglages restent dans le menu natif.
 
 ## GitHub Pages
 
