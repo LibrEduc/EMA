@@ -17,6 +17,8 @@ Coquille autour de [µcBlockly](https://github.com/A-S-T-U-C-E/ucBlockly) — en
 
 Il faut Node 20.19, ou 22.12 et plus. Le fichier `.nvmrc` donne la version utilisée par la CI.
 
+Le sous-module `vendor/ucBlockly` pointe vers `A-S-T-U-C-E/ucBlockly`, un dépôt privé : sans accès en lecture, `git submodule update` échoue et rien ne compile. Demandez cet accès à un mainteneur avant de cloner.
+
 ```bash
 git submodule update --init --recursive
 npm install
