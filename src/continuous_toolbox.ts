@@ -284,8 +284,26 @@ export class EmaContinuousCategory extends ContinuousCategory {
 
   override init(): void {
     super.init();
+    this.clearBlocklyColourBorder_();
     this.applyCategoryColourVar_();
     this.bindHoverHandlers_();
+  }
+
+  /**
+   * Blockly ajoute une barre `border-left: 8px` (pastille).
+   * On utilise des icônes SVG : la barre décale le centrage — on la retire.
+   */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  override addColourBorder_(): void {
+    this.clearBlocklyColourBorder_();
+  }
+
+  private clearBlocklyColourBorder_(): void {
+    if (!this.rowDiv_) {
+      return;
+    }
+    this.rowDiv_.style.borderLeft = "";
+    this.rowDiv_.style.borderRight = "";
   }
 
   /** Couleur de catégorie en CSS var (hover + barre de sélection). */
@@ -354,6 +372,7 @@ export class EmaContinuousCategory extends ContinuousCategory {
       return;
     }
     this.applyCategoryColourVar_();
+    this.clearBlocklyColourBorder_();
 
     const selectedClass = this.cssConfig_["selected"] ?? "";
     // Évite le fond « gray » inline de ContinuousCategory.
@@ -477,12 +496,19 @@ export function registerContinuousToolbox(): void {
     }
     .blocklyToolboxCategory,
     .blocklyTreeRow {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       height: initial;
       min-block-size: 2.75rem;
       margin: 0.28rem auto;
       padding: 0.5rem 0.4rem;
       border-radius: 0.7rem;
-      border: 2px solid transparent;
+      /* Annule la barre couleur 8px de Blockly (inline) — centrage icône/texte */
+      border: 2px solid transparent !important;
+      border-left: 2px solid transparent !important;
+      border-right: 2px solid transparent !important;
       background: rgb(255 255 255 / 72%);
       cursor: pointer;
       box-sizing: border-box;
@@ -494,16 +520,25 @@ export function registerContinuousToolbox(): void {
         box-shadow 160ms ease,
         transform 160ms ease;
     }
+    .blocklyToolboxCategoryContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      inline-size: 100%;
+    }
     .blocklyTreeRowContentContainer {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       inline-size: 100%;
+      flex: 1 1 auto;
       text-align: center;
+      gap: 0.2rem;
     }
     .emaCategoryIcon {
       margin-inline: auto;
+      margin-block-end: 0.3rem;
     }
     .blocklyTreeLabel,
     .blocklyToolboxCategoryLabel,
@@ -525,16 +560,33 @@ export function registerContinuousToolbox(): void {
       white-space: normal;
     }
 
-    /* Bouton collé en bas de la toolbox (juste au-dessus de « Voir le code ») */
+    /* Pied : poussé en bas de la colonne flex, bouton centré horizontalement */
+    .emaToolboxRailFooter {
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-block-start: auto;
+      padding: 0.25rem 0.35rem 0.35rem;
+      inline-size: 100%;
+      box-sizing: border-box;
+      background: linear-gradient(
+        180deg,
+        rgb(237 242 247 / 0%) 0%,
+        rgb(237 242 247 / 95%) 35%,
+        #edf2f7 100%
+      );
+      z-index: 3;
+    }
     .emaToolboxRailToggle {
       flex: 0 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.35rem;
-      margin: auto 0.35rem 0.25rem;
+      margin: 0;
       min-block-size: 2.75rem;
-      padding: 0.35rem 0.45rem;
+      padding: 0.35rem 0.65rem;
       border: 2px solid #1a2332;
       border-radius: 0.7rem;
       background: #ffffff;
@@ -543,10 +595,9 @@ export function registerContinuousToolbox(): void {
       font-size: var(--ema-blockly-font, 0.875rem);
       font-weight: 800;
       cursor: pointer;
-      position: sticky;
-      bottom: 0;
-      z-index: 3;
-      box-shadow: 0 -0.4rem 0.75rem rgb(237 242 247 / 90%);
+      inline-size: max-content;
+      max-inline-size: 100%;
+      box-shadow: 0 2px 8px rgb(26 35 50 / 12%);
     }
     .emaToolboxRailToggle:focus-visible {
       outline: 3px solid #0b6e4f;
@@ -585,17 +636,98 @@ export function registerContinuousToolbox(): void {
       white-space: nowrap;
       border: 0;
     }
+    /* Mode icônes : rail serré ≈ taille du bouton chevron */
+    html.ema-toolbox-icons-only {
+      --ema-toolbox-icon-rail: 2.6rem;
+    }
     html.ema-toolbox-icons-only .emaCategoryIcon {
-      margin-block-end: 0;
+      margin: 0 !important;
+      width: 1.45rem;
+      height: 1.45rem;
     }
     html.ema-toolbox-icons-only .blocklyToolboxCategory,
     html.ema-toolbox-icons-only .blocklyTreeRow {
-      min-block-size: 2.75rem;
-      padding: 0.4rem 0.2rem;
+      inline-size: var(--ema-toolbox-icon-rail) !important;
+      min-inline-size: var(--ema-toolbox-icon-rail) !important;
+      max-inline-size: var(--ema-toolbox-icon-rail) !important;
+      block-size: var(--ema-toolbox-icon-rail) !important;
+      min-block-size: var(--ema-toolbox-icon-rail) !important;
+      max-block-size: var(--ema-toolbox-icon-rail) !important;
+      padding: 0.3rem !important;
+      margin: 0.2rem auto !important;
     }
     html.ema-toolbox-icons-only .blocklyToolboxDiv {
-      width: 3.75rem !important;
-      max-width: 3.75rem !important;
+      width: calc(var(--ema-toolbox-icon-rail) + 0.55rem) !important;
+      min-width: calc(var(--ema-toolbox-icon-rail) + 0.55rem) !important;
+      max-width: calc(var(--ema-toolbox-icon-rail) + 0.55rem) !important;
+    }
+    html.ema-toolbox-icons-only .emaToolboxRailFooter {
+      padding-inline: 0.2rem;
+    }
+    html.ema-toolbox-icons-only .emaToolboxRailToggle {
+      inline-size: var(--ema-toolbox-icon-rail) !important;
+      min-inline-size: var(--ema-toolbox-icon-rail) !important;
+      max-inline-size: var(--ema-toolbox-icon-rail) !important;
+      block-size: var(--ema-toolbox-icon-rail) !important;
+      min-block-size: var(--ema-toolbox-icon-rail) !important;
+      margin: 0 !important;
+      padding: 0.3rem !important;
+      gap: 0;
+    }
+    html.ema-toolbox-icons-only .emaCategory--hover:not(.emaCategory--selected),
+    html.ema-toolbox-icons-only .blocklyToolboxCategory:hover:not(.emaCategory--selected),
+    html.ema-toolbox-icons-only .blocklyTreeRow:hover:not(.emaCategory--selected) {
+      transform: none;
+    }
+
+    /*
+     * Recherche : champ unique en tête du flyout.
+     * Catégorie search du rail masquée (évite la pastille écrasée).
+     */
+    html.ema-flyout-search .blocklyToolboxCategoryContainer:has(#toolbox-search-input),
+    html.ema-flyout-search .blocklyToolboxCategory:has(#toolbox-search-input) {
+      position: absolute !important;
+      inline-size: 1px !important;
+      block-size: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      border: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    .emaFlyoutSearch {
+      position: absolute;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0.35rem 0.45rem;
+      overflow: hidden;
+      background: #edf2f7;
+      border-inline-end: 1px solid #b7c4d2;
+      border-block-end: 1px solid #b7c4d2;
+      pointer-events: auto;
+    }
+    .emaFlyoutSearch-input {
+      inline-size: 100%;
+      min-block-size: 2.35rem;
+      margin: 0;
+      padding: 0.4rem 0.65rem;
+      border: 2px solid #1a2332;
+      border-radius: 0.55rem;
+      background: #ffffff;
+      color: #1a2332;
+      font: inherit;
+      font-size: var(--ema-blockly-font, 0.875rem);
+      font-weight: 600;
+      box-sizing: border-box;
+    }
+    .emaFlyoutSearch-input:focus {
+      outline: 3px solid #0b6e4f;
+      outline-offset: 2px;
     }
 
     /* Hover = teinte de la catégorie (lisible) + bordure pleine + ombre */
@@ -617,11 +749,7 @@ export function registerContinuousToolbox(): void {
       box-shadow: 0 0 0 2px var(--ema-cat-colour, #1a2332);
     }
     @media (prefers-reduced-motion: no-preference) {
-      .emaCategory--hover:not(.emaCategory--selected),
-      .blocklyToolboxCategory:hover:not(.emaCategory--selected),
-      .blocklyTreeRow:hover:not(.emaCategory--selected) {
-        transform: translateX(3px);
-      }
+      /* Pas de translateX : sortait du rail toolbox à droite */
       .emaCategory--hover:not(.emaCategory--selected) .emaCategoryIcon,
       .blocklyToolboxCategory:hover:not(.emaCategory--selected) .emaCategoryIcon,
       .blocklyTreeRow:hover:not(.emaCategory--selected) .emaCategoryIcon {
@@ -641,7 +769,7 @@ export function registerContinuousToolbox(): void {
       outline-offset: 2px;
     }
 
-    /* Sélection : teinte légère + barre pleine (padding symétrique pour centrer) */
+    /* Sélection : teinte + bordure (symétrique — plus de barre inset à gauche) */
     .emaCategory--selected.blocklyToolboxCategory,
     .emaCategory--selected.blocklyTreeRow,
     .blocklyToolboxCategory.emaCategory--selected,
@@ -652,11 +780,8 @@ export function registerContinuousToolbox(): void {
         var(--ema-cat-colour, #5c6b7a) 22%,
         #ffffff
       ) !important;
-      border-color: #1a2332 !important;
-      padding-inline: 0.55rem !important;
-      box-shadow:
-        inset 6px 0 0 var(--ema-cat-colour, #0b6e4f),
-        0 6px 14px rgb(26 35 50 / 16%) !important;
+      border-color: var(--ema-cat-colour, #1a2332) !important;
+      box-shadow: 0 6px 14px rgb(26 35 50 / 16%) !important;
       transform: none;
     }
     .emaCategory--selected .emaCategoryIcon {

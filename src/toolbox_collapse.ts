@@ -6,6 +6,7 @@ import * as Blockly from "blockly";
 
 const STORAGE_KEY = "ema.toolboxIconsOnly";
 const TOGGLE_ID = "ema-toolbox-rail-toggle";
+const FOOTER_CLASS = "emaToolboxRailFooter";
 
 export type ToolboxCollapseCopy = {
   collapse: string;
@@ -59,7 +60,10 @@ export function setToolboxCollapseCopy(copy: ToolboxCollapseCopy): void {
   currentCopy = copy;
   const button = document.getElementById(TOGGLE_ID) as HTMLButtonElement | null;
   if (button) {
-    syncToggleButton(button, document.documentElement.classList.contains("ema-toolbox-icons-only"));
+    syncToggleButton(
+      button,
+      document.documentElement.classList.contains("ema-toolbox-icons-only"),
+    );
   }
 }
 
@@ -73,10 +77,10 @@ export function applyToolboxIconsOnly(
   if (button) {
     syncToggleButton(button, iconsOnly);
   }
-  // Laisse le layout CSS s’appliquer puis recalcule toolbox + flyout.
   requestAnimationFrame(() => {
     Blockly.svgResize(workspace);
     workspace.resize();
+    workspace.getFlyout()?.position?.();
   });
 }
 
@@ -93,6 +97,14 @@ export function installToolboxIconRailToggle(
 
   if (!toolboxDiv) {
     return;
+  }
+
+  let footer = toolboxDiv.querySelector(
+    `.${FOOTER_CLASS}`,
+  ) as HTMLDivElement | null;
+  if (!footer) {
+    footer = document.createElement("div");
+    footer.className = FOOTER_CLASS;
   }
 
   let button = document.getElementById(TOGGLE_ID) as HTMLButtonElement | null;
@@ -112,8 +124,8 @@ export function installToolboxIconRailToggle(
     });
   }
 
-  // Toujours collé en dernier enfant = bas de la colonne flex toolbox.
-  toolboxDiv.appendChild(button);
+  footer.appendChild(button);
+  toolboxDiv.appendChild(footer);
 
   applyToolboxIconsOnly(workspace, readToolboxIconsOnly());
 }
