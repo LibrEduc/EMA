@@ -203,7 +203,7 @@ function registerBoardGenerators(gen: MicroPythonGenerator): void {
   register(gen, "board_base_inout_analog_write", (block, g) => {
     g.addImport("from machine import Pin, PWM");
     const pin = pinExpr(block, g);
-    const val = g.valueToCode(block, "NUM", Order.ATOMIC) || "0";
+    const val = g.valueToCode(block, "PWM", Order.ATOMIC) || "0";
     g.addSetup(`setup_pwm_${pin}`, `pwm_${pin} = PWM(Pin(${pin}))`);
     return `pwm_${pin}.duty_u16(int((${val}) * 257))\n`;
   });
@@ -230,12 +230,12 @@ function registerBoardGenerators(gen: MicroPythonGenerator): void {
   });
 
   register(gen, "board_serial_print", (block, g) => {
-    const text = g.valueToCode(block, "CONTENT", Order.NONE) || "''";
+    const text = g.valueToCode(block, "TEXT", Order.NONE) || "''";
     return `print(${text}, end='')\n`;
   });
 
   register(gen, "board_serial_println", (block, g) => {
-    const text = g.valueToCode(block, "CONTENT", Order.NONE) || "''";
+    const text = g.valueToCode(block, "TEXT", Order.NONE) || "''";
     return `print(${text})\n`;
   });
 
