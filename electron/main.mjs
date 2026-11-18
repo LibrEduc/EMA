@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { buildMenuTemplate, isMenuCommand, isMenuState } from "./menu.mjs";
 
 const electronDirectory = path.dirname(fileURLToPath(import.meta.url));
-const rendererPath = path.resolve(electronDirectory, "../dist/index.html");
+const rendererPath = path.resolve(electronDirectory, "../dist-electron/index.html");
 const rendererUrl = pathToFileURL(rendererPath);
 let mainWindow;
 
@@ -113,7 +113,8 @@ function createMainWindow() {
   mainWindow.webContents.on("will-navigate", (event, url) => {
     try {
       const destination = new URL(url);
-      if (destination.protocol === "file:" && destination.pathname === rendererUrl.pathname) return;
+      if (destination.protocol === "file:" && destination.host === rendererUrl.host &&
+          destination.pathname === rendererUrl.pathname) return;
     } catch {
       // Block malformed navigation URLs.
     }
