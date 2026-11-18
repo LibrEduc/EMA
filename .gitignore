@@ -1,7 +1,6 @@
 node_modules/
 vendor/ucBlockly/node_modules/
 dist/
-dist-electron/
 public/media/
 .DS_Store
 *.log

@@ -56,8 +56,6 @@ export default defineConfig({
     include: ["src/**/*.test.ts"],
   },
   optimizeDeps: {
-    // Without it, Vite scans every HTML file, including the Electron build in dist-electron/.
-    entries: ["index.html"],
     include: [
       "blockly",
       "@blockly/continuous-toolbox",
