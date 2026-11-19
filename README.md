@@ -17,6 +17,8 @@ Coquille autour de [µcBlockly](https://github.com/A-S-T-U-C-E/ucBlockly) — en
 
 Il faut Node 20.19, ou 22.12 et plus. Le fichier `.nvmrc` donne la version utilisée par la CI.
 
+Le sous-module `vendor/ucBlockly` pointe vers `A-S-T-U-C-E/ucBlockly`, un dépôt privé : sans accès en lecture, `git submodule update` échoue et rien ne compile. Demandez cet accès à un mainteneur avant de cloner.
+
 ```bash
 git submodule update --init --recursive
 npm install
@@ -24,6 +26,8 @@ npm run dev
 ```
 
 `npm install` installe aussi les dépendances de µcBlockly et copie les médias Blockly.
+
+Les tests de parcours demandent une fois `npx playwright install chromium`. Ils lancent leur propre serveur sur le port 5391 (`E2E_PORT` pour en changer, `E2E_REUSE=1` pour réutiliser un serveur déjà lancé).
 
 ## Scripts
 
@@ -34,6 +38,7 @@ npm run dev
 | `npm run typecheck` | Vérification des types TypeScript           |
 | `npm test`          | Tests du générateur MicroPython (Vitest)    |
 | `npm run media`     | Recopie les médias Blockly dans `public/`   |
+| `npm run test:e2e`  | Parcours d'élèves dans Chromium (Playwright) |
 
 ## GitHub Pages
 

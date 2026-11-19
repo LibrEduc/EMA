@@ -5,3 +5,4 @@ public/media/
 .DS_Store
 *.log
 .vite/
+e2e-artifacts/
