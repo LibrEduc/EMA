@@ -353,7 +353,12 @@ async function flyoutGrabPoint(
     }
     const box = candidate.getSvgRoot().getBoundingClientRect();
     const view = flyoutWorkspace.getParentSvg().getBoundingClientRect();
-    if (box.top < view.top + 4 || box.bottom > view.bottom - 4) {
+    // The search bar shifts the flyout down: its bottom can lie below the visible workspace.
+    const visibleBottom = Math.min(
+      view.bottom,
+      workspace.getInjectionDiv().getBoundingClientRect().bottom,
+    );
+    if (box.top < view.top + 4 || box.bottom > visibleBottom - 4) {
       return { scroll: box.top - view.top - view.height / 2 };
     }
     const offset = { x: 12, y: Math.min(14, box.height / 2) };
