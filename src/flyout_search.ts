@@ -13,6 +13,8 @@ const SEARCH_BAR_H = 48;
 type FlyoutWithPosition = Blockly.IFlyout & {
   position: () => void;
   getWidth?: () => number;
+  getHeight?: () => number;
+  getFlyoutScale?: () => number;
   isVisible?: () => boolean;
   svgGroup_?: SVGGElement | null;
 };
@@ -213,6 +215,15 @@ function hookFlyoutPosition(workspace: Blockly.WorkspaceSvg): void {
     hookedFlyout.position = originalPosition;
   }
   hookedFlyout = flyout;
+  // The bar width follows the flyout width, which follows the board zoom: keep the flyout at scale 1.
+  flyout.getFlyoutScale = () => 1;
+  // layoutBar() pushes the flyout down by the bar height: remove it from the flyout height too,
+  // or the last blocks end below the visible area.
+  const blocklyGetHeight = flyout.getHeight?.bind(flyout);
+  if (blocklyGetHeight) {
+    flyout.getHeight = () => blocklyGetHeight() - SEARCH_BAR_H;
+  }
+  flyout.reflow?.();
   originalPosition = flyout.position.bind(flyout);
   flyout.position = () => {
     originalPosition?.();
