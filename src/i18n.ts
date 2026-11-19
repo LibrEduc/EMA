@@ -32,10 +32,7 @@ export function loadUiLanguage(): UiLanguage {
   } catch {
     // ignore
   }
-  const nav = (navigator.language || "fr").slice(0, 2).toLowerCase();
-  if (isUiLanguage(nav) && languagesMap[nav]) {
-    return nav;
-  }
+  // Not the browser language: school computers are often set up in English.
   return "fr";
 }
 
@@ -45,6 +42,13 @@ export function saveUiLanguage(language: UiLanguage): void {
   } catch {
     // ignore
   }
+}
+
+// µcBlockly dialogs (keyboard tutorial, shortcuts, a11y labels) read the language from `?lang=`.
+export function shareLanguageWithUcBlockly(language: UiLanguage): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set("lang", language);
+  window.history.replaceState(window.history.state, "", url.href);
 }
 
 export function applyDocumentDirection(language: string): void {
