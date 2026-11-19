@@ -13,6 +13,8 @@ type ValueFn = (
   generator: MicroPythonGenerator,
 ) => [string, number];
 
+const IMPORT_LINE = /^(from\s+\S+\s+)?import\s+\S+/;
+
 export class MicroPythonGenerator extends PythonGenerator {
   setups_: Record<string, string> = {};
   loops_: Record<string, string> = {};
@@ -23,6 +25,9 @@ export class MicroPythonGenerator extends PythonGenerator {
     // Réutilise les générateurs standard Blockly Python (logique, math, texte…).
     Object.assign(this.forBlock, pythonGenerator.forBlock);
     registerBoardGenerators(this);
+    registerCoreOverrides(this);
+    // Top-level names of the generated code: a student variable must not hide them.
+    this.addReservedWords("machine,Pin,PWM,ADC,time,math,random,builtin_led,Number");
   }
 
   addSetup(key: string, code: string): void {
@@ -47,7 +52,9 @@ export class MicroPythonGenerator extends PythonGenerator {
   override finish(code: string): string {
     const hasSetupTag = Object.keys(this.setups_).length > 0;
     const hasLoopTag = Object.keys(this.loops_).length > 0;
-    const setupBody = Object.values(this.setups_)
+    // Pin setups go first: the student's setup may call a function using a pin.
+    const { base_setup: studentSetup = "", ...pinSetups } = this.setups_;
+    const setupBody = [...Object.values(pinSetups), studentSetup]
       .map((s) => s.trimEnd())
       .filter(Boolean)
       .join("\n");
@@ -59,9 +66,30 @@ export class MicroPythonGenerator extends PythonGenerator {
     const loopBody = [loopFromTags, loose].filter(Boolean).join("\n");
     const emitLoop = hasLoopTag || Boolean(loose);
 
+    // MicroPython has no `numbers` module; Blockly's helpers only use Number in isinstance.
+    if (this.definitions_["from_numbers_import_Number"]) {
+      this.definitions_["from_numbers_import_Number"] = "Number = (int, float)";
+    }
+    const variables = String(this.definitions_["variables"] ?? "").trim();
+    const definitions: string[] = [];
+    for (const definition of Object.values(this.definitions_)) {
+      if (definition === this.definitions_["variables"] || !definition) continue;
+      if (IMPORT_LINE.test(definition)) {
+        this.imports_.add(definition.trim());
+      } else {
+        definitions.push(definition.trim());
+      }
+    }
+
+    // Only called for its reset of generator state: it wipes definitions_.
     super.finish(code);
 
-    if (!hasSetupTag && !emitLoop && this.imports_.size === 0) {
+    if (
+      !hasSetupTag &&
+      !emitLoop &&
+      this.imports_.size === 0 &&
+      definitions.length === 0
+    ) {
       return "";
     }
 
@@ -74,6 +102,14 @@ export class MicroPythonGenerator extends PythonGenerator {
     const imports = [...this.imports_].sort();
     if (imports.length > 0) {
       lines.push(...imports, "");
+    }
+
+    if (variables) {
+      lines.push(variables, "");
+    }
+
+    for (const definition of definitions) {
+      lines.push(definition, "");
     }
 
     if (hasSetupTag) {
@@ -173,9 +209,9 @@ function registerBoardGenerators(gen: MicroPythonGenerator): void {
     const stat = block.getFieldValue("STAT") === "HIGH" ? "1" : "0";
     g.addSetup(
       "setup_led",
-      "led = Pin('LED', Pin.OUT) if hasattr(Pin.board, 'LED') else Pin(25, Pin.OUT)",
+      "builtin_led = Pin('LED', Pin.OUT) if hasattr(Pin.board, 'LED') else Pin(25, Pin.OUT)",
     );
-    return `led.value(${stat})\n`;
+    return `builtin_led.value(${stat})\n`;
   });
 
   register(gen, "board_base_inout_digital_write", (block, g) => {
@@ -196,8 +232,8 @@ function registerBoardGenerators(gen: MicroPythonGenerator): void {
   register(gen, "board_base_inout_digital_read_pin", (block, g) => {
     g.addImport("from machine import Pin");
     const pin = g.valueToCode(block, "PIN", Order.ATOMIC) || "0";
-    g.addSetup(`setup_in_dyn_${block.id}`, `pin_dyn = Pin(${pin}, Pin.IN)`);
-    return ["pin_dyn.value()", Order.FUNCTION_CALL];
+    // Built where it is read: the variable only has its value at that point.
+    return [`Pin(${pin}, Pin.IN).value()`, Order.FUNCTION_CALL];
   });
 
   register(gen, "board_base_inout_analog_write", (block, g) => {
@@ -242,5 +278,16 @@ function registerBoardGenerators(gen: MicroPythonGenerator): void {
   register(gen, "comment", (block) => {
     const text = String(block.getFieldValue("TEXT") ?? "").replace(/\n/g, " ");
     return `# ${text}\n`;
+  });
+}
+
+function registerCoreOverrides(gen: MicroPythonGenerator): void {
+  // µcBlockly's math_change takes the variable as a value input, which the
+  // stock Python generator does not read.
+  register(gen, "math_change", (block, g) => {
+    const target = block.getInput("VAR") ? g.valueToCode(block, "VAR", Order.NONE) : "";
+    if (!target) return "";
+    const delta = g.valueToCode(block, "DELTA", Order.ADDITIVE) || "0";
+    return `${target} += ${delta}\n`;
   });
 }
