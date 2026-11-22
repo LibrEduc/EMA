@@ -3,6 +3,13 @@
  * Inspiré des réglages a11y usuels (µcBlockly / widgets lecture) + WCAG G178.
  */
 
+import "@fontsource/atkinson-hyperlegible/400.css";
+import "@fontsource/atkinson-hyperlegible/700.css";
+import "@fontsource/lexend/400.css";
+import "@fontsource/lexend/600.css";
+import "@fontsource/lexend/700.css";
+import "@fontsource/opendyslexic/400.css";
+import "@fontsource/opendyslexic/700.css";
 import * as Blockly from "blockly";
 
 export const TEXT_SIZE_KEY = "ema.textSizePercent";
