@@ -5,3 +5,25 @@ public/media/
 .DS_Store
 *.log
 .vite/
+
+# --- vlad_ai_stack (strictly local: AI skills, rules, memory, agent configs) ---
+.agent/
+.agents/
+.claude/
+.codex/
+.kilo/
+.cursor/
+.gemini/
+.superpowers/
+CLAUDE.md
+AGENTS.md
+PROJECT_RULES.md
+GEMINI.md
+ai-project.json
+ai-workflow/
+MEMORY.md
+Opus.md
+**/skills/
+.agentation-local/
+vite.local.config.ts
+# --- end vlad_ai_stack ---
