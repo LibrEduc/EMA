@@ -23,11 +23,20 @@ import {
 } from "./continuous_toolbox";
 import {
   bindCodePanel,
+  generateCode,
   loadCodeTarget,
   saveCodeTarget,
   seedProgramStructure,
   type CodeTarget,
 } from "./codegen";
+import {
+  HUB_SLOT_MAX,
+  HUB_SLOT_MIN,
+  downloadHubProgram,
+  loadHubSlot,
+  normalizeHubSlot,
+  saveHubSlot,
+} from "./hub_export";
 import {
   applyDocumentDirection,
   applyShellStrings,
@@ -75,6 +84,10 @@ const langSelect = document.getElementById("ema-lang") as HTMLSelectElement | nu
 const undoBtn = document.getElementById("ema-undo");
 const redoBtn = document.getElementById("ema-redo");
 const restartBtn = document.getElementById("ema-restart");
+const hubSlotSelect = document.getElementById(
+  "ema-hub-slot",
+) as HTMLSelectElement | null;
+const hubDownloadBtn = document.getElementById("ema-hub-download");
 const codeDrawer = document.querySelector(
   ".ema-code-drawer",
 ) as HTMLDetailsElement | null;
@@ -356,6 +369,29 @@ restartBtn?.addEventListener("click", () => {
   applyFlyoutOpen(flyoutOpenToggle?.checked ?? true);
   refreshCode();
   resizeWorkspace();
+});
+
+let hubSlot = loadHubSlot();
+if (hubSlotSelect) {
+  for (let slot = HUB_SLOT_MIN; slot <= HUB_SLOT_MAX; slot += 1) {
+    const option = document.createElement("option");
+    option.value = String(slot);
+    option.textContent = `prog_${slot}.py`;
+    hubSlotSelect.appendChild(option);
+  }
+  hubSlotSelect.value = String(hubSlot);
+  hubSlotSelect.addEventListener("change", () => {
+    hubSlot = normalizeHubSlot(hubSlotSelect.value);
+    saveHubSlot(hubSlot);
+  });
+}
+
+hubDownloadBtn?.addEventListener("click", () => {
+  const slot = hubSlotSelect
+    ? normalizeHubSlot(hubSlotSelect.value)
+    : hubSlot;
+  const pythonCode = generateCode(manager.workspace, "micropython");
+  downloadHubProgram(pythonCode, slot);
 });
 
 const targetRadios = document.querySelectorAll<HTMLInputElement>(
