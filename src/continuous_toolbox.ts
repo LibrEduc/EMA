@@ -132,20 +132,38 @@ function contrastingInk(background: string): string {
 /**
  * Flyout continu : sync scroll→sélection + badges de catégorie colorés.
  */
+import { sliceFlyoutContentsForCategory } from "./flyout_category_filter";
+
 export class EmaContinuousFlyout extends ContinuousFlyout {
   constructor(workspaceOptions: Blockly.Options) {
     super(workspaceOptions);
-    this.getWorkspace().addChangeListener((e: Blockly.Events.Abstract) => {
-      if (e.type === Blockly.Events.VIEWPORT_CHANGE) {
-        this.selectCategoryWithLead(-this.getWorkspace().scrollY);
-      }
-    });
   }
 
   override show(
     flyoutDef: Blockly.utils.toolbox.FlyoutDefinition | string,
   ): void {
-    super.show(flyoutDef);
+    let nextDef = flyoutDef;
+    if (Array.isArray(flyoutDef)) {
+      const toolbox = this.targetWorkspace?.getToolbox();
+      const selected =
+        toolbox && "getSelectedItem" in toolbox
+          ? (toolbox as Blockly.Toolbox).getSelectedItem()
+          : null;
+      const categoryName =
+        selected && typeof selected.getName === "function"
+          ? selected.getName()
+          : "";
+      if (categoryName) {
+        const sliced = sliceFlyoutContentsForCategory(
+          flyoutDef as unknown as readonly Record<string, unknown>[],
+          categoryName,
+        );
+        if (sliced.length > 0) {
+          nextDef = sliced as unknown as Blockly.utils.toolbox.FlyoutDefinition;
+        }
+      }
+    }
+    super.show(nextDef);
     this.styleCategoryLabels_();
   }
 
@@ -424,7 +442,7 @@ export function registerContinuousToolbox(): void {
   Blockly.registry.register(
     Blockly.registry.Type.METRICS_MANAGER,
     "ContinuousMetrics",
-    ContinuousMetricsOverlayFlyout,
+    Blockly.MetricsManager,
     true,
   );
   Blockly.registry.register(
