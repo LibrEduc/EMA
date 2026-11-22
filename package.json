@@ -44,6 +44,9 @@
     "@blockly/workspace-content-highlight": "^13.4.0",
     "@blockly/workspace-minimap": "^13.4.0",
     "@blockly/zoom-to-fit": "^13.4.0",
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/lexend": "^5.3.0",
+    "@fontsource/opendyslexic": "^5.3.0",
     "@jaames/iro": "^5.5.2",
     "blockly": "^13.4.0"
   },
