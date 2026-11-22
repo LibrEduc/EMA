@@ -21,7 +21,8 @@ export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
   for (let i = 0; i < contents.length; i++) {
     const item = contents[i];
     if (
-      item?.kind === "label" &&
+      typeof item?.kind === "string" &&
+      item.kind.toLowerCase() === "label" &&
       typeof item.text === "string" &&
       item.text.trim().toLowerCase() === target
     ) {
@@ -36,7 +37,8 @@ export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
 
   let endIdx = contents.length;
   for (let i = startIdx + 1; i < contents.length; i++) {
-    if (contents[i]?.kind === "label") {
+    const item = contents[i];
+    if (typeof item?.kind === "string" && item.kind.toLowerCase() === "label") {
       endIdx = i;
       break;
     }

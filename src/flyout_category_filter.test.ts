@@ -39,6 +39,19 @@ describe("sliceFlyoutContentsForCategory", () => {
     ]);
   });
 
+  it("handles uppercase LABEL kind from Blockly flyout definitions", () => {
+    const upperContents = [
+      { kind: "LABEL", text: "Actions" },
+      { kind: "BLOCK", type: "ema_move" },
+      { kind: "LABEL", text: "Capteurs" },
+      { kind: "BLOCK", type: "ema_sensor_distance" },
+    ];
+    expect(sliceFlyoutContentsForCategory(upperContents, "Actions")).toEqual([
+      { kind: "LABEL", text: "Actions" },
+      { kind: "BLOCK", type: "ema_move" },
+    ]);
+  });
+
   it("returns empty array when category is not found or empty", () => {
     expect(sliceFlyoutContentsForCategory(sampleContents, "Inexistant")).toEqual([]);
     expect(sliceFlyoutContentsForCategory(sampleContents, "")).toEqual([]);
