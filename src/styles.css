@@ -210,6 +210,30 @@ body {
   font-weight: 600;
 }
 
+.ema-hub-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ema-hub-slot {
+  min-block-size: var(--target-size);
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 35%);
+  background: rgb(255 255 255 / 14%);
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ema-hub-slot option {
+  color: var(--ema-ink);
+  background: var(--ema-panel);
+}
+
 .ema-flyout-toggle {
   display: inline-flex;
   align-items: center;

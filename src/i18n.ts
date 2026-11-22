@@ -87,6 +87,8 @@ type ShellCopy = {
   shortcutsHelp: string;
   toolboxCollapse: string;
   toolboxExpand: string;
+  hubSlotLabel: string;
+  hubDownload: string;
 };
 
 const SHELL: Record<UiLanguage, ShellCopy> = {
@@ -124,6 +126,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "Raccourcis",
     toolboxCollapse: "Icônes seules",
     toolboxExpand: "Afficher les noms",
+    hubSlotLabel: "Numéro du programme (0 à 19)",
+    hubDownload: "Télécharger pour le Hub",
   },
   en: {
     title: "Program your MAE robot",
@@ -159,6 +163,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "Shortcuts",
     toolboxCollapse: "Icons only",
     toolboxExpand: "Show names",
+    hubSlotLabel: "Program slot (0 to 19)",
+    hubDownload: "Download for Hub",
   },
   es: {
     title: "Programa tu robot MAE",
@@ -194,6 +200,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "Atajos",
     toolboxCollapse: "Solo iconos",
     toolboxExpand: "Mostrar nombres",
+    hubSlotLabel: "Número de programa (0 a 19)",
+    hubDownload: "Descargar para el Hub",
   },
   ar: {
     title: "برمِج روبوت MAE",
@@ -229,6 +237,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "الاختصارات",
     toolboxCollapse: "أيقونات فقط",
     toolboxExpand: "إظهار الأسماء",
+    hubSlotLabel: "رقم البرنامج (0 إلى 19)",
+    hubDownload: "تنزيل إلى الموزع",
   },
 };
 
@@ -254,6 +264,8 @@ export function applyShellStrings(
   setText("#ema-undo", t.undo);
   setText("#ema-redo", t.redo);
   setText("#ema-restart", t.restart);
+  setText("#ema-hub-slot-label", t.hubSlotLabel);
+  setText("#ema-hub-download", t.hubDownload);
   setText(".ema-flyout-toggle > span:last-child", t.flyoutOpen);
   setText("#ema-flyout-open-hint", t.flyoutHint);
   setText(".ema-settings > summary", t.settings);
