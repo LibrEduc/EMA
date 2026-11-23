@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { computeCategoryLabelWidth } from "./flyout_label_metrics";
+import {
+  computeCategoryLabelWidth,
+  computeFlyoutWidthForLabel,
+} from "./flyout_label_metrics";
 
 describe("computeCategoryLabelWidth", () => {
   it("laisse la barre de défilement et le contour hors du badge", () => {
@@ -30,5 +33,32 @@ describe("computeCategoryLabelWidth", () => {
       textWidth: 100,
     });
     expect(width).toBe(132);
+  });
+});
+
+describe("computeFlyoutWidthForLabel", () => {
+  it("a flyout sized for its widest label keeps the badge left of the scrollbar", () => {
+    const sideMargin = 10;
+    const scrollbarWidth = 12;
+    const stroke = 3;
+    const textWidth = 140;
+
+    const flyoutWidth = computeFlyoutWidthForLabel({
+      textWidth,
+      sideMargin,
+      scrollbarWidth,
+    });
+    const badge = computeCategoryLabelWidth({
+      viewWidth: flyoutWidth,
+      sideMargin,
+      scrollbarWidth,
+      stroke,
+      textWidth,
+    });
+
+    expect(flyoutWidth).toBe(textWidth + 32 + 2 * sideMargin + scrollbarWidth);
+    expect(sideMargin + badge + stroke / 2).toBeLessThanOrEqual(
+      flyoutWidth - scrollbarWidth,
+    );
   });
 });

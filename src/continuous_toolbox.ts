@@ -133,7 +133,10 @@ function contrastingInk(background: string): string {
  * Flyout continu : sync scroll→sélection + badges de catégorie colorés.
  */
 import { resolveFlyoutDefinition } from "./flyout_category_filter";
-import { computeCategoryLabelWidth } from "./flyout_label_metrics";
+import {
+  computeCategoryLabelWidth,
+  computeFlyoutWidthForLabel,
+} from "./flyout_label_metrics";
 
 const LABEL_STROKE_PX = 3;
 const DEFAULT_SCROLLBAR_PX = 12;
@@ -145,6 +148,29 @@ function flyoutScrollbarWidth(): number {
   return Number.isFinite(width) && width > 0 ? width : DEFAULT_SCROLLBAR_PX;
 }
 
+function searchHint(): string {
+  const hint = (Blockly.Msg as Record<string, string>).TOOLBOX_SEARCH_HINT;
+  return hint && hint !== "TOOLBOX_SEARCH_HINT"
+    ? hint
+    : "Type to search for blocks";
+}
+
+/**
+ * Same call and font as FlyoutButton, so the result matches a label's `width`.
+ * Measured on a canvas: the clone needs no parent, only the label class (Blockly's cache key).
+ */
+function measureLikeLabel(labelText: SVGTextElement, text: string): number {
+  const probe = labelText.cloneNode(false) as SVGTextElement;
+  probe.textContent = text;
+  const style = getComputedStyle(labelText);
+  return Blockly.utils.dom.getFastTextWidthWithSizeString(
+    probe,
+    style.fontSize,
+    style.fontWeight,
+    style.fontFamily,
+  );
+}
+
 export class EmaContinuousFlyout extends ContinuousFlyout {
   constructor(workspaceOptions: Blockly.Options) {
     super(workspaceOptions);
@@ -152,6 +178,11 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
 
   /** Définition complète (toutes catégories), mémorisée pour re-filtrer au clic. */
   private fullDef_: Blockly.utils.toolbox.FlyoutDefinition | null = null;
+
+  // Board zoom must not resize the block list, and a zoomed flyout also covered the board.
+  override getFlyoutScale(): number {
+    return 1;
+  }
 
   override scrollToCategory(category: Blockly.ISelectableToolboxItem): void {
     if (this.fullDef_) {
@@ -176,13 +207,49 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
         selected && typeof selected.getName === "function"
           ? selected.getName()
           : "";
+      const categoryNames = (toolbox?.getToolboxItems() ?? [])
+        .filter((item) => item instanceof Blockly.ToolboxCategory)
+        .map((item) => (item as Blockly.ToolboxCategory).getName());
       nextDef = resolveFlyoutDefinition(
         flyoutDef as unknown as readonly Record<string, unknown>[],
         categoryName,
+        categoryNames,
       ) as unknown as Blockly.utils.toolbox.FlyoutDefinition;
     }
     super.show(nextDef);
     this.styleCategoryLabels_();
+  }
+
+  /**
+   * super.show() sizes the flyout on bare label text, but the badge adds padding and margins.
+   * The search hint is the floor, so the board does not jump at each category.
+   */
+  private widenForLabels_(sideMargin: number): void {
+    let widest = 0;
+    let labelText: SVGTextElement | null = null;
+    for (const item of this.getContents()) {
+      const element = item.getElement();
+      if (element instanceof Blockly.FlyoutButton && element.isLabel()) {
+        widest = Math.max(widest, element.width);
+        labelText ??= element
+          .getSvgRoot()
+          .querySelector<SVGTextElement>(".blocklyFlyoutLabelText");
+      }
+    }
+    if (labelText) {
+      widest = Math.max(widest, measureLikeLabel(labelText, searchHint()));
+    }
+    const needed = computeFlyoutWidthForLabel({
+      textWidth: widest,
+      sideMargin,
+      scrollbarWidth: flyoutScrollbarWidth(),
+    });
+    if (widest > 0 && needed > this.getWidth()) {
+      this.width_ = needed;
+      this.position();
+      this.targetWorkspace.resizeContents();
+      this.targetWorkspace.recordDragTargets();
+    }
   }
 
   /**
@@ -196,8 +263,9 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
       return;
     }
 
-    const viewWidth = this.getWorkspace().getMetrics().viewWidth;
     const sideMargin = 10;
+    this.widenForLabels_(sideMargin);
+    const viewWidth = this.getWorkspace().getMetrics().viewWidth;
     const radius = 10;
     const rootPx = Number.parseFloat(
       getComputedStyle(document.documentElement).fontSize,

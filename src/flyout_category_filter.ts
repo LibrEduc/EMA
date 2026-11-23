@@ -4,13 +4,30 @@ export interface FlyoutContentItem {
   [key: string]: unknown;
 }
 
+function isLabel(item: FlyoutContentItem | undefined): boolean {
+  return typeof item?.kind === "string" && item.kind.toLowerCase() === "label";
+}
+
+function closesSection(
+  label: FlyoutContentItem,
+  normalizedNames: readonly string[] | undefined,
+): boolean {
+  return (
+    !normalizedNames ||
+    (typeof label.text === "string" &&
+      normalizedNames.includes(label.text.trim().toLowerCase()))
+  );
+}
+
 /**
  * Extracts only the label and items belonging to `categoryName` from a flat
- * continuous flyout definition array.
+ * continuous flyout definition array. With `categoryNames`, only a label with
+ * one of those names ends a section (the search message is a label too).
  */
 export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
   contents: readonly T[],
   categoryName: string,
+  categoryNames?: readonly string[],
 ): T[] {
   const target = categoryName.trim().toLowerCase();
   if (!target || contents.length === 0) {
@@ -35,20 +52,19 @@ export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
     return [];
   }
 
+  const normalizedNames = categoryNames?.map((name) =>
+    name.trim().toLowerCase(),
+  );
   let endIdx = contents.length;
   for (let i = startIdx + 1; i < contents.length; i++) {
     const item = contents[i];
-    if (typeof item?.kind === "string" && item.kind.toLowerCase() === "label") {
+    if (isLabel(item) && closesSection(item, normalizedNames)) {
       endIdx = i;
       break;
     }
   }
 
   return contents.slice(startIdx, endIdx);
-}
-
-function isLabel(item: FlyoutContentItem | undefined): boolean {
-  return typeof item?.kind === "string" && item.kind.toLowerCase() === "label";
 }
 
 /**
@@ -59,8 +75,13 @@ function isLabel(item: FlyoutContentItem | undefined): boolean {
 export function resolveFlyoutDefinition<T extends FlyoutContentItem>(
   contents: readonly T[],
   categoryName: string,
+  categoryNames?: readonly string[],
 ): T[] {
-  const own = sliceFlyoutContentsForCategory(contents, categoryName);
+  const own = sliceFlyoutContentsForCategory(
+    contents,
+    categoryName,
+    categoryNames,
+  );
   if (own.length > 1) {
     return own;
   }

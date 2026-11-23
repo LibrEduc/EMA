@@ -7,7 +7,6 @@ import * as Blockly from "blockly";
 import {
   applyUcBlocklyLocale,
   basic_toolbox,
-  getToolboxWithoutBoardCategory,
   UcBlocklyWorkspaceManager,
 } from "µcBlockly/core";
 import { registerToolboxSearchI18n } from "../vendor/ucBlockly/src/toolbox_search_i18n";
@@ -15,6 +14,7 @@ import { changeLanguageToolbox } from "../vendor/ucBlockly/src/language";
 import {
   SHOW_BOARD_CATEGORY,
   installFixedBoardMenu,
+  withoutBoardCategory,
 } from "./board_config";
 
 import {
@@ -109,7 +109,7 @@ const buildToolbox = (language: string) => {
   // Mono-carte : pas de catégorie « Carte : … ». Remettre SHOW_BOARD_CATEGORY pour la réactiver.
   return SHOW_BOARD_CATEGORY
     ? translated
-    : getToolboxWithoutBoardCategory(translated);
+    : withoutBoardCategory(translated);
 };
 
 const toolbox = buildToolbox(uiLanguage);

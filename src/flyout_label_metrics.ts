@@ -24,3 +24,18 @@ export function computeCategoryLabelWidth(
     Math.max(MIN_LABEL_WIDTH, available),
   );
 }
+
+export interface FlyoutWidthForLabelInput {
+  readonly textWidth: number;
+  readonly sideMargin: number;
+  readonly scrollbarWidth: number;
+}
+
+/** Flyout width at which a badge fits with its margins and the scrollbar. */
+export function computeFlyoutWidthForLabel(
+  input: FlyoutWidthForLabelInput,
+): number {
+  return (
+    input.textWidth + TEXT_PADDING + input.sideMargin * 2 + input.scrollbarWidth
+  );
+}
