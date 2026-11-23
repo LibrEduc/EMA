@@ -24,6 +24,13 @@ export function isRtlLanguage(language: string): boolean {
 }
 
 export function loadUiLanguage(): UiLanguage {
+  const requested = new URL(window.location.href).searchParams
+    .get("lang")
+    ?.trim()
+    .toLowerCase();
+  if (requested && isUiLanguage(requested) && languagesMap[requested]) {
+    return requested;
+  }
   try {
     const saved = window.localStorage.getItem(LANG_KEY);
     if (saved && isUiLanguage(saved) && languagesMap[saved]) {
@@ -45,6 +52,13 @@ export function saveUiLanguage(language: UiLanguage): void {
   } catch {
     // ignore
   }
+}
+
+// µcBlockly dialogs (keyboard tutorial, shortcuts, a11y labels) read the language from `?lang=`.
+export function shareLanguageWithUcBlockly(language: UiLanguage): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set("lang", language);
+  window.history.replaceState(window.history.state, "", url.href);
 }
 
 export function applyDocumentDirection(language: string): void {

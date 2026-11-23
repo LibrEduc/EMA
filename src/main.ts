@@ -36,6 +36,7 @@ import {
   isUiLanguage,
   loadUiLanguage,
   saveUiLanguage,
+  shareLanguageWithUcBlockly,
   type UiLanguage,
 } from "./i18n";
 import {
@@ -87,6 +88,7 @@ let uiLanguage: UiLanguage = loadUiLanguage();
 let codeTarget: CodeTarget = loadCodeTarget();
 let refreshCode: () => void = () => undefined;
 
+shareLanguageWithUcBlockly(uiLanguage);
 applyDocumentDirection(uiLanguage);
 applyUcBlocklyLocale(uiLanguage);
 applyShellStrings(uiLanguage, codeTarget);
@@ -383,6 +385,7 @@ const applyLanguage = (language: UiLanguage): void => {
 
   uiLanguage = language;
   saveUiLanguage(language);
+  shareLanguageWithUcBlockly(language);
   applyDocumentDirection(language);
   applyUcBlocklyLocale(language);
   applyShellStrings(language, codeTarget);
