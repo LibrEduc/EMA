@@ -24,6 +24,13 @@ export function isRtlLanguage(language: string): boolean {
 }
 
 export function loadUiLanguage(): UiLanguage {
+  const requested = new URL(window.location.href).searchParams
+    .get("lang")
+    ?.trim()
+    .toLowerCase();
+  if (requested && isUiLanguage(requested) && languagesMap[requested]) {
+    return requested;
+  }
   try {
     const saved = window.localStorage.getItem(LANG_KEY);
     if (saved && isUiLanguage(saved) && languagesMap[saved]) {
@@ -32,7 +39,10 @@ export function loadUiLanguage(): UiLanguage {
   } catch {
     // ignore
   }
-  // Not the browser language: school computers are often set up in English.
+  const nav = (navigator.language || "fr").slice(0, 2).toLowerCase();
+  if (isUiLanguage(nav) && languagesMap[nav]) {
+    return nav;
+  }
   return "fr";
 }
 
