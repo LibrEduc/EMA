@@ -5,6 +5,8 @@ public/media/
 .DS_Store
 *.log
 .vite/
+.vitest/
+.playwright-mcp/
 
 # --- vlad_ai_stack (strictly local: AI skills, rules, memory, agent configs) ---
 .agent/
