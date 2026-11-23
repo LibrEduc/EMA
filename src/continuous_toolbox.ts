@@ -132,20 +132,56 @@ function contrastingInk(background: string): string {
 /**
  * Flyout continu : sync scroll→sélection + badges de catégorie colorés.
  */
+import { resolveFlyoutDefinition } from "./flyout_category_filter";
+import { computeCategoryLabelWidth } from "./flyout_label_metrics";
+
+const LABEL_STROKE_PX = 3;
+const DEFAULT_SCROLLBAR_PX = 12;
+
+/** Largeur réelle de la barre verticale du flyout (repli : 12 px). */
+function flyoutScrollbarWidth(): number {
+  const bar = document.querySelector(".blocklyFlyoutScrollbar");
+  const width = Number.parseFloat(bar?.getAttribute("width") ?? "");
+  return Number.isFinite(width) && width > 0 ? width : DEFAULT_SCROLLBAR_PX;
+}
+
 export class EmaContinuousFlyout extends ContinuousFlyout {
   constructor(workspaceOptions: Blockly.Options) {
     super(workspaceOptions);
-    this.getWorkspace().addChangeListener((e: Blockly.Events.Abstract) => {
-      if (e.type === Blockly.Events.VIEWPORT_CHANGE) {
-        this.selectCategoryWithLead(-this.getWorkspace().scrollY);
-      }
-    });
+  }
+
+  /** Définition complète (toutes catégories), mémorisée pour re-filtrer au clic. */
+  private fullDef_: Blockly.utils.toolbox.FlyoutDefinition | null = null;
+
+  override scrollToCategory(category: Blockly.ISelectableToolboxItem): void {
+    if (this.fullDef_) {
+      // Le filtre lit la catégorie déjà sélectionnée par la toolbox.
+      this.show(this.fullDef_);
+    }
+    super.scrollToCategory(category);
   }
 
   override show(
     flyoutDef: Blockly.utils.toolbox.FlyoutDefinition | string,
   ): void {
-    super.show(flyoutDef);
+    let nextDef = flyoutDef;
+    if (Array.isArray(flyoutDef)) {
+      this.fullDef_ = flyoutDef;
+      const toolbox = this.targetWorkspace?.getToolbox();
+      const selected =
+        toolbox && "getSelectedItem" in toolbox
+          ? (toolbox as Blockly.Toolbox).getSelectedItem()
+          : null;
+      const categoryName =
+        selected && typeof selected.getName === "function"
+          ? selected.getName()
+          : "";
+      nextDef = resolveFlyoutDefinition(
+        flyoutDef as unknown as readonly Record<string, unknown>[],
+        categoryName,
+      ) as unknown as Blockly.utils.toolbox.FlyoutDefinition;
+    }
+    super.show(nextDef);
     this.styleCategoryLabels_();
   }
 
@@ -201,10 +237,13 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
 
       const oldHeight = element.height;
       const pos = element.getPosition();
-      const fullWidth = Math.max(
-        element.width + 32,
-        Math.max(80, viewWidth - sideMargin * 2),
-      );
+      const fullWidth = computeCategoryLabelWidth({
+        viewWidth,
+        sideMargin,
+        scrollbarWidth: flyoutScrollbarWidth(),
+        stroke: LABEL_STROKE_PX,
+        textWidth: element.width,
+      });
       // Hauteur ≈ ligne de texte (--ema-blockly-font) + padding, pas un bandeau XXL.
       const linePx = Number.isFinite(rootPx) ? rootPx * 0.875 : 14;
       const fullHeight = Math.max(oldHeight + padY * 2, linePx + padY * 2, 28);
@@ -221,7 +260,7 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
         bg.setAttribute("ry", String(radius));
         bg.style.setProperty("fill", colour, "important");
         bg.style.setProperty("stroke", "#1a2332", "important");
-        bg.style.setProperty("stroke-width", "3px", "important");
+        bg.style.setProperty("stroke-width", `${LABEL_STROKE_PX}px`, "important");
         bg.style.setProperty("opacity", "1", "important");
       }
       if (text instanceof SVGTextElement) {
@@ -424,7 +463,7 @@ export function registerContinuousToolbox(): void {
   Blockly.registry.register(
     Blockly.registry.Type.METRICS_MANAGER,
     "ContinuousMetrics",
-    ContinuousMetricsOverlayFlyout,
+    Blockly.MetricsManager,
     true,
   );
   Blockly.registry.register(
