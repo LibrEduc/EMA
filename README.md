@@ -11,6 +11,7 @@ Coquille autour de [µcBlockly](https://github.com/A-S-T-U-C-E/ucBlockly) — en
 - Langue + Robot (C) / Robot (Python) dans **Réglages** (enseignant)
 - Pas de minimap / sac à dos / Monaco / debug / surbrillance
 - Cibles tactiles ≥ 44 px (`pointer: coarse`)
+- **Une seule carte** (`arduino_uno` via `src/board_config.ts`) — pas de menu « Carte »
 
 ## Démarrage
 

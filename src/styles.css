@@ -581,11 +581,28 @@ body {
 .blocklyTreeRowContentContainer {
   inline-size: 100%;
   align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .blocklyToolboxDiv {
   font-size: var(--ema-blockly-font);
+}
+
+/* Mode icônes : labels hors flux (évite le décalage vertical des pastilles) */
+html.ema-toolbox-icons-only .blocklyToolboxCategoryLabel,
+html.ema-toolbox-icons-only .blocklyTreeLabel,
+html.ema-toolbox-icons-only .emaCategoryLabel {
+  position: absolute !important;
+  inline-size: 1px !important;
+  max-inline-size: 1px !important;
+  block-size: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .ema-code-drawer {

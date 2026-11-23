@@ -36,7 +36,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "µcBlockly/core": path.join(ucbRoot, "src/core/index.ts"),
-      "µcBlockly/host": path.join(ucbRoot, "src/host/index.ts"),
       // Évite Monaco / shell démo si un import transitif pointe sur host trop large.
       "µcBlockly": path.join(ucbRoot, "src/core/index.ts"),
     },

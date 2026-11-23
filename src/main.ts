@@ -12,6 +12,10 @@ import {
 } from "µcBlockly/core";
 import { registerToolboxSearchI18n } from "../vendor/ucBlockly/src/toolbox_search_i18n";
 import { changeLanguageToolbox } from "../vendor/ucBlockly/src/language";
+import {
+  SHOW_BOARD_CATEGORY,
+  installFixedBoardMenu,
+} from "./board_config";
 
 import {
   CONTINUOUS_WORKSPACE_PLUGINS,
@@ -42,7 +46,7 @@ import {
 } from "../vendor/ucBlockly/src/blockly_a11y_extensions";
 import { registerKeyboardTutorial } from "../vendor/ucBlockly/src/shell_keyboard_tutorial";
 import { registerShortcutsHelp } from "../vendor/ucBlockly/src/shell_shortcuts_help";
-import { resolveWorkspaceToolbarTheme } from "µcBlockly/host";
+import { resolveWorkspaceToolbarTheme } from "../vendor/ucBlockly/src/host/workspace_toolbar";
 import {
   applyBlocklyTypography,
   applyShellTypography,
@@ -56,16 +60,21 @@ import {
   installToolboxIconRailToggle,
   setToolboxCollapseCopy,
 } from "./toolbox_collapse";
+import { installFlyoutSearchBar } from "./flyout_search";
 
 registerToolboxSearchI18n();
 registerContinuousToolbox();
 registerShortcutsHelp();
 registerKeyboardTutorial({ autoOpen: false });
 
+// Carte unique (MAE) — `#boardMenu` caché pour µcBlockly ; voir `board_config.ts`.
+installFixedBoardMenu();
+
 const workspaceRoot = document.getElementById("ema-workspace");
 const codeRoot = document.getElementById("ema-code");
 const langSelect = document.getElementById("ema-lang") as HTMLSelectElement | null;
 const undoBtn = document.getElementById("ema-undo");
+const redoBtn = document.getElementById("ema-redo");
 const restartBtn = document.getElementById("ema-restart");
 const codeDrawer = document.querySelector(
   ".ema-code-drawer",
@@ -84,10 +93,13 @@ applyDocumentDirection(uiLanguage);
 applyUcBlocklyLocale(uiLanguage);
 applyShellStrings(uiLanguage, codeTarget);
 
-const buildToolbox = (language: string) =>
-  getToolboxWithoutBoardCategory(
-    changeLanguageToolbox(language, basic_toolbox),
-  );
+const buildToolbox = (language: string) => {
+  const translated = changeLanguageToolbox(language, basic_toolbox);
+  // Mono-carte : pas de catégorie « Carte : … ». Remettre SHOW_BOARD_CATEGORY pour la réactiver.
+  return SHOW_BOARD_CATEGORY
+    ? translated
+    : getToolboxWithoutBoardCategory(translated);
+};
 
 const toolbox = buildToolbox(uiLanguage);
 
@@ -169,6 +181,7 @@ const wireWorkspaceUi = (): void => {
   refreshCode = bindCodePanel(workspace, codeRoot, () => codeTarget);
   applyFlyoutOpen(readFlyoutOpen());
   installToolboxIconRailToggle(workspace);
+  installFlyoutSearchBar(workspace);
   syncToolboxCollapseLabels();
   resizeWorkspace();
   refreshCode();
@@ -325,6 +338,11 @@ if (flyoutOpenToggle) {
 
 undoBtn?.addEventListener("click", () => {
   manager.workspace.undo(false);
+  refreshCode();
+});
+
+redoBtn?.addEventListener("click", () => {
+  manager.workspace.undo(true);
   refreshCode();
 });
 

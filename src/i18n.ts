@@ -71,6 +71,7 @@ type ShellCopy = {
   title: string;
   help: string;
   undo: string;
+  redo: string;
   restart: string;
   restartConfirm: string;
   flyoutOpen: string;
@@ -107,6 +108,7 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     title: "Programme ton robot MAE",
     help: "Glisse des blocs dans la boucle pour faire bouger le robot.",
     undo: "Annuler",
+    redo: "Refaire",
     restart: "Recommencer",
     restartConfirm: "Effacer tous les blocs et recommencer ?",
     flyoutOpen: "Garder les blocs ouverts",
@@ -141,6 +143,7 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     title: "Program your MAE robot",
     help: "Drag blocks into the loop to make the robot move.",
     undo: "Undo",
+    redo: "Redo",
     restart: "Start over",
     restartConfirm: "Clear all blocks and start over?",
     flyoutOpen: "Keep blocks open",
@@ -175,6 +178,7 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     title: "Programa tu robot MAE",
     help: "Arrastra bloques al bucle para mover el robot.",
     undo: "Deshacer",
+    redo: "Rehacer",
     restart: "Empezar de nuevo",
     restartConfirm: "¿Borrar todos los bloques y empezar de nuevo?",
     flyoutOpen: "Mantener bloques abiertos",
@@ -209,6 +213,7 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     title: "برمِج روبوت MAE",
     help: "اسحب الكتل إلى الحلقة لتحريك الروبوت.",
     undo: "تراجع",
+    redo: "إعادة",
     restart: "البداية من جديد",
     restartConfirm: "مسح كل الكتل والبدء من جديد؟",
     flyoutOpen: "إبقاء الكتل مفتوحة",
@@ -261,6 +266,7 @@ export function applyShellStrings(
   setText(".ema-tagline", t.title);
   setText("#ema-help", t.help);
   setText("#ema-undo", t.undo);
+  setText("#ema-redo", t.redo);
   setText("#ema-restart", t.restart);
   setText(".ema-flyout-toggle > span:last-child", t.flyoutOpen);
   setText("#ema-flyout-open-hint", t.flyoutHint);
