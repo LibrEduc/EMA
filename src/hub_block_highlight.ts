@@ -50,3 +50,23 @@ export function markUnsupportedBlocks(
     }
   };
 }
+
+/** The part of a Blockly workspace needed to react to block edits. */
+export interface ChangeWorkspace {
+  addChangeListener(callback: (event: { readonly isUiEvent: boolean }) => void): unknown;
+}
+
+/**
+ * Calls `clear` on every block edit (not on scrolling or selection).
+ * Must be called for each new workspace: a language change rebuilds it.
+ */
+export function clearOnBlockEdit(
+  workspace: ChangeWorkspace,
+  clear: () => void,
+): void {
+  workspace.addChangeListener((event) => {
+    if (!event.isUiEvent) {
+      clear();
+    }
+  });
+}

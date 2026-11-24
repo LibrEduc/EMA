@@ -41,7 +41,10 @@ import {
   normalizeHubSlot,
   saveHubSlot,
 } from "./hub_export";
-import { markUnsupportedBlocks } from "./hub_block_highlight";
+import {
+  clearOnBlockEdit,
+  markUnsupportedBlocks,
+} from "./hub_block_highlight";
 import {
   applyDocumentDirection,
   applyShellStrings,
@@ -192,10 +195,22 @@ const syncToolboxCollapseLabels = (): void => {
   });
 };
 
+let clearHubHighlight: () => void = () => undefined;
+
+function clearHubFeedback(): void {
+  clearHubHighlight();
+  clearHubHighlight = () => undefined;
+  if (hubMessage) {
+    hubMessage.textContent = "";
+  }
+}
+
 const wireWorkspaceUi = (): void => {
   const workspace = manager.workspace as Blockly.WorkspaceSvg;
   seedProgramStructure(workspace);
   refreshCode = bindCodePanel(workspace, codeRoot, () => codeTarget);
+  // Un changement de langue recrée le workspace : l'écouteur est reposé à chaque fois.
+  clearOnBlockEdit(workspace, clearHubFeedback);
   applyFlyoutOpen(readFlyoutOpen());
   installToolboxIconRailToggle(workspace);
   installFlyoutSearchBar(workspace);
@@ -393,16 +408,6 @@ if (hubSlotSelect) {
   });
 }
 
-let clearHubHighlight: () => void = () => undefined;
-
-function clearHubFeedback(): void {
-  clearHubHighlight();
-  clearHubHighlight = () => undefined;
-  if (hubMessage) {
-    hubMessage.textContent = "";
-  }
-}
-
 function showHubIssue(
   issue: HubExportIssue,
   result: GenerationResult,
@@ -421,13 +426,6 @@ function showHubIssue(
     );
   }
 }
-
-// Une modification des blocs efface le message et le contour rouge.
-manager.workspace.addChangeListener((event: Blockly.Events.Abstract) => {
-  if (!event.isUiEvent) {
-    clearHubFeedback();
-  }
-});
 
 hubDownloadBtn?.addEventListener("click", () => {
   clearHubFeedback();
