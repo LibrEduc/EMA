@@ -101,4 +101,83 @@ describe("resolveFlyoutDefinition", () => {
     const onlyLabels = [{ kind: "LABEL", text: "A" }];
     expect(resolveFlyoutDefinition(onlyLabels, "A")).toEqual(onlyLabels);
   });
+
+  describe("with category names (search section)", () => {
+    const names = ["Recherche", "Libre", "Logique"];
+
+    it("keeps the no-result message under the search header", () => {
+      const noResult = [
+        { kind: "LABEL", text: "Recherche" },
+        { kind: "LABEL", text: "Aucun résultat" },
+        { kind: "LABEL", text: "Libre" },
+        { kind: "block", type: "free_1" },
+        { kind: "block", type: "free_2" },
+      ];
+      expect(resolveFlyoutDefinition(noResult, "Recherche", names)).toEqual([
+        { kind: "LABEL", text: "Recherche" },
+        { kind: "LABEL", text: "Aucun résultat" },
+      ]);
+    });
+
+    it("keeps the typing hint under the search header when the query is empty", () => {
+      const hint = [
+        { kind: "LABEL", text: "Recherche" },
+        { kind: "LABEL", text: "Tapez pour chercher" },
+        { kind: "LABEL", text: "Libre" },
+        { kind: "block", type: "free_1" },
+      ];
+      expect(resolveFlyoutDefinition(hint, "Recherche", names)).toEqual([
+        { kind: "LABEL", text: "Recherche" },
+        { kind: "LABEL", text: "Tapez pour chercher" },
+      ]);
+    });
+
+    const searchWithHintThenEmptyCategory = [
+      { kind: "LABEL", text: "Recherche" },
+      { kind: "LABEL", text: "Taper pour rechercher des blocs" },
+      { kind: "LABEL", text: "Catégorie sans bloc" },
+      { kind: "LABEL", text: "Libre" },
+      { kind: "block", type: "free_1" },
+      { kind: "LABEL", text: "Logique" },
+      { kind: "block", type: "controls_if" },
+    ];
+    const categoryNamesWithEmpty = [
+      "Recherche",
+      "Catégorie sans bloc",
+      "Libre",
+      "Logique",
+    ];
+    const firstCategoryWithBlocks = [
+      { kind: "LABEL", text: "Libre" },
+      { kind: "block", type: "free_1" },
+    ];
+
+    it("an empty category falls back to the first category with blocks, not to the search hint", () => {
+      expect(
+        resolveFlyoutDefinition(
+          searchWithHintThenEmptyCategory,
+          "Catégorie sans bloc",
+          categoryNamesWithEmpty,
+        ),
+      ).toEqual(firstCategoryWithBlocks);
+    });
+
+    it("no selected category falls back to the first category with blocks, not to the search hint", () => {
+      expect(
+        resolveFlyoutDefinition(
+          searchWithHintThenEmptyCategory,
+          "",
+          categoryNamesWithEmpty,
+        ),
+      ).toEqual(firstCategoryWithBlocks);
+    });
+
+    it("still falls back to the first category with blocks when search has no item (init)", () => {
+      expect(resolveFlyoutDefinition(full, "Recherche", names)).toEqual([
+        { kind: "LABEL", text: "Libre" },
+        { kind: "block", type: "free_1" },
+        { kind: "block", type: "free_2" },
+      ]);
+    });
+  });
 });

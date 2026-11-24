@@ -10,6 +10,8 @@
  */
 
 import type { BoardId } from "../vendor/ucBlockly/src/board_profiles";
+import { CAT_BOARD_NAME } from "../vendor/ucBlockly/src/toolbox_filters";
+import type { ToolboxConfiguration } from "../vendor/ucBlockly/src/toolbox_types";
 
 /** Profil pins / codegen — MAE tourne sur ce mapping (comme µcBlockly sans menu). */
 export const EMA_FIXED_BOARD_ID = "arduino_uno" as const satisfies BoardId;
@@ -42,4 +44,30 @@ export function installFixedBoardMenu(
   option.selected = true;
   menu.appendChild(option);
   menu.value = boardId;
+}
+
+/**
+ * Toolbox without the "Carte : …" entry in the category rail: µcBlockly's
+ * getToolboxWithoutBoardCategory only empties that category, it does not remove it.
+ */
+export function withoutBoardCategory(
+  toolbox: ToolboxConfiguration,
+): ToolboxConfiguration {
+  if (!Array.isArray(toolbox.contents)) {
+    return toolbox;
+  }
+  return {
+    ...toolbox,
+    contents: toolbox.contents.filter((item) => !isBoardCategory(item)),
+  } as ToolboxConfiguration;
+}
+
+// The name is already translated here ("Carte : arduino_uno"), so the style is the
+// reliable mark; CAT_BOARD_NAME covers an untranslated toolbox.
+function isBoardCategory(item: object): boolean {
+  const { name, categorystyle } = item as {
+    name?: string;
+    categorystyle?: string;
+  };
+  return name === CAT_BOARD_NAME || categorystyle === "board_category";
 }

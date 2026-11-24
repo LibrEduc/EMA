@@ -4,13 +4,34 @@ export interface FlyoutContentItem {
   [key: string]: unknown;
 }
 
+function isLabel(item: FlyoutContentItem | undefined): boolean {
+  return typeof item?.kind === "string" && item.kind.toLowerCase() === "label";
+}
+
+// With a name list, only a label named in it starts a category: the search hint
+// and the "no result" message are labels too, but belong to the search section.
+function startsNextCategory(
+  label: FlyoutContentItem,
+  lowercaseCategoryNames: readonly string[] | undefined,
+): boolean {
+  if (!lowercaseCategoryNames) {
+    return true;
+  }
+  if (typeof label.text !== "string") {
+    return false;
+  }
+  return lowercaseCategoryNames.includes(label.text.trim().toLowerCase());
+}
+
 /**
  * Extracts only the label and items belonging to `categoryName` from a flat
- * continuous flyout definition array.
+ * continuous flyout definition array. With `categoryNames`, only a label with
+ * one of those names ends a section (the search message is a label too).
  */
 export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
   contents: readonly T[],
   categoryName: string,
+  categoryNames?: readonly string[],
 ): T[] {
   const target = categoryName.trim().toLowerCase();
   if (!target || contents.length === 0) {
@@ -35,20 +56,19 @@ export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
     return [];
   }
 
+  const lowercaseCategoryNames = categoryNames?.map((name) =>
+    name.trim().toLowerCase(),
+  );
   let endIdx = contents.length;
   for (let i = startIdx + 1; i < contents.length; i++) {
     const item = contents[i];
-    if (typeof item?.kind === "string" && item.kind.toLowerCase() === "label") {
+    if (isLabel(item) && startsNextCategory(item, lowercaseCategoryNames)) {
       endIdx = i;
       break;
     }
   }
 
   return contents.slice(startIdx, endIdx);
-}
-
-function isLabel(item: FlyoutContentItem | undefined): boolean {
-  return typeof item?.kind === "string" && item.kind.toLowerCase() === "label";
 }
 
 /**
@@ -59,8 +79,13 @@ function isLabel(item: FlyoutContentItem | undefined): boolean {
 export function resolveFlyoutDefinition<T extends FlyoutContentItem>(
   contents: readonly T[],
   categoryName: string,
+  categoryNames?: readonly string[],
 ): T[] {
-  const own = sliceFlyoutContentsForCategory(contents, categoryName);
+  const own = sliceFlyoutContentsForCategory(
+    contents,
+    categoryName,
+    categoryNames,
+  );
   if (own.length > 1) {
     return own;
   }
