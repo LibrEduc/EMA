@@ -1,3 +1,5 @@
+import type { GenerationResult } from "./codegen";
+
 export const HUB_SLOT_MIN = 0;
 export const HUB_SLOT_MAX = 19;
 export const HUB_SLOT_STORAGE_KEY = "ema.hubProgramSlot";
@@ -43,6 +45,57 @@ export function saveHubSlot(slot: number): void {
   } catch {
     // ignore
   }
+}
+
+export type HubExportIssue = "generationError" | "emptyProgram";
+
+export interface HubIssueCopy {
+  readonly hubErrorBlocks: string;
+  readonly hubErrorGeneric: string;
+  readonly hubErrorEmpty: string;
+}
+
+const MAX_NAMED_BLOCKS = 3;
+
+const IMPORT_LINE = /^(import\s|from\s+\S+\s+import\s)/;
+
+// Comments, blank lines, imports and the idle loop (`while True: pass`) carry no program.
+function isInactiveLine(line: string): boolean {
+  const text = line.trim();
+  return (
+    text === "" ||
+    text.startsWith("#") ||
+    IMPORT_LINE.test(text) ||
+    text === "while True:" ||
+    text === "pass"
+  );
+}
+
+export function getHubExportIssue(
+  result: GenerationResult,
+): HubExportIssue | null {
+  if (!result.ok) {
+    return "generationError";
+  }
+  return result.code.split("\n").every(isInactiveLine) ? "emptyProgram" : null;
+}
+
+export function formatHubIssueMessage(
+  copy: HubIssueCopy,
+  issue: HubExportIssue,
+  result: GenerationResult,
+): string {
+  if (issue === "emptyProgram") {
+    return copy.hubErrorEmpty;
+  }
+  if (result.ok || result.unsupportedBlocks.length === 0) {
+    return copy.hubErrorGeneric;
+  }
+  const labels = result.unsupportedBlocks.map((block) => block.label);
+  const named = labels.slice(0, MAX_NAMED_BLOCKS).map((label) => `« ${label} »`);
+  const others = labels.length - named.length;
+  const list = others > 0 ? `${named.join(", ")} (+${others})` : named.join(", ");
+  return copy.hubErrorBlocks.replace("{blocks}", list);
 }
 
 export function downloadHubProgram(code: string, slot: number): string {

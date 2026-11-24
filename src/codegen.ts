@@ -26,19 +26,76 @@ export function saveCodeTarget(target: CodeTarget): void {
   }
 }
 
+export interface UnsupportedBlock {
+  readonly id: string;
+  readonly label: string;
+}
+
+export type GenerationResult =
+  | { readonly ok: true; readonly code: string }
+  | {
+      readonly ok: false;
+      readonly error: unknown;
+      readonly unsupportedBlocks: ReadonlyArray<UnsupportedBlock>;
+    };
+
+const BLOCK_LABEL_MAX_LENGTH = 40;
+
+function hasGenerator(target: CodeTarget, blockType: string): boolean {
+  const generator =
+    target === "micropython" ? micropythonGenerator : arduinoGenerator;
+  return typeof generator.forBlock[blockType] === "function";
+}
+
+// toString() renvoie des "?" pour les entrées vides : un bloc sans texte
+// (comme libre_start) n'a alors aucun libellé lisible, son type le remplace.
+const READABLE_TEXT = /[\p{L}\p{N}]/u;
+
+function labelOf(block: Blockly.Block): string {
+  const text = block.toString(BLOCK_LABEL_MAX_LENGTH).trim();
+  return READABLE_TEXT.test(text) ? text : block.type;
+}
+
+/** Enabled blocks without a generator: the ones that make generation throw. */
+function findUnsupportedBlocks(
+  workspace: Blockly.Workspace,
+  target: CodeTarget,
+): UnsupportedBlock[] {
+  return workspace
+    .getAllBlocks(false)
+    .filter((block) => block.isEnabled() && !hasGenerator(target, block.type))
+    .map((block) => ({ id: block.id, label: labelOf(block) }));
+}
+
+export function tryGenerateCode(
+  workspace: Blockly.Workspace,
+  target: CodeTarget,
+): GenerationResult {
+  try {
+    const code =
+      target === "micropython"
+        ? micropythonGenerator.workspaceToCode(workspace)
+        : arduinoGenerator.workspaceToCode(workspace);
+    return { ok: true, code };
+  } catch (error) {
+    console.error("[EMA] génération code:", error);
+    return {
+      ok: false,
+      error,
+      unsupportedBlocks: findUnsupportedBlocks(workspace, target),
+    };
+  }
+}
+
 export function generateCode(
   workspace: Blockly.Workspace,
   target: CodeTarget,
 ): string {
-  try {
-    if (target === "micropython") {
-      return micropythonGenerator.workspaceToCode(workspace);
-    }
-    return arduinoGenerator.workspaceToCode(workspace);
-  } catch (error) {
-    console.error("[EMA] génération code:", error);
-    return `// Erreur de génération (${target})\n// ${String(error)}`;
+  const result = tryGenerateCode(workspace, target);
+  if (result.ok) {
+    return result.code;
   }
+  return `// Erreur de génération (${target})\n// ${String(result.error)}`;
 }
 
 /** Place un bloc setup+loop si le workspace est vide (sinon le générateur Arduino renvoie ""). */

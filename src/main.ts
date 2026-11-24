@@ -23,8 +23,9 @@ import {
 } from "./continuous_toolbox";
 import {
   bindCodePanel,
-  generateCode,
   loadCodeTarget,
+  tryGenerateCode,
+  type GenerationResult,
   saveCodeTarget,
   seedProgramStructure,
   type CodeTarget,
@@ -33,10 +34,14 @@ import {
   HUB_SLOT_MAX,
   HUB_SLOT_MIN,
   downloadHubProgram,
+  formatHubIssueMessage,
+  getHubExportIssue,
+  type HubExportIssue,
   loadHubSlot,
   normalizeHubSlot,
   saveHubSlot,
 } from "./hub_export";
+import { markUnsupportedBlocks } from "./hub_block_highlight";
 import {
   applyDocumentDirection,
   applyShellStrings,
@@ -88,6 +93,7 @@ const hubSlotSelect = document.getElementById(
   "ema-hub-slot",
 ) as HTMLSelectElement | null;
 const hubDownloadBtn = document.getElementById("ema-hub-download");
+const hubMessage = document.getElementById("ema-hub-message");
 const codeDrawer = document.querySelector(
   ".ema-code-drawer",
 ) as HTMLDetailsElement | null;
@@ -383,15 +389,58 @@ if (hubSlotSelect) {
   hubSlotSelect.addEventListener("change", () => {
     hubSlot = normalizeHubSlot(hubSlotSelect.value);
     saveHubSlot(hubSlot);
+    clearHubFeedback();
   });
 }
 
+let clearHubHighlight: () => void = () => undefined;
+
+function clearHubFeedback(): void {
+  clearHubHighlight();
+  clearHubHighlight = () => undefined;
+  if (hubMessage) {
+    hubMessage.textContent = "";
+  }
+}
+
+function showHubIssue(
+  issue: HubExportIssue,
+  result: GenerationResult,
+): void {
+  if (hubMessage) {
+    hubMessage.textContent = formatHubIssueMessage(
+      getShellCopy(uiLanguage),
+      issue,
+      result,
+    );
+  }
+  if (!result.ok) {
+    clearHubHighlight = markUnsupportedBlocks(
+      manager.workspace as Blockly.WorkspaceSvg,
+      result.unsupportedBlocks.map((block) => block.id),
+    );
+  }
+}
+
+// Une modification des blocs efface le message et le contour rouge.
+manager.workspace.addChangeListener((event: Blockly.Events.Abstract) => {
+  if (!event.isUiEvent) {
+    clearHubFeedback();
+  }
+});
+
 hubDownloadBtn?.addEventListener("click", () => {
+  clearHubFeedback();
   const slot = hubSlotSelect
     ? normalizeHubSlot(hubSlotSelect.value)
     : hubSlot;
-  const pythonCode = generateCode(manager.workspace, "micropython");
-  downloadHubProgram(pythonCode, slot);
+  const result = tryGenerateCode(manager.workspace, "micropython");
+  const issue = getHubExportIssue(result);
+  if (issue === null && result.ok) {
+    downloadHubProgram(result.code, slot);
+    return;
+  }
+  showHubIssue(issue ?? "generationError", result);
 });
 
 const targetRadios = document.querySelectorAll<HTMLInputElement>(
@@ -457,6 +506,7 @@ if (langSelect) {
     if (!isUiLanguage(next) || next === uiLanguage) {
       return;
     }
+    clearHubFeedback();
     applyLanguage(next);
   });
 }
