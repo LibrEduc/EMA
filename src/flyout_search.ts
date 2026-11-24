@@ -13,6 +13,7 @@ const SEARCH_BAR_H = 48;
 type FlyoutWithPosition = Blockly.IFlyout & {
   position: () => void;
   getWidth?: () => number;
+  getHeight?: () => number;
   isVisible?: () => boolean;
   svgGroup_?: SVGGElement | null;
 };
@@ -265,6 +266,12 @@ function hookFlyoutPosition(workspace: Blockly.WorkspaceSvg): void {
     hookedFlyout.position = originalPosition;
   }
   hookedFlyout = flyout;
+  // layoutBar() pushes the flyout down by the bar height: remove it from the flyout height too,
+  // or the last blocks end below the visible area.
+  const blocklyGetHeight = flyout.getHeight?.bind(flyout);
+  if (blocklyGetHeight) {
+    flyout.getHeight = () => blocklyGetHeight() - SEARCH_BAR_H;
+  }
   originalPosition = flyout.position.bind(flyout);
   flyout.position = () => {
     originalPosition?.();
