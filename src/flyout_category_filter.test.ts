@@ -132,27 +132,44 @@ describe("resolveFlyoutDefinition", () => {
       ]);
     });
 
-    it("falls back to the first category with blocks even when the search section holds a hint", () => {
-      const afterClear = [
-        { kind: "LABEL", text: "Recherche" },
-        { kind: "LABEL", text: "Taper pour rechercher des blocs" },
-        { kind: "LABEL", text: "Vide" },
-        { kind: "LABEL", text: "Libre" },
-        { kind: "block", type: "free_1" },
-        { kind: "LABEL", text: "Logique" },
-        { kind: "block", type: "controls_if" },
-      ];
-      const allNames = ["Recherche", "Vide", "Libre", "Logique"];
-      const expected = [
-        { kind: "LABEL", text: "Libre" },
-        { kind: "block", type: "free_1" },
-      ];
-      expect(resolveFlyoutDefinition(afterClear, "Vide", allNames)).toEqual(
-        expected,
-      );
-      expect(resolveFlyoutDefinition(afterClear, "", allNames)).toEqual(
-        expected,
-      );
+    const searchWithHintThenEmptyCategory = [
+      { kind: "LABEL", text: "Recherche" },
+      { kind: "LABEL", text: "Taper pour rechercher des blocs" },
+      { kind: "LABEL", text: "Catégorie sans bloc" },
+      { kind: "LABEL", text: "Libre" },
+      { kind: "block", type: "free_1" },
+      { kind: "LABEL", text: "Logique" },
+      { kind: "block", type: "controls_if" },
+    ];
+    const categoryNamesWithEmpty = [
+      "Recherche",
+      "Catégorie sans bloc",
+      "Libre",
+      "Logique",
+    ];
+    const firstCategoryWithBlocks = [
+      { kind: "LABEL", text: "Libre" },
+      { kind: "block", type: "free_1" },
+    ];
+
+    it("an empty category falls back to the first category with blocks, not to the search hint", () => {
+      expect(
+        resolveFlyoutDefinition(
+          searchWithHintThenEmptyCategory,
+          "Catégorie sans bloc",
+          categoryNamesWithEmpty,
+        ),
+      ).toEqual(firstCategoryWithBlocks);
+    });
+
+    it("no selected category falls back to the first category with blocks, not to the search hint", () => {
+      expect(
+        resolveFlyoutDefinition(
+          searchWithHintThenEmptyCategory,
+          "",
+          categoryNamesWithEmpty,
+        ),
+      ).toEqual(firstCategoryWithBlocks);
     });
 
     it("still falls back to the first category with blocks when search has no item (init)", () => {

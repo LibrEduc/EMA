@@ -46,7 +46,10 @@ export function installFixedBoardMenu(
   menu.value = boardId;
 }
 
-/** Toolbox sans l'entrée « Carte : … » du rail (le filtre µcBlockly la vide seulement). */
+/**
+ * Toolbox without the "Carte : …" entry in the category rail: µcBlockly's
+ * getToolboxWithoutBoardCategory only empties that category, it does not remove it.
+ */
 export function withoutBoardCategory(
   toolbox: ToolboxConfiguration,
 ): ToolboxConfiguration {
@@ -55,12 +58,16 @@ export function withoutBoardCategory(
   }
   return {
     ...toolbox,
-    contents: toolbox.contents.filter((item) => {
-      const { name, categorystyle } = item as {
-        name?: string;
-        categorystyle?: string;
-      };
-      return name !== CAT_BOARD_NAME && categorystyle !== "board_category";
-    }),
+    contents: toolbox.contents.filter((item) => !isBoardCategory(item)),
   } as ToolboxConfiguration;
+}
+
+// The name is already translated here ("Carte : arduino_uno"), so the style is the
+// reliable mark; CAT_BOARD_NAME covers an untranslated toolbox.
+function isBoardCategory(item: object): boolean {
+  const { name, categorystyle } = item as {
+    name?: string;
+    categorystyle?: string;
+  };
+  return name === CAT_BOARD_NAME || categorystyle === "board_category";
 }

@@ -220,36 +220,46 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
     this.styleCategoryLabels_();
   }
 
-  /**
-   * super.show() sizes the flyout on bare label text, but the badge adds padding and margins.
-   * The search hint is the floor, so the board does not jump at each category.
-   */
+  // super.show() sizes the flyout on bare label text, but the badge adds padding and margins.
+  // The search hint counts even when hidden, so the width does not jump between categories.
   private widenForLabels_(sideMargin: number): void {
-    let widest = 0;
-    let labelText: SVGTextElement | null = null;
+    const widestTextPx = this.widestLabelTextPx_();
+    if (widestTextPx === 0) {
+      return;
+    }
+    const flyoutWidthForBadges = computeFlyoutWidthForLabel({
+      textWidth: widestTextPx,
+      sideMargin,
+      scrollbarWidth: flyoutScrollbarWidth(),
+    });
+    if (flyoutWidthForBadges <= this.getWidth()) {
+      return;
+    }
+    // Same steps as Blockly's own reflow after a width change.
+    this.width_ = flyoutWidthForBadges;
+    this.position();
+    this.targetWorkspace.resizeContents();
+    this.targetWorkspace.recordDragTargets();
+  }
+
+  /** Widest label text in the flyout, search hint included. 0 when there is no label. */
+  private widestLabelTextPx_(): number {
+    let widestTextPx = 0;
+    let labelTextForFont: SVGTextElement | null = null;
     for (const item of this.getContents()) {
       const element = item.getElement();
       if (element instanceof Blockly.FlyoutButton && element.isLabel()) {
-        widest = Math.max(widest, element.width);
-        labelText ??= element
+        widestTextPx = Math.max(widestTextPx, element.width);
+        labelTextForFont ??= element
           .getSvgRoot()
           .querySelector<SVGTextElement>(".blocklyFlyoutLabelText");
       }
     }
-    if (labelText) {
-      widest = Math.max(widest, measureLikeLabel(labelText, searchHint()));
+    if (labelTextForFont) {
+      const hintTextPx = measureLikeLabel(labelTextForFont, searchHint());
+      widestTextPx = Math.max(widestTextPx, hintTextPx);
     }
-    const needed = computeFlyoutWidthForLabel({
-      textWidth: widest,
-      sideMargin,
-      scrollbarWidth: flyoutScrollbarWidth(),
-    });
-    if (widest > 0 && needed > this.getWidth()) {
-      this.width_ = needed;
-      this.position();
-      this.targetWorkspace.resizeContents();
-      this.targetWorkspace.recordDragTargets();
-    }
+    return widestTextPx;
   }
 
   /**
@@ -264,6 +274,7 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
     }
 
     const sideMargin = 10;
+    // Before reading viewWidth: this may widen the flyout.
     this.widenForLabels_(sideMargin);
     const viewWidth = this.getWorkspace().getMetrics().viewWidth;
     const radius = 10;

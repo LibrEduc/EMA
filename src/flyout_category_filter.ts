@@ -8,15 +8,19 @@ function isLabel(item: FlyoutContentItem | undefined): boolean {
   return typeof item?.kind === "string" && item.kind.toLowerCase() === "label";
 }
 
-function closesSection(
+// With a name list, only a label named in it starts a category: the search hint
+// and the "no result" message are labels too, but belong to the search section.
+function startsNextCategory(
   label: FlyoutContentItem,
-  normalizedNames: readonly string[] | undefined,
+  lowercaseCategoryNames: readonly string[] | undefined,
 ): boolean {
-  return (
-    !normalizedNames ||
-    (typeof label.text === "string" &&
-      normalizedNames.includes(label.text.trim().toLowerCase()))
-  );
+  if (!lowercaseCategoryNames) {
+    return true;
+  }
+  if (typeof label.text !== "string") {
+    return false;
+  }
+  return lowercaseCategoryNames.includes(label.text.trim().toLowerCase());
 }
 
 /**
@@ -52,13 +56,13 @@ export function sliceFlyoutContentsForCategory<T extends FlyoutContentItem>(
     return [];
   }
 
-  const normalizedNames = categoryNames?.map((name) =>
+  const lowercaseCategoryNames = categoryNames?.map((name) =>
     name.trim().toLowerCase(),
   );
   let endIdx = contents.length;
   for (let i = startIdx + 1; i < contents.length; i++) {
     const item = contents[i];
-    if (isLabel(item) && closesSection(item, normalizedNames)) {
+    if (isLabel(item) && startsNextCategory(item, lowercaseCategoryNames)) {
       endIdx = i;
       break;
     }

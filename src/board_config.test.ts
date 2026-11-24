@@ -1,32 +1,54 @@
 import { describe, expect, it } from "vitest";
+import type { ToolboxConfiguration } from "../vendor/ucBlockly/src/toolbox_types";
 import { withoutBoardCategory } from "./board_config";
 
+function toolboxOf(...contents: ToolboxConfiguration["contents"]): ToolboxConfiguration {
+  return { kind: "categoryToolbox", contents };
+}
+
 describe("withoutBoardCategory", () => {
-  const toolbox = {
-    kind: "categoryToolbox",
-    contents: [
-      { kind: "category", name: "Libre", contents: [{ kind: "block", type: "a" }] },
-      { kind: "sep" },
-      {
-        kind: "category",
-        name: "Carte : arduino_uno",
-        categorystyle: "board_category",
-        contents: [{ kind: "block", type: "board_x" }],
-      },
-      { kind: "category", name: "CAT_BOARD", contents: [{ kind: "block", type: "board_y" }] },
-      { kind: "category", name: "Logique", contents: [] },
-    ],
+  const libre = {
+    kind: "category",
+    name: "Libre",
+    contents: [{ kind: "block", type: "a" }],
+  };
+  const separator = { kind: "sep" };
+  const logique = { kind: "category", name: "Logique", contents: [] };
+  // Translated name, only the style tells it is the board.
+  const boardByStyle = {
+    kind: "category",
+    name: "Carte : arduino_uno",
+    categorystyle: "board_category",
+    contents: [{ kind: "block", type: "board_x" }],
+  };
+  // Untranslated key.
+  const boardByName = {
+    kind: "category",
+    name: "CAT_BOARD",
+    contents: [{ kind: "block", type: "board_y" }],
   };
 
-  it("removes the board category from the rail in single-board mode, keeps the others, does not mutate the input", () => {
-    const snapshot = structuredClone(toolbox);
-    const result = withoutBoardCategory(toolbox as never) as typeof toolbox;
+  it("removes the board category recognised by its style", () => {
+    const result = withoutBoardCategory(toolboxOf(libre, boardByStyle));
+    expect(result.contents).toEqual([libre]);
+  });
 
-    expect(result.contents.map((c) => (c as { name?: string }).name)).toEqual([
-      "Libre",
-      undefined,
-      "Logique",
-    ]);
-    expect(toolbox).toEqual(snapshot);
+  it("removes the board category recognised by its untranslated name", () => {
+    const result = withoutBoardCategory(toolboxOf(libre, boardByName));
+    expect(result.contents).toEqual([libre]);
+  });
+
+  it("keeps the other categories and the separators, in order", () => {
+    const result = withoutBoardCategory(
+      toolboxOf(libre, separator, boardByStyle, logique),
+    );
+    expect(result.contents).toEqual([libre, separator, logique]);
+  });
+
+  it("does not modify the toolbox it receives", () => {
+    const toolbox = toolboxOf(libre, separator, boardByStyle, logique);
+    const before = structuredClone(toolbox);
+    withoutBoardCategory(toolbox);
+    expect(toolbox).toEqual(before);
   });
 });

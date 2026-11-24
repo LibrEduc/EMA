@@ -37,18 +37,25 @@ describe("computeCategoryLabelWidth", () => {
 });
 
 describe("computeFlyoutWidthForLabel", () => {
-  it("a flyout sized for its widest label keeps the badge left of the scrollbar", () => {
-    const sideMargin = 10;
-    const scrollbarWidth = 12;
-    const stroke = 3;
-    const textWidth = 140;
+  const textWidth = 140;
+  const sideMargin = 10;
+  const scrollbarWidth = 12;
+  const stroke = 3;
 
+  it("fits the badge text, its padding, both margins and the scrollbar", () => {
+    // 140 text + 32 padding + 2 * 10 margin + 12 scrollbar
+    expect(
+      computeFlyoutWidthForLabel({ textWidth, sideMargin, scrollbarWidth }),
+    ).toBe(204);
+  });
+
+  it("keeps the badge left of the scrollbar", () => {
     const flyoutWidth = computeFlyoutWidthForLabel({
       textWidth,
       sideMargin,
       scrollbarWidth,
     });
-    const badge = computeCategoryLabelWidth({
+    const badgeWidth = computeCategoryLabelWidth({
       viewWidth: flyoutWidth,
       sideMargin,
       scrollbarWidth,
@@ -56,9 +63,9 @@ describe("computeFlyoutWidthForLabel", () => {
       textWidth,
     });
 
-    expect(flyoutWidth).toBe(textWidth + 32 + 2 * sideMargin + scrollbarWidth);
-    expect(sideMargin + badge + stroke / 2).toBeLessThanOrEqual(
-      flyoutWidth - scrollbarWidth,
-    );
+    // Half the stroke is drawn outside the badge edge.
+    const badgeRightEdge = sideMargin + badgeWidth + stroke / 2;
+    const scrollbarLeftEdge = flyoutWidth - scrollbarWidth;
+    expect(badgeRightEdge).toBeLessThanOrEqual(scrollbarLeftEdge);
   });
 });

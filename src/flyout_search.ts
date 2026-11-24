@@ -25,7 +25,8 @@ type ToolboxWithWidth = Blockly.IToolbox & {
 let hookedFlyout: FlyoutWithPosition | null = null;
 let originalPosition: (() => void) | null = null;
 
-let categoryBeforeSearch: unknown = null;
+// Category selected when the search took over, to go back to it once the query is empty.
+let categoryBeforeSearch: object | null = null;
 
 // getElementById would find the plugin's category DIV that carries the same id.
 function getSource(workspace: Blockly.WorkspaceSvg): HTMLInputElement | null {
@@ -69,12 +70,17 @@ function writeTranslate(svg: SVGElement, x: number, y: number): void {
   svg.setAttribute("transform", `translate(${x}, ${y})`);
 }
 
+type SearchableToolbox = {
+  getToolboxItems?: () => Array<{
+    getId?: () => string;
+    isSelectable?: () => boolean;
+  }>;
+  setSelectedItem?: (item: unknown) => void;
+  getSelectedItem?: () => { getId?: () => string } | null;
+};
+
 function selectSearchCategory(workspace: Blockly.WorkspaceSvg): void {
-  const toolbox = workspace.getToolbox() as {
-    getToolboxItems?: () => Array<{ getId?: () => string }>;
-    setSelectedItem?: (item: unknown) => void;
-    getSelectedItem?: () => { getId?: () => string } | null;
-  } | null;
+  const toolbox = workspace.getToolbox() as SearchableToolbox | null;
   if (!toolbox?.getToolboxItems || !toolbox.setSelectedItem) {
     return;
   }
@@ -92,15 +98,8 @@ function selectSearchCategory(workspace: Blockly.WorkspaceSvg): void {
 }
 
 // Leaves the search category once the query is empty, back to where the user was.
-function restoreCategory(workspace: Blockly.WorkspaceSvg): void {
-  const toolbox = workspace.getToolbox() as {
-    getToolboxItems?: () => Array<{
-      getId?: () => string;
-      isSelectable?: () => boolean;
-    }>;
-    setSelectedItem?: (item: unknown) => void;
-    getSelectedItem?: () => { getId?: () => string } | null;
-  } | null;
+function restoreCategoryBeforeSearch(workspace: Blockly.WorkspaceSvg): void {
+  const toolbox = workspace.getToolbox() as SearchableToolbox | null;
   if (!toolbox?.getToolboxItems || !toolbox.setSelectedItem) {
     return;
   }
@@ -108,9 +107,12 @@ function restoreCategory(workspace: Blockly.WorkspaceSvg): void {
     return;
   }
   const items = toolbox.getToolboxItems();
-  const target =
-    items.find((item) => item === categoryBeforeSearch) ??
-    items.find((item) => item.getId?.() !== SOURCE_ID && item.isSelectable?.());
+  const previous = items.find((item) => item === categoryBeforeSearch);
+  const firstCategory = items.find(
+    (item) => item.getId?.() !== SOURCE_ID && item.isSelectable?.(),
+  );
+  // Fallback when nothing was selected before the search, or that category is gone.
+  const target = previous ?? firstCategory;
   if (target) {
     toolbox.setSelectedItem(target);
   }
@@ -124,6 +126,8 @@ function syncSourceFromFlyout(
   if (!source) {
     return;
   }
+  // The plugin refreshes the flyout only while its search category is selected: select it
+  // before a query, and leave it only after an empty one (the plugin resets to the hint first).
   const isEmpty = value.trim() === "";
   if (!isEmpty) {
     selectSearchCategory(workspace);
@@ -133,7 +137,7 @@ function syncSourceFromFlyout(
   }
   source.dispatchEvent(new Event("input", { bubbles: true }));
   if (isEmpty) {
-    restoreCategory(workspace);
+    restoreCategoryBeforeSearch(workspace);
   }
 }
 
@@ -178,7 +182,7 @@ function ensureBar(workspace: Blockly.WorkspaceSvg): HTMLDivElement | null {
   });
   input.addEventListener("blur", () => {
     if (input.value.trim() === "") {
-      restoreCategory(workspace);
+      restoreCategoryBeforeSearch(workspace);
     }
   });
   input.addEventListener("input", () => {
