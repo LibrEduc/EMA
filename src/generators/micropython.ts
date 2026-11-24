@@ -71,13 +71,13 @@ export class MicroPythonGenerator extends PythonGenerator {
       this.definitions_["from_numbers_import_Number"] = "Number = (int, float)";
     }
     const variables = String(this.definitions_["variables"] ?? "").trim();
-    const definitions: string[] = [];
-    for (const definition of Object.values(this.definitions_)) {
-      if (definition === this.definitions_["variables"] || !definition) continue;
+    const otherDefinitions: string[] = [];
+    for (const [name, definition] of Object.entries(this.definitions_)) {
+      if (name === "variables" || !definition) continue;
       if (IMPORT_LINE.test(definition)) {
         this.imports_.add(definition.trim());
       } else {
-        definitions.push(definition.trim());
+        otherDefinitions.push(definition.trim());
       }
     }
 
@@ -88,7 +88,7 @@ export class MicroPythonGenerator extends PythonGenerator {
       !hasSetupTag &&
       !emitLoop &&
       this.imports_.size === 0 &&
-      definitions.length === 0
+      otherDefinitions.length === 0
     ) {
       return "";
     }
@@ -108,7 +108,7 @@ export class MicroPythonGenerator extends PythonGenerator {
       lines.push(variables, "");
     }
 
-    for (const definition of definitions) {
+    for (const definition of otherDefinitions) {
       lines.push(definition, "");
     }
 
@@ -285,6 +285,7 @@ function registerCoreOverrides(gen: MicroPythonGenerator): void {
   // µcBlockly's math_change takes the variable as a value input, which the
   // stock Python generator does not read.
   register(gen, "math_change", (block, g) => {
+    // Stock Blockly's math_change has VAR as a field, and valueToCode throws on a missing input.
     const target = block.getInput("VAR") ? g.valueToCode(block, "VAR", Order.NONE) : "";
     if (!target) return "";
     const delta = g.valueToCode(block, "DELTA", Order.ADDITIVE) || "0";

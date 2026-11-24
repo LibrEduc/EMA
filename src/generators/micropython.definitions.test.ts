@@ -53,6 +53,7 @@ const callBlink: BlockState = {
 describe("MicroPython generator definitions", () => {
   let workspace: Blockly.Workspace;
 
+  // The header carries the generation time, so it is dropped before comparing.
   const generate = (...programs: BlockState[]): string[] => {
     for (const program of programs) {
       Blockly.serialization.blocks.append(program, workspace);
@@ -64,6 +65,7 @@ describe("MicroPython generator definitions", () => {
   };
 
   beforeAll(() => {
+    // µcBlockly reads the selected board from a #boardMenu element.
     vi.stubGlobal("document", { getElementById: () => null });
     registerUcBlocklyKernel();
   });
@@ -117,7 +119,10 @@ describe("MicroPython generator definitions", () => {
     };
     const output = generate(loopOf(change)).join("\n");
     expect(output).toContain("score = None\n");
+    // Declared once: the variables entry must not also land among the other definitions.
+    expect(output.match(/^score = None$/gm)).toHaveLength(1);
     expect(output).toContain("\n  score += 1\n");
+    // The stock generator emits `unnamed = (unnamed if isinstance(unnamed, Number) else 0) + 1`.
     expect(output).not.toMatch(/unnamed|Number|isinstance/);
   });
 
