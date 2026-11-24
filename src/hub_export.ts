@@ -61,6 +61,8 @@ export interface HubIssueCopy {
   readonly hubErrorBlocks: string;
   readonly hubErrorGeneric: string;
   readonly hubErrorEmpty: string;
+  readonly hubBlockQuoted: string;
+  readonly hubBlockSeparator: string;
   readonly hubFreeBlock: string;
   readonly hubFreeRoles: Readonly<Record<HubFreeRole, string>>;
 }
@@ -117,6 +119,22 @@ export function getHubExportIssue(
   return result.code.split("\n").every(isInactiveLine) ? "emptyProgram" : null;
 }
 
+/** Downloads the program for the Hub, or returns why it cannot go there (then nothing is downloaded). */
+export function tryDownloadHubProgram(
+  result: GenerationResult,
+  slot: number,
+): HubExportIssue | null {
+  if (!result.ok) {
+    return "generationError";
+  }
+  const issue = getHubExportIssue(result);
+  if (issue !== null) {
+    return issue;
+  }
+  downloadHubProgram(result.code, slot);
+  return null;
+}
+
 export function formatHubIssueMessage(
   copy: HubIssueCopy,
   issue: HubExportIssue,
@@ -129,10 +147,13 @@ export function formatHubIssueMessage(
     return copy.hubErrorGeneric;
   }
   const labels = result.unsupportedBlocks.map((block) => blockName(copy, block));
-  const named = labels.slice(0, MAX_NAMED_BLOCKS).map((label) => `« ${label} »`);
-  const others = labels.length - named.length;
-  const list = others > 0 ? `${named.join(", ")} (+${others})` : named.join(", ");
   // Fonction de remplacement : le texte saisi par l'élève ($&, $', $`…) reste littéral.
+  const named = labels
+    .slice(0, MAX_NAMED_BLOCKS)
+    .map((label) => copy.hubBlockQuoted.replace("{name}", () => label));
+  const others = labels.length - named.length;
+  const namedList = named.join(copy.hubBlockSeparator);
+  const list = others > 0 ? `${namedList} (+${others})` : namedList;
   return copy.hubErrorBlocks.replace("{blocks}", () => list);
 }
 

@@ -33,13 +33,12 @@ import {
 import {
   HUB_SLOT_MAX,
   HUB_SLOT_MIN,
-  downloadHubProgram,
   formatHubIssueMessage,
-  getHubExportIssue,
   type HubExportIssue,
   loadHubSlot,
   normalizeHubSlot,
   saveHubSlot,
+  tryDownloadHubProgram,
 } from "./hub_export";
 import {
   clearOnBlockEdit,
@@ -197,12 +196,20 @@ const syncToolboxCollapseLabels = (): void => {
 
 let clearHubHighlight: () => void = () => undefined;
 
+// The message sits above the workspace and changes its height. Blockly 13 does not
+// notice, so resize it here, synchronously, before any centerOnBlock.
+function setHubMessage(text: string): void {
+  if (!hubMessage || hubMessage.textContent === text) {
+    return;
+  }
+  hubMessage.textContent = text;
+  resizeWorkspace();
+}
+
 function clearHubFeedback(): void {
   clearHubHighlight();
   clearHubHighlight = () => undefined;
-  if (hubMessage) {
-    hubMessage.textContent = "";
-  }
+  setHubMessage("");
 }
 
 const wireWorkspaceUi = (): void => {
@@ -412,13 +419,8 @@ function showHubIssue(
   issue: HubExportIssue,
   result: GenerationResult,
 ): void {
-  if (hubMessage) {
-    hubMessage.textContent = formatHubIssueMessage(
-      getShellCopy(uiLanguage),
-      issue,
-      result,
-    );
-  }
+  // Set the message first: markUnsupportedBlocks centers with the new workspace size.
+  setHubMessage(formatHubIssueMessage(getShellCopy(uiLanguage), issue, result));
   if (!result.ok) {
     clearHubHighlight = markUnsupportedBlocks(
       manager.workspace as Blockly.WorkspaceSvg,
@@ -433,12 +435,10 @@ hubDownloadBtn?.addEventListener("click", () => {
     ? normalizeHubSlot(hubSlotSelect.value)
     : hubSlot;
   const result = tryGenerateCode(manager.workspace, "micropython");
-  const issue = getHubExportIssue(result);
-  if (issue === null && result.ok) {
-    downloadHubProgram(result.code, slot);
-    return;
+  const issue = tryDownloadHubProgram(result, slot);
+  if (issue !== null) {
+    showHubIssue(issue, result);
   }
-  showHubIssue(issue ?? "generationError", result);
 });
 
 const targetRadios = document.querySelectorAll<HTMLInputElement>(

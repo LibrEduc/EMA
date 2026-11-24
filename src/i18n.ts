@@ -92,6 +92,8 @@ type ShellCopy = {
   hubErrorBlocks: string;
   hubErrorGeneric: string;
   hubErrorEmpty: string;
+  hubBlockQuoted: string;
+  hubBlockSeparator: string;
   hubFreeBlock: string;
   hubFreeRoles: {
     value: string;
@@ -141,11 +143,13 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     hubSlotLabel: "Numéro du programme (0 à 19)",
     hubDownload: "Télécharger pour le Hub",
     hubErrorBlocks:
-      "Impossible de télécharger. Blocs non pris en charge par le Hub : {blocks} (entourés en rouge). Retirez-les et réessayez.",
+      "Impossible de télécharger. Blocs non pris en charge par le Hub : {blocks} (entourés en rouge). Retire-les et réessaie.",
     hubErrorGeneric:
-      "Impossible de télécharger : la génération du programme a échoué. Vérifiez les blocs et réessayez.",
+      "Impossible de télécharger : la génération du programme a échoué. Vérifie les blocs et réessaie.",
     hubErrorEmpty:
-      "Impossible de télécharger : le programme est vide. Ajoutez des blocs dans setup ou loop.",
+      "Impossible de télécharger : le programme est vide. Ajoute des blocs dans setup ou loop.",
+    hubBlockQuoted: "« {name} »",
+    hubBlockSeparator: ", ",
     hubFreeBlock: "Bloc libre ({role})",
     hubFreeRoles: {
       value: "valeur",
@@ -198,6 +202,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "Can't download: the program could not be generated. Check your blocks and try again.",
     hubErrorEmpty:
       "Can't download: the program is empty. Add blocks to setup or loop.",
+    hubBlockQuoted: "“{name}”",
+    hubBlockSeparator: ", ",
     hubFreeBlock: "Free block ({role})",
     hubFreeRoles: {
       value: "value",
@@ -250,6 +256,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "No se puede descargar: no se pudo generar el programa. Revisa los bloques e inténtalo de nuevo.",
     hubErrorEmpty:
       "No se puede descargar: el programa está vacío. Añade bloques en setup o loop.",
+    hubBlockQuoted: "«{name}»",
+    hubBlockSeparator: ", ",
     hubFreeBlock: "Bloque libre ({role})",
     hubFreeRoles: {
       value: "valor",
@@ -302,6 +310,8 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "تعذّر التنزيل: فشل إنشاء البرنامج. تحقّق من الكتل وأعد المحاولة.",
     hubErrorEmpty:
       "تعذّر التنزيل: البرنامج فارغ. أضف كتلًا في setup أو loop.",
+    hubBlockQuoted: "«{name}»",
+    hubBlockSeparator: "، ",
     hubFreeBlock: "كتلة حرة ({role})",
     hubFreeRoles: {
       value: "قيمة",

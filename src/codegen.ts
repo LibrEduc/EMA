@@ -29,7 +29,7 @@ export function saveCodeTarget(target: CodeTarget): void {
 export interface UnsupportedBlock {
   readonly id: string;
   readonly type: string;
-  /** Texte lisible du bloc (saisi par l'élève), vide s'il n'en a aucun. */
+  /** The block's own text (what the student typed, for a Libre block); empty if it has none. */
   readonly label: string;
 }
 
@@ -49,23 +49,46 @@ function hasGenerator(target: CodeTarget, blockType: string): boolean {
   return typeof generator.forBlock[blockType] === "function";
 }
 
-// toString() renvoie des "?" pour les entrées vides : un bloc sans texte
-// (comme libre_start) n'a alors aucun libellé lisible.
+// Fields like the +/- image of a mutator show only symbols: no letter or digit
+// means the block has no readable text.
 const READABLE_TEXT = /[\p{L}\p{N}]/u;
 
-function labelOf(block: Blockly.Block): string {
-  const text = block.toString(BLOCK_LABEL_MAX_LENGTH).trim();
-  return READABLE_TEXT.test(text) ? text : "";
+// Libre blocks (µcBlockly categories/blockly/libre.ts) hold what the student typed in
+// their text fields; their other labels, like "faire", say nothing about the block.
+// Other blocks: own fields only, since toString() also reads the blocks plugged in.
+function ownText(block: Blockly.Block): string {
+  const fields = [...block.getFields()];
+  const shownFields = block.type.startsWith("libre_")
+    ? fields.filter((field) => field instanceof Blockly.FieldTextInput)
+    : fields;
+  return shownFields.map((field) => field.getText()).join(" ");
 }
 
-/** Enabled blocks without a generator: the ones that make generation throw. */
+function labelOf(block: Blockly.Block): string {
+  const text = ownText(block).trim();
+  if (!READABLE_TEXT.test(text)) {
+    return "";
+  }
+  // Cut by code points, not UTF-16 units, so a surrogate pair is never split.
+  const characters = Array.from(text);
+  return characters.length > BLOCK_LABEL_MAX_LENGTH
+    ? `${characters.slice(0, BLOCK_LABEL_MAX_LENGTH - 1).join("")}…`
+    : text;
+}
+
+// The generator skips disabled blocks and every block inside them.
+function isGenerated(block: Blockly.Block): boolean {
+  return block.isEnabled() && !block.getInheritedDisabled();
+}
+
+/** Blocks the generator visits that have no generator: the ones that make generation throw. */
 function findUnsupportedBlocks(
   workspace: Blockly.Workspace,
   target: CodeTarget,
 ): UnsupportedBlock[] {
   return workspace
     .getAllBlocks(false)
-    .filter((block) => block.isEnabled() && !hasGenerator(target, block.type))
+    .filter((block) => isGenerated(block) && !hasGenerator(target, block.type))
     .map((block) => ({
       id: block.id,
       type: block.type,
