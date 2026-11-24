@@ -217,6 +217,36 @@ body {
   gap: 0.35rem;
 }
 
+/* Message d'échec de l'export Hub : toujours dans le DOM (zone live), vide = invisible. */
+.ema-hub-message {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  background: #fbeceb;
+  color: #7a1913;
+  border-block: 2px solid #c0281d;
+  border-inline-start: 0.5rem solid #c0281d;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.ema-hub-message:empty {
+  padding: 0;
+  border: 0;
+}
+
+html.ema-high-contrast .ema-hub-message {
+  background: #ffffff;
+  color: #000000;
+  border-color: #000000;
+}
+
+/* Bloc non pris en charge : contour rouge posé par hub_block_highlight.ts. */
+.ema-hub-unsupported > .blocklyPath {
+  stroke: #d92d20;
+  stroke-width: 4px;
+}
+
 .ema-hub-slot {
   min-block-size: var(--target-size);
   padding: 0.35rem 0.5rem;

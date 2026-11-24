@@ -27,5 +27,6 @@ MEMORY.md
 Opus.md
 **/skills/
 .agentation-local/
+.lavish/
 vite.local.config.ts
 # --- end vlad_ai_stack ---
