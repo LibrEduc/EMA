@@ -28,6 +28,8 @@ export function saveCodeTarget(target: CodeTarget): void {
 
 export interface UnsupportedBlock {
   readonly id: string;
+  readonly type: string;
+  /** Texte lisible du bloc (saisi par l'élève), vide s'il n'en a aucun. */
   readonly label: string;
 }
 
@@ -48,12 +50,12 @@ function hasGenerator(target: CodeTarget, blockType: string): boolean {
 }
 
 // toString() renvoie des "?" pour les entrées vides : un bloc sans texte
-// (comme libre_start) n'a alors aucun libellé lisible, son type le remplace.
+// (comme libre_start) n'a alors aucun libellé lisible.
 const READABLE_TEXT = /[\p{L}\p{N}]/u;
 
 function labelOf(block: Blockly.Block): string {
   const text = block.toString(BLOCK_LABEL_MAX_LENGTH).trim();
-  return READABLE_TEXT.test(text) ? text : block.type;
+  return READABLE_TEXT.test(text) ? text : "";
 }
 
 /** Enabled blocks without a generator: the ones that make generation throw. */
@@ -64,7 +66,11 @@ function findUnsupportedBlocks(
   return workspace
     .getAllBlocks(false)
     .filter((block) => block.isEnabled() && !hasGenerator(target, block.type))
-    .map((block) => ({ id: block.id, label: labelOf(block) }));
+    .map((block) => ({
+      id: block.id,
+      type: block.type,
+      label: labelOf(block),
+    }));
 }
 
 export function tryGenerateCode(

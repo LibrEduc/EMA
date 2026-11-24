@@ -92,6 +92,15 @@ type ShellCopy = {
   hubErrorBlocks: string;
   hubErrorGeneric: string;
   hubErrorEmpty: string;
+  hubFreeBlock: string;
+  hubFreeRoles: {
+    value: string;
+    instruction: string;
+    start: string;
+    end: string;
+    loop: string;
+    innerLoop: string;
+  };
 };
 
 const SHELL: Record<UiLanguage, ShellCopy> = {
@@ -137,6 +146,15 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "Impossible de télécharger : la génération du programme a échoué. Vérifiez les blocs et réessayez.",
     hubErrorEmpty:
       "Impossible de télécharger : le programme est vide. Ajoutez des blocs dans setup ou loop.",
+    hubFreeBlock: "Bloc libre ({role})",
+    hubFreeRoles: {
+      value: "valeur",
+      instruction: "instruction",
+      start: "début de pile",
+      end: "fin de pile",
+      loop: "boucle",
+      innerLoop: "boucle au milieu",
+    },
   },
   en: {
     title: "Program your MAE robot",
@@ -180,6 +198,15 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "Can't download: the program could not be generated. Check your blocks and try again.",
     hubErrorEmpty:
       "Can't download: the program is empty. Add blocks to setup or loop.",
+    hubFreeBlock: "Free block ({role})",
+    hubFreeRoles: {
+      value: "value",
+      instruction: "instruction",
+      start: "stack start",
+      end: "stack end",
+      loop: "loop",
+      innerLoop: "loop in the middle",
+    },
   },
   es: {
     title: "Programa tu robot MAE",
@@ -223,6 +250,15 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "No se puede descargar: no se pudo generar el programa. Revisa los bloques e inténtalo de nuevo.",
     hubErrorEmpty:
       "No se puede descargar: el programa está vacío. Añade bloques en setup o loop.",
+    hubFreeBlock: "Bloque libre ({role})",
+    hubFreeRoles: {
+      value: "valor",
+      instruction: "instrucción",
+      start: "inicio de pila",
+      end: "fin de pila",
+      loop: "bucle",
+      innerLoop: "bucle intermedio",
+    },
   },
   ar: {
     title: "برمِج روبوت MAE",
@@ -266,6 +302,15 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
       "تعذّر التنزيل: فشل إنشاء البرنامج. تحقّق من الكتل وأعد المحاولة.",
     hubErrorEmpty:
       "تعذّر التنزيل: البرنامج فارغ. أضف كتلًا في setup أو loop.",
+    hubFreeBlock: "كتلة حرة ({role})",
+    hubFreeRoles: {
+      value: "قيمة",
+      instruction: "تعليمة",
+      start: "بداية المكدس",
+      end: "نهاية المكدس",
+      loop: "حلقة",
+      innerLoop: "حلقة وسطية",
+    },
   },
 };
 

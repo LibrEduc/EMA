@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { GenerationResult } from "./codegen";
+import type { GenerationResult, UnsupportedBlock } from "./codegen";
+import { getShellCopy, type UiLanguage } from "./i18n";
 import {
   HUB_SLOT_MAX,
   HUB_SLOT_MIN,
@@ -116,7 +117,7 @@ const REAL_PROGRAM = [
 
 const generated = (code: string): GenerationResult => ({ ok: true, code });
 const failed = (
-  unsupportedBlocks: ReadonlyArray<{ id: string; label: string }>,
+  unsupportedBlocks: ReadonlyArray<UnsupportedBlock>,
 ): GenerationResult => ({ ok: false, error: new Error("x"), unsupportedBlocks });
 
 describe("getHubExportIssue (revue PR #32)", () => {
@@ -156,10 +157,78 @@ describe("formatHubIssueMessage", () => {
     hubErrorBlocks: "Blocs non pris en charge : {blocks}.",
     hubErrorGeneric: "La génération a échoué.",
     hubErrorEmpty: "Le programme est vide.",
+    hubFreeBlock: "Bloc libre ({role})",
+    hubFreeRoles: {
+      value: "valeur",
+      instruction: "instruction",
+      start: "début de pile",
+      end: "fin de pile",
+      loop: "boucle",
+      innerLoop: "boucle au milieu",
+    },
   };
 
+  it("names a Libre block by its role when it holds no text", () => {
+    const result = failed([{ id: "1", type: "libre_start", label: "" }]);
+
+    expect(formatHubIssueMessage(copy, "generationError", result)).toBe(
+      "Blocs non pris en charge : « Bloc libre (début de pile) ».",
+    );
+  });
+
+  it("gives every Libre block type a readable role name", () => {
+    const types = [
+      "libre_in",
+      "libre_out",
+      "libre_in_out",
+      "libre_start",
+      "libre_end",
+      "libre_loop",
+      "libre_loop_with_return",
+      "libre_loop_inside",
+      "libre_loop_inside_in",
+      "libre_loop_inside_in_mutator",
+      "libre_loop_do_inside",
+      "libre_loop_do_inside_in",
+    ];
+    for (const type of types) {
+      const message = formatHubIssueMessage(
+        copy,
+        "generationError",
+        failed([{ id: "1", type, label: "" }]),
+      );
+      expect(message, type).toContain("Bloc libre (");
+      expect(message, type).not.toContain(type);
+    }
+  });
+
+  it("prefers the text typed in the block over its role", () => {
+    const result = failed([{ id: "1", type: "libre_start", label: "mon code" }]);
+
+    expect(formatHubIssueMessage(copy, "generationError", result)).toBe(
+      "Blocs non pris en charge : « mon code ».",
+    );
+  });
+
+  it("shows text typed by a student literally, even with replace patterns", () => {
+    const typed = "$& $' $` $1 $$ <b>x</b>";
+    const result = failed([{ id: "1", type: "libre_start", label: typed }]);
+
+    expect(formatHubIssueMessage(copy, "generationError", result)).toBe(
+      `Blocs non pris en charge : « ${typed} ».`,
+    );
+  });
+
+  it("falls back to the block type when it has neither text nor role", () => {
+    const result = failed([{ id: "1", type: "autre_bloc", label: "" }]);
+
+    expect(formatHubIssueMessage(copy, "generationError", result)).toBe(
+      "Blocs non pris en charge : « autre_bloc ».",
+    );
+  });
+
   it("names the unsupported block", () => {
-    const result = failed([{ id: "1", label: "allumer LED" }]);
+    const result = failed([{ id: "1", type: "t", label: "allumer LED" }]);
 
     expect(formatHubIssueMessage(copy, "generationError", result)).toBe(
       "Blocs non pris en charge : « allumer LED ».",
@@ -168,7 +237,7 @@ describe("formatHubIssueMessage", () => {
 
   it("names three blocks at most and counts the others", () => {
     const result = failed(
-      ["a", "b", "c", "d", "e"].map((label) => ({ id: label, label })),
+      ["a", "b", "c", "d", "e"].map((label) => ({ id: label, type: "t", label })),
     );
 
     expect(formatHubIssueMessage(copy, "generationError", result)).toBe(
@@ -186,5 +255,32 @@ describe("formatHubIssueMessage", () => {
     expect(
       formatHubIssueMessage(copy, "emptyProgram", generated(IDLE_PROGRAM)),
     ).toBe("Le programme est vide.");
+  });
+});
+
+describe("Hub messages in every interface language", () => {
+  const languages: UiLanguage[] = ["fr", "en", "es", "ar"];
+
+  it("defines a distinct name for each Libre block role", () => {
+    for (const language of languages) {
+      const copy = getShellCopy(language);
+      const roles = Object.values(copy.hubFreeRoles);
+
+      expect(copy.hubFreeBlock, language).toContain("{role}");
+      expect(roles, language).toHaveLength(6);
+      expect(new Set(roles).size, language).toBe(6);
+      expect(
+        roles.every((role) => role.trim() !== ""),
+        language,
+      ).toBe(true);
+    }
+  });
+
+  it("keeps the {blocks} placeholder in the unsupported-blocks message", () => {
+    for (const language of languages) {
+      expect(getShellCopy(language).hubErrorBlocks, language).toContain(
+        "{blocks}",
+      );
+    }
   });
 });

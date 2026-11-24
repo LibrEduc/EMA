@@ -73,11 +73,11 @@ describe("tryGenerateCode (export Hub)", () => {
       return;
     }
     expect(result.unsupportedBlocks).toEqual([
-      { id: block.id, label: "bloc inconnu" },
+      { id: block.id, type: UNSUPPORTED_TYPE, label: "bloc inconnu" },
     ]);
   });
 
-  it("falls back to the block type when the block has no readable label", () => {
+  it("gives an empty label, and keeps the type, when the block has no readable text", () => {
     const block = Blockly.serialization.blocks.append(
       { type: UNNAMED_TYPE },
       workspace,
@@ -90,7 +90,7 @@ describe("tryGenerateCode (export Hub)", () => {
       return;
     }
     expect(result.unsupportedBlocks).toEqual([
-      { id: block.id, label: UNNAMED_TYPE },
+      { id: block.id, type: UNNAMED_TYPE, label: "" },
     ]);
   });
 
