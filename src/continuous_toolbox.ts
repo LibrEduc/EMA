@@ -1,6 +1,6 @@
 /**
  * Enregistrement permanent de la toolbox continue (@blockly/continuous-toolbox).
- * Variante EMA : sync scroll→sélection avec avance, icônes colorées explicites.
+ * Variante EMA : une seule catégorie à la fois dans le volet, icônes colorées explicites.
  */
 
 import * as Blockly from "blockly";
@@ -10,7 +10,11 @@ import {
   ContinuousToolbox,
   RecyclableBlockFlyoutInflater,
 } from "@blockly/continuous-toolbox";
-import { ContinuousMetricsOverlayFlyout } from "../vendor/ucBlockly/src/continuous_metrics_overlay_flyout";
+import { resolveFlyoutDefinition } from "./flyout_category_filter";
+import {
+  computeCategoryLabelWidth,
+  computeFlyoutWidthForLabel,
+} from "./flyout_label_metrics";
 
 /** Inflater pour les séparateurs de catégories en mode continu. */
 class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
@@ -80,11 +84,6 @@ const STYLE_TO_FA: Record<string, string> = {
   procedure_category: "fa-gears",
 };
 
-type FlyoutInternals = {
-  scrollTarget?: number;
-  scrollPositions: Map<string, number>;
-};
-
 /** Parse `#rgb` / `#rrggbb` → [r,g,b] 0–255. */
 function parseCssColour(input: string): [number, number, number] | null {
   const raw = input.trim();
@@ -129,15 +128,6 @@ function contrastingInk(background: string): string {
   return luminance > 0.45 ? "#1a2332" : "#ffffff";
 }
 
-/**
- * Flyout continu : sync scroll→sélection + badges de catégorie colorés.
- */
-import { resolveFlyoutDefinition } from "./flyout_category_filter";
-import {
-  computeCategoryLabelWidth,
-  computeFlyoutWidthForLabel,
-} from "./flyout_label_metrics";
-
 const LABEL_STROKE_PX = 3;
 const DEFAULT_SCROLLBAR_PX = 12;
 
@@ -171,6 +161,7 @@ function measureLikeLabel(labelText: SVGTextElement, text: string): number {
   );
 }
 
+/** Flyout continu : une seule catégorie à la fois, badges de catégorie colorés. */
 export class EmaContinuousFlyout extends ContinuousFlyout {
   constructor(workspaceOptions: Blockly.Options) {
     super(workspaceOptions);
@@ -359,40 +350,10 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
     }
 
     // Recalcule les ancres de scroll après le décalage vertical.
-    const internals = this as unknown as FlyoutInternals & {
+    const internals = this as unknown as {
       recordScrollPositions?: () => void;
     };
     internals.recordScrollPositions?.();
-  }
-
-  /** Sélection avec avance (~40 % de la hauteur visible). */
-  private selectCategoryWithLead(position: number): void {
-    const internals = this as unknown as FlyoutInternals;
-    if (internals.scrollTarget !== undefined) {
-      return;
-    }
-    if (internals.scrollPositions.size === 0) {
-      return;
-    }
-
-    const workspace = this.getWorkspace();
-    const viewHeight = workspace.getMetrics().viewHeight;
-    const lead = Math.max(72, viewHeight * 0.4);
-    const scaledPosition = Math.round((position + lead) / workspace.scale);
-
-    const toolbox = this.targetWorkspace.getToolbox();
-    if (!(toolbox instanceof ContinuousToolbox)) {
-      return;
-    }
-
-    for (const [name, categoryTop] of [
-      ...internals.scrollPositions.entries(),
-    ].reverse()) {
-      if (scaledPosition >= categoryTop) {
-        toolbox.selectCategoryByName(name);
-        return;
-      }
-    }
   }
 }
 
