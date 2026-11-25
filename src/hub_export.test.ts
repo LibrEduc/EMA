@@ -10,7 +10,33 @@ import {
   getHubExportIssue,
   isValidHubSlot,
   normalizeHubSlot,
+  tryDownloadHubProgram,
 } from "./hub_export";
+
+// Replaces the browser download machinery with fakes; `downloadedFilenames`
+// lists the file names that were "clicked".
+function stubBrowserDownload() {
+  const downloadedFilenames: string[] = [];
+  const link = {
+    href: "",
+    download: "",
+    style: { display: "" },
+    click: vi.fn(() => downloadedFilenames.push(link.download)),
+    remove: vi.fn(),
+  };
+  const append = vi.fn();
+  const createObjectURL = vi.fn((_blob: Blob) => "blob:ema-test");
+  const revokeObjectURL = vi.fn((_url: string) => undefined);
+  vi.stubGlobal("document", {
+    createElement: vi.fn((tag: string) => {
+      expect(tag).toBe("a");
+      return link;
+    }),
+    body: { appendChild: append },
+  });
+  vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+  return { link, append, createObjectURL, revokeObjectURL, downloadedFilenames };
+}
 
 describe("hub_export (#21 / #12)", () => {
   afterEach(() => {
@@ -52,28 +78,8 @@ describe("hub_export (#21 / #12)", () => {
   });
 
   it("downloads prog_N.py via a Blob object URL and revokes it", () => {
-    const click = vi.fn();
-    const remove = vi.fn();
-    const link = {
-      href: "",
-      download: "",
-      style: { display: "" },
-      click,
-      remove,
-    };
-    const append = vi.fn();
-
-    vi.stubGlobal("document", {
-      createElement: vi.fn((tag: string) => {
-        expect(tag).toBe("a");
-        return link;
-      }),
-      body: { appendChild: append },
-    });
-
-    const createObjectURL = vi.fn((_blob: Blob) => "blob:ema-test");
-    const revokeObjectURL = vi.fn((_url: string) => undefined);
-    vi.stubGlobal("URL", { createObjectURL, revokeObjectURL });
+    const { link, append, createObjectURL, revokeObjectURL } =
+      stubBrowserDownload();
 
     const filename = downloadHubProgram("print('MAE')\n", 3);
 
@@ -85,8 +91,8 @@ describe("hub_export (#21 / #12)", () => {
     expect(link.download).toBe("prog_3.py");
     expect(link.href).toBe("blob:ema-test");
     expect(append).toHaveBeenCalledWith(link);
-    expect(click).toHaveBeenCalledTimes(1);
-    expect(remove).toHaveBeenCalledTimes(1);
+    expect(link.click).toHaveBeenCalledTimes(1);
+    expect(link.remove).toHaveBeenCalledTimes(1);
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:ema-test");
   });
 });
@@ -152,11 +158,42 @@ describe("getHubExportIssue (revue PR #32)", () => {
   });
 });
 
+describe("tryDownloadHubProgram", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("downloads a real program as prog_N.py and reports no issue", () => {
+    const { downloadedFilenames } = stubBrowserDownload();
+
+    expect(tryDownloadHubProgram(generated(REAL_PROGRAM), 3)).toBeNull();
+    expect(downloadedFilenames).toEqual(["prog_3.py"]);
+  });
+
+  it("does not download an empty program and reports it", () => {
+    const { downloadedFilenames } = stubBrowserDownload();
+
+    expect(tryDownloadHubProgram(generated(IDLE_PROGRAM), 3)).toBe(
+      "emptyProgram",
+    );
+    expect(downloadedFilenames).toEqual([]);
+  });
+
+  it("does not download a failed generation and reports it", () => {
+    const { downloadedFilenames } = stubBrowserDownload();
+
+    expect(tryDownloadHubProgram(failed([]), 3)).toBe("generationError");
+    expect(downloadedFilenames).toEqual([]);
+  });
+});
+
 describe("formatHubIssueMessage", () => {
   const copy = {
     hubErrorBlocks: "Blocs non pris en charge : {blocks}.",
     hubErrorGeneric: "La génération a échoué.",
     hubErrorEmpty: "Le programme est vide.",
+    hubBlockQuoted: "« {name} »",
+    hubBlockSeparator: ", ",
     hubFreeBlock: "Bloc libre ({role})",
     hubFreeRoles: {
       value: "valeur",
@@ -176,29 +213,28 @@ describe("formatHubIssueMessage", () => {
     );
   });
 
-  it("gives every Libre block type a readable role name", () => {
-    const types = [
-      "libre_in",
-      "libre_out",
-      "libre_in_out",
-      "libre_start",
-      "libre_end",
-      "libre_loop",
-      "libre_loop_with_return",
-      "libre_loop_inside",
-      "libre_loop_inside_in",
-      "libre_loop_inside_in_mutator",
-      "libre_loop_do_inside",
-      "libre_loop_do_inside_in",
-    ];
-    for (const type of types) {
+  it("names each Libre block type by its own role", () => {
+    const expectedNames: Record<string, string> = {
+      libre_in: "Bloc libre (valeur)",
+      libre_out: "Bloc libre (instruction)",
+      libre_in_out: "Bloc libre (instruction)",
+      libre_start: "Bloc libre (début de pile)",
+      libre_end: "Bloc libre (fin de pile)",
+      libre_loop: "Bloc libre (boucle)",
+      libre_loop_with_return: "Bloc libre (boucle)",
+      libre_loop_inside: "Bloc libre (boucle au milieu)",
+      libre_loop_inside_in: "Bloc libre (boucle au milieu)",
+      libre_loop_inside_in_mutator: "Bloc libre (boucle au milieu)",
+      libre_loop_do_inside: "Bloc libre (boucle au milieu)",
+      libre_loop_do_inside_in: "Bloc libre (boucle au milieu)",
+    };
+    for (const [type, expectedName] of Object.entries(expectedNames)) {
       const message = formatHubIssueMessage(
         copy,
         "generationError",
         failed([{ id: "1", type, label: "" }]),
       );
-      expect(message, type).toContain("Bloc libre (");
-      expect(message, type).not.toContain(type);
+      expect(message, type).toBe(`Blocs non pris en charge : « ${expectedName} ».`);
     }
   });
 
@@ -273,6 +309,27 @@ describe("Hub messages in every interface language", () => {
         roles.every((role) => role.trim() !== ""),
         language,
       ).toBe(true);
+    }
+  });
+
+  it("quotes and separates block names the way each language does", () => {
+    const twoBlocks = failed([
+      { id: "1", type: "t", label: "a" },
+      { id: "2", type: "t", label: "b" },
+    ]);
+    const expectedLists: Record<UiLanguage, string> = {
+      fr: "« a », « b »",
+      en: "“a”, “b”",
+      es: "«a», «b»",
+      ar: "«a»، «b»",
+    };
+    for (const language of languages) {
+      const message = formatHubIssueMessage(
+        getShellCopy(language),
+        "generationError",
+        twoBlocks,
+      );
+      expect(message, language).toContain(expectedLists[language]);
     }
   });
 
