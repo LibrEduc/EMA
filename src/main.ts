@@ -7,7 +7,6 @@ import * as Blockly from "blockly";
 import {
   applyUcBlocklyLocale,
   basic_toolbox,
-  getToolboxWithoutBoardCategory,
   UcBlocklyWorkspaceManager,
 } from "µcBlockly/core";
 import { registerToolboxSearchI18n } from "../vendor/ucBlockly/src/toolbox_search_i18n";
@@ -15,6 +14,7 @@ import { changeLanguageToolbox } from "../vendor/ucBlockly/src/language";
 import {
   SHOW_BOARD_CATEGORY,
   installFixedBoardMenu,
+  withoutBoardCategory,
 } from "./board_config";
 
 import {
@@ -24,10 +24,26 @@ import {
 import {
   bindCodePanel,
   loadCodeTarget,
+  tryGenerateCode,
+  type GenerationResult,
   saveCodeTarget,
   seedProgramStructure,
   type CodeTarget,
 } from "./codegen";
+import {
+  HUB_SLOT_MAX,
+  HUB_SLOT_MIN,
+  formatHubIssueMessage,
+  type HubExportIssue,
+  loadHubSlot,
+  normalizeHubSlot,
+  saveHubSlot,
+  tryDownloadHubProgram,
+} from "./hub_export";
+import {
+  clearOnBlockEdit,
+  markUnsupportedBlocks,
+} from "./hub_block_highlight";
 import {
   applyDocumentDirection,
   applyShellStrings,
@@ -75,6 +91,11 @@ const langSelect = document.getElementById("ema-lang") as HTMLSelectElement | nu
 const undoBtn = document.getElementById("ema-undo");
 const redoBtn = document.getElementById("ema-redo");
 const restartBtn = document.getElementById("ema-restart");
+const hubSlotSelect = document.getElementById(
+  "ema-hub-slot",
+) as HTMLSelectElement | null;
+const hubDownloadBtn = document.getElementById("ema-hub-download");
+const hubMessage = document.getElementById("ema-hub-message");
 const codeDrawer = document.querySelector(
   ".ema-code-drawer",
 ) as HTMLDetailsElement | null;
@@ -96,7 +117,7 @@ const buildToolbox = (language: string) => {
   // Mono-carte : pas de catégorie « Carte : … ». Remettre SHOW_BOARD_CATEGORY pour la réactiver.
   return SHOW_BOARD_CATEGORY
     ? translated
-    : getToolboxWithoutBoardCategory(translated);
+    : withoutBoardCategory(translated);
 };
 
 const toolbox = buildToolbox(uiLanguage);
@@ -173,10 +194,30 @@ const syncToolboxCollapseLabels = (): void => {
   });
 };
 
+let clearHubHighlight: () => void = () => undefined;
+
+// The message sits above the workspace and changes its height. Blockly 13 does not
+// notice, so resize it here, synchronously, before any centerOnBlock.
+function setHubMessage(text: string): void {
+  if (!hubMessage || hubMessage.textContent === text) {
+    return;
+  }
+  hubMessage.textContent = text;
+  resizeWorkspace();
+}
+
+function clearHubFeedback(): void {
+  clearHubHighlight();
+  clearHubHighlight = () => undefined;
+  setHubMessage("");
+}
+
 const wireWorkspaceUi = (): void => {
   const workspace = manager.workspace as Blockly.WorkspaceSvg;
   seedProgramStructure(workspace);
   refreshCode = bindCodePanel(workspace, codeRoot, () => codeTarget);
+  // Un changement de langue recrée le workspace : l'écouteur est reposé à chaque fois.
+  clearOnBlockEdit(workspace, clearHubFeedback);
   applyFlyoutOpen(readFlyoutOpen());
   installToolboxIconRailToggle(workspace);
   installFlyoutSearchBar(workspace);
@@ -358,6 +399,48 @@ restartBtn?.addEventListener("click", () => {
   resizeWorkspace();
 });
 
+let hubSlot = loadHubSlot();
+if (hubSlotSelect) {
+  for (let slot = HUB_SLOT_MIN; slot <= HUB_SLOT_MAX; slot += 1) {
+    const option = document.createElement("option");
+    option.value = String(slot);
+    option.textContent = `prog_${slot}.py`;
+    hubSlotSelect.appendChild(option);
+  }
+  hubSlotSelect.value = String(hubSlot);
+  hubSlotSelect.addEventListener("change", () => {
+    hubSlot = normalizeHubSlot(hubSlotSelect.value);
+    saveHubSlot(hubSlot);
+    clearHubFeedback();
+  });
+}
+
+function showHubIssue(
+  issue: HubExportIssue,
+  result: GenerationResult,
+): void {
+  // Set the message first: markUnsupportedBlocks centers with the new workspace size.
+  setHubMessage(formatHubIssueMessage(getShellCopy(uiLanguage), issue, result));
+  if (!result.ok) {
+    clearHubHighlight = markUnsupportedBlocks(
+      manager.workspace as Blockly.WorkspaceSvg,
+      result.unsupportedBlocks.map((block) => block.id),
+    );
+  }
+}
+
+hubDownloadBtn?.addEventListener("click", () => {
+  clearHubFeedback();
+  const slot = hubSlotSelect
+    ? normalizeHubSlot(hubSlotSelect.value)
+    : hubSlot;
+  const result = tryGenerateCode(manager.workspace, "micropython");
+  const issue = tryDownloadHubProgram(result, slot);
+  if (issue !== null) {
+    showHubIssue(issue, result);
+  }
+});
+
 const targetRadios = document.querySelectorAll<HTMLInputElement>(
   'input[name="ema-code-target"]',
 );
@@ -421,6 +504,7 @@ if (langSelect) {
     if (!isUiLanguage(next) || next === uiLanguage) {
       return;
     }
+    clearHubFeedback();
     applyLanguage(next);
   });
 }

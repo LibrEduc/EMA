@@ -26,19 +26,105 @@ export function saveCodeTarget(target: CodeTarget): void {
   }
 }
 
+export interface UnsupportedBlock {
+  readonly id: string;
+  readonly type: string;
+  /** The block's own text (what the student typed, for a Libre block); empty if it has none. */
+  readonly label: string;
+}
+
+export type GenerationResult =
+  | { readonly ok: true; readonly code: string }
+  | {
+      readonly ok: false;
+      readonly error: unknown;
+      readonly unsupportedBlocks: ReadonlyArray<UnsupportedBlock>;
+    };
+
+const BLOCK_LABEL_MAX_LENGTH = 40;
+
+function hasGenerator(target: CodeTarget, blockType: string): boolean {
+  const generator =
+    target === "micropython" ? micropythonGenerator : arduinoGenerator;
+  return typeof generator.forBlock[blockType] === "function";
+}
+
+// Fields like the +/- image of a mutator show only symbols: no letter or digit
+// means the block has no readable text.
+const READABLE_TEXT = /[\p{L}\p{N}]/u;
+
+// Libre blocks (µcBlockly categories/blockly/libre.ts) hold what the student typed in
+// their text fields; their other labels, like "faire", say nothing about the block.
+// Other blocks: own fields only, since toString() also reads the blocks plugged in.
+function ownText(block: Blockly.Block): string {
+  const fields = [...block.getFields()];
+  const shownFields = block.type.startsWith("libre_")
+    ? fields.filter((field) => field instanceof Blockly.FieldTextInput)
+    : fields;
+  return shownFields.map((field) => field.getText()).join(" ");
+}
+
+function labelOf(block: Blockly.Block): string {
+  const text = ownText(block).trim();
+  if (!READABLE_TEXT.test(text)) {
+    return "";
+  }
+  // Cut by code points, not UTF-16 units, so a surrogate pair is never split.
+  const characters = Array.from(text);
+  return characters.length > BLOCK_LABEL_MAX_LENGTH
+    ? `${characters.slice(0, BLOCK_LABEL_MAX_LENGTH - 1).join("")}…`
+    : text;
+}
+
+// The generator skips disabled blocks and every block inside them.
+function isGenerated(block: Blockly.Block): boolean {
+  return block.isEnabled() && !block.getInheritedDisabled();
+}
+
+/** Blocks the generator visits that have no generator: the ones that make generation throw. */
+function findUnsupportedBlocks(
+  workspace: Blockly.Workspace,
+  target: CodeTarget,
+): UnsupportedBlock[] {
+  return workspace
+    .getAllBlocks(false)
+    .filter((block) => isGenerated(block) && !hasGenerator(target, block.type))
+    .map((block) => ({
+      id: block.id,
+      type: block.type,
+      label: labelOf(block),
+    }));
+}
+
+export function tryGenerateCode(
+  workspace: Blockly.Workspace,
+  target: CodeTarget,
+): GenerationResult {
+  try {
+    const code =
+      target === "micropython"
+        ? micropythonGenerator.workspaceToCode(workspace)
+        : arduinoGenerator.workspaceToCode(workspace);
+    return { ok: true, code };
+  } catch (error) {
+    console.error("[EMA] génération code:", error);
+    return {
+      ok: false,
+      error,
+      unsupportedBlocks: findUnsupportedBlocks(workspace, target),
+    };
+  }
+}
+
 export function generateCode(
   workspace: Blockly.Workspace,
   target: CodeTarget,
 ): string {
-  try {
-    if (target === "micropython") {
-      return micropythonGenerator.workspaceToCode(workspace);
-    }
-    return arduinoGenerator.workspaceToCode(workspace);
-  } catch (error) {
-    console.error("[EMA] génération code:", error);
-    return `// Erreur de génération (${target})\n// ${String(error)}`;
+  const result = tryGenerateCode(workspace, target);
+  if (result.ok) {
+    return result.code;
   }
+  return `// Erreur de génération (${target})\n// ${String(result.error)}`;
 }
 
 /** Place un bloc setup+loop si le workspace est vide (sinon le générateur Arduino renvoie ""). */

@@ -87,6 +87,22 @@ type ShellCopy = {
   shortcutsHelp: string;
   toolboxCollapse: string;
   toolboxExpand: string;
+  hubSlotLabel: string;
+  hubDownload: string;
+  hubErrorBlocks: string;
+  hubErrorGeneric: string;
+  hubErrorEmpty: string;
+  hubBlockQuoted: string;
+  hubBlockSeparator: string;
+  hubFreeBlock: string;
+  hubFreeRoles: {
+    value: string;
+    instruction: string;
+    start: string;
+    end: string;
+    loop: string;
+    innerLoop: string;
+  };
 };
 
 const SHELL: Record<UiLanguage, ShellCopy> = {
@@ -124,6 +140,25 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "Raccourcis",
     toolboxCollapse: "Icônes seules",
     toolboxExpand: "Afficher les noms",
+    hubSlotLabel: "Numéro du programme (0 à 19)",
+    hubDownload: "Télécharger pour le Hub",
+    hubErrorBlocks:
+      "Impossible de télécharger. Blocs non pris en charge par le Hub : {blocks} (entourés en rouge). Retire-les et réessaie.",
+    hubErrorGeneric:
+      "Impossible de télécharger : la génération du programme a échoué. Vérifie les blocs et réessaie.",
+    hubErrorEmpty:
+      "Impossible de télécharger : le programme est vide. Ajoute des blocs dans setup ou loop.",
+    hubBlockQuoted: "« {name} »",
+    hubBlockSeparator: ", ",
+    hubFreeBlock: "Bloc libre ({role})",
+    hubFreeRoles: {
+      value: "valeur",
+      instruction: "instruction",
+      start: "début de pile",
+      end: "fin de pile",
+      loop: "boucle",
+      innerLoop: "boucle au milieu",
+    },
   },
   en: {
     title: "Program your MAE robot",
@@ -159,6 +194,25 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "Shortcuts",
     toolboxCollapse: "Icons only",
     toolboxExpand: "Show names",
+    hubSlotLabel: "Program slot (0 to 19)",
+    hubDownload: "Download for Hub",
+    hubErrorBlocks:
+      "Can't download. Blocks not supported by the Hub: {blocks} (outlined in red). Remove them and try again.",
+    hubErrorGeneric:
+      "Can't download: the program could not be generated. Check your blocks and try again.",
+    hubErrorEmpty:
+      "Can't download: the program is empty. Add blocks to setup or loop.",
+    hubBlockQuoted: "“{name}”",
+    hubBlockSeparator: ", ",
+    hubFreeBlock: "Free block ({role})",
+    hubFreeRoles: {
+      value: "value",
+      instruction: "instruction",
+      start: "stack start",
+      end: "stack end",
+      loop: "loop",
+      innerLoop: "loop in the middle",
+    },
   },
   es: {
     title: "Programa tu robot MAE",
@@ -194,6 +248,25 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "Atajos",
     toolboxCollapse: "Solo iconos",
     toolboxExpand: "Mostrar nombres",
+    hubSlotLabel: "Número de programa (0 a 19)",
+    hubDownload: "Descargar para el Hub",
+    hubErrorBlocks:
+      "No se puede descargar. Bloques no compatibles con el Hub: {blocks} (resaltados en rojo). Quítalos e inténtalo de nuevo.",
+    hubErrorGeneric:
+      "No se puede descargar: no se pudo generar el programa. Revisa los bloques e inténtalo de nuevo.",
+    hubErrorEmpty:
+      "No se puede descargar: el programa está vacío. Añade bloques en setup o loop.",
+    hubBlockQuoted: "«{name}»",
+    hubBlockSeparator: ", ",
+    hubFreeBlock: "Bloque libre ({role})",
+    hubFreeRoles: {
+      value: "valor",
+      instruction: "instrucción",
+      start: "inicio de pila",
+      end: "fin de pila",
+      loop: "bucle",
+      innerLoop: "bucle intermedio",
+    },
   },
   ar: {
     title: "برمِج روبوت MAE",
@@ -229,6 +302,25 @@ const SHELL: Record<UiLanguage, ShellCopy> = {
     shortcutsHelp: "الاختصارات",
     toolboxCollapse: "أيقونات فقط",
     toolboxExpand: "إظهار الأسماء",
+    hubSlotLabel: "رقم البرنامج (0 إلى 19)",
+    hubDownload: "تنزيل إلى الموزع",
+    hubErrorBlocks:
+      "تعذّر التنزيل. كتل غير مدعومة في الموزع: {blocks} (محاطة بالأحمر). احذفها وأعد المحاولة.",
+    hubErrorGeneric:
+      "تعذّر التنزيل: فشل إنشاء البرنامج. تحقّق من الكتل وأعد المحاولة.",
+    hubErrorEmpty:
+      "تعذّر التنزيل: البرنامج فارغ. أضف كتلًا في setup أو loop.",
+    hubBlockQuoted: "«{name}»",
+    hubBlockSeparator: "، ",
+    hubFreeBlock: "كتلة حرة ({role})",
+    hubFreeRoles: {
+      value: "قيمة",
+      instruction: "تعليمة",
+      start: "بداية المكدس",
+      end: "نهاية المكدس",
+      loop: "حلقة",
+      innerLoop: "حلقة وسطية",
+    },
   },
 };
 
@@ -254,6 +346,8 @@ export function applyShellStrings(
   setText("#ema-undo", t.undo);
   setText("#ema-redo", t.redo);
   setText("#ema-restart", t.restart);
+  setText("#ema-hub-slot-label", t.hubSlotLabel);
+  setText("#ema-hub-download", t.hubDownload);
   setText(".ema-flyout-toggle > span:last-child", t.flyoutOpen);
   setText("#ema-flyout-open-hint", t.flyoutHint);
   setText(".ema-settings > summary", t.settings);

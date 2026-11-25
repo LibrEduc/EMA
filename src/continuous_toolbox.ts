@@ -1,6 +1,6 @@
 /**
  * Enregistrement permanent de la toolbox continue (@blockly/continuous-toolbox).
- * Variante EMA : sync scroll→sélection avec avance, icônes colorées explicites.
+ * Variante EMA : une seule catégorie à la fois dans le volet, icônes colorées explicites.
  */
 
 import * as Blockly from "blockly";
@@ -10,7 +10,11 @@ import {
   ContinuousToolbox,
   RecyclableBlockFlyoutInflater,
 } from "@blockly/continuous-toolbox";
-import { ContinuousMetricsOverlayFlyout } from "../vendor/ucBlockly/src/continuous_metrics_overlay_flyout";
+import { resolveFlyoutDefinition } from "./flyout_category_filter";
+import {
+  computeCategoryLabelWidth,
+  computeFlyoutWidthForLabel,
+} from "./flyout_label_metrics";
 
 /** Inflater pour les séparateurs de catégories en mode continu. */
 class CategoryFlyoutInflater implements Blockly.IFlyoutInflater {
@@ -80,11 +84,6 @@ const STYLE_TO_FA: Record<string, string> = {
   procedure_category: "fa-gears",
 };
 
-type FlyoutInternals = {
-  scrollTarget?: number;
-  scrollPositions: Map<string, number>;
-};
-
 /** Parse `#rgb` / `#rrggbb` → [r,g,b] 0–255. */
 function parseCssColour(input: string): [number, number, number] | null {
   const raw = input.trim();
@@ -129,24 +128,129 @@ function contrastingInk(background: string): string {
   return luminance > 0.45 ? "#1a2332" : "#ffffff";
 }
 
+const LABEL_STROKE_PX = 3;
+const DEFAULT_SCROLLBAR_PX = 12;
+
+/** Largeur réelle de la barre verticale du flyout (repli : 12 px). */
+function flyoutScrollbarWidth(): number {
+  const bar = document.querySelector(".blocklyFlyoutScrollbar");
+  const width = Number.parseFloat(bar?.getAttribute("width") ?? "");
+  return Number.isFinite(width) && width > 0 ? width : DEFAULT_SCROLLBAR_PX;
+}
+
+function searchHint(): string {
+  const hint = (Blockly.Msg as Record<string, string>).TOOLBOX_SEARCH_HINT;
+  return hint && hint !== "TOOLBOX_SEARCH_HINT"
+    ? hint
+    : "Type to search for blocks";
+}
+
 /**
- * Flyout continu : sync scroll→sélection + badges de catégorie colorés.
+ * Same call and font as FlyoutButton, so the result matches a label's `width`.
+ * Measured on a canvas: the clone needs no parent, only the label class (Blockly's cache key).
  */
+function measureLikeLabel(labelText: SVGTextElement, text: string): number {
+  const probe = labelText.cloneNode(false) as SVGTextElement;
+  probe.textContent = text;
+  const style = getComputedStyle(labelText);
+  return Blockly.utils.dom.getFastTextWidthWithSizeString(
+    probe,
+    style.fontSize,
+    style.fontWeight,
+    style.fontFamily,
+  );
+}
+
+/** Flyout continu : une seule catégorie à la fois, badges de catégorie colorés. */
 export class EmaContinuousFlyout extends ContinuousFlyout {
   constructor(workspaceOptions: Blockly.Options) {
     super(workspaceOptions);
-    this.getWorkspace().addChangeListener((e: Blockly.Events.Abstract) => {
-      if (e.type === Blockly.Events.VIEWPORT_CHANGE) {
-        this.selectCategoryWithLead(-this.getWorkspace().scrollY);
-      }
-    });
+  }
+
+  /** Définition complète (toutes catégories), mémorisée pour re-filtrer au clic. */
+  private fullDef_: Blockly.utils.toolbox.FlyoutDefinition | null = null;
+
+  // Board zoom must not resize the block list, and a zoomed flyout also covered the board.
+  override getFlyoutScale(): number {
+    return 1;
+  }
+
+  override scrollToCategory(category: Blockly.ISelectableToolboxItem): void {
+    if (this.fullDef_) {
+      // Le filtre lit la catégorie déjà sélectionnée par la toolbox.
+      this.show(this.fullDef_);
+    }
+    super.scrollToCategory(category);
   }
 
   override show(
     flyoutDef: Blockly.utils.toolbox.FlyoutDefinition | string,
   ): void {
-    super.show(flyoutDef);
+    let nextDef = flyoutDef;
+    if (Array.isArray(flyoutDef)) {
+      this.fullDef_ = flyoutDef;
+      const toolbox = this.targetWorkspace?.getToolbox();
+      const selected =
+        toolbox && "getSelectedItem" in toolbox
+          ? (toolbox as Blockly.Toolbox).getSelectedItem()
+          : null;
+      const categoryName =
+        selected && typeof selected.getName === "function"
+          ? selected.getName()
+          : "";
+      const categoryNames = (toolbox?.getToolboxItems() ?? [])
+        .filter((item) => item instanceof Blockly.ToolboxCategory)
+        .map((item) => (item as Blockly.ToolboxCategory).getName());
+      nextDef = resolveFlyoutDefinition(
+        flyoutDef as unknown as readonly Record<string, unknown>[],
+        categoryName,
+        categoryNames,
+      ) as unknown as Blockly.utils.toolbox.FlyoutDefinition;
+    }
+    super.show(nextDef);
     this.styleCategoryLabels_();
+  }
+
+  // super.show() sizes the flyout on bare label text, but the badge adds padding and margins.
+  // The search hint counts even when hidden, so the width does not jump between categories.
+  private widenForLabels_(sideMargin: number): void {
+    const widestTextPx = this.widestLabelTextPx_();
+    if (widestTextPx === 0) {
+      return;
+    }
+    const flyoutWidthForBadges = computeFlyoutWidthForLabel({
+      textWidth: widestTextPx,
+      sideMargin,
+      scrollbarWidth: flyoutScrollbarWidth(),
+    });
+    if (flyoutWidthForBadges <= this.getWidth()) {
+      return;
+    }
+    // Same steps as Blockly's own reflow after a width change.
+    this.width_ = flyoutWidthForBadges;
+    this.position();
+    this.targetWorkspace.resizeContents();
+    this.targetWorkspace.recordDragTargets();
+  }
+
+  /** Widest label text in the flyout, search hint included. 0 when there is no label. */
+  private widestLabelTextPx_(): number {
+    let widestTextPx = 0;
+    let labelTextForFont: SVGTextElement | null = null;
+    for (const item of this.getContents()) {
+      const element = item.getElement();
+      if (element instanceof Blockly.FlyoutButton && element.isLabel()) {
+        widestTextPx = Math.max(widestTextPx, element.width);
+        labelTextForFont ??= element
+          .getSvgRoot()
+          .querySelector<SVGTextElement>(".blocklyFlyoutLabelText");
+      }
+    }
+    if (labelTextForFont) {
+      const hintTextPx = measureLikeLabel(labelTextForFont, searchHint());
+      widestTextPx = Math.max(widestTextPx, hintTextPx);
+    }
+    return widestTextPx;
   }
 
   /**
@@ -160,8 +264,10 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
       return;
     }
 
-    const viewWidth = this.getWorkspace().getMetrics().viewWidth;
     const sideMargin = 10;
+    // Before reading viewWidth: this may widen the flyout.
+    this.widenForLabels_(sideMargin);
+    const viewWidth = this.getWorkspace().getMetrics().viewWidth;
     const radius = 10;
     const rootPx = Number.parseFloat(
       getComputedStyle(document.documentElement).fontSize,
@@ -201,10 +307,13 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
 
       const oldHeight = element.height;
       const pos = element.getPosition();
-      const fullWidth = Math.max(
-        element.width + 32,
-        Math.max(80, viewWidth - sideMargin * 2),
-      );
+      const fullWidth = computeCategoryLabelWidth({
+        viewWidth,
+        sideMargin,
+        scrollbarWidth: flyoutScrollbarWidth(),
+        stroke: LABEL_STROKE_PX,
+        textWidth: element.width,
+      });
       // Hauteur ≈ ligne de texte (--ema-blockly-font) + padding, pas un bandeau XXL.
       const linePx = Number.isFinite(rootPx) ? rootPx * 0.875 : 14;
       const fullHeight = Math.max(oldHeight + padY * 2, linePx + padY * 2, 28);
@@ -221,7 +330,7 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
         bg.setAttribute("ry", String(radius));
         bg.style.setProperty("fill", colour, "important");
         bg.style.setProperty("stroke", "#1a2332", "important");
-        bg.style.setProperty("stroke-width", "3px", "important");
+        bg.style.setProperty("stroke-width", `${LABEL_STROKE_PX}px`, "important");
         bg.style.setProperty("opacity", "1", "important");
       }
       if (text instanceof SVGTextElement) {
@@ -241,40 +350,10 @@ export class EmaContinuousFlyout extends ContinuousFlyout {
     }
 
     // Recalcule les ancres de scroll après le décalage vertical.
-    const internals = this as unknown as FlyoutInternals & {
+    const internals = this as unknown as {
       recordScrollPositions?: () => void;
     };
     internals.recordScrollPositions?.();
-  }
-
-  /** Sélection avec avance (~40 % de la hauteur visible). */
-  private selectCategoryWithLead(position: number): void {
-    const internals = this as unknown as FlyoutInternals;
-    if (internals.scrollTarget !== undefined) {
-      return;
-    }
-    if (internals.scrollPositions.size === 0) {
-      return;
-    }
-
-    const workspace = this.getWorkspace();
-    const viewHeight = workspace.getMetrics().viewHeight;
-    const lead = Math.max(72, viewHeight * 0.4);
-    const scaledPosition = Math.round((position + lead) / workspace.scale);
-
-    const toolbox = this.targetWorkspace.getToolbox();
-    if (!(toolbox instanceof ContinuousToolbox)) {
-      return;
-    }
-
-    for (const [name, categoryTop] of [
-      ...internals.scrollPositions.entries(),
-    ].reverse()) {
-      if (scaledPosition >= categoryTop) {
-        toolbox.selectCategoryByName(name);
-        return;
-      }
-    }
   }
 }
 
@@ -424,7 +503,7 @@ export function registerContinuousToolbox(): void {
   Blockly.registry.register(
     Blockly.registry.Type.METRICS_MANAGER,
     "ContinuousMetrics",
-    ContinuousMetricsOverlayFlyout,
+    Blockly.MetricsManager,
     true,
   );
   Blockly.registry.register(

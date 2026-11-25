@@ -13,6 +13,7 @@ const SEARCH_BAR_H = 48;
 type FlyoutWithPosition = Blockly.IFlyout & {
   position: () => void;
   getWidth?: () => number;
+  getHeight?: () => number;
   isVisible?: () => boolean;
   svgGroup_?: SVGGElement | null;
 };
@@ -25,8 +26,20 @@ type ToolboxWithWidth = Blockly.IToolbox & {
 let hookedFlyout: FlyoutWithPosition | null = null;
 let originalPosition: (() => void) | null = null;
 
-function getSource(): HTMLInputElement | null {
-  return document.getElementById(SOURCE_ID) as HTMLInputElement | null;
+// Category selected when the search took over, to go back to it once the query is empty.
+let categoryBeforeSearch: object | null = null;
+
+// getElementById would find the plugin's category DIV that carries the same id.
+function getSource(workspace: Blockly.WorkspaceSvg): HTMLInputElement | null {
+  const category = workspace
+    .getToolbox()
+    ?.getToolboxItems()
+    .find((item) => item.getId() === SOURCE_ID);
+  return (
+    (category as Blockly.ToolboxCategory | undefined)
+      ?.getDiv()
+      ?.querySelector("input") ?? null
+  );
 }
 
 function getBar(): HTMLDivElement | null {
@@ -58,12 +71,17 @@ function writeTranslate(svg: SVGElement, x: number, y: number): void {
   svg.setAttribute("transform", `translate(${x}, ${y})`);
 }
 
+type SearchableToolbox = {
+  getToolboxItems?: () => Array<{
+    getId?: () => string;
+    isSelectable?: () => boolean;
+  }>;
+  setSelectedItem?: (item: unknown) => void;
+  getSelectedItem?: () => { getId?: () => string } | null;
+};
+
 function selectSearchCategory(workspace: Blockly.WorkspaceSvg): void {
-  const toolbox = workspace.getToolbox() as {
-    getToolboxItems?: () => Array<{ getId?: () => string }>;
-    setSelectedItem?: (item: unknown) => void;
-    getSelectedItem?: () => { getId?: () => string } | null;
-  } | null;
+  const toolbox = workspace.getToolbox() as SearchableToolbox | null;
   if (!toolbox?.getToolboxItems || !toolbox.setSelectedItem) {
     return;
   }
@@ -73,9 +91,31 @@ function selectSearchCategory(workspace: Blockly.WorkspaceSvg): void {
   }
   for (const item of toolbox.getToolboxItems()) {
     if (item.getId?.() === SOURCE_ID) {
+      categoryBeforeSearch = selected ?? null;
       toolbox.setSelectedItem(item);
       return;
     }
+  }
+}
+
+// Leaves the search category once the query is empty, back to where the user was.
+function restoreCategoryBeforeSearch(workspace: Blockly.WorkspaceSvg): void {
+  const toolbox = workspace.getToolbox() as SearchableToolbox | null;
+  if (!toolbox?.getToolboxItems || !toolbox.setSelectedItem) {
+    return;
+  }
+  if (toolbox.getSelectedItem?.()?.getId?.() !== SOURCE_ID) {
+    return;
+  }
+  const items = toolbox.getToolboxItems();
+  const previous = items.find((item) => item === categoryBeforeSearch);
+  const firstCategory = items.find(
+    (item) => item.getId?.() !== SOURCE_ID && item.isSelectable?.(),
+  );
+  // Fallback when nothing was selected before the search, or that category is gone.
+  const target = previous ?? firstCategory;
+  if (target) {
+    toolbox.setSelectedItem(target);
   }
 }
 
@@ -83,15 +123,23 @@ function syncSourceFromFlyout(
   workspace: Blockly.WorkspaceSvg,
   value: string,
 ): void {
-  const source = getSource();
+  const source = getSource(workspace);
   if (!source) {
     return;
   }
-  selectSearchCategory(workspace);
+  // The plugin refreshes the flyout only while its search category is selected: select it
+  // before a query, and leave it only after an empty one (the plugin resets to the hint first).
+  const isEmpty = value.trim() === "";
+  if (!isEmpty) {
+    selectSearchCategory(workspace);
+  }
   if (source.value !== value) {
     source.value = value;
   }
   source.dispatchEvent(new Event("input", { bubbles: true }));
+  if (isEmpty) {
+    restoreCategoryBeforeSearch(workspace);
+  }
 }
 
 function ensureBar(workspace: Blockly.WorkspaceSvg): HTMLDivElement | null {
@@ -125,12 +173,17 @@ function ensureBar(workspace: Blockly.WorkspaceSvg): HTMLDivElement | null {
   const input = bar.querySelector("input") as HTMLInputElement;
   input.addEventListener("focus", () => {
     selectSearchCategory(workspace);
-    const source = getSource();
+    const source = getSource(workspace);
     if (source) {
       input.placeholder = source.placeholder || "Rechercher";
       if (!input.value && source.value) {
         input.value = source.value;
       }
+    }
+  });
+  input.addEventListener("blur", () => {
+    if (input.value.trim() === "") {
+      restoreCategoryBeforeSearch(workspace);
     }
   });
   input.addEventListener("input", () => {
@@ -194,7 +247,7 @@ function layoutBar(workspace: Blockly.WorkspaceSvg): void {
 
   writeTranslate(svg, x, SEARCH_BAR_H);
 
-  const source = getSource();
+  const source = getSource(workspace);
   const input = getFlyoutInput();
   if (source && input && document.activeElement !== input) {
     input.placeholder = source.placeholder || "Rechercher";
@@ -213,6 +266,12 @@ function hookFlyoutPosition(workspace: Blockly.WorkspaceSvg): void {
     hookedFlyout.position = originalPosition;
   }
   hookedFlyout = flyout;
+  // layoutBar() pushes the flyout down by the bar height: remove it from the flyout height too,
+  // or the last blocks end below the visible area.
+  const blocklyGetHeight = flyout.getHeight?.bind(flyout);
+  if (blocklyGetHeight) {
+    flyout.getHeight = () => blocklyGetHeight() - SEARCH_BAR_H;
+  }
   originalPosition = flyout.position.bind(flyout);
   flyout.position = () => {
     originalPosition?.();
@@ -224,6 +283,7 @@ function hookFlyoutPosition(workspace: Blockly.WorkspaceSvg): void {
  * Installe (idempotent) la barre de recherche en tête du flyout.
  */
 export function installFlyoutSearchBar(workspace: Blockly.WorkspaceSvg): void {
+  categoryBeforeSearch = null;
   if (!ensureBar(workspace)) {
     return;
   }
